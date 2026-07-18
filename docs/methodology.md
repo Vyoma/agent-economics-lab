@@ -10,7 +10,7 @@ not a dashboard screenshot. The claim is deliberately narrow:
 ## 1. Choose the unit of work
 
 A `task_id` is the join key between execution and outcome data. It must represent a
-business attempt—a support case, invoice, code change, investigation—not an
+business attempt, such as a support case, invoice, code change, or investigation, not an
 individual model call. Every retry, tool call, sub-agent handoff, and final response
 for that attempt belongs to the same task.
 

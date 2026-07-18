@@ -26,7 +26,7 @@ The audience hierarchy is intentional:
 
 Do not lead with MCP, “zero compute,” a dashboard, or a generic resource list. Lead
 with the compatibility promise and the decision existing tools leave fragmented:
-*keep your stack; make its evidence sufficient—or visibly insufficient—for scale.*
+*keep your stack; make its evidence sufficient or visibly insufficient for scale.*
 
 ## Recommended modularity launch post
 
@@ -35,7 +35,7 @@ Keep the observability and evaluation stack you already use.
 
 Today Agent Economics Lab accepts its own CSV and normalized JSON evidence
 boundary. Fixture-backed Galileo, LangSmith, OpenTelemetry, and internal export
-mappers are contribution lanes—not integrations I am claiming have shipped.
+mappers are contribution lanes, not integrations I am claiming have shipped.
 
 The missing layer is not another agent dashboard. It is a portable answer to an
 enterprise decision:
@@ -65,7 +65,7 @@ Across 588 deterministic synthetic ablations, an unsafe available-checks-only
 reducer produced 23 false SCALE decisions. The fail-safe engine produced zero: it
 returned INCOMPLETE whenever required coverage was removed.
 
-That is a controlled software stress test—not a claim about how often enterprises
+That is a controlled software stress test, not a claim about how often enterprises
 make this mistake in production. The repo includes the protocol, generated rows,
 data card, result card, and paper-style note.
 
@@ -139,7 +139,7 @@ Can you prove it should scale?
 Most teams can show model accuracy and token spend. Enterprise decisions need a
 different denominator: cost per acceptable outcome.
 
-That means counting the entire call graph—not just the final model call—and joining
+That means counting the entire call graph, not just the final model call, and joining
 it to:
 
 • outcome quality
@@ -150,7 +150,7 @@ it to:
 
 I open-sourced Agent Economics Lab: a small system with no third-party runtime
 dependencies that turns raw
-agent traces into one auditable result—INCOMPLETE, SCALE, ASSIST, or STOP.
+agent traces into one auditable result: INCOMPLETE, SCALE, ASSIST, or STOP.
 
 The included synthetic support case is deliberately uncomfortable:
 

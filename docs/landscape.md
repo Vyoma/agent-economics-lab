@@ -83,7 +83,7 @@ For this project, the executable artifact provides:
 1. a two-minute result with no cloud account;
 2. transparent math and synthetic evidence;
 3. a sharp, shareable failure case;
-4. a contribution unit—bring one assurance case; and
+4. a contribution unit: bring one assurance case; and
 5. a narrow adapter seam that lets existing platforms remain in place.
 
 ## Product boundary for v0.1

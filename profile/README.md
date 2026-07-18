@@ -6,7 +6,7 @@ Applied AI research engineer building **economic assurance for AI agents**.
 
 I built Agent Economics Lab to connect normalized agent traces with outcome
 quality, human work, remediation and incident cost, a named counterfactual, and
-versioned policy—then issue an auditable `INCOMPLETE`, `SCALE`, `ASSIST`, or `STOP`
+versioned policy, then issue an auditable `INCOMPLETE`, `SCALE`, `ASSIST`, or `STOP`
 decision.
 
 ## Current open-source work

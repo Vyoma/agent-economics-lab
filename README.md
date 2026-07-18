@@ -4,12 +4,12 @@
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)
 
-> **Status: alpha.** This is a research, teaching, and conformance lab—not a
+> **Status: alpha.** This is a research, teaching, and conformance lab, not a
 > production authorization layer.
 
 Agent Economics Lab is an executable assurance case for evaluating deployment
 decisions about AI-agent workloads. It joins call-level traces to outcome labels,
-human work, remediation, incident loss, and a counterfactual baseline—then issues
+human work, remediation, incident loss, and a counterfactual baseline, then issues
 one bounded decision:
 
 - `INCOMPLETE`: required assurance coverage was removed or never evaluated.
@@ -226,7 +226,7 @@ or open a case-study issue. Synthetic and fully anonymized cases are welcome.
 
 ## Scope and claim boundary
 
-This is a teaching, conformance, and controlled-research lab—not a production
+This is a teaching, conformance, and controlled-research lab, not a production
 authorization layer, accounting system, or prevalence study. The demo has eight
 synthetic tasks and the benchmark has 98 generated scenarios. Before a production
 decision, test representativeness, label agreement, attribution, confidence

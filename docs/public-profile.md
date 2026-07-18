@@ -76,7 +76,7 @@ harnesses, and control methods.
 My background is software-engineering-first: building and debugging production AI
 systems where models interact with retrieval, tools, workflows, human reviewers,
 and enterprise constraints. The failure modes I care about are the ones that remain
-hidden when teams measure only model accuracy or token spend—multi-call cost,
+hidden when teams measure only model accuracy or token spend: multi-call cost,
 unacceptable outcomes, weak counterfactuals, tail loss, authority leakage, missing
 provenance, and controls that disappear without making the decision visibly weaker.
 
@@ -105,12 +105,12 @@ public artifacts, reproducibility, and clear negative scope.
 
 ## Featured section order
 
-1. **Agent Economics Lab repository** — runnable system and modularity demo.
-2. **False-Green Assurance note** — research question, method, result, limitations.
-3. **Benchmark card and data card** — generated evidence and claim boundary.
-4. **Two-minute demo** — optional deletion, fail-safe required deletion, custom gate.
-5. **Methodology** — cost per acceptable outcome and counterfactual routing.
-6. **Teaching/course material** — supporting proof after the technical artifacts.
+1. **Agent Economics Lab repository:** runnable system and modularity demo.
+2. **False-Green Assurance note:** research question, method, result, limitations.
+3. **Benchmark card and data card:** generated evidence and claim boundary.
+4. **Two-minute demo:** optional deletion, fail-safe required deletion, custom gate.
+5. **Methodology:** cost per acceptable outcome and counterfactual routing.
+6. **Teaching/course material:** supporting proof after the technical artifacts.
 
 ## One-sentence introduction
 

@@ -91,7 +91,7 @@ def render_markdown(case: AssuranceCase) -> str:
             ),
             (
                 "| Incremental net value per attempt | "
-                f"${case.incremental_net_value_vs_baseline_usd:.2f} | — |"
+                f"${case.incremental_net_value_vs_baseline_usd:.2f} | N/A |"
             ),
             "",
             "## Gate results",
@@ -133,7 +133,7 @@ def render_markdown(case: AssuranceCase) -> str:
                 "The result is only as reliable as the trace coverage, outcome labels, "
                 "cost allocation, counterfactual, enabled checks, and observation window. "
                 "Removing required coverage returns INCOMPLETE. A repeated tool shape or "
-                "graph cycle is a diagnostic warning—not semantic proof of a loop or deadlock."
+                "graph cycle is a diagnostic warning, not semantic proof of a loop or deadlock."
             ),
             "",
         ]

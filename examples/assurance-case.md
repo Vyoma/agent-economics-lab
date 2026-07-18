@@ -47,7 +47,7 @@ Baseline: **human-only support queue**
 |---|---:|---:|
 | Cost per acceptable outcome | $3.50 | $7.14 |
 | Expected net value per attempt | $3.37 | $0.60 |
-| Incremental net value per attempt | $2.77 | — |
+| Incremental net value per attempt | $2.77 | N/A |
 
 ## Gate results
 
@@ -73,4 +73,4 @@ Baseline: **human-only support queue**
 
 ## Claim boundary
 
-The result is only as reliable as the trace coverage, outcome labels, cost allocation, counterfactual, enabled checks, and observation window. Removing required coverage returns INCOMPLETE. A repeated tool shape or graph cycle is a diagnostic warning—not semantic proof of a loop or deadlock.
+The result is only as reliable as the trace coverage, outcome labels, cost allocation, counterfactual, enabled checks, and observation window. Removing required coverage returns INCOMPLETE. A repeated tool shape or graph cycle is a diagnostic warning, not semantic proof of a loop or deadlock.
