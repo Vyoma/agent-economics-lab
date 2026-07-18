@@ -1,0 +1,9 @@
+task_id,acceptable,business_value_usd,human_minutes,remediation_cost_usd,incident_loss_usd
+t-001,true,8.00,0,0,0
+t-002,true,8.00,0,0,0
+t-003,false,0,6,0.50,0
+t-004,true,8.00,0,0,0
+t-005,false,0,10,1.00,3.00
+t-006,true,8.00,0,0,0
+t-007,true,8.00,0,0,0
+t-008,true,8.00,0,0,0

@@ -1,0 +1,37 @@
+name: Source adapter
+description: Map an offline platform export into the canonical EvidenceBundle.
+title: "adapter: "
+labels: ["source-adapter"]
+body:
+  - type: input
+    id: format
+    attributes:
+      label: Source format and documented version
+      placeholder: OpenTelemetry GenAI OTLP JSON, LangSmith run export, internal ledger...
+    validations:
+      required: true
+  - type: textarea
+    id: mapping
+    attributes:
+      label: Canonical mapping
+      description: Map task, event, usage/cost, status, and safe argument-shape fields.
+    validations:
+      required: true
+  - type: textarea
+    id: coverage
+    attributes:
+      label: Missing or ambiguous fields
+      description: Which canonical claims cannot be made from this export alone?
+    validations:
+      required: true
+  - type: checkboxes
+    id: guarantees
+    attributes:
+      label: Adapter guarantees
+      options:
+        - label: Duplicate event and outcome IDs are rejected.
+          required: true
+        - label: Raw prompts, responses, and tool arguments are removed by default.
+          required: true
+        - label: An equivalence test proves the expected canonical digest and decision.
+          required: true
