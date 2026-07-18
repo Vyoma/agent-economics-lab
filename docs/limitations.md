@@ -73,7 +73,7 @@ the cost of false acceptance versus false rejection.
 The engine rejects diagnostics that attempt to route and returns `INCOMPLETE` when
 declared required coverage is missing. It cannot prove that a third-party gate
 correctly implements the coverage it claims. Review module code, pin its ID/version,
-test counterexamples, and treat the evidence digest as reproducibility metadata—not
+test counterexamples, and treat the evidence digest as reproducibility metadata, not
 as a signature or security attestation.
 
 ## Generic interchange is not a finished vendor adapter

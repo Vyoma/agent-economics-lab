@@ -27,13 +27,13 @@ product, finance, risk leaders, and technical learners.
 
 ## 2. Ideas considered
 
-### Generic agent-cost dashboard — rejected
+### Generic agent-cost dashboard (rejected)
 
 Observability platforms already report tokens, models, latency, traces, and cost.
 Another dashboard would compete on implementation breadth without a clear new
 decision.
 
-### Semantic loop/deadlock circuit breaker — narrowed
+### Semantic loop/deadlock circuit breaker (narrowed)
 
 Repeated tool-call shapes and dependency cycles can be useful warnings. They do
 not prove equal intent, lack of progress, or deadlock. Pagination, polling, search
@@ -41,12 +41,12 @@ refinement, and healthy coordination can look repetitive or cyclic. Deterministi
 budgets, call caps, timeouts, authorization, and escalation are stronger enforcement
 boundaries.
 
-### MCP-first framing — rejected as the wedge
+### MCP-first framing (rejected as the wedge)
 
 MCP is a transport/integration choice, not the enterprise decision. Leading with it
 would hide the actual value and prematurely constrain the architecture.
 
-### Broad LLM wiki — deferred
+### Broad LLM wiki (deferred)
 
 Resource collections can attract readers but do not prove a scarce engineering
 capability. First-principles lessons became a supporting layer inside the flagship

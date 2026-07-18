@@ -133,4 +133,4 @@ case before calculating reversals. Report cases where missing data changes a
 decision as well as cases where it does not.
 
 Until that evidence exists, the project should describe the result as a synthetic
-software stress test—not proof of enterprise impact.
+software stress test, not proof of enterprise impact.
