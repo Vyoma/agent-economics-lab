@@ -1,0 +1,34 @@
+name: Assurance check
+description: Propose a versioned gate or optional diagnostic.
+title: "check: "
+labels: ["assurance-check"]
+body:
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Gate
+        - Diagnostic
+    validations:
+      required: true
+  - type: textarea
+    id: claim
+    attributes:
+      label: Claim and evidence
+      description: What does PASS, WARN, or FAIL mean, and what evidence supports it?
+    validations:
+      required: true
+  - type: textarea
+    id: coverage
+    attributes:
+      label: Coverage and consequence
+      description: Which assurance dimension does it cover? Can failure route to ASSIST or STOP?
+    validations:
+      required: true
+  - type: textarea
+    id: nonclaims
+    attributes:
+      label: False positives and non-claims
+    validations:
+      required: true

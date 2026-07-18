@@ -1,0 +1,43 @@
+name: Evidence case
+description: Propose a synthetic or fully anonymized agent economic assurance case.
+title: "case: "
+labels: ["case-study"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not share customer data, secrets, personal information, or proprietary pricing.
+  - type: textarea
+    id: workload
+    attributes:
+      label: Workload and unit of work
+      description: What business attempt does one task_id represent?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptable
+    attributes:
+      label: Acceptable outcome
+      description: What observable rule separates acceptable from unacceptable?
+    validations:
+      required: true
+  - type: textarea
+    id: costs
+    attributes:
+      label: Complete cost boundary
+      description: Which execution, labor, remediation, and loss costs are present or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: counterfactual
+    attributes:
+      label: Counterfactual
+      description: What process or system should the agent beat?
+    validations:
+      required: true
+  - type: textarea
+    id: permission
+    attributes:
+      label: Sharing and anonymization
+      description: Confirm the data is synthetic or that you have permission to share the anonymized material.
+    validations:
+      required: true

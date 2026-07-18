@@ -1,0 +1,6 @@
+{
+  "name": "human-only support queue",
+  "cost_per_attempt_usd": 5.00,
+  "acceptable_rate": 0.70,
+  "value_per_acceptable_outcome_usd": 8.00
+}

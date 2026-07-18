@@ -1,0 +1,23 @@
+name: Challenge a claim
+description: Identify a hidden assumption, invalid inference, or misleading boundary.
+title: "claim: "
+labels: ["claim-boundary"]
+body:
+  - type: textarea
+    id: claim
+    attributes:
+      label: Claim being challenged
+      description: Quote or link to the exact code, output, or documentation.
+    validations:
+      required: true
+  - type: textarea
+    id: counterexample
+    attributes:
+      label: Counterexample or missing evidence
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Narrower wording or test
+      description: How could the claim be made falsifiable?
