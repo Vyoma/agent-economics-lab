@@ -26,7 +26,9 @@ The Clopper-Pearson bound covers the observed harmful-transition process under a
 binomial model. The paired percentile bootstrap reflects sampling variation in
 recorded full cost, but its interval and nominal confidence target are approximate
 and include Monte Carlo error. The plan rejects a resample count that cannot resolve
-the adjusted lower tail. Neither method repairs biased labels, correlated duplicates,
+the adjusted lower tail. Derived endpoints are canonicalized to 12 significant
+digits for cross-runtime reproducibility. This numeric precision is not additional
+statistical certainty. Neither method repairs biased labels, correlated duplicates,
 missing failed runs, or an unrepresentative population.
 
 ## Outcome labels can dominate the result

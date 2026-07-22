@@ -35,6 +35,22 @@ from .models import (
 )
 
 
+CANONICAL_SIGNIFICANT_DIGITS = 12
+
+
+def canonical_float(value: float) -> float:
+    """Remove runtime-level noise from a finite derived statistic.
+
+    Decision endpoints and portable artifacts use twelve significant digits. This
+    is substantially finer than displayed report precision while keeping supported
+    Python runtimes byte-stable around platform-level floating-point differences.
+    """
+    if not math.isfinite(value):
+        return value
+    result = float(format(value, f".{CANONICAL_SIGNIFICANT_DIGITS}g"))
+    return 0.0 if result == 0 else result
+
+
 class FrontierDecision(str, Enum):
     INCOMPLETE = "INCOMPLETE"
     HOLD = "HOLD"
@@ -105,7 +121,8 @@ class FrontierCase:
     method: str = (
         "Exact one-sided Clopper-Pearson breakage bound plus deterministic "
         "paired percentile bootstrap for cost reduction; a Bonferroni-adjusted "
-        "nominal familywise confidence target across planned quality and cost tests."
+        "nominal familywise confidence target across planned quality and cost tests. "
+        "Derived decision endpoints are canonicalized to twelve significant digits."
     )
 
 
@@ -704,9 +721,9 @@ def _paired_cost_bootstrap(
     alpha: float,
     seed: int,
 ) -> tuple[float, float]:
-    reference_total = sum(reference_costs)
+    reference_total = math.fsum(reference_costs)
     point = (
-        (reference_total - sum(candidate_costs)) / reference_total
+        (reference_total - math.fsum(candidate_costs)) / reference_total
         if reference_total > 0
         else -math.inf
     )
@@ -715,8 +732,8 @@ def _paired_cost_bootstrap(
     estimates: list[float] = []
     for _ in range(samples):
         indices = [generator.randrange(count) for _ in range(count)]
-        sampled_reference = sum(reference_costs[index] for index in indices)
-        sampled_candidate = sum(candidate_costs[index] for index in indices)
+        sampled_reference = math.fsum(reference_costs[index] for index in indices)
+        sampled_candidate = math.fsum(candidate_costs[index] for index in indices)
         estimates.append(
             (sampled_reference - sampled_candidate) / sampled_reference
             if sampled_reference > 0
@@ -734,10 +751,16 @@ def _arm_summary(arm_id: str, case: AssuranceCase, dominated: bool) -> ArmSummar
         arm_id=arm_id,
         assurance_decision=case.decision.value,
         paired_tasks=len(case.tasks),
-        acceptable_rate=case.acceptable_rate,
-        mean_effective_cost_usd=case.total_effective_cost_usd / len(case.tasks),
-        cost_per_acceptable_outcome_usd=case.cost_per_acceptable_outcome_usd,
-        expected_net_value_per_attempt_usd=case.expected_net_value_per_attempt_usd,
+        acceptable_rate=canonical_float(case.acceptable_rate),
+        mean_effective_cost_usd=canonical_float(
+            case.total_effective_cost_usd / len(case.tasks)
+        ),
+        cost_per_acceptable_outcome_usd=canonical_float(
+            case.cost_per_acceptable_outcome_usd
+        ),
+        expected_net_value_per_attempt_usd=canonical_float(
+            case.expected_net_value_per_attempt_usd
+        ),
         evidence_digest=case.evidence_digest,
         dominated=dominated,
     )
@@ -906,14 +929,17 @@ def evaluate_frontier(
             and candidate_map[task_id].acceptable
             for task_id in ordered_tasks
         )
-        breakage_upper = clopper_pearson_upper(
-            harmful, len(ordered_tasks), adjusted_alpha
+        breakage_upper = canonical_float(
+            clopper_pearson_upper(harmful, len(ordered_tasks), adjusted_alpha)
         )
-        quality_delta = sum(
-            int(candidate_map[task_id].acceptable)
-            - int(reference_map[task_id].acceptable)
-            for task_id in ordered_tasks
-        ) / len(ordered_tasks)
+        quality_delta = canonical_float(
+            sum(
+                int(candidate_map[task_id].acceptable)
+                - int(reference_map[task_id].acceptable)
+                for task_id in ordered_tasks
+            )
+            / len(ordered_tasks)
+        )
         seed_material = f"{plan.seed}:{candidate_id}".encode("utf-8")
         candidate_seed = int.from_bytes(
             hashlib.sha256(seed_material).digest()[:8], "big"
@@ -925,6 +951,8 @@ def evaluate_frontier(
             alpha=adjusted_alpha,
             seed=candidate_seed,
         )
+        cost_point = canonical_float(cost_point)
+        cost_lower = canonical_float(cost_lower)
         reasons: list[str] = []
         if reference_case.decision is not Decision.SCALE:
             reasons.append(
@@ -952,12 +980,12 @@ def evaluate_frontier(
                 paired_tasks=len(ordered_tasks),
                 harmful_regressions=harmful,
                 beneficial_changes=beneficial,
-                breakage_rate=harmful / len(ordered_tasks),
+                breakage_rate=canonical_float(harmful / len(ordered_tasks)),
                 breakage_rate_upper=breakage_upper,
                 acceptable_rate_delta=quality_delta,
                 mean_cost_reduction_rate=cost_point,
                 cost_reduction_rate_lower=cost_lower,
-                adjusted_alpha=adjusted_alpha,
+                adjusted_alpha=canonical_float(adjusted_alpha),
                 eligible=not reasons,
                 reasons=tuple(reasons),
             )
@@ -1004,6 +1032,7 @@ def frontier_payload(case: FrontierCase) -> dict[str, Any]:
         "task_manifest_path": case.plan.task_manifest_path,
         "reference_arm": case.plan.reference_arm,
         "method": case.method,
+        "numeric_precision_significant_digits": CANONICAL_SIGNIFICANT_DIGITS,
         "policy": {
             "max_breakage_rate": case.plan.max_breakage_rate,
             "min_cost_reduction_rate": case.plan.min_cost_reduction_rate,
