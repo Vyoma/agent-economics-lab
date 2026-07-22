@@ -80,6 +80,13 @@ class Outcome:
 
 
 @dataclass(frozen=True)
+class TaskIdentity:
+    task_id: str
+    input_digest: str
+    rubric_version: str
+
+
+@dataclass(frozen=True)
 class Baseline:
     name: str
     cost_per_attempt_usd: float
@@ -190,6 +197,7 @@ class EvidenceBundle:
     source_id: str
     source_version: str
     digest: str
+    task_manifest: dict[str, TaskIdentity] = field(default_factory=dict)
 
     @property
     def source_manifest_id(self) -> str:
