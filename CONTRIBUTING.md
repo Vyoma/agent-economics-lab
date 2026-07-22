@@ -8,6 +8,9 @@ The project optimizes for auditable claims over feature breadth.
   proves digest/result equivalence against a canonical fixture.
 - A typed assurance gate or diagnostic with declared coverage and failure semantics.
 - A synthetic or fully anonymized assurance case from a real workload pattern.
+- A permissioned paired frontier case with a frozen candidate family, identical task
+  IDs, SHA-256 input digests, rubric versions, explicit full costs, and a predeclared
+  decision rule.
 - A counterexample that falsifies or narrows a benchmark hypothesis.
 - A clearer outcome contract or counterfactual.
 - A failure case that exposes incorrect math or a hidden assumption.
@@ -24,6 +27,7 @@ make demo
 make modularity
 make lessons
 make benchmark
+make frontier
 make reproduce
 ```
 

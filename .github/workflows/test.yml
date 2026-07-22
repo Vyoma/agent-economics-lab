@@ -23,3 +23,17 @@ jobs:
       - run: make modularity
       - run: make lessons
       - run: make benchmark
+      - run: make frontier
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip wheel . --no-deps --wheel-dir /tmp/wheels
+      - run: python -m venv /tmp/agent-economics-venv
+      - run: /tmp/agent-economics-venv/bin/pip install /tmp/wheels/agent_economics_lab-*.whl
+      - run: /tmp/agent-economics-venv/bin/agent-economics capabilities
+        working-directory: /tmp

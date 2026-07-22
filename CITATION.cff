@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use Agent Economics Lab, cite this software and the exact release."
+title: "Agent Economics Lab"
+type: software
+version: 0.2.0
+date-released: 2026-07-22
+authors:
+  - family-names: Gajjar
+    given-names: Vyoma
+repository-code: "https://github.com/Vyoma/agent-economics-lab"
+url: "https://github.com/Vyoma/agent-economics-lab"
+license: Apache-2.0
+keywords:
+  - AI agents
+  - paired experiments
+  - economic assurance
+  - non-inferiority
+  - agent evaluation

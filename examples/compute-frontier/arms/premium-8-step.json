@@ -1,0 +1,4711 @@
+{
+  "arm": {
+    "id": "premium-8-step",
+    "max_steps": 8,
+    "prompt_version": "support-rubric-v1",
+    "route": "premium-all"
+  },
+  "baseline": {
+    "acceptable_rate": 0.8,
+    "cost_per_attempt_usd": 2.0,
+    "name": "human-first triage",
+    "value_per_acceptable_outcome_usd": 8.0
+  },
+  "events": [
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-000",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-000",
+      "timestamp": "2026-07-01T00:00:00Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-001",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-001",
+      "timestamp": "2026-07-01T00:00:01Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-002",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-002",
+      "timestamp": "2026-07-01T00:00:02Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-003",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-003",
+      "timestamp": "2026-07-01T00:00:03Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-004",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-004",
+      "timestamp": "2026-07-01T00:00:04Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-005",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-005",
+      "timestamp": "2026-07-01T00:00:05Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-006",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-006",
+      "timestamp": "2026-07-01T00:00:06Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-007",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-007",
+      "timestamp": "2026-07-01T00:00:07Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-008",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-008",
+      "timestamp": "2026-07-01T00:00:08Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-009",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-009",
+      "timestamp": "2026-07-01T00:00:09Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-010",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-010",
+      "timestamp": "2026-07-01T00:00:10Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-011",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-011",
+      "timestamp": "2026-07-01T00:00:11Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-012",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-012",
+      "timestamp": "2026-07-01T00:00:12Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-013",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-013",
+      "timestamp": "2026-07-01T00:00:13Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-014",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-014",
+      "timestamp": "2026-07-01T00:00:14Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-015",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-015",
+      "timestamp": "2026-07-01T00:00:15Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-016",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-016",
+      "timestamp": "2026-07-01T00:00:16Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-017",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-017",
+      "timestamp": "2026-07-01T00:00:17Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-018",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-018",
+      "timestamp": "2026-07-01T00:00:18Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-019",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-019",
+      "timestamp": "2026-07-01T00:00:19Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-020",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-020",
+      "timestamp": "2026-07-01T00:00:20Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-021",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-021",
+      "timestamp": "2026-07-01T00:00:21Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-022",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-022",
+      "timestamp": "2026-07-01T00:00:22Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-023",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-023",
+      "timestamp": "2026-07-01T00:00:23Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-024",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-024",
+      "timestamp": "2026-07-01T00:00:24Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-025",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-025",
+      "timestamp": "2026-07-01T00:00:25Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-026",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-026",
+      "timestamp": "2026-07-01T00:00:26Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-027",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-027",
+      "timestamp": "2026-07-01T00:00:27Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-028",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-028",
+      "timestamp": "2026-07-01T00:00:28Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-029",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-029",
+      "timestamp": "2026-07-01T00:00:29Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-030",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-030",
+      "timestamp": "2026-07-01T00:00:30Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-031",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-031",
+      "timestamp": "2026-07-01T00:00:31Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-032",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-032",
+      "timestamp": "2026-07-01T00:00:32Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-033",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-033",
+      "timestamp": "2026-07-01T00:00:33Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-034",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-034",
+      "timestamp": "2026-07-01T00:00:34Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-035",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-035",
+      "timestamp": "2026-07-01T00:00:35Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-036",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-036",
+      "timestamp": "2026-07-01T00:00:36Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-037",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-037",
+      "timestamp": "2026-07-01T00:00:37Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-038",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-038",
+      "timestamp": "2026-07-01T00:00:38Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-039",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-039",
+      "timestamp": "2026-07-01T00:00:39Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-040",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-040",
+      "timestamp": "2026-07-01T00:00:40Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-041",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-041",
+      "timestamp": "2026-07-01T00:00:41Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-042",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-042",
+      "timestamp": "2026-07-01T00:00:42Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-043",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-043",
+      "timestamp": "2026-07-01T00:00:43Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-044",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-044",
+      "timestamp": "2026-07-01T00:00:44Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-045",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-045",
+      "timestamp": "2026-07-01T00:00:45Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-046",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-046",
+      "timestamp": "2026-07-01T00:00:46Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-047",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-047",
+      "timestamp": "2026-07-01T00:00:47Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-048",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-048",
+      "timestamp": "2026-07-01T00:00:48Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-049",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-049",
+      "timestamp": "2026-07-01T00:00:49Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-050",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-050",
+      "timestamp": "2026-07-01T00:00:50Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-051",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-051",
+      "timestamp": "2026-07-01T00:00:51Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-052",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-052",
+      "timestamp": "2026-07-01T00:00:52Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-053",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-053",
+      "timestamp": "2026-07-01T00:00:53Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-054",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-054",
+      "timestamp": "2026-07-01T00:00:54Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-055",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-055",
+      "timestamp": "2026-07-01T00:00:55Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-056",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-056",
+      "timestamp": "2026-07-01T00:00:56Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-057",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-057",
+      "timestamp": "2026-07-01T00:00:57Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-058",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-058",
+      "timestamp": "2026-07-01T00:00:58Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-059",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-059",
+      "timestamp": "2026-07-01T00:00:59Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-060",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-060",
+      "timestamp": "2026-07-01T00:01:00Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-061",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-061",
+      "timestamp": "2026-07-01T00:01:01Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-062",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-062",
+      "timestamp": "2026-07-01T00:01:02Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-063",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-063",
+      "timestamp": "2026-07-01T00:01:03Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-064",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-064",
+      "timestamp": "2026-07-01T00:01:04Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-065",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-065",
+      "timestamp": "2026-07-01T00:01:05Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-066",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-066",
+      "timestamp": "2026-07-01T00:01:06Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-067",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-067",
+      "timestamp": "2026-07-01T00:01:07Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-068",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-068",
+      "timestamp": "2026-07-01T00:01:08Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-069",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-069",
+      "timestamp": "2026-07-01T00:01:09Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-070",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-070",
+      "timestamp": "2026-07-01T00:01:10Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-071",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-071",
+      "timestamp": "2026-07-01T00:01:11Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-072",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-072",
+      "timestamp": "2026-07-01T00:01:12Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-073",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-073",
+      "timestamp": "2026-07-01T00:01:13Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-074",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-074",
+      "timestamp": "2026-07-01T00:01:14Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-075",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-075",
+      "timestamp": "2026-07-01T00:01:15Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-076",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-076",
+      "timestamp": "2026-07-01T00:01:16Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-077",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-077",
+      "timestamp": "2026-07-01T00:01:17Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-078",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-078",
+      "timestamp": "2026-07-01T00:01:18Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-079",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-079",
+      "timestamp": "2026-07-01T00:01:19Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-080",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-080",
+      "timestamp": "2026-07-01T00:01:20Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-081",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-081",
+      "timestamp": "2026-07-01T00:01:21Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-082",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-082",
+      "timestamp": "2026-07-01T00:01:22Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-083",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-083",
+      "timestamp": "2026-07-01T00:01:23Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-084",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-084",
+      "timestamp": "2026-07-01T00:01:24Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-085",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-085",
+      "timestamp": "2026-07-01T00:01:25Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-086",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-086",
+      "timestamp": "2026-07-01T00:01:26Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-087",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-087",
+      "timestamp": "2026-07-01T00:01:27Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-088",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-088",
+      "timestamp": "2026-07-01T00:01:28Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-089",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-089",
+      "timestamp": "2026-07-01T00:01:29Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-090",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-090",
+      "timestamp": "2026-07-01T00:01:30Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-091",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-091",
+      "timestamp": "2026-07-01T00:01:31Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-092",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-092",
+      "timestamp": "2026-07-01T00:01:32Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-093",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-093",
+      "timestamp": "2026-07-01T00:01:33Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-094",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-094",
+      "timestamp": "2026-07-01T00:01:34Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-095",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-095",
+      "timestamp": "2026-07-01T00:01:35Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-096",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-096",
+      "timestamp": "2026-07-01T00:01:36Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-097",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-097",
+      "timestamp": "2026-07-01T00:01:37Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-098",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-098",
+      "timestamp": "2026-07-01T00:01:38Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-099",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-099",
+      "timestamp": "2026-07-01T00:01:39Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-100",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-100",
+      "timestamp": "2026-07-01T00:01:40Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-101",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-101",
+      "timestamp": "2026-07-01T00:01:41Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-102",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-102",
+      "timestamp": "2026-07-01T00:01:42Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-103",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-103",
+      "timestamp": "2026-07-01T00:01:43Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-104",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-104",
+      "timestamp": "2026-07-01T00:01:44Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-105",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-105",
+      "timestamp": "2026-07-01T00:01:45Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-106",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-106",
+      "timestamp": "2026-07-01T00:01:46Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-107",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-107",
+      "timestamp": "2026-07-01T00:01:47Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-108",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-108",
+      "timestamp": "2026-07-01T00:01:48Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-109",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-109",
+      "timestamp": "2026-07-01T00:01:49Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-110",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-110",
+      "timestamp": "2026-07-01T00:01:50Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-111",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-111",
+      "timestamp": "2026-07-01T00:01:51Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-112",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-112",
+      "timestamp": "2026-07-01T00:01:52Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-113",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-113",
+      "timestamp": "2026-07-01T00:01:53Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-114",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-114",
+      "timestamp": "2026-07-01T00:01:54Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-115",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-115",
+      "timestamp": "2026-07-01T00:01:55Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-116",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-116",
+      "timestamp": "2026-07-01T00:01:56Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-117",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-117",
+      "timestamp": "2026-07-01T00:01:57Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-118",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-118",
+      "timestamp": "2026-07-01T00:01:58Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-119",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-119",
+      "timestamp": "2026-07-01T00:01:59Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-120",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-120",
+      "timestamp": "2026-07-01T00:02:00Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-121",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-121",
+      "timestamp": "2026-07-01T00:02:01Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-122",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-122",
+      "timestamp": "2026-07-01T00:02:02Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-123",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-123",
+      "timestamp": "2026-07-01T00:02:03Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-124",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-124",
+      "timestamp": "2026-07-01T00:02:04Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-125",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-125",
+      "timestamp": "2026-07-01T00:02:05Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-126",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-126",
+      "timestamp": "2026-07-01T00:02:06Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-127",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-127",
+      "timestamp": "2026-07-01T00:02:07Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-128",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-128",
+      "timestamp": "2026-07-01T00:02:08Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-129",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-129",
+      "timestamp": "2026-07-01T00:02:09Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-130",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-130",
+      "timestamp": "2026-07-01T00:02:10Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-131",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-131",
+      "timestamp": "2026-07-01T00:02:11Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-132",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-132",
+      "timestamp": "2026-07-01T00:02:12Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-133",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-133",
+      "timestamp": "2026-07-01T00:02:13Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-134",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-134",
+      "timestamp": "2026-07-01T00:02:14Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-135",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-135",
+      "timestamp": "2026-07-01T00:02:15Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-136",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-136",
+      "timestamp": "2026-07-01T00:02:16Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-137",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-137",
+      "timestamp": "2026-07-01T00:02:17Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-138",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-138",
+      "timestamp": "2026-07-01T00:02:18Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-139",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-139",
+      "timestamp": "2026-07-01T00:02:19Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-140",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-140",
+      "timestamp": "2026-07-01T00:02:20Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-141",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-141",
+      "timestamp": "2026-07-01T00:02:21Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-142",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-142",
+      "timestamp": "2026-07-01T00:02:22Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-143",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-143",
+      "timestamp": "2026-07-01T00:02:23Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-144",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-144",
+      "timestamp": "2026-07-01T00:02:24Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-145",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-145",
+      "timestamp": "2026-07-01T00:02:25Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-146",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-146",
+      "timestamp": "2026-07-01T00:02:26Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-147",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-147",
+      "timestamp": "2026-07-01T00:02:27Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-148",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-148",
+      "timestamp": "2026-07-01T00:02:28Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-149",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-149",
+      "timestamp": "2026-07-01T00:02:29Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-150",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-150",
+      "timestamp": "2026-07-01T00:02:30Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-151",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-151",
+      "timestamp": "2026-07-01T00:02:31Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-152",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-152",
+      "timestamp": "2026-07-01T00:02:32Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-153",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-153",
+      "timestamp": "2026-07-01T00:02:33Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-154",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-154",
+      "timestamp": "2026-07-01T00:02:34Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-155",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-155",
+      "timestamp": "2026-07-01T00:02:35Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-156",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-156",
+      "timestamp": "2026-07-01T00:02:36Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-157",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-157",
+      "timestamp": "2026-07-01T00:02:37Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-158",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-158",
+      "timestamp": "2026-07-01T00:02:38Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-159",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-159",
+      "timestamp": "2026-07-01T00:02:39Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-160",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-160",
+      "timestamp": "2026-07-01T00:02:40Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-161",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-161",
+      "timestamp": "2026-07-01T00:02:41Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-162",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-162",
+      "timestamp": "2026-07-01T00:02:42Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-163",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-163",
+      "timestamp": "2026-07-01T00:02:43Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-164",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-164",
+      "timestamp": "2026-07-01T00:02:44Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-165",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-165",
+      "timestamp": "2026-07-01T00:02:45Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-166",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-166",
+      "timestamp": "2026-07-01T00:02:46Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-167",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-167",
+      "timestamp": "2026-07-01T00:02:47Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-168",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-168",
+      "timestamp": "2026-07-01T00:02:48Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-169",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-169",
+      "timestamp": "2026-07-01T00:02:49Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-170",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-170",
+      "timestamp": "2026-07-01T00:02:50Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-171",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-171",
+      "timestamp": "2026-07-01T00:02:51Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-172",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-172",
+      "timestamp": "2026-07-01T00:02:52Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-173",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-173",
+      "timestamp": "2026-07-01T00:02:53Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-174",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-174",
+      "timestamp": "2026-07-01T00:02:54Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.4,
+      "event_id": "premium-8-step-event-175",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-175",
+      "timestamp": "2026-07-01T00:02:55Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.42,
+      "event_id": "premium-8-step-event-176",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-176",
+      "timestamp": "2026-07-01T00:02:56Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.44,
+      "event_id": "premium-8-step-event-177",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-177",
+      "timestamp": "2026-07-01T00:02:57Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.46,
+      "event_id": "premium-8-step-event-178",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-178",
+      "timestamp": "2026-07-01T00:02:58Z"
+    },
+    {
+      "arguments": {
+        "arm_id": "premium-8-step",
+        "max_steps": 8,
+        "prompt_version": "support-rubric-v1",
+        "route": "premium-all"
+      },
+      "direct_cost_usd": 1.48,
+      "event_id": "premium-8-step-event-179",
+      "event_type": "model",
+      "input_tokens": 0,
+      "model": "premium-all",
+      "name": "resolve_case",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "case-179",
+      "timestamp": "2026-07-01T00:02:59Z"
+    }
+  ],
+  "outcomes": [
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-000"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-001"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-002"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-003"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-004"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-005"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-006"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-007"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-008"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-009"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-010"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-011"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-012"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-013"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-014"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-015"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-016"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-017"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-018"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-019"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-020"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-021"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-022"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-023"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-024"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-025"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-026"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-027"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-028"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-029"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-030"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-031"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-032"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-033"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-034"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-035"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-036"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-037"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-038"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-039"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-040"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-041"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-042"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-043"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-044"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-045"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-046"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-047"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-048"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-049"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-050"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-051"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-052"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-053"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-054"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-055"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-056"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-057"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-058"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-059"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-060"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-061"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-062"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-063"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-064"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-065"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-066"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-067"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-068"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-069"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-070"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-071"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-072"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-073"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-074"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-075"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-076"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-077"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-078"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-079"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-080"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-081"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-082"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-083"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-084"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-085"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-086"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-087"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-088"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-089"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-090"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-091"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-092"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-093"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-094"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-095"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-096"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-097"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-098"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-099"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-100"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-101"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-102"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-103"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-104"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-105"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-106"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-107"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-108"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-109"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-110"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-111"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-112"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-113"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-114"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-115"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-116"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-117"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-118"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-119"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-120"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-121"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-122"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-123"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-124"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-125"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-126"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-127"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-128"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-129"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-130"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-131"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-132"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-133"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-134"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-135"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-136"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-137"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-138"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-139"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-140"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-141"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-142"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-143"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-144"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-145"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-146"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-147"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-148"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-149"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-150"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-151"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-152"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-153"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-154"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-155"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-156"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-157"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-158"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-159"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 8.0,
+      "human_minutes": 4.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "case-160"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-161"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-162"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-163"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-164"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-165"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-166"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-167"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-168"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-169"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-170"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-171"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-172"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-173"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-174"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-175"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-176"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-177"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-178"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "case-179"
+    }
+  ],
+  "policy": {
+    "human_hourly_cost_usd": 60.0,
+    "max_calls_per_task": 20,
+    "max_cost_per_acceptable_outcome_usd": 3.0,
+    "max_p95_task_cost_usd": 10.0,
+    "max_trace_cost_per_task_usd": 3.0,
+    "min_acceptable_rate": 0.85,
+    "min_expected_net_value_per_attempt_usd": 0.0,
+    "min_incremental_net_value_vs_baseline_usd": 0.0,
+    "repetition_warning_threshold": 3
+  },
+  "rates": {},
+  "schema_version": 1
+}

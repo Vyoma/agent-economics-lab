@@ -32,13 +32,14 @@ artifact carry code, data, method, result, and limitations.
 | Layer | Current artifact | Evidence it provides |
 |---|---|---|
 | Open-source kernel | Agent Economics Lab | Software engineering, explicit contracts, reproducibility |
-| Controlled benchmark | False-Green Assurance Benchmark | Falsifiable hypothesis, ablation, generated dataset, result |
-| Paper-style communication | `research/NOTE.md` | Method, interpretation, threats to validity |
-| External validation | Contribution case-study lane | Independent, redacted workload evidence |
-| Next research environment | Handoff/provenance simulator | Multi-agent safety question built on the same evidence model |
+| Paired experiment | Economic Assurance Frontier | Exact task pairing, breakage bounds, full-cost intervals, bounded selection |
+| Engine conformance | False-Green Assurance Benchmark | Fail-safe coverage invariant under constructed ablations |
+| Research communication | Frontier protocol and data card | Method, hypotheses, threats to validity, and claim boundary |
+| External validation | Paired frontier contribution lane | Permissioned, redacted matched-workload evidence |
+| Next integration | OpenTelemetry GenAI fixture adapter | A real normalized intake path without a live vendor dependency |
 
 Every layer reuses the canonical `EvidenceBundle`, typed checks, coverage manifest,
-and reproducibility command. Product and research do not fork into separate stories.
+plan and evidence digests, and reproducibility command.
 
 ## Portfolio decisions from the deep-research report
 
@@ -48,35 +49,35 @@ weaken the evidence.
 
 | Proposed artifact | Cohesive decision |
 |---|---|
-| JudgeBench-Reliability | Valuable independent benchmark; defer until the current benchmark is externally reviewed |
-| HandoffLab | **Next primary research extension** because provenance, authority, and responsibility can extend the existing evidence schema |
+| JudgeBench-Reliability | Defer until outcome-label reliability is measured on an external frontier case |
+| HandoffLab | Defer; current delegation benchmarks already cover quality, routing, and handoff efficiency, while this repo still needs a real paired economic case |
 | ToolGate-Control | Downstream enforcement consumer; keep outside this offline assurance kernel |
 | MonitorBlind | Later diagnostic benchmark; do not add an LLM judge to the standard-library-only core |
 | DeepResearch-Eval | Separate OpenAI-oriented lane only if application timing justifies it |
 
 ## Sequenced twelve-week plan
 
-### Weeks 1–2: publish one complete artifact
+### Weeks 1–2: ship the paired frontier
 
-- Ship the modular engine, false-green benchmark, data card, protocol, note, and demo.
-- Ask five engineers and three eval/FinOps practitioners to reproduce the result.
-- Record setup failures and counterexamples publicly.
+- Ship paired task alignment, exact breakage bounds, simultaneous cost intervals,
+  fail-closed completeness, portable reports, a protocol, and a transparent fixture.
+- Keep the old false-green result as an engine invariant rather than the headline.
+- Ask five agent engineers and three eval/FinOps practitioners to reproduce the result.
 
-### Weeks 3–5: external evidence cases
+### Weeks 3–5: real intake and independent reproduction
 
 - Add one offline OpenTelemetry GenAI mapper with pinned fixtures.
-- Collect three synthetic or fully anonymized assurance cases from independent users.
-- Pre-register thresholds before calculating each case.
-- Publish decision-preserving and decision-reversing cases.
+- Collect one permissioned, redacted matched-task case with at least 100 task IDs and
+  three tested configurations.
+- Freeze the rubric, candidate family, margins, and subgroup plan before analysis.
+- Publish at least one negative or null candidate result, not only the selected arm.
 
-### Weeks 6–9: HandoffLab as an extension, not a restart
+### Weeks 6–9: label reliability and subgroup robustness
 
-- Extend `EvidenceBundle` with role, authority, provenance, and handoff fields only
-  after writing the research protocol.
-- Generate controlled heterogeneous-agent workflows.
-- Measure privilege leakage, provenance completeness, failed escalation,
-  responsibility drop, and unsafe action rate.
-- Compare a no-control baseline with explicit handoff gates.
+- Add outcome-label provenance and agreement metadata.
+- Predeclare critical subgroups and refuse aggregate selection when a protected or
+  high-risk slice exceeds breakage tolerance.
+- Test sensitivity to missing failed runs, delayed remediation, and provider drift.
 
 ### Weeks 10–12: consolidate evidence
 
@@ -90,10 +91,10 @@ weaken the evidence.
 The Featured section or portfolio should link, in order:
 
 1. repository README;
-2. generated benchmark result;
-3. paper-style note;
-4. data card and protocol;
-5. two-minute modularity demo; and
+2. generated frontier report and plot;
+3. frontier protocol and data card;
+4. permissioned external case when available;
+5. engine conformance and modularity demo; and
 6. only then a lesson, talk, or course.
 
 Ready-to-use headline, About copy, Featured ordering, and claim-safe bio are in
