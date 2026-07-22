@@ -345,6 +345,13 @@ class FrontierTests(unittest.TestCase):
         payload = json.loads(render_frontier_json(first))
         self.assertEqual(payload["decision"], "ADOPT")
         self.assertEqual(payload["selected_arm"], "balanced-4-step")
+        self.assertEqual(payload["numeric_precision_significant_digits"], 12)
+        premium_reference = next(
+            arm for arm in payload["arms"] if arm["arm_id"] == "premium-8-step"
+        )
+        self.assertEqual(premium_reference["mean_effective_cost_usd"], 1.665)
+        self.assertIn("$1.67", render_frontier_markdown(first))
+        self.assertIn("$5.94", render_frontier_markdown(first))
 
 
 if __name__ == "__main__":

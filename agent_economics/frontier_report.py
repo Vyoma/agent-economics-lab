@@ -5,13 +5,22 @@ from __future__ import annotations
 import html
 import json
 import math
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Any
 
-from .frontier import FrontierCase, FrontierDecision, frontier_payload
+from .frontier import (
+    FrontierCase,
+    FrontierDecision,
+    canonical_float,
+    frontier_payload,
+)
 
 
 def _money(value: float) -> str:
-    return "N/A" if not math.isfinite(value) else f"${value:.2f}"
+    if not math.isfinite(value):
+        return "N/A"
+    amount = Decimal(str(value)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return f"${amount:.2f}"
 
 
 def render_frontier_markdown(case: FrontierCase) -> str:
@@ -73,6 +82,7 @@ def render_frontier_markdown(case: FrontierCase) -> str:
         f"- Bootstrap seed: {case.plan.seed}",
         f"- Expected adjusted-tail draws: "
         f"{tail_draws:.1f}" if tail_draws is not None else "- Expected adjusted-tail draws: N/A",
+        "- Portable numeric precision: 12 significant digits",
         "",
     ]
     if case.problems:
@@ -165,8 +175,10 @@ def render_frontier_markdown(case: FrontierCase) -> str:
 
 
 def _json_safe(value: Any) -> Any:
-    if isinstance(value, float) and not math.isfinite(value):
-        return None
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            return None
+        return canonical_float(value)
     if isinstance(value, dict):
         return {key: _json_safe(item) for key, item in value.items()}
     if isinstance(value, (list, tuple)):
@@ -222,7 +234,7 @@ def render_frontier_svg(case: FrontierCase) -> str:
         parts.extend(
             [
                 f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{top + plot_height}" stroke="#21262d"/>',
-                f'<text x="{x:.1f}" y="{top + plot_height + 22}" text-anchor="middle" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">${x_value:.2f}</text>',
+                f'<text x="{x:.1f}" y="{top + plot_height + 22}" text-anchor="middle" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">{_money(x_value)}</text>',
             ]
         )
         y_value = min_quality + fraction * quality_span

@@ -18,6 +18,7 @@ This is the lowest-cost tested candidate that satisfied the predeclared breakage
 - Paired bootstrap resamples: 5000
 - Bootstrap seed: 20260722
 - Expected adjusted-tail draws: 41.7
+- Portable numeric precision: 12 significant digits
 
 ## Tested configurations
 
@@ -26,7 +27,7 @@ This is the lowest-cost tested candidate that satisfied the predeclared breakage
 | `balanced-4-step` | SCALE | 180 | 95.6% | $1.00 | $1.05 | $6.64 | frontier |
 | `cheap-2-step` | SCALE | 180 | 89.4% | $0.93 | $1.04 | $6.23 | frontier |
 | `premium-12-step` | SCALE | 180 | 96.7% | $2.19 | $2.27 | $5.54 | frontier |
-| `premium-8-step` | SCALE | 180 | 95.0% | $1.66 | $1.75 | $5.94 | dominated |
+| `premium-8-step` | SCALE | 180 | 95.0% | $1.67 | $1.75 | $5.94 | dominated |
 
 ## Paired evidence against the reference
 
@@ -45,7 +46,7 @@ This is the lowest-cost tested candidate that satisfied the predeclared breakage
 
 ## Statistical method
 
-Exact one-sided Clopper-Pearson breakage bound plus deterministic paired percentile bootstrap for cost reduction; a Bonferroni-adjusted nominal familywise confidence target across planned quality and cost tests.
+Exact one-sided Clopper-Pearson breakage bound plus deterministic paired percentile bootstrap for cost reduction; a Bonferroni-adjusted nominal familywise confidence target across planned quality and cost tests. Derived decision endpoints are canonicalized to twelve significant digits.
 
 The breakage estimand is the absolute paired-population rate of tasks accepted by the reference and rejected by the candidate, with all matched tasks in the denominator. The exact upper bound prevents a small sample with zero observed regressions from appearing certain. Paired resampling preserves the task-level relationship between reference and candidate costs. The bootstrap endpoint and its nominal confidence target are approximate and include Monte Carlo error.
 

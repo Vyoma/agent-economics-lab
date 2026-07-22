@@ -98,6 +98,10 @@ The target nominal familywise alpha is divided across both quality and cost test
 for every planned candidate. The exact quality endpoint receives this adjustment;
 the percentile-bootstrap cost endpoint remains approximate and includes Monte Carlo
 error. Plans must provide at least 20 expected resamples in the adjusted lower tail.
+Economic totals use accurate floating-point summation. Derived decision endpoints
+and machine-readable floats are canonicalized to 12 significant digits after
+calculation so supported Python runtimes produce the same portable artifacts. This
+precision is finer than the displayed report precision and is part of the method.
 A candidate is eligible only when:
 
 1. its normal assurance decision is `SCALE`;

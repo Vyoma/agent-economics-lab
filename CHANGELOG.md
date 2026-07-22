@@ -11,6 +11,8 @@
   invalid numeric evidence, unknown event costs, baseline or policy drift,
   inconsistent shared-model rates, and insufficient paired sample size.
 - Generate portable Markdown, JSON, and SVG frontier artifacts.
+- Canonicalize economic aggregation, decision endpoints, and currency rendering for
+  byte-stable artifacts across supported Python runtimes.
 - Add a transparent 180-task, four-arm synthetic experiment, protocol, data card,
   tests, and contribution template.
 

@@ -92,6 +92,9 @@ bound. When zero regressions are observed in `n` tasks, the bound is:
 The cost gate uses a deterministic paired percentile bootstrap with the seed and
 resample count stored in the plan. It is approximate and has Monte Carlo error, so
 the plan must provide at least 20 expected resamples in the adjusted lower tail.
+Economic totals use accurate floating-point summation. Derived endpoints are
+canonicalized to 12 significant digits before threshold comparison and portable
+serialization, preventing runtime-level noise from changing a decision or artifact.
 Net paired quality delta and the empirical Pareto frontier are descriptive; the
 selection decision is made only by the declared gates.
 
