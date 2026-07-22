@@ -4,6 +4,23 @@ from .adapters import load_normalized_json_bundle, normalized_json_bundle
 from .assurance import AssuranceEngine, default_engine, evaluate, evaluate_bundle
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .evidence import make_evidence_bundle
+from .frontier import (
+    ArmSummary,
+    ExperimentPlan,
+    FrontierCase,
+    FrontierDecision,
+    PairedComparison,
+    clopper_pearson_upper,
+    evaluate_frontier,
+    load_experiment,
+    load_plan,
+    run_frontier,
+)
+from .frontier_report import (
+    render_frontier_json,
+    render_frontier_markdown,
+    render_frontier_svg,
+)
 from .io import (
     load_baseline,
     load_csv_bundle,
@@ -27,12 +44,14 @@ from .models import (
     EvidenceBundle,
     ModelRate,
     Outcome,
+    TaskIdentity,
     TraceEvent,
 )
 
 __all__ = [
     "AssuranceCase",
     "AssuranceEngine",
+    "ArmSummary",
     "Baseline",
     "CheckMode",
     "CheckOutput",
@@ -44,21 +63,34 @@ __all__ = [
     "Decision",
     "EconomicPolicy",
     "EvaluationView",
+    "ExperimentPlan",
     "EvidenceBundle",
+    "FrontierCase",
+    "FrontierDecision",
     "ModelRate",
     "Outcome",
+    "PairedComparison",
+    "TaskIdentity",
     "TraceEvent",
     "default_checks",
     "default_engine",
+    "clopper_pearson_upper",
     "evaluate",
     "evaluate_bundle",
+    "evaluate_frontier",
     "load_baseline",
     "load_csv_bundle",
+    "load_experiment",
     "load_normalized_json_bundle",
     "load_outcomes",
     "load_policy",
+    "load_plan",
     "load_rates",
     "load_traces",
     "make_evidence_bundle",
     "normalized_json_bundle",
+    "render_frontier_json",
+    "render_frontier_markdown",
+    "render_frontier_svg",
+    "run_frontier",
 ]

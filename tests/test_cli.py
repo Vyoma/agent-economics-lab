@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import io
 import json
+import tempfile
 import unittest
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from agent_economics.cli import main
@@ -71,6 +72,26 @@ class CliTests(unittest.TestCase):
                 ]
             )
         self.assertEqual(exit_code, 3)
+
+    def test_frontier_verification_cannot_overwrite_itself(self) -> None:
+        error = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = Path(directory) / "frontier.md"
+            artifact.write_text("stale\n", encoding="utf-8")
+            with redirect_stderr(error):
+                exit_code = main(
+                    [
+                        "frontier",
+                        str(EXAMPLES / "compute-frontier" / "manifest.json"),
+                        "--output-dir",
+                        directory,
+                        "--verify-dir",
+                        directory,
+                    ]
+                )
+            self.assertEqual(artifact.read_text(encoding="utf-8"), "stale\n")
+        self.assertEqual(exit_code, 2)
+        self.assertIn("must be different", error.getvalue())
 
 
 if __name__ == "__main__":

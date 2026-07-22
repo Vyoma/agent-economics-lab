@@ -1,0 +1,49 @@
+name: Paired frontier case
+description: Contribute a synthetic or permissioned matched-task agent experiment.
+title: "frontier: "
+labels: ["frontier-case"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not share customer data, secrets, personal information, or proprietary pricing.
+  - type: textarea
+    id: intervention
+    attributes:
+      label: Tested configuration family
+      description: Name the reference, every planned candidate, and the exact model, prompt, tool, budget, and orchestration versions.
+    validations:
+      required: true
+  - type: textarea
+    id: population
+    attributes:
+      label: Paired task population and rubric
+      description: Explain how identical task IDs and input digests were assigned, and how the versioned outcome rubric was frozen before analysis.
+    validations:
+      required: true
+  - type: textarea
+    id: plan
+    attributes:
+      label: Frozen decision rule
+      description: State the breakage tolerance, cost target, confidence, minimum N, subgroups, and whether route order was randomized or counterbalanced.
+    validations:
+      required: true
+  - type: textarea
+    id: costs
+    attributes:
+      label: Full-cost boundary
+      description: Account for model, tool, labor, remediation, and incident cost. Identify any unknown fields.
+    validations:
+      required: true
+  - type: checkboxes
+    id: guarantees
+    attributes:
+      label: Sharing and evidence guarantees
+      options:
+        - label: Every planned arm contains exactly the same task IDs, SHA-256 input digests, and rubric versions.
+          required: true
+        - label: Failed and timed-out runs were retained.
+          required: true
+        - label: Every zero cost is explicitly recorded as 0.0 rather than omitted.
+          required: true
+        - label: The data are synthetic or I have permission to share the redacted evidence.
+          required: true
