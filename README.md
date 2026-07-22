@@ -1,55 +1,96 @@
 # Agent Economics Lab
 
-**Your agent passed its evals. Can you prove it should scale?**
+**Find the lowest-cost tested agent configuration that stays within a
+confidence-bounded regression policy.**
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)
 
-> **Status: alpha.** This is a research, teaching, and conformance lab, not a
-> production authorization layer.
+> **Status: v0.2 alpha.** The paired frontier is implemented and reproducible. Its
+> checked-in study is synthetic, so it validates the method and software, not
+> production impact.
 
-Agent Economics Lab is an executable assurance case for evaluating deployment
-decisions about AI-agent workloads. It joins call-level traces to outcome labels,
-human work, remediation, incident loss, and a counterfactual baseline, then issues
-one bounded decision:
+![Economic Assurance Frontier](research/results/frontier/frontier.svg)
 
-- `INCOMPLETE`: required assurance coverage was removed or never evaluated.
-- `SCALE`: the observed system meets its economic and quality policy.
-- `ASSIST`: value is positive, but human or deterministic control coverage is needed.
-- `STOP`: a required value gate fails, including value versus the named baseline.
-
-This is not another token dashboard. It is the smallest complete system we could
-build for answering the question finance, product, risk, and engineering share:
-**what did one acceptable outcome actually cost, and what should we do next?**
-
-**Keep your existing observability and evaluation stack. Normalize its offline
-exports to the included CSV or JSON boundary, then issue a composable,
-vendor-neutral economic assurance case. Fixture-backed vendor-specific mappers are
-a contribution lane, not a shipped integration.**
-
-## Run the evidence case
+## Run the 60-second experiment
 
 Requires Python 3.10+ and no third-party runtime packages.
+
+```bash
+make frontier
+```
+
+Four configurations are compared on the same 180 synthetic input fingerprints and
+rubric version. The frozen
+plan requires at least 25% full-cost reduction and an adjusted one-sided upper bound
+of no more than 5% on tasks broken versus the reference.
+
+```text
+Decision                         ADOPT balanced-4-step
+
+Candidate            Breakage UCB   Cost reduction LCB   Result
+balanced-4-step             3.7%                32.0%   eligible
+cheap-2-step               12.5%                29.9%   quality fails
+premium-12-step             2.6%               -38.9%   cost fails
+```
+
+The cheaper arm is not automatically selected. `cheap-2-step` saves more at the
+point estimate, but its exact harmful-regression bound fails. `premium-12-step`
+improves point quality, but its paired cost interval fails. The selected arm is the
+lowest-cost **tested** candidate that clears every predeclared rule.
+
+Inspect the portable artifacts:
+
+- [decision report](research/results/frontier/frontier.md);
+- [machine-readable result](research/results/frontier/frontier.json);
+- [cost-quality plot](research/results/frontier/frontier.svg);
+- [frozen protocol](research/FRONTIER_PROTOCOL.md);
+- [fixture data card](research/FRONTIER_DATA_CARD.md); and
+- [transparent generator](examples/compute-frontier/generate.py).
+
+## What is substantively different
+
+Experiment platforms already compare scores, latency, and token spend. This project
+adds a narrow decision layer for deployment experiments:
+
+```text
+same task input digests and rubric across a frozen configuration family
+                         |
+          full downstream cost per task
+   model + tool + labor + remediation + incident
+                         |
+     exact harmful-regression upper confidence bound
+       + paired cost-reduction lower confidence bound
+                         |
+            INCOMPLETE / HOLD / ADOPT arm
+```
+
+- **Paired, not aggregate:** task IDs, input digests, and rubric versions cannot
+  change between arms.
+- **Fail closed:** missing arms, tasks, full-cost fields, or assurance coverage return
+  `INCOMPLETE`; failed runs are not silently dropped.
+- **Uncertainty-aware:** zero observed regressions in a small sample never means zero
+  risk. Quality uses an exact one-sided Clopper-Pearson upper bound.
+- **Multiplicity-aware:** a Bonferroni-adjusted nominal alpha target covers every
+  planned candidate's quality and approximate bootstrap cost test. The plan must
+  include enough resamples to resolve the adjusted tail.
+- **Economically complete:** selection includes model, tool, human, remediation, and
+  incident cost, not token price alone.
+- **Portable:** Markdown, JSON, SVG, plan digest, and evidence digests are generated
+  offline without a vendor runtime.
+
+Read the [frontier method and data contract](docs/frontier.md).
+
+## Issue a single-arm assurance case
+
+The frontier is built on a composable single-arm engine. It joins call-level traces
+to outcome labels, human work, remediation, incident loss, and a named baseline,
+then returns `INCOMPLETE`, `SCALE`, `ASSIST`, or `STOP`.
 
 ```bash
 make demo
 ```
 
-The included eight-task synthetic support scenario produces:
-
-```text
-Decision                         ASSIST
-Acceptable outcomes              6 / 8 (75.0%)
-Total effective cost             $21.02
-Cost / acceptable outcome        $3.50
-Expected net value / attempt     $3.37
-Human-only baseline              $0.60
-```
-
-The agent creates more expected value than the baseline, but it is not ready for
-unattended scale. Its acceptable rate misses policy, its tail cost is too high, and
-one task crosses both the call and trace-cost caps.
-
-Generate a portable Markdown assurance case:
+Generate a portable report from your normalized offline exports:
 
 ```bash
 python3 -m agent_economics evaluate \
@@ -61,39 +102,22 @@ python3 -m agent_economics evaluate \
   --output assurance-case.md
 ```
 
-## Research-shaped, not demo-shaped
+## Engine conformance invariant
 
-The repository includes a deterministic benchmark for the central modularity
-claim: can deleting required evidence silently manufacture a green decision?
+The earlier false-green benchmark remains as a secondary property test. Across 98
+constructed scenarios and 588 single-check ablations, silently ignoring missing
+coverage creates 23 false `SCALE` decisions; the fail-safe engine returns
+`INCOMPLETE` instead. This validates routing semantics by construction, not the
+prevalence of enterprise failures.
 
 ```bash
 make benchmark
 make reproduce
 ```
 
-Across 98 synthetic scenarios and 588 single-module ablations:
-
-```text
-Unsafe reducer: 23 false SCALE decisions
-                4.5% of complete non-SCALE comparisons
-
-Fail-safe engine: 0 false SCALE decisions
-                  missing required evidence -> INCOMPLETE
-```
-
-This is a controlled software stress test, not an estimate of production
-prevalence. The repository ships the complete research package:
-
-- [research question and hypotheses](research/README.md);
-- [fixed benchmark protocol](research/PROTOCOL.md);
-- [data card](research/DATA_CARD.md);
-- [generated result rows](research/results/false_green_results.csv);
-- [benchmark card](research/results/SUMMARY.md); and
-- [paper-style note](research/NOTE.md).
-
-The longer [research agenda](docs/research-agenda.md) explains how this artifact,
-external evidence cases, and the proposed HandoffLab extension remain one coherent
-program rather than five disconnected demos.
+See the [conformance protocol](research/PROTOCOL.md),
+[generated rows](research/results/false_green_results.csv), and
+[limitations](docs/limitations.md).
 
 ## Build it from first principles
 
@@ -164,19 +188,19 @@ make modularity
 
 Read [`docs/modularity.md`](docs/modularity.md) for the contracts and adapter rules.
 
-## What is deliberately different
+## What the kernel owns
 
-Agent traces and model cost fields already belong in observability products. Cost
-caps and cycle detectors already belong in runtime guardrails. This project gives
-their exported evidence an independent, inspectable decision artifact:
+Agent traces and model cost fields belong in observability products. Cost caps and
+cycle detectors belong in runtime guardrails. This project converts their frozen
+exports into independent, inspectable single-arm and paired decision artifacts.
 
 ```text
 source adapter + traces + outcomes + risk/labor cost + counterfactual + policy
                                   |
                                   v
-             versioned checks + assurance manifest
+       versioned checks + assurance and frontier manifests
                                   |
-                INCOMPLETE / SCALE / ASSIST / STOP
+       INCOMPLETE / SCALE / ASSIST / STOP / HOLD / ADOPT
 ```
 
 The included repetition detector is intentionally called a warning. Three tool
@@ -189,17 +213,17 @@ timeouts, call caps, authorization, and human escalation.
 
 | Audience | What they can take from the repo |
 |---|---|
-| Agent engineers | A vendor-neutral trace/outcome schema, deterministic caps, and tests |
-| Enterprise architects | A reviewable incomplete/scale/assist/stop gate for production readiness |
-| FinOps and finance | Cost per acceptable outcome and a named counterfactual |
-| Product and risk leaders | Visible labor, remediation, incident, and tail-risk assumptions |
-| Educators | A runnable case that can be changed live without cloud credentials |
+| Agent engineers | A paired budget frontier, vendor-neutral evidence schema, and deterministic tests |
+| Enterprise architects | A reviewable fail-closed deployment experiment artifact |
+| FinOps and finance | Confidence-bounded full-cost reduction, not token price alone |
+| Product and risk leaders | Explicit harmful-regression tolerance and complete cost boundary |
+| Educators | A reproducible cost-quality experiment without cloud credentials |
 
 ## Repository map
 
 ```text
-agent_economics/   evidence adapters, typed checks, engine, controls, and renderers
-examples/          synthetic evidence plus the add/delete modularity demo
+agent_economics/   paired frontier, evidence adapters, checks, controls, and renderers
+examples/          frozen paired experiment, single-arm evidence, and modularity demo
 lessons/           five executable steps
 research/          hypothesis, protocol, generator, data card, results, and note
 templates/         assurance-case worksheet for an enterprise review
@@ -207,13 +231,15 @@ docs/              method, limitations, landscape, and launch copy
 tests/             unit tests for the math, controls, and claim boundaries
 ```
 
-## Three contribution lanes
+## Four contribution lanes
 
 1. **Source adapters:** map a pinned offline vendor or internal export fixture into
    the canonical bundle without adding a live vendor dependency.
 2. **Assurance checks:** add domain policy while declaring its mode, version, and
    coverage. Diagnostics cannot change routing; gates can only preserve or restrict it.
-3. **Evidence cases:** contribute a redacted scenario with:
+3. **Paired frontier cases:** contribute a frozen matched-task experiment with the
+   complete candidate family, rubric, margins, full costs, and sharing permission.
+4. **Single-arm evidence cases:** contribute a redacted scenario with:
 
    - a stable task ID across trace and outcome data;
    - an explicit definition of “acceptable” agreed before analysis;
@@ -221,16 +247,18 @@ tests/             unit tests for the math, controls, and claim boundaries
    - the named process the agent is being compared against; and
    - the policy that would have existed before seeing the result.
 
-Use [`templates/agent-economic-assurance-case.md`](templates/agent-economic-assurance-case.md)
-or open a case-study issue. Synthetic and fully anonymized cases are welcome.
+Open a paired frontier issue or use
+[`templates/agent-economic-assurance-case.md`](templates/agent-economic-assurance-case.md).
+Synthetic and fully anonymized cases are welcome.
 
 ## Scope and claim boundary
 
 This is a teaching, conformance, and controlled-research lab, not a production
-authorization layer, accounting system, or prevalence study. The demo has eight
-synthetic tasks and the benchmark has 98 generated scenarios. Before a production
-decision, test representativeness, label agreement, attribution, confidence
-intervals, policy ownership, and observation-window effects. See
+authorization layer, accounting system, or prevalence study. The paired example has
+180 synthetic tasks; the engine invariant has 98 constructed scenarios. Before a
+production decision, test representativeness, label agreement, assignment bias,
+subgroup regressions, cost attribution, policy ownership, and observation-window
+effects. See
 [`docs/limitations.md`](docs/limitations.md).
 
 Apache-2.0 licensed. Contributions that make the assurance claim more falsifiable

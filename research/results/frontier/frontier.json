@@ -1,0 +1,116 @@
+{
+  "arms": [
+    {
+      "acceptable_rate": 0.955555555556,
+      "arm_id": "balanced-4-step",
+      "assurance_decision": "SCALE",
+      "cost_per_acceptable_outcome_usd": 1.0476744186,
+      "dominated": false,
+      "evidence_digest": "32fa0e4a4953b298352d58e0849cc2ffc18636d67093a77ce0fae0673896638f",
+      "expected_net_value_per_attempt_usd": 6.64333333333,
+      "mean_effective_cost_usd": 1.00111111111,
+      "paired_tasks": 180
+    },
+    {
+      "acceptable_rate": 0.894444444444,
+      "arm_id": "cheap-2-step",
+      "assurance_decision": "SCALE",
+      "cost_per_acceptable_outcome_usd": 1.03540372671,
+      "dominated": false,
+      "evidence_digest": "25259104ba610bae17322c6b40d1b301362c52c806c796466ce3e46adfb7ff7a",
+      "expected_net_value_per_attempt_usd": 6.22944444444,
+      "mean_effective_cost_usd": 0.926111111111,
+      "paired_tasks": 180
+    },
+    {
+      "acceptable_rate": 0.966666666667,
+      "arm_id": "premium-12-step",
+      "assurance_decision": "SCALE",
+      "cost_per_acceptable_outcome_usd": 2.26551724138,
+      "dominated": false,
+      "evidence_digest": "8316e57badbc4fcc1cbab1233ba66873237a549f6f1df583bee1901a0204cb05",
+      "expected_net_value_per_attempt_usd": 5.54333333333,
+      "mean_effective_cost_usd": 2.19,
+      "paired_tasks": 180
+    },
+    {
+      "acceptable_rate": 0.95,
+      "arm_id": "premium-8-step",
+      "assurance_decision": "SCALE",
+      "cost_per_acceptable_outcome_usd": 1.75263157895,
+      "dominated": true,
+      "evidence_digest": "91526aecd73578ba43d2bc1cf4bfdb9cedcb26841967b2899dddfe1348fb9756",
+      "expected_net_value_per_attempt_usd": 5.935,
+      "mean_effective_cost_usd": 1.665,
+      "paired_tasks": 180
+    }
+  ],
+  "comparisons": [
+    {
+      "acceptable_rate_delta": 0.00555555555556,
+      "adjusted_alpha": 0.00833333333333,
+      "beneficial_changes": 2,
+      "breakage_rate": 0.00555555555556,
+      "breakage_rate_upper": 0.0374307915066,
+      "candidate_arm": "balanced-4-step",
+      "cost_reduction_rate_lower": 0.320091923835,
+      "eligible": true,
+      "harmful_regressions": 1,
+      "mean_cost_reduction_rate": 0.398732065399,
+      "paired_tasks": 180,
+      "reasons": []
+    },
+    {
+      "acceptable_rate_delta": -0.0555555555556,
+      "adjusted_alpha": 0.00833333333333,
+      "beneficial_changes": 2,
+      "breakage_rate": 0.0666666666667,
+      "breakage_rate_upper": 0.124773141319,
+      "candidate_arm": "cheap-2-step",
+      "cost_reduction_rate_lower": 0.299269153226,
+      "eligible": false,
+      "harmful_regressions": 12,
+      "mean_cost_reduction_rate": 0.443777110444,
+      "paired_tasks": 180,
+      "reasons": [
+        "breakage upper bound 12.477% exceeds 5.000%"
+      ]
+    },
+    {
+      "acceptable_rate_delta": 0.0166666666667,
+      "adjusted_alpha": 0.00833333333333,
+      "beneficial_changes": 3,
+      "breakage_rate": 0.0,
+      "breakage_rate_upper": 0.0262465865636,
+      "candidate_arm": "premium-12-step",
+      "cost_reduction_rate_lower": -0.389441800087,
+      "eligible": false,
+      "harmful_regressions": 0,
+      "mean_cost_reduction_rate": -0.315315315315,
+      "paired_tasks": 180,
+      "reasons": [
+        "cost-reduction lower bound -38.944% is below 25.000%"
+      ]
+    }
+  ],
+  "decision": "ADOPT",
+  "experiment_id": "synthetic-support-budget-frontier-v1",
+  "method": "Exact one-sided Clopper-Pearson breakage bound plus deterministic paired percentile bootstrap for cost reduction; a Bonferroni-adjusted nominal familywise confidence target across planned quality and cost tests. Derived decision endpoints are canonicalized to twelve significant digits.",
+  "numeric_precision_significant_digits": 12,
+  "plan_digest": "fdef79a28661ec29d92439f64cbc37dadd32f2362b5d13af55f7da96b5608660",
+  "policy": {
+    "bootstrap_samples": 5000,
+    "confidence_level": 0.95,
+    "expected_adjusted_tail_draws": 41.6666666667,
+    "max_breakage_rate": 0.05,
+    "min_cost_reduction_rate": 0.25,
+    "min_paired_tasks": 150,
+    "seed": 20260722
+  },
+  "problems": [],
+  "reference_arm": "premium-8-step",
+  "schema": "frontier.case@1",
+  "selected_arm": "balanced-4-step",
+  "task_manifest_digest": "8ab1d32aff8ff1d42fa3d7fecff28bc36548dd1c9905b972a0ed701c874298d4",
+  "task_manifest_path": "task-manifest.json"
+}

@@ -2,12 +2,13 @@
 
 Applied AI research engineer building **economic assurance for AI agents**.
 
-## Your agent passed its evals. Can you prove it should scale?
+## Where does saving money start breaking the agent?
 
-I built Agent Economics Lab to connect normalized agent traces with outcome
-quality, human work, remediation and incident cost, a named counterfactual, and
-versioned policy, then issue an auditable `INCOMPLETE`, `SCALE`, `ASSIST`, or `STOP`
-decision.
+I built Agent Economics Lab to compare tested agent configurations on identical
+task input fingerprints and rubric versions, join outcomes to model, tool, labor,
+remediation, and incident cost, and
+refuse to select a cheaper route when its uncertainty-bounded breakage risk is too
+high.
 
 ## Current open-source work
 
@@ -15,41 +16,40 @@ decision.
 
 Python 3.10+. No cloud account. No third-party runtime packages.
 
-**Question:** Can deleting a required check silently manufacture `SCALE`?
+**Question:** Which tested agent configuration is the lowest-cost one whose upper
+confidence bound on harmful paired transitions stays within policy?
 
-**Test:** 98 deterministic synthetic scenarios × 6 single-module evidence
-ablations.
+**Test:** a frozen four-arm, 180-task paired experiment with exact harmful-regression
+bounds, deterministic paired cost intervals, and a multiplicity-adjusted nominal
+confidence target.
 
-| Deterministic synthetic stress test | Result |
-|---|---:|
-| Scenarios | 98 |
-| Single-module ablations | 588 |
-| Complete non-`SCALE` comparisons | 510 |
-| Unsafe comparator: false `SCALE` | 23 / 510 (4.5%) |
-| Fail-safe engine: false `SCALE` | 0 |
+| Candidate | Breakage UCB | Cost reduction LCB | Result |
+|---|---:|---:|---|
+| `balanced-4-step` | 3.7% | 32.0% | eligible |
+| `cheap-2-step` | 12.5% | 29.9% | quality fails |
+| `premium-12-step` | 2.6% | -38.9% | cost fails |
 
-**Result:** the fail-safe engine returned `INCOMPLETE` whenever required coverage
-was missing. This validates a routing invariant under controlled perturbations. It
-does not estimate production prevalence or validate enterprise policy thresholds.
+**Result:** `ADOPT balanced-4-step`. It was the lowest-cost tested arm that cleared
+the frozen 5% breakage-risk and 25% full-cost-reduction rules. The study is synthetic
+and validates the method, not production impact.
 
 ```bash
-make demo
-make modularity
+make frontier
 make reproduce
 ```
 
 [Run the lab](https://github.com/Vyoma/agent-economics-lab)
-· [Read the research note](https://github.com/Vyoma/agent-economics-lab/blob/main/research/NOTE.md)
-· [Inspect the protocol](https://github.com/Vyoma/agent-economics-lab/blob/main/research/PROTOCOL.md)
+· [Inspect the result](https://github.com/Vyoma/agent-economics-lab/blob/main/research/results/frontier/frontier.md)
+· [Inspect the protocol](https://github.com/Vyoma/agent-economics-lab/blob/main/research/FRONTIER_PROTOCOL.md)
 · [Review the limitations](https://github.com/Vyoma/agent-economics-lab/blob/main/docs/limitations.md)
 
 ## What I am investigating
 
-- agent evaluation tied to observable task outcomes;
-- cost per acceptable outcome and named counterfactuals;
-- assurance systems that make missing evidence visibly incomplete;
-- the boundary between diagnostic signals and enforceable controls; and
-- next: authority, provenance, and handoff failures in multi-agent systems.
+- paired cost-quality experiments for agent configurations;
+- exact breakage-risk bounds and simultaneous decision rules;
+- full downstream cost per acceptable outcome;
+- assurance systems that make missing tasks and cost evidence visibly incomplete;
+- next: one pinned OpenTelemetry GenAI adapter and a permissioned real frontier case.
 
 ## Learn it from first principles
 
@@ -63,10 +63,10 @@ assurance decision.
 
 The most useful contributions to Agent Economics Lab are:
 
-1. fixture-backed offline adapters for real observability and evaluation exports;
-2. versioned domain assurance checks with declared coverage; and
-3. redacted real-world cases that define the task, acceptable outcome, full cost,
-   counterfactual, and pre-committed policy.
+1. permissioned matched-task experiments with a frozen candidate family and rubric;
+2. fixture-backed adapters for real observability and evaluation exports;
+3. critical subgroup and label-reliability tests; and
+4. counterexamples that make the selection rule narrower or falsify it.
 
 [Open a case-study issue](https://github.com/Vyoma/agent-economics-lab/issues)
 

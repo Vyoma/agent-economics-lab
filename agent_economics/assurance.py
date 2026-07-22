@@ -55,13 +55,15 @@ def reconstruct_tasks(
     for task_id in sorted(by_task):
         task_events = by_task[task_id]
         outcome = outcomes[task_id]
-        trace_cost = sum(event.cost(rates) for event in task_events)
+        trace_cost = math.fsum(event.cost(rates) for event in task_events)
         human_cost = outcome.human_minutes * policy.human_hourly_cost_usd / 60
-        effective_cost = (
-            trace_cost
-            + human_cost
-            + outcome.remediation_cost_usd
-            + outcome.incident_loss_usd
+        effective_cost = math.fsum(
+            (
+                trace_cost,
+                human_cost,
+                outcome.remediation_cost_usd,
+                outcome.incident_loss_usd,
+            )
         )
         tasks.append(
             TaskEconomics(
@@ -127,11 +129,11 @@ class AssuranceEngine:
 
         accepted = sum(task.acceptable for task in tasks)
         acceptable_rate = accepted / len(tasks)
-        total_cost = sum(task.effective_cost_usd for task in tasks)
+        total_cost = math.fsum(task.effective_cost_usd for task in tasks)
         cost_per_acceptable = total_cost / accepted if accepted else math.inf
         p95_cost = percentile([task.effective_cost_usd for task in tasks], 0.95)
         max_cost = max(task.effective_cost_usd for task in tasks)
-        realized_value = sum(task.business_value_usd for task in tasks)
+        realized_value = math.fsum(task.business_value_usd for task in tasks)
         expected_net = (realized_value - total_cost) / len(tasks)
         incremental_net = (
             expected_net - evidence.baseline.expected_net_value_per_attempt_usd

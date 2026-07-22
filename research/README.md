@@ -1,72 +1,58 @@
-# False-Green Assurance Benchmark
+# Research Artifacts
 
-## Research question
+Agent Economics Lab separates its flagship paired experiment from lower-level engine
+conformance so a software invariant is not mistaken for external empirical evidence.
 
-When required economic evidence is removed from an agent-readiness review, can the
-remaining checks produce `SCALE` even though the complete assurance case would not?
+## 1. Economic Assurance Frontier
 
-## Falsifiable hypotheses
+**Question:** Which tested agent configuration is the lowest-cost candidate whose
+uncertainty-bounded harmful-regression risk stays within a frozen policy?
 
-- **H1:** At least one single-dimension ablation will produce a false-green `SCALE`
-  on the controlled scenario matrix.
-- **H2:** Required-coverage enforcement will convert every such false green to
-  `INCOMPLETE`.
-- **H3:** Removing counterfactual coverage will expose scenarios where the agent is
-  positive in isolation but economically worse than the named alternative.
+The artifact aligns identical task input digests and rubric versions across a
+reference and complete candidate
+family, reconstructs full downstream cost, uses an exact one-sided upper confidence
+bound on harmful regressions, and uses a paired lower confidence bound for cost
+reduction. Missing tasks, arms, cost evidence, or assurance coverage return
+`INCOMPLETE`.
 
-H1 is falsified if no ablation changes a complete non-`SCALE` decision to `SCALE`.
-H2 is falsified if the production engine returns `SCALE` after any required
-dimension is removed. H3 is falsified if counterfactual removal produces no false
-greens in the scenario matrix.
+- [Protocol](FRONTIER_PROTOCOL.md)
+- [Data card](FRONTIER_DATA_CARD.md)
+- [Generated decision](results/frontier/frontier.md)
+- [Machine-readable result](results/frontier/frontier.json)
+- [Cost-quality plot](results/frontier/frontier.svg)
+- [Transparent fixture generator](../examples/compute-frontier/generate.py)
 
-## Run it
+The checked-in 180-task study is synthetic. It validates the implementation and
+selection rule, not production impact.
 
-```bash
-make benchmark
-make reproduce
-```
+## 2. False-Green Engine Conformance
 
-The benchmark has no network, model, or third-party dependency. It deterministically
-generates 96 factorial ten-task scenarios plus two gate-isolation boundary cases,
-then evaluates six single-dimension ablations per scenario.
+**Question:** When a required assurance dimension is removed, can a reducer that
+silently redefines available evidence as complete manufacture a `SCALE` decision?
 
-## Experimental factors
+The deterministic stress test generates 96 factorial scenarios plus two boundary
+cases, then runs six single-check ablations per scenario. It compares an unsafe
+available-only reducer with the production fail-safe coverage behavior.
 
-| Factor | Controlled values |
-|---|---|
-| Acceptable tasks out of 10 | 5, 8, 10 |
-| Trace cost per task | $0.10, $1.50 |
-| Human minutes per failed task | 0, 5 |
-| Single-task tail loss | $0, $10 |
-| Baseline cost per attempt | $0, $4 |
-| Baseline acceptable rate | 70%, 95% |
+- [Protocol](PROTOCOL.md)
+- [Data card](DATA_CARD.md)
+- [Generated rows](results/false_green_results.csv)
+- [Summary](results/SUMMARY.md)
+- [Research note](NOTE.md)
 
-Two additional boundary cases isolate distributed human cost and low absolute
-business value so the unit-economics and business-value gates can each be tested
-without a second gate masking the result.
+This benchmark validates routing semantics under constructed perturbations. The
+zero false-green safe result follows from the required-coverage invariant and should
+not be described as an empirical ecosystem result.
 
-Each scenario is evaluated with complete coverage, then with one of these checks
-removed: outcome quality, unit economics, tail risk, business value,
-counterfactual, or runtime caps.
+## External validation gate
 
-Two reducers are compared:
+The next evidence milestone is one permissioned, redacted matched-task study from a
+real agent workflow with:
 
-1. **Unsafe available-only:** silently treats whichever checks remain as complete.
-2. **Fail-safe coverage:** returns `INCOMPLETE` when a required dimension is absent.
-
-The full generated rows are in [`results/false_green_results.csv`](results/false_green_results.csv).
-The benchmark card is in [`results/SUMMARY.md`](results/SUMMARY.md).
-
-## Interpretation boundary
-
-This experiment validates software semantics under controlled perturbations. It
-does not establish:
-
-- the prevalence of incomplete evidence in enterprises;
-- the causal effect of an assurance process on production incidents;
-- that the sample thresholds are appropriate for a real domain; or
-- that six dimensions exhaust agent economic or safety assurance.
-
-Those questions require redacted or independently collected workload cases. The
-synthetic benchmark is useful because every decision reversal is attributable to a
-known removed dimension.
+- at least 100 paired task input fingerprints;
+- at least three tested configurations;
+- a frozen rubric and candidate family;
+- complete failed and timed-out runs;
+- explicit model, tool, labor, remediation, and incident costs;
+- randomized or counterbalanced route order for causal interpretation; and
+- an independent reproduction.
