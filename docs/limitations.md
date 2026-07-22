@@ -9,6 +9,26 @@ Eight synthetic tasks are enough to inspect every calculation, not enough to inf
 production behavior. A real decision needs representative volume, seasonality,
 segment analysis, uncertainty bounds, and monitoring for distribution shift.
 
+The paired frontier fixture has 180 synthetic tasks. Its intervals exercise the
+selection method, but synthetic volume does not create external validity. A public
+enterprise-impact claim needs a permissioned matched-task study and independent
+reproduction.
+
+## Paired uncertainty does not create causality
+
+Exact pairing of task IDs, input digests, and rubric versions controls task-mix
+differences. It does not control route order,
+provider drift, learning effects, benchmark contamination, or unobserved changes
+between arms. Use randomized or counterbalanced assignment before interpreting a
+paired difference as causal.
+
+The Clopper-Pearson bound covers the observed harmful-transition process under a
+binomial model. The paired percentile bootstrap reflects sampling variation in
+recorded full cost, but its interval and nominal confidence target are approximate
+and include Monte Carlo error. The plan rejects a resample count that cannot resolve
+the adjusted lower tail. Neither method repairs biased labels, correlated duplicates,
+missing failed runs, or an unrepresentative population.
+
 ## Outcome labels can dominate the result
 
 “Acceptable” must be operationalized before analysis. Human labels require a rubric
@@ -86,7 +106,9 @@ equivalence test.
 ## Event and cost semantics must be mapped explicitly
 
 The default runtime-call cap counts canonical trace events. A source adapter must
-decide which source spans represent calls versus internal bookkeeping. Non-model
-events without a direct cost contribute zero trace spend; this may mean “free” or
-“cost data missing.” A production evidence case must distinguish those states
-before claiming complete cost coverage.
+decide which source spans represent calls versus internal bookkeeping. The
+single-arm engine preserves legacy behavior in which non-model events without a
+direct cost contribute zero trace spend. The paired frontier is stricter: an absent
+non-model cost returns `INCOMPLETE`; explicitly free or included events must record
+`direct_cost_usd: 0.0`. Rate-card-priced model events must include explicit token
+counts and positive usage. Source adapters must preserve these distinctions.

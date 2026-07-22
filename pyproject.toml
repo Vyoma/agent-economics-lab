@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-economics-lab"
-version = "0.1.0"
-description = "Composable economic assurance for AI-agent deployment decisions"
+version = "0.2.0"
+description = "Paired cost-quality frontiers and economic assurance for AI-agent deployment decisions"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "Apache-2.0"}
 authors = [{name = "Vyoma Gajjar"}]
-keywords = ["ai-agents", "finops", "evaluation", "llm", "observability"]
+keywords = ["ai-agents", "finops", "evaluation", "llm", "observability", "non-inferiority", "paired-experiment"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: Apache Software License",
@@ -18,6 +18,12 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
 ]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Vyoma/agent-economics-lab"
+Repository = "https://github.com/Vyoma/agent-economics-lab"
+Documentation = "https://github.com/Vyoma/agent-economics-lab/blob/main/docs/frontier.md"
+Issues = "https://github.com/Vyoma/agent-economics-lab/issues"
 
 [project.scripts]
 agent-economics = "agent_economics.cli:main"

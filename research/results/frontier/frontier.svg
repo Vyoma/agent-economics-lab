@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="430" viewBox="0 0 760 430" role="img" aria-labelledby="title desc">
+<title id="title">Economic Assurance Frontier</title>
+<desc id="desc">Acceptable outcome rate versus mean full effective cost for tested agent configurations.</desc>
+<rect width="100%" height="100%" fill="#0d1117" rx="14"/>
+<text x="24" y="30" fill="#f0f6fc" font-family="ui-monospace,monospace" font-size="18" font-weight="700">Economic Assurance Frontier</text>
+<line x1="84" y1="360" x2="724" y2="360" stroke="#8b949e"/>
+<line x1="84" y1="46" x2="84" y2="360" stroke="#8b949e"/>
+<text x="404.0" y="408" text-anchor="middle" fill="#c9d1d9" font-family="ui-sans-serif,sans-serif" font-size="13">Mean full effective cost per attempt (USD)</text>
+<text x="20" y="203.0" transform="rotate(-90 20 203.0)" text-anchor="middle" fill="#c9d1d9" font-family="ui-sans-serif,sans-serif" font-size="13">Acceptable outcome rate</text>
+<line x1="84.0" y1="46" x2="84.0" y2="360" stroke="#21262d"/>
+<text x="84.0" y="382" text-anchor="middle" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">$0.93</text>
+<line x1="84" y1="360.0" x2="724" y2="360.0" stroke="#21262d"/>
+<text x="72" y="364.0" text-anchor="end" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">86%</text>
+<line x1="244.0" y1="46" x2="244.0" y2="360" stroke="#21262d"/>
+<text x="244.0" y="382" text-anchor="middle" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">$1.24</text>
+<line x1="84" y1="281.5" x2="724" y2="281.5" stroke="#21262d"/>
+<text x="72" y="285.5" text-anchor="end" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">90%</text>
+<line x1="404.0" y1="46" x2="404.0" y2="360" stroke="#21262d"/>
+<text x="404.0" y="382" text-anchor="middle" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">$1.56</text>
+<line x1="84" y1="203.0" x2="724" y2="203.0" stroke="#21262d"/>
+<text x="72" y="207.0" text-anchor="end" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">93%</text>
+<line x1="564.0" y1="46" x2="564.0" y2="360" stroke="#21262d"/>
+<text x="564.0" y="382" text-anchor="middle" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">$1.87</text>
+<line x1="84" y1="124.5" x2="724" y2="124.5" stroke="#21262d"/>
+<text x="72" y="128.5" text-anchor="end" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">96%</text>
+<line x1="724.0" y1="46" x2="724.0" y2="360" stroke="#21262d"/>
+<text x="724.0" y="382" text-anchor="middle" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">$2.19</text>
+<line x1="84" y1="46.0" x2="724" y2="46.0" stroke="#21262d"/>
+<text x="72" y="50.0" text-anchor="end" fill="#8b949e" font-family="ui-monospace,monospace" font-size="11">100%</text>
+<circle cx="122.0" cy="143.6" r="8" fill="#3fb950" stroke="#f0f6fc" stroke-width="1"/>
+<text x="132.0" y="133.6" text-anchor="start" fill="#f0f6fc" font-family="ui-monospace,monospace" font-size="11">balanced-4-step</text>
+<circle cx="84.0" cy="288.8" r="6" fill="#58a6ff" stroke="#f0f6fc" stroke-width="1"/>
+<text x="94.0" y="278.8" text-anchor="start" fill="#f0f6fc" font-family="ui-monospace,monospace" font-size="11">cheap-2-step</text>
+<circle cx="724.0" cy="117.2" r="6" fill="#58a6ff" stroke="#f0f6fc" stroke-width="1"/>
+<text x="714.0" y="107.2" text-anchor="end" fill="#f0f6fc" font-family="ui-monospace,monospace" font-size="11">premium-12-step</text>
+<circle cx="458.2" cy="156.8" r="6" fill="#8b949e" stroke="#f0f6fc" stroke-width="1"/>
+<text x="468.2" y="146.8" text-anchor="start" fill="#f0f6fc" font-family="ui-monospace,monospace" font-size="11">premium-8-step</text>
+</svg>
