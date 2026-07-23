@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from research.false_green_benchmark import (
+from false_green import (
     render_summary,
     run_benchmark,
     scenario_matrix,

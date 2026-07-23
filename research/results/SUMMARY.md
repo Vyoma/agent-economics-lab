@@ -16,5 +16,17 @@
 | `counterfactual` | 3 |
 | `runtime_caps` | 8 |
 
+```text
+removed evidence       false SCALE
+outcome_quality      #####                2
+unit_economics       ##                   1
+tail_risk            #################### 8
+business_value       ##                   1
+counterfactual       ########             3
+runtime_caps         #################### 8
+```
+
 This is a deterministic synthetic stress test of routing semantics, not an
 estimate of how often production systems make false-green decisions.
+
+A dashboard that averages only what it has can bless what it cannot see.

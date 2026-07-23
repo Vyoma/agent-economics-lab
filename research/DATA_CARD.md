@@ -16,7 +16,7 @@ production systems.
 
 ## Generation
 
-`research/false_green_benchmark.py` creates the factorial matrix plus two isolation
+`false_green.py` creates the factorial matrix plus two isolation
 cases documented in `research/README.md`. Every task contains one directly priced
 model event and one business outcome. Values were selected to create separable
 quality, unit-cost, tail-risk, business-value, counterfactual, and runtime-cap
