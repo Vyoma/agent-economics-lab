@@ -21,17 +21,13 @@ from typing import Any, Mapping, Sequence
 
 from .adapters import normalized_json_bundle
 from .assurance import evaluate_bundle
+from .evidence import validate_evidence_bundle
 from .models import (
     AssuranceCase,
-    Baseline,
     Decision,
-    EconomicPolicy,
     EvidenceBundle,
-    ModelRate,
-    Outcome,
     TaskEconomics,
     TaskIdentity,
-    TraceEvent,
 )
 
 
@@ -386,204 +382,6 @@ def _validate_frontier_bundle(raw: Mapping[str, Any], arm_id: str) -> tuple[str,
     return tuple(problems)
 
 
-def _numeric_issue(
-    label: str,
-    value: Any,
-    *,
-    minimum: float | None = 0.0,
-    maximum: float | None = None,
-    integer: bool = False,
-) -> str | None:
-    if integer:
-        if not _is_integer(value):
-            return f"{label} must be an integer"
-        number = float(value)
-    else:
-        if not isinstance(value, Real) or isinstance(value, bool):
-            return f"{label} must be a finite number"
-        number = float(value)
-    if not math.isfinite(number):
-        return f"{label} must be finite"
-    if minimum is not None and number < minimum:
-        return f"{label} must be at least {minimum}"
-    if maximum is not None and number > maximum:
-        return f"{label} must be no more than {maximum}"
-    return None
-
-
-def _validate_evidence_bundle(
-    bundle: EvidenceBundle, arm_id: str
-) -> tuple[str, ...]:
-    """Validate the canonical in-memory boundary used by the public API."""
-    problems: list[str] = []
-    if not isinstance(bundle, EvidenceBundle):
-        return (f"{arm_id}: supplied value is not an EvidenceBundle",)
-
-    for event in bundle.events:
-        if not isinstance(event, TraceEvent):
-            problems.append(f"{arm_id}: event is not a TraceEvent")
-            continue
-        event_label = f"{arm_id}: event {event.event_id!r}"
-        if not isinstance(event.task_id, str) or not event.task_id:
-            problems.append(f"{event_label} has an invalid task_id")
-        if not isinstance(event.event_id, str) or not event.event_id:
-            problems.append(f"{arm_id}: event has an invalid event_id")
-        for field, value in (
-            ("input_tokens", event.input_tokens),
-            ("output_tokens", event.output_tokens),
-        ):
-            issue = _numeric_issue(
-                f"{event_label} {field}", value, minimum=0, integer=True
-            )
-            if issue:
-                problems.append(issue)
-        if event.direct_cost_usd is None:
-            if event.event_type != "model" or event.model not in bundle.rates:
-                problems.append(
-                    f"{event_label} has unknown cost; provide direct_cost_usd "
-                    "(use 0.0 for explicitly included cost) or a model rate"
-                )
-            elif (
-                _is_integer(event.input_tokens)
-                and _is_integer(event.output_tokens)
-                and event.input_tokens + event.output_tokens <= 0
-            ):
-                problems.append(
-                    f"{event_label} has zero rate-card usage; provide positive token "
-                    "usage or an explicit direct_cost_usd"
-                )
-        else:
-            issue = _numeric_issue(
-                f"{event_label} direct_cost_usd", event.direct_cost_usd
-            )
-            if issue:
-                problems.append(issue)
-
-    for model, rate in bundle.rates.items():
-        if not isinstance(rate, ModelRate):
-            problems.append(f"{arm_id}: rate {model!r} is not a ModelRate")
-            continue
-        for field, value in (
-            ("input_per_million_usd", rate.input_per_million_usd),
-            ("output_per_million_usd", rate.output_per_million_usd),
-        ):
-            issue = _numeric_issue(f"{arm_id}: rate {model!r} {field}", value)
-            if issue:
-                problems.append(issue)
-
-    for task_id, outcome in bundle.outcomes.items():
-        if not isinstance(outcome, Outcome):
-            problems.append(f"{arm_id}: outcome {task_id!r} is not an Outcome")
-            continue
-        label = f"{arm_id}: outcome {task_id!r}"
-        if task_id != outcome.task_id:
-            problems.append(f"{label} key does not match its task_id")
-        if not isinstance(outcome.acceptable, bool):
-            problems.append(f"{label} acceptable must be boolean")
-        for field, value in (
-            ("business_value_usd", outcome.business_value_usd),
-            ("human_minutes", outcome.human_minutes),
-            ("remediation_cost_usd", outcome.remediation_cost_usd),
-            ("incident_loss_usd", outcome.incident_loss_usd),
-        ):
-            issue = _numeric_issue(f"{label} {field}", value)
-            if issue:
-                problems.append(issue)
-
-    event_task_ids = {
-        event.task_id for event in bundle.events if isinstance(event, TraceEvent)
-    }
-    outcome_task_ids = set(bundle.outcomes)
-    manifest_task_ids = set(bundle.task_manifest)
-    if manifest_task_ids != outcome_task_ids or manifest_task_ids != event_task_ids:
-        problems.append(
-            f"{arm_id}: task manifest must exactly cover trace and outcome task IDs"
-        )
-    for task_id, identity in bundle.task_manifest.items():
-        if not isinstance(identity, TaskIdentity):
-            problems.append(
-                f"{arm_id}: task manifest {task_id!r} is not a TaskIdentity"
-            )
-            continue
-        label = f"{arm_id}: task manifest {task_id!r}"
-        if task_id != identity.task_id:
-            problems.append(f"{label} key does not match its task_id")
-        if (
-            not isinstance(identity.input_digest, str)
-            or len(identity.input_digest) != 64
-            or any(
-                character not in "0123456789abcdef"
-                for character in identity.input_digest
-            )
-        ):
-            problems.append(f"{label} input_digest must be a lowercase SHA-256 digest")
-        if not isinstance(identity.rubric_version, str) or not identity.rubric_version:
-            problems.append(f"{label} rubric_version must be a non-empty string")
-
-    baseline = bundle.baseline
-    if not isinstance(baseline, Baseline):
-        problems.append(f"{arm_id}: baseline is not a Baseline")
-        return tuple(problems)
-    for field, value in (
-        ("cost_per_attempt_usd", baseline.cost_per_attempt_usd),
-        ("value_per_acceptable_outcome_usd", baseline.value_per_acceptable_outcome_usd),
-    ):
-        issue = _numeric_issue(f"{arm_id}: baseline {field}", value)
-        if issue:
-            problems.append(issue)
-    issue = _numeric_issue(
-        f"{arm_id}: baseline acceptable_rate",
-        baseline.acceptable_rate,
-        minimum=0.0,
-        maximum=1.0,
-    )
-    if issue:
-        problems.append(issue)
-    elif baseline.acceptable_rate == 0:
-        problems.append(f"{arm_id}: baseline acceptable_rate must be greater than zero")
-
-    policy = bundle.policy
-    if not isinstance(policy, EconomicPolicy):
-        problems.append(f"{arm_id}: policy is not an EconomicPolicy")
-        return tuple(problems)
-    for field in (
-        "human_hourly_cost_usd",
-        "max_cost_per_acceptable_outcome_usd",
-        "max_p95_task_cost_usd",
-        "max_trace_cost_per_task_usd",
-    ):
-        issue = _numeric_issue(f"{arm_id}: policy {field}", getattr(policy, field))
-        if issue:
-            problems.append(issue)
-    for field in (
-        "min_expected_net_value_per_attempt_usd",
-        "min_incremental_net_value_vs_baseline_usd",
-    ):
-        issue = _numeric_issue(
-            f"{arm_id}: policy {field}", getattr(policy, field), minimum=None
-        )
-        if issue:
-            problems.append(issue)
-    issue = _numeric_issue(
-        f"{arm_id}: policy min_acceptable_rate",
-        policy.min_acceptable_rate,
-        minimum=0.0,
-        maximum=1.0,
-    )
-    if issue:
-        problems.append(issue)
-    for field in ("max_calls_per_task", "repetition_warning_threshold"):
-        issue = _numeric_issue(
-            f"{arm_id}: policy {field}",
-            getattr(policy, field),
-            minimum=1.0,
-            integer=True,
-        )
-        if issue:
-            problems.append(issue)
-    return tuple(problems)
-
-
 def _task_manifest_digest(bundle: EvidenceBundle) -> str:
     payload = [
         asdict(bundle.task_manifest[task_id])
@@ -813,7 +611,14 @@ def evaluate_frontier(
             problems.append(f"unplanned arms supplied: {extra}")
 
     for arm_id in sorted(planned & supplied):
-        problems.extend(_validate_evidence_bundle(bundles[arm_id], arm_id))
+        problems.extend(
+            validate_evidence_bundle(
+                bundles[arm_id],
+                label=arm_id,
+                require_explicit_costs=True,
+                require_task_manifest=True,
+            )
+        )
 
     cases: dict[str, AssuranceCase] = {}
     if not problems:
