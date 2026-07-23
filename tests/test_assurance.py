@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import unittest
 from dataclasses import replace
 from pathlib import Path
@@ -73,6 +74,31 @@ class AssuranceTests(unittest.TestCase):
             max_calls_per_task=20,
         )
         self.assertEqual(self.evaluate(policy).decision, Decision.SCALE)
+
+    def test_invalid_economic_evidence_cannot_reach_a_decision(self) -> None:
+        evidence = load_csv_bundle(
+            traces=EXAMPLES / "support_trace.csv",
+            outcomes=EXAMPLES / "outcomes.csv",
+            rates=EXAMPLES / "rates.json",
+            baseline=EXAMPLES / "baseline.json",
+            policy=EXAMPLES / "policy.json",
+        )
+        events = list(evidence.events)
+        events[0] = replace(events[0], direct_cost_usd=math.nan)
+        with self.assertRaisesRegex(ValueError, "must be finite"):
+            evaluate_bundle(replace(evidence, events=tuple(events)))
+
+        events[0] = replace(events[0], direct_cost_usd=-0.01)
+        with self.assertRaisesRegex(ValueError, "must be at least"):
+            evaluate_bundle(replace(evidence, events=tuple(events)))
+
+        outcomes = dict(evidence.outcomes)
+        task_id = next(iter(outcomes))
+        outcomes[task_id] = replace(
+            outcomes[task_id], acceptable="false"  # type: ignore[arg-type]
+        )
+        with self.assertRaisesRegex(ValueError, "acceptable must be boolean"):
+            evaluate_bundle(replace(evidence, outcomes=outcomes))
 
     def test_negative_threshold_routes_to_stop(self) -> None:
         policy = replace(self.policy, min_expected_net_value_per_attempt_usd=100.0)

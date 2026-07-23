@@ -299,13 +299,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     rows = run_benchmark()
     csv_text = render_csv(rows)
-    if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(csv_text, encoding="utf-8")
     if args.verify:
         if not args.verify.exists() or args.verify.read_text(encoding="utf-8") != csv_text:
             print(f"Generated results differ from {args.verify}")
             return 1
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(csv_text, encoding="utf-8")
     print(render_summary(summarize(rows)))
     return 0
 

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import io
+import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from false_green import (
+    main,
     render_summary,
     run_benchmark,
     scenario_matrix,
@@ -39,6 +43,19 @@ class FalseGreenBenchmarkTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         expected = (root / "research/results/SUMMARY.md").read_text(encoding="utf-8")
         self.assertEqual(render_summary(self.summary), expected)
+
+    def test_verification_happens_before_output_is_written(self) -> None:
+        output = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            artifact = Path(directory) / "results.csv"
+            artifact.write_text("stale\n", encoding="utf-8")
+            with redirect_stdout(output):
+                exit_code = main(
+                    ["--output", str(artifact), "--verify", str(artifact)]
+                )
+            self.assertEqual(artifact.read_text(encoding="utf-8"), "stale\n")
+        self.assertEqual(exit_code, 1)
+        self.assertIn("Generated results differ", output.getvalue())
 
 
 if __name__ == "__main__":

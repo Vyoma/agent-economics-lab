@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
-from .evidence import make_evidence_bundle
+from .evidence import make_evidence_bundle, validate_evidence_bundle
 from .models import (
     AssuranceCase,
     Baseline,
@@ -121,6 +121,11 @@ class AssuranceEngine:
             raise ValueError(f"Duplicate check IDs: {duplicates}")
 
     def evaluate(self, evidence: EvidenceBundle) -> AssuranceCase:
+        evidence_problems = validate_evidence_bundle(evidence)
+        if evidence_problems:
+            raise ValueError(
+                "Invalid evidence bundle: " + "; ".join(evidence_problems)
+            )
         tasks = reconstruct_tasks(
             evidence.events, evidence.outcomes, evidence.rates, evidence.policy
         )
@@ -138,6 +143,25 @@ class AssuranceEngine:
         incremental_net = (
             expected_net - evidence.baseline.expected_net_value_per_attempt_usd
         )
+        derived_metrics = (
+            ("acceptable_rate", acceptable_rate),
+            ("total_effective_cost_usd", total_cost),
+            ("cost_per_acceptable_outcome_usd", cost_per_acceptable),
+            ("p95_task_cost_usd", p95_cost),
+            ("max_task_cost_usd", max_cost),
+            ("expected_net_value_per_attempt_usd", expected_net),
+            ("incremental_net_value_vs_baseline_usd", incremental_net),
+        )
+        non_finite = [
+            label for label, value in derived_metrics if not math.isfinite(value)
+        ]
+        if non_finite and not (
+            accepted == 0
+            and non_finite == ["cost_per_acceptable_outcome_usd"]
+        ):
+            raise ValueError(
+                "Computed economic metrics are not finite: " + ", ".join(non_finite)
+            )
         view = EvaluationView(
             events=evidence.events,
             rates=evidence.rates,
