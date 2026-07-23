@@ -123,16 +123,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         supplied_csv = [name for name, value in csv_paths.items() if value]
         if args.bundle and supplied_csv:
             build_parser().error("--bundle cannot be combined with CSV input options")
-        if args.bundle:
-            evidence = load_normalized_json_bundle(args.bundle)
-        elif len(supplied_csv) == len(csv_paths):
-            evidence = load_csv_bundle(**csv_paths)
-        else:
+        if not args.bundle and len(supplied_csv) != len(csv_paths):
             missing = [name for name, value in csv_paths.items() if not value]
             build_parser().error(
                 "provide --bundle or all CSV inputs; missing: " + ", ".join(missing)
             )
-        case = evaluate_bundle(evidence)
+        try:
+            evidence = (
+                load_normalized_json_bundle(args.bundle)
+                if args.bundle
+                else load_csv_bundle(**csv_paths)
+            )
+            case = evaluate_bundle(evidence)
+        except (
+            ArithmeticError,
+            AttributeError,
+            KeyError,
+            OSError,
+            TypeError,
+            ValueError,
+        ) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
         report = render_json(case) if args.format == "json" else render_markdown(case)
         if args.output:
             Path(args.output).write_text(report, encoding="utf-8")

@@ -76,9 +76,15 @@ def load_outcomes(path: str | Path) -> dict[str, Outcome]:
             task_id = row["task_id"]
             if task_id in outcomes:
                 raise ValueError(f"Duplicate outcome task ID: {task_id!r}")
+            acceptable_text = row["acceptable"].strip().lower()
+            if acceptable_text not in {"0", "1", "false", "true", "no", "yes"}:
+                raise ValueError(
+                    f"Invalid acceptable value for task {task_id!r}: "
+                    f"{row['acceptable']!r}"
+                )
             outcomes[task_id] = Outcome(
                 task_id=task_id,
-                acceptable=row["acceptable"].strip().lower() in {"1", "true", "yes"},
+                acceptable=acceptable_text in {"1", "true", "yes"},
                 business_value_usd=float(row.get("business_value_usd") or 0),
                 human_minutes=float(row.get("human_minutes") or 0),
                 remediation_cost_usd=float(row.get("remediation_cost_usd") or 0),
