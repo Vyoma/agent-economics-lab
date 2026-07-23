@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import unittest
 from dataclasses import asdict, replace
 from pathlib import Path
@@ -85,6 +86,21 @@ class ModularityTests(unittest.TestCase):
             "policy": asdict(self.csv.policy),
         }
         with self.assertRaisesRegex(ValueError, "Duplicate outcome task ID"):
+            normalized_json_bundle(raw)
+
+    def test_normalized_adapter_rejects_non_finite_economics(self) -> None:
+        events = [asdict(event) for event in self.csv.events]
+        events[0]["direct_cost_usd"] = math.nan
+        raw = {
+            "events": events,
+            "outcomes": [
+                asdict(self.csv.outcomes[task_id]) for task_id in self.csv.outcomes
+            ],
+            "rates": {name: asdict(rate) for name, rate in self.csv.rates.items()},
+            "baseline": asdict(self.csv.baseline),
+            "policy": asdict(self.csv.policy),
+        }
+        with self.assertRaisesRegex(ValueError, "must be finite"):
             normalized_json_bundle(raw)
 
     def test_checked_in_report_is_reproducible(self) -> None:

@@ -1,4 +1,4 @@
-.PHONY: demo frontier modularity benchmark reproduce lessons test
+.PHONY: demo falsegreen frontier modularity benchmark reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -11,8 +11,11 @@ demo:
 modularity:
 	PYTHONPATH=. python3 examples/modularity_demo.py
 
+falsegreen:
+	@python3 false_green.py
+
 benchmark:
-	PYTHONPATH=. python3 research/false_green_benchmark.py \
+	python3 false_green.py \
 		--verify research/results/false_green_results.csv
 
 frontier:
