@@ -37,8 +37,8 @@ Recommended visibility settings:
 Publish in this order:
 
 1. Publish `agent-economics-lab` and verify every README command from a clean clone.
-2. Create the special public profile repository `Vyoma/Vyoma` and copy
-   [`profile/README.md`](../profile/README.md) into its root.
+2. Create the special public profile repository `Vyoma/Vyoma` and write a focused
+   README from the positioning and evidence on this page.
 3. Update the bio and URL above.
 4. Pin the flagship repository first. Keep the research note, benchmark, protocol,
    and methodology inside that repository so stars and discussion accrue to one
