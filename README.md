@@ -13,7 +13,8 @@ into one bounded decision:
 `INCOMPLETE` / `SCALE` / `ASSIST` / `STOP`
 
 The dangerous failure is not difficult math. It is averaging whatever evidence
-happens to be present and blessing what the system cannot see. One file proves it:
+happens to be present and blessing what the system cannot see. One file reproduces
+the controlled failure mode:
 
 ```bash
 python3 false_green.py
@@ -128,7 +129,7 @@ make frontier
 make reproduce
 ```
 
-`make reproduce` runs 45 tests, the module-deletion proof, five executable lessons,
+`make reproduce` runs 49 tests, the module-deletion proof, five executable lessons,
 the 588-comparison false-green benchmark, and byte-for-byte frontier artifact
 verification.
 

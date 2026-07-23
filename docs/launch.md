@@ -214,7 +214,7 @@ The first group is useful evidence. The second group is a policy boundary.
 
 That distinction is small in code and enormous in production claims.
 
-[LINK TO docs/limitations.md]
+Claim boundary: https://github.com/Vyoma/agent-economics-lab/blob/main/docs/limitations.md
 ```
 
 ## Executive follow-up post
