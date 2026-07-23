@@ -209,14 +209,9 @@ class FrontierTests(unittest.TestCase):
         original = bundles["balanced-4-step"]
         events = list(original.events)
         events[0] = replace(events[0], direct_cost_usd=math.nan)
-        bundles["balanced-4-step"] = make_evidence_bundle(
-            events=events,
-            outcomes=original.outcomes,
-            rates=original.rates,
-            baseline=original.baseline,
-            policy=original.policy,
-            source_id="source.test-nan",
-            task_manifest=original.task_manifest,
+        bundles["balanced-4-step"] = replace(
+            original,
+            events=tuple(events),
         )
         case = evaluate_frontier(plan, bundles, problems)
         self.assertEqual(case.decision, FrontierDecision.INCOMPLETE)
@@ -229,15 +224,7 @@ class FrontierTests(unittest.TestCase):
         outcomes["case-000"] = replace(
             outcomes["case-000"], acceptable="false"  # type: ignore[arg-type]
         )
-        bundles["balanced-4-step"] = make_evidence_bundle(
-            events=original.events,
-            outcomes=outcomes,
-            rates=original.rates,
-            baseline=original.baseline,
-            policy=original.policy,
-            source_id="source.test-wrong-type",
-            task_manifest=original.task_manifest,
-        )
+        bundles["balanced-4-step"] = replace(original, outcomes=outcomes)
         case = evaluate_frontier(plan, bundles, problems)
         self.assertEqual(case.decision, FrontierDecision.INCOMPLETE)
         self.assertTrue(any("acceptable must be boolean" in item for item in case.problems))

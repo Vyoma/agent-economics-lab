@@ -1,4 +1,0 @@
-interface:
-  display_name: "Artifact-First OSS Launch"
-  short_description: "Validate a gap and build a credible OSS launch"
-  default_prompt: "Use $build-artifact-first-oss-launch to audit this idea, validate the market gap, and produce a defensible open-source launch package."

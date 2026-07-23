@@ -73,6 +73,16 @@ class CliTests(unittest.TestCase):
             )
         self.assertEqual(exit_code, 3)
 
+    def test_invalid_bundle_returns_incomplete_instead_of_crashing(self) -> None:
+        error = io.StringIO()
+        with tempfile.TemporaryDirectory() as directory:
+            bundle = Path(directory) / "invalid.json"
+            bundle.write_text('{"events": []}\n', encoding="utf-8")
+            with redirect_stderr(error):
+                exit_code = main(["evaluate", "--bundle", str(bundle)])
+        self.assertEqual(exit_code, 2)
+        self.assertIn("INCOMPLETE: invalid evidence", error.getvalue())
+
     def test_frontier_verification_cannot_overwrite_itself(self) -> None:
         error = io.StringIO()
         with tempfile.TemporaryDirectory() as directory:
