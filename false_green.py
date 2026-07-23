@@ -1,7 +1,8 @@
-"""Deterministic stress test for false-green agent assurance decisions.
+"""One-file proof that missing evidence can manufacture a green decision.
 
-This benchmark is synthetic by design. It measures the decision logic under
-controlled evidence ablations; it does not estimate production prevalence.
+Run `python3 false_green.py`. The frozen v1 matrix produces 23 false SCALE
+decisions for an unsafe available-evidence-only reducer and zero for the fail-safe
+engine. This synthetic test validates routing semantics, not production prevalence.
 """
 
 from __future__ import annotations
@@ -267,11 +268,20 @@ def render_summary(summary: dict[str, object]) -> str:
     lines.extend(
         f"| `{ablation}` | {by_ablation[ablation]} |" for ablation in ABLATIONS
     )
+    largest = max(by_ablation.values(), default=1)
+    lines.extend(["", "```text", "removed evidence       false SCALE"])
+    for ablation in ABLATIONS:
+        count = by_ablation[ablation]
+        width = max(1, round(20 * count / largest)) if count else 0
+        lines.append(f"{ablation:<20} {'#' * width:<20} {count}")
     lines.extend(
         [
+            "```",
             "",
             "This is a deterministic synthetic stress test of routing semantics, not an",
             "estimate of how often production systems make false-green decisions.",
+            "",
+            "A dashboard that averages only what it has can bless what it cannot see.",
             "",
         ]
     )
