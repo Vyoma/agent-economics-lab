@@ -46,7 +46,11 @@ The 23 is a property of a synthetic fixture. The zero is an enforced invariant.
 Neither is a production prevalence estimate. Read the
 [protocol](research/FALSE_GREEN_PROTOCOL.md), inspect all
 [588 rows](research/results/decision-coverage-drift/results.csv), or read the
-[publication draft](docs/article.md).
+[technical article](docs/article.md).
+
+For a product-team version with a 30-minute operating exercise, read
+[The Missing Product Spec for AI Agents](docs/substack-article.md) and copy the
+[one-page decision contract](templates/agent-scale-decision-contract.md).
 
 ## Delete actual evidence
 
@@ -173,6 +177,8 @@ verification.
 - Add one typed gate or diagnostic with explicit failure semantics.
 - Contribute one permissioned paired experiment with a frozen task manifest,
   candidate family, rubric, and full-cost boundary.
+- Test one real workflow with the
+  [blank decision contract](templates/agent-scale-decision-contract.md).
 - Submit one counterexample that narrows or falsifies a claim.
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) or the issue templates. Do not submit
