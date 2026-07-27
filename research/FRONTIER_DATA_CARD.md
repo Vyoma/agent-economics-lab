@@ -43,6 +43,12 @@ uses the seed frozen in `manifest.json`.
 - Cost fields illustrate full-cost accounting but are not market estimates.
 - Task independence is assumed by the statistical procedure and manufactured by the
   fixture, not empirically validated.
+- The same synthetic candidate family is used for eligibility and minimum-cost
+  ranking. The selected arm's observed cost and rank are post-selection exploratory
+  evidence for any population beyond this frozen fixture.
+- Absolute harmful-transition risk uses all 180 paired tasks as its denominator.
+  The report also exposes the descriptive conditional denominator among the 171
+  tasks accepted by the reference.
 
 ## License and privacy
 

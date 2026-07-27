@@ -1,4 +1,4 @@
-"""Delete an optional check, fail safely on required removal, then add a gate."""
+"""Delete an optional diagnostic, disable a required gate, then add a gate."""
 
 from pathlib import Path
 
@@ -45,6 +45,7 @@ custom_gate = CheckSpec(
     mode=CheckMode.GATE,
     covers=frozenset(),
     run=no_failed_events,
+    failure_route=Decision.STOP,
 )
 
 default_case = evaluate_bundle(evidence, checks)
@@ -68,7 +69,7 @@ print(
     f"({len(default_case.findings)} -> {len(without_diagnostic.findings)} findings)"
 )
 print(
-    "DELETE REQUIRED    "
+    "DISABLE GATE       "
     f"{without_required.decision.value} "
     f"(missing: {', '.join(without_required.missing_coverage)})"
 )

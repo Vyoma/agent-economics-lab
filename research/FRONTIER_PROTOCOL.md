@@ -77,6 +77,18 @@ The primary breakage estimand is `mean(harmful_i)` over all paired tasks. It is 
 absolute joint harmful-transition rate, not a failure rate conditioned on reference
 success.
 
+The report also includes the descriptive conditional rate:
+
+```text
+conditional breakage = sum(harmful_i) / sum(R_i)
+```
+
+It is undefined when the reference has no acceptable outcomes. The absolute
+Clopper-Pearson upper bound remains the governing v1 endpoint because the
+predeclared tolerance is harm per attempted task over the frozen workload. The
+conditional point rate is reported to expose denominator masking and is not an
+additional eligibility test.
+
 ## Statistical method
 
 For `m` planned candidates and target nominal familywise confidence `1 - alpha`,
@@ -112,6 +124,14 @@ The result is `ADOPT <arm>` for the lowest observed full-cost eligible candidate
 `HOLD` when no candidate is eligible, and `INCOMPLETE` when the experiment family or
 required evidence is incomplete.
 
+Eligibility and minimum-cost ranking use the same frozen candidate family.
+Familywise adjustment is intended to bound simultaneous threshold clearance under
+the stated endpoint assumptions; it does not remove winner's-curse bias from the
+selected arm's observed cost or prove its rank in a new population. The selected
+cost magnitude and rank are therefore post-selection exploratory evidence for
+generalization. Confirm them with held-out evaluation, nested selection and
+evaluation, or an independent frozen replication.
+
 ## Threats to validity
 
 - Synthetic outcomes validate software semantics, not production prevalence.
@@ -125,6 +145,8 @@ required evidence is incomplete.
 - Sparse incident loss and delayed remediation make full-cost estimates unstable.
 - Aggregate non-inferiority can hide subgroup regressions.
 - The paired bootstrap does not repair biased labels or incomplete cost attribution.
+- Selecting the minimum observed cost from the evaluated family can make the
+  winner's estimated savings optimistic outside the frozen fixture.
 
 ## External validation exit criterion
 

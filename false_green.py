@@ -1,8 +1,9 @@
-"""One-file proof that missing evidence can manufacture a green decision.
+"""One-file proof of decision-coverage drift under required-gate disablement.
 
 Run `python3 false_green.py`. The frozen v1 matrix produces 23 false SCALE
-decisions for an unsafe available-evidence-only reducer and zero for the fail-safe
-engine. This synthetic test validates routing semantics, not production prevalence.
+transitions for a dynamic-coverage engine. The fixed-contract engine returns
+INCOMPLETE for all 588 gate disablements. This synthetic conformance test changes
+engine configuration, not evidence, and does not estimate production prevalence.
 """
 
 from __future__ import annotations
@@ -10,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import json
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
@@ -54,7 +56,7 @@ class Scenario:
         )
 
 
-ABLATIONS = {
+GATE_DISABLEMENTS = {
     "outcome_quality": "gate.acceptable-rate",
     "unit_economics": "gate.unit-economics",
     "tail_risk": "gate.tail-cost",
@@ -135,7 +137,7 @@ def build_evidence(scenario: Scenario):
             value_per_acceptable_outcome_usd=scenario.business_value_usd,
         ),
         policy=policy,
-        source_id="source.synthetic-false-green",
+        source_id="source.synthetic-decision-coverage-drift",
         source_version="1",
     )
 
@@ -150,35 +152,53 @@ def run_benchmark() -> list[dict[str, str]]:
     for scenario in scenario_matrix():
         evidence = build_evidence(scenario)
         full_case = evaluate_bundle(evidence, checks)
-        for ablation, removed_check in ABLATIONS.items():
+        for coverage_dimension, disabled_check in GATE_DISABLEMENTS.items():
             reduced_checks = tuple(
-                check for check in checks if check.id != removed_check
+                check for check in checks if check.id != disabled_check
             )
 
-            # Production behavior: required removal is visible and fail-safe.
-            safe_case = default_engine(reduced_checks).evaluate(evidence)
+            # Fixed-contract architecture: the original six requirements remain.
+            fixed_contract_case = default_engine(reduced_checks).evaluate(evidence)
 
-            # Unsafe comparator: emulate a system that silently redefines
-            # "complete" as whatever checks happen to remain enabled.
-            unsafe_case = AssuranceEngine(
+            # Dynamic-coverage architecture: completeness silently shrinks to
+            # whichever gates remain enabled.
+            dynamic_coverage_case = AssuranceEngine(
                 checks=reduced_checks,
                 required_coverage=_enabled_coverage(reduced_checks),
             ).evaluate(evidence)
 
-            false_green = (
+            false_scale_transition = (
                 full_case.decision is not Decision.SCALE
-                and unsafe_case.decision is Decision.SCALE
+                and dynamic_coverage_case.decision is Decision.SCALE
             )
             rows.append(
                 {
                     "scenario_id": scenario.id,
-                    "ablation": ablation,
+                    "disabled_coverage_dimension": coverage_dimension,
+                    "disabled_check_id": disabled_check,
+                    "full_evidence_digest": full_case.evidence_digest,
+                    "fixed_contract_evidence_digest": (
+                        fixed_contract_case.evidence_digest
+                    ),
+                    "dynamic_coverage_evidence_digest": (
+                        dynamic_coverage_case.evidence_digest
+                    ),
+                    "full_contract_digest": full_case.decision_contract_digest,
+                    "fixed_contract_digest": (
+                        fixed_contract_case.decision_contract_digest
+                    ),
+                    "dynamic_coverage_contract_digest": (
+                        dynamic_coverage_case.decision_contract_digest
+                    ),
                     "full_decision": full_case.decision.value,
-                    "unsafe_decision": unsafe_case.decision.value,
-                    "safe_decision": safe_case.decision.value,
-                    "false_green": str(false_green).lower(),
-                    "prevented_by_coverage": str(
-                        false_green and safe_case.decision is Decision.INCOMPLETE
+                    "dynamic_coverage_decision": (
+                        dynamic_coverage_case.decision.value
+                    ),
+                    "fixed_contract_decision": fixed_contract_case.decision.value,
+                    "false_scale_transition": str(false_scale_transition).lower(),
+                    "fixed_contract_refused": str(
+                        false_scale_transition
+                        and fixed_contract_case.decision is Decision.INCOMPLETE
                     ).lower(),
                     "acceptable_rate": f"{full_case.acceptable_rate:.3f}",
                     "cost_per_acceptable_usd": (
@@ -195,12 +215,19 @@ def run_benchmark() -> list[dict[str, str]]:
 
 FIELDNAMES = (
     "scenario_id",
-    "ablation",
+    "disabled_coverage_dimension",
+    "disabled_check_id",
+    "full_evidence_digest",
+    "fixed_contract_evidence_digest",
+    "dynamic_coverage_evidence_digest",
+    "full_contract_digest",
+    "fixed_contract_digest",
+    "dynamic_coverage_contract_digest",
     "full_decision",
-    "unsafe_decision",
-    "safe_decision",
-    "false_green",
-    "prevented_by_coverage",
+    "dynamic_coverage_decision",
+    "fixed_contract_decision",
+    "false_scale_transition",
+    "fixed_contract_refused",
     "acceptable_rate",
     "cost_per_acceptable_usd",
     "p95_task_cost_usd",
@@ -218,80 +245,127 @@ def render_csv(rows: Sequence[dict[str, str]]) -> str:
 
 def summarize(rows: Sequence[dict[str, str]]) -> dict[str, object]:
     non_scale = [row for row in rows if row["full_decision"] != Decision.SCALE.value]
-    false_greens = [row for row in rows if row["false_green"] == "true"]
-    safe_false_greens = [
+    false_scale_transitions = [
+        row for row in rows if row["false_scale_transition"] == "true"
+    ]
+    fixed_contract_false_scale_transitions = [
         row
         for row in rows
         if row["full_decision"] != Decision.SCALE.value
-        and row["safe_decision"] == Decision.SCALE.value
+        and row["fixed_contract_decision"] == Decision.SCALE.value
     ]
-    by_ablation = {
-        ablation: sum(
-            row["false_green"] == "true"
+    by_disabled_dimension = {
+        coverage_dimension: sum(
+            row["false_scale_transition"] == "true"
             for row in rows
-            if row["ablation"] == ablation
+            if row["disabled_coverage_dimension"] == coverage_dimension
         )
-        for ablation in ABLATIONS
+        for coverage_dimension in GATE_DISABLEMENTS
     }
     return {
+        "schema_version": 1,
+        "experiment_id": "decision-coverage-drift-conformance",
+        "experiment_version": "1",
         "scenarios": len(scenario_matrix()),
         "comparisons": len(rows),
-        "non_scale_comparisons": len(non_scale),
-        "unsafe_false_greens": len(false_greens),
-        "unsafe_false_green_rate": (
-            len(false_greens) / len(non_scale) if non_scale else 0.0
+        "complete_non_scale_comparisons": len(non_scale),
+        "dynamic_false_scale_transitions": len(false_scale_transitions),
+        "dynamic_false_scale_rate_at_risk": (
+            len(false_scale_transitions) / len(non_scale) if non_scale else 0.0
         ),
-        "safe_false_greens": len(safe_false_greens),
-        "by_ablation": by_ablation,
+        "dynamic_false_scale_rate_all": (
+            len(false_scale_transitions) / len(rows) if rows else 0.0
+        ),
+        "fixed_contract_false_scale_transitions": len(
+            fixed_contract_false_scale_transitions
+        ),
+        "fixed_contract_incomplete": sum(
+            row["fixed_contract_decision"] == Decision.INCOMPLETE.value
+            for row in rows
+        ),
+        "by_disabled_dimension": by_disabled_dimension,
+        "claim_boundary": (
+            "Synthetic conformance fixture; not a production prevalence estimate."
+        ),
     }
 
 
 def render_summary(summary: dict[str, object]) -> str:
-    by_ablation = summary["by_ablation"]
-    assert isinstance(by_ablation, dict)
+    by_disabled_dimension = summary["by_disabled_dimension"]
+    assert isinstance(by_disabled_dimension, dict)
     lines = [
-        "# False-Green Benchmark Results",
+        "# Decision-Coverage Drift Conformance Results",
         "",
         f"- Synthetic scenarios: **{summary['scenarios']}**",
-        f"- Single-module ablation comparisons: **{summary['comparisons']}**",
-        f"- Comparisons whose complete result was not SCALE: **{summary['non_scale_comparisons']}**",
-        f"- False SCALE results when missing coverage was silently ignored: **{summary['unsafe_false_greens']}**",
+        f"- Single required-gate disablements: **{summary['comparisons']}**",
         (
-            "- Unsafe false-green rate among non-SCALE comparisons: "
-            f"**{summary['unsafe_false_green_rate']:.1%}**"
+            "- Disablements whose complete result was not SCALE: "
+            f"**{summary['complete_non_scale_comparisons']}**"
         ),
-        f"- False SCALE results with fail-safe coverage enabled: **{summary['safe_false_greens']}**",
+        (
+            "- False SCALE transitions under dynamic coverage: "
+            f"**{summary['dynamic_false_scale_transitions']}**"
+        ),
+        (
+            "- Dynamic-coverage transition rate among non-SCALE comparisons: "
+            f"**{summary['dynamic_false_scale_rate_at_risk']:.1%}**"
+        ),
+        (
+            "- Dynamic-coverage transition rate across all disablements: "
+            f"**{summary['dynamic_false_scale_rate_all']:.1%}**"
+        ),
+        (
+            "- Fixed-contract decisions returning INCOMPLETE: "
+            f"**{summary['fixed_contract_incomplete']} / {summary['comparisons']}**"
+        ),
+        (
+            "- False SCALE transitions under the fixed contract: "
+            f"**{summary['fixed_contract_false_scale_transitions']}**"
+        ),
         "",
-        "| Removed assurance dimension | Unsafe false-green decisions |",
+        "| Disabled gate coverage | Dynamic-coverage false SCALE transitions |",
         "|---|---:|",
     ]
     lines.extend(
-        f"| `{ablation}` | {by_ablation[ablation]} |" for ablation in ABLATIONS
+        f"| `{coverage_dimension}` | {by_disabled_dimension[coverage_dimension]} |"
+        for coverage_dimension in GATE_DISABLEMENTS
     )
-    largest = max(by_ablation.values(), default=1)
-    lines.extend(["", "```text", "removed evidence       false SCALE"])
-    for ablation in ABLATIONS:
-        count = by_ablation[ablation]
+    largest = max(by_disabled_dimension.values(), default=1)
+    lines.extend(["", "```text", "disabled gate          false SCALE"])
+    for coverage_dimension in GATE_DISABLEMENTS:
+        count = by_disabled_dimension[coverage_dimension]
         width = max(1, round(20 * count / largest)) if count else 0
-        lines.append(f"{ablation:<20} {'#' * width:<20} {count}")
+        lines.append(f"{coverage_dimension:<20} {'#' * width:<20} {count}")
     lines.extend(
         [
             "```",
             "",
-            "This is a deterministic synthetic stress test of routing semantics, not an",
-            "estimate of how often production systems make false-green decisions.",
+            "The evidence bundle is unchanged in every comparison. The intervention",
+            "disables one required gate. The dynamic-coverage engine silently shrinks",
+            "its completeness contract; the fixed-contract engine does not.",
             "",
-            "A dashboard that averages only what it has can bless what it cannot see.",
+            "This is a deterministic synthetic conformance test, not an estimate of",
+            "how often production systems experience decision-coverage drift.",
+            "",
+            "All enabled checks passed is not the same claim as all required checks passed.",
             "",
         ]
     )
     return "\n".join(lines)
 
 
+def render_summary_json(summary: dict[str, object]) -> str:
+    return json.dumps(summary, indent=2, sort_keys=True) + "\n"
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path)
     parser.add_argument("--verify", type=Path)
+    parser.add_argument("--summary-output", type=Path)
+    parser.add_argument("--summary-verify", type=Path)
+    parser.add_argument("--json-output", type=Path)
+    parser.add_argument("--json-verify", type=Path)
     return parser
 
 
@@ -299,14 +373,37 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     rows = run_benchmark()
     csv_text = render_csv(rows)
+    summary = summarize(rows)
+    summary_text = render_summary(summary)
+    summary_json = render_summary_json(summary)
     if args.verify:
         if not args.verify.exists() or args.verify.read_text(encoding="utf-8") != csv_text:
             print(f"Generated results differ from {args.verify}")
             return 1
+    if args.summary_verify:
+        if (
+            not args.summary_verify.exists()
+            or args.summary_verify.read_text(encoding="utf-8") != summary_text
+        ):
+            print(f"Generated summary differs from {args.summary_verify}")
+            return 1
+    if args.json_verify:
+        if (
+            not args.json_verify.exists()
+            or args.json_verify.read_text(encoding="utf-8") != summary_json
+        ):
+            print(f"Generated JSON summary differs from {args.json_verify}")
+            return 1
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(csv_text, encoding="utf-8")
-    print(render_summary(summarize(rows)))
+    if args.summary_output:
+        args.summary_output.parent.mkdir(parents=True, exist_ok=True)
+        args.summary_output.write_text(summary_text, encoding="utf-8")
+    if args.json_output:
+        args.json_output.parent.mkdir(parents=True, exist_ok=True)
+        args.json_output.write_text(summary_json, encoding="utf-8")
+    print(summary_text)
     return 0
 
 

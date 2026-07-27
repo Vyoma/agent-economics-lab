@@ -1,7 +1,17 @@
 """Small, dependency-free primitives for an agent economic assurance case."""
 
 from .adapters import load_normalized_json_bundle, normalized_json_bundle
-from .assurance import AssuranceEngine, default_engine, evaluate, evaluate_bundle
+from .assurance import (
+    ASSURANCE_ENGINE_IMPLEMENTATION,
+    DECISION_CONTRACT_SCHEMA,
+    ROUTING_SEMANTICS,
+    AssuranceEngine,
+    decision_contract_digest,
+    decision_contract_manifest,
+    default_engine,
+    evaluate,
+    evaluate_bundle,
+)
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .evidence import make_evidence_bundle
 from .frontier import (
@@ -51,6 +61,7 @@ from .models import (
 __all__ = [
     "AssuranceCase",
     "AssuranceEngine",
+    "ASSURANCE_ENGINE_IMPLEMENTATION",
     "ArmSummary",
     "Baseline",
     "CheckMode",
@@ -60,6 +71,7 @@ __all__ = [
     "CheckStatus",
     "Coverage",
     "DEFAULT_REQUIRED_COVERAGE",
+    "DECISION_CONTRACT_SCHEMA",
     "Decision",
     "EconomicPolicy",
     "EvaluationView",
@@ -72,6 +84,9 @@ __all__ = [
     "PairedComparison",
     "TaskIdentity",
     "TraceEvent",
+    "ROUTING_SEMANTICS",
+    "decision_contract_digest",
+    "decision_contract_manifest",
     "default_checks",
     "default_engine",
     "clopper_pearson_upper",

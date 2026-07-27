@@ -114,3 +114,12 @@ direct cost contribute zero trace spend. The paired frontier is stricter: an abs
 non-model cost returns `INCOMPLETE`; explicitly free or included events must record
 `direct_cost_usd: 0.0`. Rate-card-priced model events must include explicit token
 counts and positive usage. Source adapters must preserve these distinctions.
+
+The checked-in [raw evidence-ablation
+benchmark](../research/EVIDENCE_ABLATION_PROTOCOL.md) makes this boundary
+executable. Four of nine constructed omissions are refused at the schema or
+semantic-evidence boundary. Five decision-material omissions change `ASSIST` to
+`SCALE`: incident loss, remediation cost, human review time, a directly priced tool
+cost, and a timed-out event. These cases do not estimate prevalence. They show that
+fixed check coverage cannot prove source completeness when absence is interpreted
+as zero or when no independent attempt inventory exists.

@@ -128,7 +128,7 @@ Routing semantics:
 
 | Decision | Meaning |
 |---|---|
-| `INCOMPLETE` | One or more required assurance dimensions were removed or not evaluated |
+| `INCOMPLETE` | Enabled gates do not supply one or more dimensions in the fixed decision contract |
 | `SCALE` | All economic checks pass and no deterministic control cap is breached |
 | `ASSIST` | Value remains positive, but at least one policy/control boundary fails |
 | `STOP` | A required value gate fails, including the counterfactual value floor |
@@ -139,8 +139,9 @@ agent that is profitable in isolation but worse than the available alternative
 cannot receive `SCALE`.
 
 Checks are explicitly composed and recorded by ID/version. Removing an optional
-diagnostic changes only its findings. Removing a check that supplies required
-coverage returns `INCOMPLETE` even if every remaining gate passes.
+diagnostic changes only its findings. Disabling a sole-provider gate while its
+dimension remains required returns `INCOMPLETE` even if every other gate would
+pass.
 
 These defaults express one possible governance contract. Enterprises should add
 domain-specific safety, compliance, fairness, authorization, and reliability gates
@@ -169,8 +170,15 @@ An assurance case should pin:
 - labor and risk allocation assumptions;
 - counterfactual definition;
 - policy version;
+- evidence digest;
+- decision-contract digest, including check order, versions, required coverage,
+  failure routes, and reducer semantics;
 - code commit; and
 - observation window.
 
 Re-run the case whenever any of these changes. Economic assurance is a renewable
 claim, not a one-time certificate.
+
+Policy thresholds live in the canonical evidence bundle and are therefore bound by
+the evidence digest. Check composition and routing semantics live in the decision
+contract. Both digests are required to reproduce what a verdict meant.
