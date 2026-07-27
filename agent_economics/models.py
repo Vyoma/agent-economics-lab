@@ -165,6 +165,7 @@ class CheckSpec:
     mode: CheckMode
     covers: frozenset[Coverage]
     run: CheckFn
+    failure_route: Decision | None = None
 
     @property
     def manifest_id(self) -> str:
@@ -224,3 +225,4 @@ class AssuranceCase:
     missing_coverage: tuple[str, ...] = ()
     source_manifest_id: str = "source.legacy@1"
     evidence_digest: str = ""
+    decision_contract_digest: str = ""

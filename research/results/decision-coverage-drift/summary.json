@@ -1,0 +1,22 @@
+{
+  "by_disabled_dimension": {
+    "business_value": 1,
+    "counterfactual": 3,
+    "outcome_quality": 2,
+    "runtime_caps": 8,
+    "tail_risk": 8,
+    "unit_economics": 1
+  },
+  "claim_boundary": "Synthetic conformance fixture; not a production prevalence estimate.",
+  "comparisons": 588,
+  "complete_non_scale_comparisons": 510,
+  "dynamic_false_scale_rate_all": 0.0391156462585034,
+  "dynamic_false_scale_rate_at_risk": 0.045098039215686274,
+  "dynamic_false_scale_transitions": 23,
+  "experiment_id": "decision-coverage-drift-conformance",
+  "experiment_version": "1",
+  "fixed_contract_false_scale_transitions": 0,
+  "fixed_contract_incomplete": 588,
+  "scenarios": 98,
+  "schema_version": 1
+}

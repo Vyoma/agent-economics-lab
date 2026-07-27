@@ -1,0 +1,43 @@
+{
+  "ablation_count": 9,
+  "assist_to_scale_transitions": 5,
+  "benchmark_id": "experiment.raw-evidence-ablation@1",
+  "claim_boundary": [
+    "These are synthetic boundary fixtures, not production prevalence.",
+    "The benchmark removes raw evidence and never removes an assurance gate.",
+    "Operational INCOMPLETE may be a CLI refusal without an assurance artifact.",
+    "A deleted attempt cannot be detected without a source completeness contract."
+  ],
+  "false_scale_transitions": 5,
+  "fixed_decision_contract": {
+    "digest": "dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983",
+    "enabled_checks": [
+      "gate.acceptable-rate@1",
+      "gate.unit-economics@1",
+      "gate.tail-cost@1",
+      "gate.net-value@1",
+      "gate.counterfactual@1",
+      "gate.runtime-caps@1",
+      "diagnostic.repeated-tool-shape@1"
+    ],
+    "required_coverage": [
+      "business_value",
+      "counterfactual",
+      "outcome_quality",
+      "runtime_caps",
+      "tail_risk",
+      "unit_economics"
+    ]
+  },
+  "incomplete_assurance_cases": 0,
+  "library_outcomes": {
+    "DECISION": 5,
+    "EVALUATION_ERROR": 0,
+    "EVIDENCE_ERROR": 2,
+    "SCHEMA_ERROR": 2
+  },
+  "operational_refusals": 4,
+  "protocol_version": "1",
+  "results_csv_sha256": "b43985f07b25c5c39ff5e09b010d8c8639edaf3f594e61bc9d7d71c1fa484113",
+  "schema_version": 1
+}

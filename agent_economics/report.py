@@ -18,7 +18,7 @@ def render_markdown(case: AssuranceCase) -> str:
         lines.extend(
             [
                 "A bounded decision cannot be issued because required assurance "
-                "coverage was removed or not evaluated.",
+                "coverage is not supplied by the enabled gates.",
                 "",
             ]
         )
@@ -39,6 +39,7 @@ def render_markdown(case: AssuranceCase) -> str:
             "",
             f"- Source adapter: `{case.source_manifest_id}`",
             f"- Evidence digest: `{case.evidence_digest}`",
+            f"- Decision-contract digest: `{case.decision_contract_digest}`",
             "- Report renderer: `renderer.markdown@1`",
             "- Enabled checks:",
         ]
@@ -132,8 +133,9 @@ def render_markdown(case: AssuranceCase) -> str:
             (
                 "The result is only as reliable as the trace coverage, outcome labels, "
                 "cost allocation, counterfactual, enabled checks, and observation window. "
-                "Removing required coverage returns INCOMPLETE. A repeated tool shape or "
-                "graph cycle is a diagnostic warning, not semantic proof of a loop or deadlock."
+                "When enabled gates do not supply the fixed required coverage, the engine "
+                "returns INCOMPLETE. A repeated tool shape or graph cycle is a diagnostic "
+                "warning, not semantic proof of a loop or deadlock."
             ),
             "",
         ]
@@ -151,6 +153,7 @@ def render_json(case: AssuranceCase) -> str:
         "manifest": {
             "source": case.source_manifest_id,
             "evidence_digest": case.evidence_digest,
+            "decision_contract_digest": case.decision_contract_digest,
             "enabled_checks": list(case.enabled_checks),
             "required_coverage": list(case.required_coverage),
             "missing_coverage": list(case.missing_coverage),

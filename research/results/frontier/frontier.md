@@ -2,7 +2,7 @@
 
 **Decision: ADOPT `balanced-4-step`**
 
-This is the lowest-cost tested candidate that satisfied the predeclared breakage-risk, cost-reduction, evidence-completeness, and assurance rules.
+This is the lowest-observed-cost tested candidate that satisfied the predeclared breakage-risk, cost-reduction, evidence-completeness, and assurance rules on this frozen dataset.
 
 ## Frozen experiment plan
 
@@ -31,11 +31,11 @@ This is the lowest-cost tested candidate that satisfied the predeclared breakage
 
 ## Paired evidence against the reference
 
-| Candidate | Harmful regressions | Breakage UCB | Quality delta | Cost reduction | Cost reduction LCB | Eligible |
-|---|---:|---:|---:|---:|---:|---|
-| `balanced-4-step` | 1/180 | 3.7% | +0.6% | 39.9% | 32.0% | yes |
-| `cheap-2-step` | 12/180 | 12.5% | -5.6% | 44.4% | 29.9% | no |
-| `premium-12-step` | 0/180 | 2.6% | +1.7% | -31.5% | -38.9% | no |
+| Candidate | Harmful transitions | Absolute rate (H/N) | Absolute UCB (governing) | Conditional rate (H/R+) | Quality delta | Cost reduction | Cost reduction LCB | Eligible |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| `balanced-4-step` | 1 | 1/180 (0.6%) | 3.7% | 1/171 (0.6%) | +0.6% | 39.9% | 32.0% | yes |
+| `cheap-2-step` | 12 | 12/180 (6.7%) | 12.5% | 12/171 (7.0%) | -5.6% | 44.4% | 29.9% | no |
+| `premium-12-step` | 0 | 0/180 (0.0%) | 2.6% | 0/171 (0.0%) | +1.7% | -31.5% | -38.9% | no |
 
 ### Rejection reasons
 
@@ -44,19 +44,29 @@ This is the lowest-cost tested candidate that satisfied the predeclared breakage
 - `premium-12-step`:
   - cost-reduction lower bound -38.944% is below 25.000%
 
+## Selection interpretation
+
+The selection rule chooses the minimum observed mean full cost among eligible candidates. The candidate family is used both to establish eligibility and to rank eligible arms. The multiplicity-adjusted endpoints are designed to control simultaneous threshold clearance under the stated method, but they do not debias the selected arm's observed cost or prove that its rank will persist in a new population.
+
+Treat the selected arm's cost magnitude and rank as post-selection exploratory evidence for generalization. A production claim requires a held-out confirmation set, nested selection and evaluation, or an independent frozen replication.
+
 ## Statistical method
 
 Exact one-sided Clopper-Pearson breakage bound plus deterministic paired percentile bootstrap for cost reduction; a Bonferroni-adjusted nominal familywise confidence target across planned quality and cost tests. Derived decision endpoints are canonicalized to twelve significant digits.
 
-The breakage estimand is the absolute paired-population rate of tasks accepted by the reference and rejected by the candidate, with all matched tasks in the denominator. The exact upper bound prevents a small sample with zero observed regressions from appearing certain. Paired resampling preserves the task-level relationship between reference and candidate costs. The bootstrap endpoint and its nominal confidence target are approximate and include Monte Carlo error.
+The governing breakage estimand is the absolute paired-population rate of tasks accepted by the reference and rejected by the candidate, with all matched tasks in the denominator. The conditional rate uses only reference-acceptable tasks in the denominator and is descriptive; it does not govern v1 eligibility. Reporting both prevents a low reference acceptance rate from making the absolute rate look sufficient by itself. The exact upper bound prevents a small sample with zero observed regressions from appearing certain. Paired resampling preserves the task-level relationship between reference and candidate costs. The bootstrap endpoint and its nominal confidence target are approximate and include Monte Carlo error.
 
-## Evidence manifests
+## Evidence and decision manifests
 
-- `balanced-4-step`: `32fa0e4a4953b298352d58e0849cc2ffc18636d67093a77ce0fae0673896638f`
-- `cheap-2-step`: `25259104ba610bae17322c6b40d1b301362c52c806c796466ce3e46adfb7ff7a`
-- `premium-12-step`: `8316e57badbc4fcc1cbab1233ba66873237a549f6f1df583bee1901a0204cb05`
-- `premium-8-step`: `91526aecd73578ba43d2bc1cf4bfdb9cedcb26841967b2899dddfe1348fb9756`
+- `balanced-4-step` evidence: `32fa0e4a4953b298352d58e0849cc2ffc18636d67093a77ce0fae0673896638f`
+  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+- `cheap-2-step` evidence: `25259104ba610bae17322c6b40d1b301362c52c806c796466ce3e46adfb7ff7a`
+  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+- `premium-12-step` evidence: `8316e57badbc4fcc1cbab1233ba66873237a549f6f1df583bee1901a0204cb05`
+  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+- `premium-8-step` evidence: `91526aecd73578ba43d2bc1cf4bfdb9cedcb26841967b2899dddfe1348fb9756`
+  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
 
 ## Claim boundary
 
-This report identifies the lowest-cost tested configuration that satisfies the declared rule on this frozen matched dataset. It does not establish a causal effect unless route assignment was randomized or counterbalanced. It does not validate the outcome rubric, prove production generalization, or infer an exact breakpoint between untested configurations. Missing arms, task fingerprints, rubric versions, cost evidence, or assurance coverage fail closed.
+This report identifies the lowest-cost tested configuration that satisfies the declared rule on this frozen matched dataset. It does not establish a causal effect unless route assignment was randomized or counterbalanced. It does not validate the outcome rubric, prove production generalization, or infer an exact breakpoint between untested configurations. Missing arms, task fingerprints, rubric versions, cost evidence, or assurance coverage fail closed. The selected arm's observed cost and rank are not unbiased confirmatory estimates for a new population.

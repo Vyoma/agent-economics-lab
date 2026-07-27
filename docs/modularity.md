@@ -3,8 +3,8 @@
 The modularity claim is intentionally narrower than a plugin ecosystem:
 
 > Normalize exported evidence into one stable bundle. Compose typed checks as an
-> explicit ordered tuple. Record the source, digest, enabled checks, and missing
-> coverage in every result.
+> explicit ordered tuple. Record the source, evidence digest, decision-contract
+> digest, enabled checks, and missing coverage in every result.
 
 There is no automatic discovery, entry-point execution, dependency-injection
 container, live vendor authentication, or policy DSL.
@@ -21,14 +21,15 @@ source adapter function ------ source ID + version
 EvidenceBundle --------------- canonical SHA-256 digest
         |
         v
-AssuranceEngine(checks) ------ ordered check IDs + versions
+AssuranceEngine(checks) ------ fixed coverage + ordered checks
         |
         +---- gate results ---- PASS / FAIL + typed consequence
         |
         +---- diagnostics ----- warning evidence; never routing authority
         |
         v
-AssuranceCase ---------------- INCOMPLETE / SCALE / ASSIST / STOP
+AssuranceCase ---------------- evidence + contract digests
+        |                       INCOMPLETE / SCALE / ASSIST / STOP
         |
         +---- renderer.markdown@1
         +---- renderer.json@1
@@ -93,6 +94,7 @@ CheckSpec(
     mode=CheckMode.GATE,
     covers=frozenset({Coverage.OUTCOME_QUALITY}),
     run=check_function,
+    failure_route=Decision.ASSIST,
 )
 ```
 
@@ -100,6 +102,7 @@ CheckSpec(
 - `mode=GATE` may return a typed `ASSIST` or `STOP` consequence on failure.
 - `mode=DIAGNOSTIC` may add findings but is rejected if it attempts to route.
 - `covers` declares which required assurance dimension the check supplies.
+- `failure_route` binds a gate's declared `ASSIST` or `STOP` consequence.
 - `run` is an ordinary pure function over an immutable evaluation view.
 
 Duplicate check IDs fail at engine construction. A check that emits results under
@@ -120,8 +123,8 @@ runtime_caps
 ```
 
 Deleting the structural repetition diagnostic is safe because it covers no required
-dimension. Deleting the acceptable-rate gate removes `outcome_quality`, so the
-engine returns:
+dimension. Disabling the acceptable-rate gate leaves the fixed contract without a
+provider for `outcome_quality`, so the engine returns:
 
 ```text
 Decision: INCOMPLETE
@@ -151,6 +154,7 @@ custom_gate = CheckSpec(
     mode=CheckMode.GATE,
     covers=frozenset(),
     run=no_failed_events,
+    failure_route=Decision.STOP,
 )
 
 case = evaluate_bundle(evidence, default_checks() + (custom_gate,))

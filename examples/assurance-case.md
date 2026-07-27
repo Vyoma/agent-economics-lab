@@ -8,6 +8,7 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
 
 - Source adapter: `source.csv@1`
 - Evidence digest: `485f97ae54ca71c84116036e1d987fd249a3e5c4e10f734b2fcf9c4878428fc4`
+- Decision-contract digest: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
 - Report renderer: `renderer.markdown@1`
 - Enabled checks:
   - `gate.acceptable-rate@1`
@@ -73,4 +74,4 @@ Baseline: **human-only support queue**
 
 ## Claim boundary
 
-The result is only as reliable as the trace coverage, outcome labels, cost allocation, counterfactual, enabled checks, and observation window. Removing required coverage returns INCOMPLETE. A repeated tool shape or graph cycle is a diagnostic warning, not semantic proof of a loop or deadlock.
+The result is only as reliable as the trace coverage, outcome labels, cost allocation, counterfactual, enabled checks, and observation window. When enabled gates do not supply the fixed required coverage, the engine returns INCOMPLETE. A repeated tool shape or graph cycle is a diagnostic warning, not semantic proof of a loop or deadlock.
