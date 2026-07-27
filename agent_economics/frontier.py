@@ -32,6 +32,8 @@ from .models import (
 
 
 CANONICAL_SIGNIFICANT_DIGITS = 12
+SELECTION_RULE = "minimum_observed_mean_cost_among_eligible"
+SELECTION_EVIDENCE_ROLE = "post_selection_exploratory"
 
 
 def canonical_float(value: float) -> float:
@@ -88,6 +90,7 @@ class ArmSummary:
     expected_net_value_per_attempt_usd: float
     evidence_digest: str
     dominated: bool
+    decision_contract_digest: str = ""
 
 
 @dataclass(frozen=True)
@@ -104,6 +107,8 @@ class PairedComparison:
     adjusted_alpha: float
     eligible: bool
     reasons: tuple[str, ...]
+    reference_acceptable_tasks: int = 0
+    conditional_breakage_rate: float | None = None
 
 
 @dataclass(frozen=True)
@@ -560,6 +565,7 @@ def _arm_summary(arm_id: str, case: AssuranceCase, dominated: bool) -> ArmSummar
             case.expected_net_value_per_attempt_usd
         ),
         evidence_digest=case.evidence_digest,
+        decision_contract_digest=case.decision_contract_digest,
         dominated=dominated,
     )
 
@@ -718,6 +724,9 @@ def evaluate_frontier(
     adjusted_alpha = (1 - plan.confidence_level) / (2 * candidate_count)
     reference_case = cases[plan.reference_arm]
     reference_map = _task_map(reference_case)
+    reference_acceptable_tasks = sum(
+        task.acceptable for task in reference_case.tasks
+    )
     comparisons: list[PairedComparison] = []
 
     for candidate_id in plan.candidate_arms:
@@ -758,6 +767,11 @@ def evaluate_frontier(
         )
         cost_point = canonical_float(cost_point)
         cost_lower = canonical_float(cost_lower)
+        conditional_breakage_rate = (
+            canonical_float(harmful / reference_acceptable_tasks)
+            if reference_acceptable_tasks
+            else None
+        )
         reasons: list[str] = []
         if reference_case.decision is not Decision.SCALE:
             reasons.append(
@@ -793,6 +807,8 @@ def evaluate_frontier(
                 adjusted_alpha=canonical_float(adjusted_alpha),
                 eligible=not reasons,
                 reasons=tuple(reasons),
+                reference_acceptable_tasks=reference_acceptable_tasks,
+                conditional_breakage_rate=conditional_breakage_rate,
             )
         )
 
@@ -838,6 +854,11 @@ def frontier_payload(case: FrontierCase) -> dict[str, Any]:
         "reference_arm": case.plan.reference_arm,
         "method": case.method,
         "numeric_precision_significant_digits": CANONICAL_SIGNIFICANT_DIGITS,
+        "selection": {
+            "rule": SELECTION_RULE,
+            "evidence_role": SELECTION_EVIDENCE_ROLE,
+            "confirmation_required_for_generalization": True,
+        },
         "policy": {
             "max_breakage_rate": case.plan.max_breakage_rate,
             "min_cost_reduction_rate": case.plan.min_cost_reduction_rate,

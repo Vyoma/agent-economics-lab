@@ -170,6 +170,7 @@ def default_checks() -> tuple[CheckSpec, ...]:
             mode=CheckMode.GATE,
             covers=frozenset({Coverage.OUTCOME_QUALITY}),
             run=_acceptable_rate,
+            failure_route=Decision.ASSIST,
         ),
         CheckSpec(
             id="gate.unit-economics",
@@ -177,6 +178,7 @@ def default_checks() -> tuple[CheckSpec, ...]:
             mode=CheckMode.GATE,
             covers=frozenset({Coverage.UNIT_ECONOMICS}),
             run=_unit_economics,
+            failure_route=Decision.ASSIST,
         ),
         CheckSpec(
             id="gate.tail-cost",
@@ -184,6 +186,7 @@ def default_checks() -> tuple[CheckSpec, ...]:
             mode=CheckMode.GATE,
             covers=frozenset({Coverage.TAIL_RISK}),
             run=_tail_cost,
+            failure_route=Decision.ASSIST,
         ),
         CheckSpec(
             id="gate.net-value",
@@ -191,6 +194,7 @@ def default_checks() -> tuple[CheckSpec, ...]:
             mode=CheckMode.GATE,
             covers=frozenset({Coverage.BUSINESS_VALUE}),
             run=_net_value,
+            failure_route=Decision.STOP,
         ),
         CheckSpec(
             id="gate.counterfactual",
@@ -198,6 +202,7 @@ def default_checks() -> tuple[CheckSpec, ...]:
             mode=CheckMode.GATE,
             covers=frozenset({Coverage.COUNTERFACTUAL}),
             run=_counterfactual,
+            failure_route=Decision.STOP,
         ),
         CheckSpec(
             id="gate.runtime-caps",
@@ -205,6 +210,7 @@ def default_checks() -> tuple[CheckSpec, ...]:
             mode=CheckMode.GATE,
             covers=frozenset({Coverage.RUNTIME_CAPS}),
             run=_runtime_caps,
+            failure_route=Decision.ASSIST,
         ),
         CheckSpec(
             id="diagnostic.repeated-tool-shape",

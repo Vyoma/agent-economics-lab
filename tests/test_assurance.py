@@ -6,6 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from agent_economics import (
+    DEFAULT_REQUIRED_COVERAGE,
     CheckMode,
     CheckOutput,
     CheckResult,
@@ -13,6 +14,7 @@ from agent_economics import (
     CheckStatus,
     Coverage,
     Decision,
+    decision_contract_digest,
     default_checks,
     evaluate,
     evaluate_bundle,
@@ -105,11 +107,13 @@ class AssuranceTests(unittest.TestCase):
         self.assertEqual(self.evaluate(policy).decision, Decision.STOP)
 
     def test_report_exposes_claim_boundary(self) -> None:
-        report = render_markdown(self.evaluate())
+        case = self.evaluate()
+        report = render_markdown(case)
         self.assertIn("**Decision: ASSIST**", report)
         self.assertIn("not semantic proof", report)
         self.assertIn("Counterfactual", report)
         self.assertIn("Enabled checks", report)
+        self.assertIn(case.decision_contract_digest, report)
 
     def test_counterfactual_underperformance_cannot_scale(self) -> None:
         perfect_free_baseline = replace(
@@ -170,6 +174,68 @@ class AssuranceTests(unittest.TestCase):
         case = evaluate_bundle(evidence, checks)
         self.assertEqual(case.decision, Decision.INCOMPLETE)
         self.assertEqual(case.missing_coverage, ("outcome_quality",))
+        self.assertEqual(case.check_results, ())
+
+    def test_missing_coverage_refuses_before_remaining_checks_run(self) -> None:
+        def should_not_run(view):
+            raise AssertionError("missing coverage must short-circuit checks")
+
+        check = CheckSpec(
+            id="gate.local",
+            version="1",
+            mode=CheckMode.GATE,
+            covers=frozenset(),
+            run=should_not_run,
+            failure_route=Decision.STOP,
+        )
+        evidence = load_csv_bundle(
+            traces=EXAMPLES / "support_trace.csv",
+            outcomes=EXAMPLES / "outcomes.csv",
+            rates=EXAMPLES / "rates.json",
+            baseline=EXAMPLES / "baseline.json",
+            policy=EXAMPLES / "policy.json",
+        )
+        case = AssuranceEngine((check,), DEFAULT_REQUIRED_COVERAGE).evaluate(evidence)
+        self.assertEqual(case.decision, Decision.INCOMPLETE)
+
+    def test_decision_contract_digest_binds_declared_semantics(self) -> None:
+        checks = default_checks()
+        digest = decision_contract_digest(checks, DEFAULT_REQUIRED_COVERAGE)
+        case = self.evaluate()
+        self.assertEqual(case.decision_contract_digest, digest)
+        self.assertEqual(
+            digest,
+            "dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983",
+        )
+        self.assertNotEqual(
+            digest,
+            decision_contract_digest(
+                tuple(reversed(checks)), DEFAULT_REQUIRED_COVERAGE
+            ),
+        )
+        self.assertNotEqual(
+            digest,
+            decision_contract_digest(
+                (replace(checks[0], version="2"),) + checks[1:],
+                DEFAULT_REQUIRED_COVERAGE,
+            ),
+        )
+        self.assertNotEqual(
+            digest,
+            decision_contract_digest(
+                (replace(checks[0], failure_route=Decision.STOP),) + checks[1:],
+                DEFAULT_REQUIRED_COVERAGE,
+            ),
+        )
+        self.assertNotEqual(
+            digest,
+            decision_contract_digest(
+                checks,
+                frozenset(
+                    DEFAULT_REQUIRED_COVERAGE - {Coverage.OUTCOME_QUALITY}
+                ),
+            ),
+        )
 
     def test_custom_gate_can_route_to_stop_without_core_edit(self) -> None:
         def custom(view):
@@ -234,6 +300,37 @@ class AssuranceTests(unittest.TestCase):
                 checks=default_checks() + (check,),
             )
 
+    def test_declared_gate_route_must_match_emitted_route(self) -> None:
+        def invalid_route(view):
+            return CheckOutput(
+                results=(
+                    CheckResult(
+                        check_id="gate.route-mismatch",
+                        status=CheckStatus.FAIL,
+                        message="route mismatch",
+                        on_failure=Decision.STOP,
+                    ),
+                )
+            )
+
+        check = CheckSpec(
+            id="gate.route-mismatch",
+            version="1",
+            mode=CheckMode.GATE,
+            covers=frozenset(),
+            run=invalid_route,
+            failure_route=Decision.ASSIST,
+        )
+        with self.assertRaisesRegex(ValueError, "declared route"):
+            evaluate(
+                self.events,
+                self.outcomes,
+                self.rates,
+                self.baseline,
+                self.policy,
+                checks=default_checks() + (check,),
+            )
+
     def test_duplicate_check_ids_are_rejected(self) -> None:
         check = default_checks()[0]
         with self.assertRaisesRegex(ValueError, "Duplicate check IDs"):
@@ -241,7 +338,9 @@ class AssuranceTests(unittest.TestCase):
 
     def test_json_and_markdown_render_same_case(self) -> None:
         case = self.evaluate()
-        self.assertIn('"decision": "ASSIST"', render_json(case))
+        json_report = render_json(case)
+        self.assertIn('"decision": "ASSIST"', json_report)
+        self.assertIn(case.decision_contract_digest, json_report)
         self.assertIn("**Decision: ASSIST**", render_markdown(case))
 
 

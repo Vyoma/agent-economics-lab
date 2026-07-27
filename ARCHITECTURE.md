@@ -9,19 +9,21 @@ offline platform exports
           v
 canonical EvidenceBundle per tested arm
   task fingerprints + rubric + traces + outcomes + rates + baseline + policy
+  evidence digest
           |
           +-------------------------------+
           |                               |
           v                               v
 single-arm AssuranceEngine          paired FrontierEngine
 typed gates and diagnostics         exact task alignment
-coverage manifest                   exact breakage upper bound
+fixed coverage contract             absolute breakage upper bound
+decision-contract digest            descriptive conditional breakage
 INCOMPLETE/SCALE/ASSIST/STOP        paired cost lower bound
           |                               |
           +---------------+---------------+
                           v
              Markdown + JSON + SVG artifacts
-             plan digest + evidence digests
+             plan + evidence + decision-contract digests
 ```
 
 ## Evidence boundary
@@ -39,8 +41,13 @@ reproducibility metadata, not a signature or attestation.
 
 The assurance engine reconstructs task-level full cost, then evaluates an explicit
 ordered tuple of typed checks. Diagnostics can emit findings but cannot route.
-Gates can preserve or restrict a decision. Removing declared required coverage
-returns `INCOMPLETE`.
+Gates can preserve or restrict a decision. The decision-contract digest binds the
+ordered check IDs and versions, declared coverage, static failure routes, required
+coverage, engine implementation, and reducer semantics. The evidence digest
+separately binds policy thresholds, the rate card, baseline, events, outcomes, and
+task manifest. A verdict is reproducible only with both digests. Disabling a
+sole-provider gate while the fixed contract still requires its dimension returns
+`INCOMPLETE` before any remaining check executes.
 
 ## Paired frontier engine
 
@@ -53,16 +60,20 @@ The frontier then requires identical task IDs, input digests, and rubric version
 across arms. For each candidate it:
 
 1. counts harmful paired regressions versus the reference;
-2. computes an exact one-sided Clopper-Pearson upper bound;
-3. reconstructs paired full effective costs;
-4. computes a deterministic paired-bootstrap lower bound on cost reduction;
-5. applies a Bonferroni-adjusted nominal alpha target across all planned quality and
+2. computes an exact one-sided Clopper-Pearson upper bound over all attempted tasks;
+3. reports the descriptive breakage rate among reference-acceptable tasks;
+4. reconstructs paired full effective costs;
+5. computes a deterministic paired-bootstrap lower bound on cost reduction;
+6. applies a Bonferroni-adjusted nominal alpha target across all planned quality and
    approximate bootstrap cost tests;
-6. rejects any arm whose standard assurance decision is not `SCALE`; and
-7. selects the lowest observed full-cost eligible tested candidate.
+7. rejects any arm whose standard assurance decision is not `SCALE`; and
+8. selects the lowest observed full-cost eligible tested candidate.
 
 Incomplete candidate families, task-fingerprint drift, unknown costs, baseline or
 policy drift, shared-model price drift, and under-resolved bootstrap tails fail closed.
+Each arm carries both its evidence digest and its decision-contract digest. The
+selected arm's observed cost and rank are post-selection exploratory; a claim about
+new workloads requires held-out, nested, or independently replicated evaluation.
 
 ## Dependency policy
 

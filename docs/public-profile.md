@@ -83,14 +83,16 @@ provenance, and controls that disappear without making the decision visibly weak
 My current open-source project, Agent Economics Lab, converts traces, outcomes,
 labor/risk cost, a named baseline, and versioned checks into an auditable
 `INCOMPLETE / SCALE / ASSIST / STOP` result. Its first research artifact is a
-deterministic false-green benchmark: 98 synthetic scenarios and 588 evidence
-ablations testing whether missing assurance coverage can silently manufacture a
-green decision.
+deterministic decision-coverage drift benchmark: 98 synthetic scenarios and 588
+required-gate disablements testing whether a changing decision contract can silently
+manufacture a green decision.
 
-The result is narrow but reproducible: an unsafe comparator produced 23 false
-`SCALE` decisions; the fail-safe coverage model produced zero and returned
-`INCOMPLETE` instead. This is a controlled software stress test, not a production
-prevalence estimate.
+The result is narrow but reproducible: a dynamic-coverage comparator produced 23
+false `SCALE` transitions; the fixed-contract model produced zero and returned
+`INCOMPLETE` in all 588 reduced compositions. A separate nine-case benchmark
+deletes actual raw evidence and exposes five decision-producing omissions across
+two source-completeness gaps. Both are controlled software stress tests, not
+production prevalence estimates.
 
 Current research direction:
 
@@ -106,8 +108,8 @@ public artifacts, reproducibility, and clear negative scope.
 ## Featured section order
 
 1. **Agent Economics Lab repository:** runnable system and modularity demo.
-2. **False-Green Assurance note:** research question, method, result, limitations.
-3. **Benchmark card and data card:** generated evidence and claim boundary.
+2. **Decision-Coverage Drift note:** research question, method, result, limitations.
+3. **Raw Evidence Ablation:** source-completeness boundary cases.
 4. **Two-minute demo:** optional deletion, fail-safe required deletion, custom gate.
 5. **Methodology:** cost per acceptable outcome and counterfactual routing.
 6. **Teaching/course material:** supporting proof after the technical artifacts.
@@ -129,7 +131,7 @@ public artifacts, reproducibility, and clear negative scope.
 ## Claims to avoid
 
 - “Enterprise-proven” until independent workload cases are published.
-- “Prevents false-green decisions” without specifying the synthetic benchmark.
+- “Prevents false approvals” without naming the exact fixed-contract invariant.
 - “Works with Galileo/LangSmith/OpenTelemetry” until their export mappers ship.
 - “Semantic loop detection” or “deadlock proof.”
 - “Research benchmark” without linking the protocol, generated rows, and data card.

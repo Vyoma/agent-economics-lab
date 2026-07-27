@@ -79,6 +79,21 @@ event in the full paired task population, not the rate conditional on reference
 success. For each candidate, the tool computes an exact one-sided
 Clopper-Pearson upper bound.
 
+The report also shows the descriptive conditional breakage rate among tasks the
+reference accepted:
+
+```text
+absolute breakage    = harmful transitions / all paired tasks
+conditional breakage = harmful transitions / reference-acceptable tasks
+```
+
+The absolute upper bound governs v1 eligibility because the frozen policy defines
+harm per attempted task across the deployment workload. Conditional breakage does
+not change the v1 decision. It makes the denominator visible because a weak
+reference can mechanically suppress the absolute rate. If there are no
+reference-acceptable tasks, the conditional rate is undefined and reported as
+`N/A`.
+
 This matters when no regressions were observed. With a small sample, the upper bound
 remains large; zero observed failures is not treated as zero risk.
 
@@ -111,6 +126,14 @@ A candidate is eligible only when:
 
 The selected arm is the lowest observed full-cost arm among eligible tested
 candidates. The tool does not interpolate an untested continuous budget threshold.
+
+The same frozen candidate family is used to establish eligibility and to choose the
+minimum observed mean cost. Multiplicity-adjusted endpoints address simultaneous
+threshold clearance under the stated method, but they do not debias the selected
+winner's cost estimate or establish that its observed rank will persist in a new
+population. Treat the selected arm's cost magnitude and rank as post-selection
+exploratory evidence until they are checked on a held-out confirmation set, through
+nested selection and evaluation, or in an independent frozen replication.
 
 ## Design requirements for real studies
 

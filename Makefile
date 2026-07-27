@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen frontier modularity benchmark reproduce lessons test
+.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity benchmark reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -11,12 +11,20 @@ demo:
 modularity:
 	PYTHONPATH=. python3 examples/modularity_demo.py
 
-falsegreen:
+coverage-drift:
 	@python3 false_green.py
+
+falsegreen: coverage-drift
 
 benchmark:
 	python3 false_green.py \
-		--verify research/results/false_green_results.csv
+		--verify research/results/decision-coverage-drift/results.csv \
+		--summary-verify research/results/SUMMARY.md \
+		--json-verify research/results/decision-coverage-drift/summary.json
+
+evidence-ablation:
+	@python3 evidence_ablation.py \
+		--verify-dir research/results/evidence-ablation
 
 frontier:
 	@python3 -m agent_economics frontier \
@@ -24,7 +32,7 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
-reproduce: test modularity lessons benchmark frontier
+reproduce: test modularity lessons benchmark evidence-ablation frontier
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done
