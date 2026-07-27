@@ -9,6 +9,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from agent_economics import (
+    ArmSummary,
     FrontierDecision,
     ModelRate,
     TaskIdentity,
@@ -28,6 +29,20 @@ PLAN_PATH = ROOT / "examples" / "compute-frontier" / "manifest.json"
 
 
 class FrontierTests(unittest.TestCase):
+    def test_arm_summary_constructor_remains_backward_compatible(self) -> None:
+        summary = ArmSummary(
+            "arm",
+            "SCALE",
+            1,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            "evidence",
+            False,
+        )
+        self.assertEqual(summary.decision_contract_digest, "")
+
     def test_zero_breakages_still_has_nonzero_exact_upper_bound(self) -> None:
         alpha = 0.05
         bound = clopper_pearson_upper(0, 10, alpha)
@@ -44,6 +59,19 @@ class FrontierTests(unittest.TestCase):
         }
         self.assertTrue(comparisons["balanced-4-step"].eligible)
         self.assertFalse(comparisons["cheap-2-step"].eligible)
+        self.assertEqual(
+            comparisons["balanced-4-step"].reference_acceptable_tasks, 171
+        )
+        self.assertAlmostEqual(
+            comparisons["balanced-4-step"].conditional_breakage_rate or 0.0,
+            1 / 171,
+            places=12,
+        )
+        self.assertAlmostEqual(
+            comparisons["cheap-2-step"].conditional_breakage_rate or 0.0,
+            12 / 171,
+            places=12,
+        )
         self.assertGreater(
             comparisons["cheap-2-step"].breakage_rate_upper,
             case.plan.max_breakage_rate,
@@ -321,6 +349,41 @@ class FrontierTests(unittest.TestCase):
         self.assertIn("no deployment recommendation", report.lower())
         self.assertNotIn("keep the reference", report.lower())
 
+    def test_conditional_breakage_is_undefined_without_reference_successes(
+        self,
+    ) -> None:
+        plan, bundles, problems = load_experiment(PLAN_PATH)
+        original = bundles[plan.reference_arm]
+        bundles[plan.reference_arm] = make_evidence_bundle(
+            events=original.events,
+            outcomes={
+                task_id: replace(outcome, acceptable=False)
+                for task_id, outcome in original.outcomes.items()
+            },
+            rates=original.rates,
+            baseline=original.baseline,
+            policy=original.policy,
+            source_id="source.test-no-reference-success",
+            task_manifest=original.task_manifest,
+        )
+        case = evaluate_frontier(plan, bundles, problems)
+        self.assertTrue(case.comparisons)
+        self.assertTrue(
+            all(
+                comparison.reference_acceptable_tasks == 0
+                and comparison.conditional_breakage_rate is None
+                for comparison in case.comparisons
+            )
+        )
+        payload = json.loads(render_frontier_json(case))
+        self.assertTrue(
+            all(
+                comparison["conditional_breakage_rate"] is None
+                for comparison in payload["comparisons"]
+            )
+        )
+        self.assertIn("N/A (R+=0)", render_frontier_markdown(case))
+
     def test_outputs_are_deterministic_and_machine_safe(self) -> None:
         first = run_frontier(PLAN_PATH)
         second = run_frontier(PLAN_PATH)
@@ -333,12 +396,49 @@ class FrontierTests(unittest.TestCase):
         self.assertEqual(payload["decision"], "ADOPT")
         self.assertEqual(payload["selected_arm"], "balanced-4-step")
         self.assertEqual(payload["numeric_precision_significant_digits"], 12)
+        self.assertEqual(
+            payload["selection"]["rule"],
+            "minimum_observed_mean_cost_among_eligible",
+        )
+        self.assertEqual(
+            payload["selection"]["evidence_role"],
+            "post_selection_exploratory",
+        )
+        self.assertTrue(
+            payload["selection"]["confirmation_required_for_generalization"]
+        )
+        balanced = next(
+            comparison
+            for comparison in payload["comparisons"]
+            if comparison["candidate_arm"] == "balanced-4-step"
+        )
+        self.assertEqual(balanced["reference_acceptable_tasks"], 171)
+        self.assertAlmostEqual(
+            balanced["conditional_breakage_rate"], 1 / 171, places=12
+        )
         premium_reference = next(
             arm for arm in payload["arms"] if arm["arm_id"] == "premium-8-step"
         )
         self.assertEqual(premium_reference["mean_effective_cost_usd"], 1.665)
-        self.assertIn("$1.67", render_frontier_markdown(first))
-        self.assertIn("$5.94", render_frontier_markdown(first))
+        self.assertRegex(
+            premium_reference["decision_contract_digest"], r"^[0-9a-f]{64}$"
+        )
+        self.assertEqual(
+            len(
+                {
+                    arm["decision_contract_digest"]
+                    for arm in payload["arms"]
+                }
+            ),
+            1,
+        )
+        report = render_frontier_markdown(first)
+        self.assertIn("$1.67", report)
+        self.assertIn("$5.94", report)
+        self.assertIn("Absolute UCB (governing)", report)
+        self.assertIn("1/171 (0.6%)", report)
+        self.assertIn("post-selection exploratory", report)
+        self.assertIn(premium_reference["decision_contract_digest"], report)
 
 
 if __name__ == "__main__":

@@ -25,24 +25,45 @@ reduction. Missing tasks, arms, cost evidence, or assurance coverage return
 The checked-in 180-task study is synthetic. It validates the implementation and
 selection rule, not production impact.
 
-## 2. False-Green Engine Conformance
+## 2. Decision-Coverage Drift Conformance
 
-**Question:** When a required assurance dimension is removed, can a reducer that
-silently redefines available evidence as complete manufacture a `SCALE` decision?
+**Question:** When a required gate is disabled, can an engine that silently shrinks
+required coverage to match the remaining gates manufacture a `SCALE` decision?
 
 The deterministic stress test generates 96 factorial scenarios plus two boundary
-cases, then runs six single-check ablations per scenario. It compares an unsafe
-available-only reducer with the production fail-safe coverage behavior.
+cases, then runs six single-gate disablements per scenario. It compares a
+dynamic-coverage engine with the fixed-contract coverage behavior. The evidence
+bundle is unchanged in every comparison.
 
-- [Protocol](PROTOCOL.md)
-- [Data card](DATA_CARD.md)
-- [Generated rows](results/false_green_results.csv)
+- [Protocol](FALSE_GREEN_PROTOCOL.md)
+- [Data card](FALSE_GREEN_DATA_CARD.md)
+- [Generated rows](results/decision-coverage-drift/results.csv)
 - [Summary](results/SUMMARY.md)
+- [Structured summary](results/decision-coverage-drift/summary.json)
 - [Research note](NOTE.md)
 
 This benchmark validates routing semantics under constructed perturbations. The
-zero false-green safe result follows from the required-coverage invariant and should
-not be described as an empirical ecosystem result.
+zero fixed-contract result follows from the required-coverage invariant and should
+not be described as an empirical ecosystem result or a missing-data experiment.
+
+## 3. Raw Evidence Ablation
+
+**Question:** What happens when an outcome record, cost field, policy threshold,
+manifest row, baseline, or timed-out event is actually deleted while the decision
+contract remains fixed?
+
+The nine-case boundary fixture produces four operational refusals and five
+`ASSIST` to `SCALE` transitions. The five transitions expose current source-contract
+limits: optional cost fields can be interpreted as zero, and a deleted attempt is
+undetectable without a source-completeness contract.
+
+- [Protocol](EVIDENCE_ABLATION_PROTOCOL.md)
+- [Data card](EVIDENCE_ABLATION_DATA_CARD.md)
+- [Generated rows](results/evidence-ablation/results.csv)
+- [Structured summary](results/evidence-ablation/summary.json)
+
+These are deliberately constructed conformance cases, not a measured enterprise
+failure rate.
 
 ## External validation gate
 

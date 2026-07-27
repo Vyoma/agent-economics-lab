@@ -35,8 +35,9 @@ def render_frontier_markdown(case: FrontierCase) -> str:
     if case.decision is FrontierDecision.ADOPT:
         outcome = f"ADOPT `{case.selected_arm}`"
         explanation = (
-            "This is the lowest-cost tested candidate that satisfied the predeclared "
-            "breakage-risk, cost-reduction, evidence-completeness, and assurance rules."
+            "This is the lowest-observed-cost tested candidate that satisfied the "
+            "predeclared breakage-risk, cost-reduction, evidence-completeness, and "
+            "assurance rules on this frozen dataset."
         )
     elif case.decision is FrontierDecision.HOLD:
         outcome = "HOLD"
@@ -113,15 +114,27 @@ def render_frontier_markdown(case: FrontierCase) -> str:
                 "",
                 "## Paired evidence against the reference",
                 "",
-                "| Candidate | Harmful regressions | Breakage UCB | Quality delta | Cost reduction | Cost reduction LCB | Eligible |",
-                "|---|---:|---:|---:|---:|---:|---|",
+                "| Candidate | Harmful transitions | Absolute rate (H/N) | Absolute UCB (governing) | Conditional rate (H/R+) | Quality delta | Cost reduction | Cost reduction LCB | Eligible |",
+                "|---|---:|---:|---:|---:|---:|---:|---:|---|",
             ]
         )
         for comparison in case.comparisons:
+            conditional = (
+                "N/A (R+=0)"
+                if comparison.conditional_breakage_rate is None
+                else (
+                    f"{comparison.harmful_regressions}/"
+                    f"{comparison.reference_acceptable_tasks} "
+                    f"({comparison.conditional_breakage_rate:.1%})"
+                )
+            )
             lines.append(
                 f"| `{comparison.candidate_arm}` | "
-                f"{comparison.harmful_regressions}/{comparison.paired_tasks} | "
+                f"{comparison.harmful_regressions} | "
+                f"{comparison.harmful_regressions}/{comparison.paired_tasks} "
+                f"({comparison.breakage_rate:.1%}) | "
                 f"{comparison.breakage_rate_upper:.1%} | "
+                f"{conditional} | "
                 f"{comparison.acceptable_rate_delta:+.1%} | "
                 f"{comparison.mean_cost_reduction_rate:.1%} | "
                 f"{comparison.cost_reduction_rate_lower:.1%} | "
@@ -139,23 +152,47 @@ def render_frontier_markdown(case: FrontierCase) -> str:
     lines.extend(
         [
             "",
+            "## Selection interpretation",
+            "",
+            "The selection rule chooses the minimum observed mean full cost among "
+            "eligible candidates. The candidate family is used both to establish "
+            "eligibility and to rank eligible arms. The multiplicity-adjusted endpoints "
+            "are designed to control simultaneous threshold clearance under the stated "
+            "method, but they do not debias the selected arm's observed cost or prove "
+            "that its rank will persist in a new population.",
+            "",
+            "Treat the selected arm's cost magnitude and rank as post-selection "
+            "exploratory evidence for generalization. A production claim requires a "
+            "held-out confirmation set, nested selection and evaluation, or an "
+            "independent frozen replication.",
+            "",
             "## Statistical method",
             "",
             case.method,
             "",
-            "The breakage estimand is the absolute paired-population rate of tasks "
-            "accepted by the reference and rejected by the candidate, with all matched "
-            "tasks in the denominator. The exact upper bound prevents a small sample with zero "
-            "observed regressions from appearing certain. Paired resampling preserves "
-            "the task-level relationship between reference and candidate costs. The "
-            "bootstrap endpoint and its nominal confidence target are approximate and "
-            "include Monte Carlo error.",
+            "The governing breakage estimand is the absolute paired-population rate of "
+            "tasks accepted by the reference and rejected by the candidate, with all "
+            "matched tasks in the denominator. The conditional rate uses only "
+            "reference-acceptable tasks in the denominator and is descriptive; it does "
+            "not govern v1 eligibility. Reporting both prevents a low reference "
+            "acceptance rate from making the absolute rate look sufficient by itself. "
+            "The exact upper bound prevents a small sample with zero observed regressions "
+            "from appearing certain. Paired resampling preserves the task-level "
+            "relationship between reference and candidate costs. The bootstrap endpoint "
+            "and its nominal confidence target are approximate and include Monte Carlo "
+            "error.",
             "",
-            "## Evidence manifests",
+            "## Evidence and decision manifests",
             "",
         ]
     )
-    lines.extend(f"- `{arm.arm_id}`: `{arm.evidence_digest}`" for arm in case.arms)
+    for arm in case.arms:
+        lines.extend(
+            [
+                f"- `{arm.arm_id}` evidence: `{arm.evidence_digest}`",
+                f"  - decision contract: `{arm.decision_contract_digest}`",
+            ]
+        )
     lines.extend(
         [
             "",
@@ -167,7 +204,8 @@ def render_frontier_markdown(case: FrontierCase) -> str:
             "It does not validate the outcome rubric, prove production generalization, "
             "or infer an exact breakpoint between untested configurations. Missing arms, "
             "task fingerprints, rubric versions, cost evidence, or assurance coverage "
-            "fail closed.",
+            "fail closed. The selected arm's observed cost and rank are not unbiased "
+            "confirmatory estimates for a new population.",
             "",
         ]
     )
