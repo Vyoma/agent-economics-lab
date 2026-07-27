@@ -33,13 +33,15 @@ artifact carry code, data, method, result, and limitations.
 |---|---|---|
 | Open-source kernel | Agent Economics Lab | Software engineering, explicit contracts, reproducibility |
 | Paired experiment | Economic Assurance Frontier | Exact task pairing, breakage bounds, full-cost intervals, bounded selection |
-| Engine conformance | False-Green Assurance Benchmark | Fail-safe coverage invariant under constructed ablations |
+| Engine conformance | Decision-Coverage Drift Conformance | Fixed-contract invariant under required-gate disablement |
+| Source conformance | Raw Evidence Ablation | Schema, semantic-validation, and source-completeness boundaries |
 | Research communication | Frontier protocol and data card | Method, hypotheses, threats to validity, and claim boundary |
 | External validation | Paired frontier contribution lane | Permissioned, redacted matched-workload evidence |
 | Next integration | OpenTelemetry GenAI fixture adapter | A real normalized intake path without a live vendor dependency |
 
-Every layer reuses the canonical `EvidenceBundle`, typed checks, coverage manifest,
-plan and evidence digests, and reproducibility command.
+Every layer reuses the canonical `EvidenceBundle`, typed checks, a fixed coverage
+contract, plan and evidence digests, decision-contract digests, and reproducibility
+command.
 
 ## Portfolio decisions from the deep-research report
 
@@ -61,7 +63,8 @@ weaken the evidence.
 
 - Ship paired task alignment, exact breakage bounds, simultaneous cost intervals,
   fail-closed completeness, portable reports, a protocol, and a transparent fixture.
-- Keep the old false-green result as an engine invariant rather than the headline.
+- Keep the decision-coverage drift result as an engine invariant, not a prevalence
+  headline.
 - Ask five agent engineers and three eval/FinOps practitioners to reproduce the result.
 
 ### Weeks 3–5: real intake and independent reproduction

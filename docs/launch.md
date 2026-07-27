@@ -47,30 +47,40 @@ I rebuilt Agent Economics Lab around explicit composition:
 
 exported evidence
   → canonical bundle + digest
-  → ordered, versioned assurance checks
+  → fixed coverage + ordered, versioned assurance checks
+  → decision-contract digest
   → Markdown/JSON decision artifact
 
 The two-minute demo proves four things:
 
 1. Run the complete assurance case → ASSIST.
 2. Delete an optional loop warning → the warning disappears; the decision does not.
-3. Delete required outcome-quality coverage → INCOMPLETE, never a fake green result.
+3. Disable the sole-provider outcome-quality gate while the contract stays fixed
+   → INCOMPLETE.
 4. Add a local enterprise gate in ordinary Python → STOP, without editing the core.
 
 Every report records the source adapter, evidence digest, enabled checks, required
-coverage, and anything missing.
+coverage, failure contract, and decision-contract digest.
 
 I also tested the safety property rather than leaving it as an architecture claim.
-Across 588 deterministic synthetic ablations, an unsafe available-checks-only
-reducer produced 23 false SCALE decisions. The fail-safe engine produced zero: it
-returned INCOMPLETE whenever required coverage was removed.
+Across 588 deterministic required-gate disablements, a dynamic-coverage engine
+produced 23 false SCALE transitions. The fixed-contract engine produced zero and
+returned INCOMPLETE for all 588 reduced compositions.
 
 That is a controlled software stress test, not a claim about how often enterprises
 make this mistake in production. The repo includes the protocol, generated rows,
 data card, result card, and paper-style note.
 
-This is modularity with a safety property: you can remove a module, but you cannot
-remove an inconvenient requirement and silently manufacture SCALE.
+This is modularity with a verifiable safety property: disable a sole-provider gate
+while its requirement remains in the fixed contract and the result is INCOMPLETE.
+If someone intentionally shrinks the required contract, the decision-contract
+digest changes and makes that different claim visible.
+
+I also ran a different experiment that deletes actual raw evidence without changing
+the decision contract. Four of nine omissions were refused. Five decision-material
+omissions still changed ASSIST to SCALE, exposing where absence can become zero and
+where a missing attempt cannot be detected without an independent inventory. Those
+are boundary cases, not a measured failure rate.
 
 No cloud account. No runtime dependencies. No plugin manager. No replacement for
 the observability or eval platform you already bought.
@@ -116,7 +126,9 @@ Ship one complete, inspectable loop:
 - rate card, baseline, and policy as versioned inputs;
 - CSV and normalized-JSON source adapters with a canonical digest;
 - typed, versioned checks with fail-safe required coverage;
-- a deterministic false-green benchmark with protocol, data card, and results;
+- a deterministic decision-coverage drift benchmark with protocol, data card, and
+  generated results;
+- a separate raw evidence-ablation benchmark with fixed checks and coverage;
 - five short lessons exposing each equation;
 - a two-minute add/delete/custom-gate demo;
 - the CLI and generated assurance case;

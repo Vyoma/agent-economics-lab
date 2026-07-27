@@ -1,6 +1,6 @@
 # Agent Economics Lab
 
-**Your agent passed its evals. Can you prove it should scale?**
+**Your agent passed every enabled check. Did every required check run?**
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)
 
@@ -12,20 +12,20 @@ into one bounded decision:
 
 `INCOMPLETE` / `SCALE` / `ASSIST` / `STOP`
 
-The dangerous failure is not difficult math. It is averaging whatever evidence
-happens to be present and blessing what the system cannot see. One file reproduces
-the controlled failure mode:
+The dangerous failure is a contract that changes with the checks that happen to be
+enabled. One file reproduces the controlled failure mode:
 
 ```bash
 python3 false_green.py
 ```
 
 ```text
-98 scenarios x 6 evidence deletions       588 comparisons
-unsafe available-evidence reducer          23 false SCALE decisions
-fail-safe engine                            0 false SCALE decisions
+98 scenarios x 6 required-gate disablements 588 comparisons
+dynamic-coverage engine                       23 false SCALE transitions
+fixed-contract engine                          0 false SCALE transitions
+fixed-contract refusals                  588/588 INCOMPLETE
 
-removed evidence       false SCALE
+disabled requirement  false SCALE
 outcome_quality      #####                2
 unit_economics       ##                   1
 tail_risk            #################### 8
@@ -34,13 +34,43 @@ counterfactual       ########             3
 runtime_caps         #################### 8
 ```
 
-> A dashboard that averages only what it has can bless what it cannot see.
+> All enabled checks passed is not the same claim as all required checks passed.
 
 ![`make demo` returns ASSIST](assets/demo.gif)
 
-The matrix is synthetic. It tests software semantics, not how often production
-systems fail. The complete rows, denominator, protocol, and limitations are checked
-in under [`research/`](research/).
+The evidence does not change in this experiment. Each intervention disables one
+sole-provider gate. A dynamic contract silently shrinks with that gate; the fixed
+contract keeps all six requirements and refuses every reduced composition.
+
+The 23 is a property of a synthetic fixture. The zero is an enforced invariant.
+Neither is a production prevalence estimate. Read the
+[protocol](research/FALSE_GREEN_PROTOCOL.md), inspect all
+[588 rows](research/results/decision-coverage-drift/results.csv), or read the
+[publication draft](docs/article.md).
+
+## Delete actual evidence
+
+Gate disablement and evidence deletion are different experiments. The second
+executable deletes real raw records and fields while keeping checks, coverage, and
+the decision-contract digest fixed:
+
+```bash
+python3 evidence_ablation.py
+```
+
+```text
+ablations                  9
+operational refusals       4
+ASSIST -> SCALE             5
+INCOMPLETE case artifacts  0
+```
+
+The five transitions expose two concrete source-contract gaps: omitted cost fields
+can become zero, and a deleted timed-out event is invisible without an independent
+attempt manifest. They are boundary cases, not a failure rate.
+
+[Read the evidence-ablation protocol](research/EVIDENCE_ABLATION_PROTOCOL.md) ·
+[Inspect the generated rows](research/results/evidence-ablation/results.csv)
 
 ## Run the full decision
 
@@ -63,8 +93,8 @@ Incremental value / attempt      $2.77
 Why not SCALE                    quality, unit cost, tail cost, runtime caps
 ```
 
-That is the assurance case: all required evidence stays visible, warnings explain,
-and typed gates route.
+That is the assurance case: evidence, the fixed decision contract, and routing
+semantics remain inspectable.
 
 ## Find the cheapest tested configuration that still clears policy
 
@@ -78,14 +108,16 @@ digests and frozen rubric:
 ```text
 Decision                         ADOPT balanced-4-step
 
-Candidate            Breakage UCB   Cost reduction LCB   Result
-balanced-4-step             3.7%                32.0%   eligible
-cheap-2-step               12.5%                29.9%   quality fails
-premium-12-step             2.6%               -38.9%   cost fails
+Candidate            Absolute UCB   Conditional H/R+   Cost LCB   Result
+balanced-4-step             3.7%             1/171       32.0%   eligible
+cheap-2-step               12.5%            12/171       29.9%   quality fails
+premium-12-step             2.6%             0/171      -38.9%   cost fails
 ```
 
-The cheapest point estimate does not win. The selected arm must clear the frozen
-quality bound, full-cost bound, evidence checks, and normal deployment policy.
+The absolute H/N upper bound governs v1 eligibility. The conditional H/R+ rate is
+reported because a weak reference can hide breakage in the absolute denominator.
+The selected arm's observed cost rank is post-selection exploratory and needs a
+held-out or independently replicated confirmation before generalization.
 
 [Read the method](docs/frontier.md) ·
 [Inspect the decision](research/results/frontier/frontier.md) ·
@@ -100,16 +132,17 @@ Normalize their offline exports, then issue an inspectable decision artifact.
 ```text
 traces + outcomes + labor/risk cost + baseline + policy
                             |
-                canonical evidence + digest
+canonical evidence + digest
                             |
-          typed checks with required coverage
+     typed checks + fixed required coverage
                             |
-       Markdown / JSON + a bounded decision
+       decision-contract digest + bounded decision
 ```
 
-Delete an optional diagnostic and only its warning disappears. Delete required
-coverage and the decision becomes `INCOMPLETE`, never a false `SCALE`. Add a local
-gate and it can restrict the result without editing the core.
+Delete an optional diagnostic and only its warning disappears. Disable a
+sole-provider gate while the contract stays fixed and the decision becomes
+`INCOMPLETE`. Add a local gate and it can restrict the result without editing the
+core.
 
 ```bash
 make modularity
@@ -123,14 +156,15 @@ make modularity
 ## Reproduce everything
 
 ```bash
-make falsegreen
+make coverage-drift
+make evidence-ablation
 make demo
 make frontier
 make reproduce
 ```
 
-`make reproduce` runs 49 tests, the module-deletion proof, five executable lessons,
-the 588-comparison false-green benchmark, and byte-for-byte frontier artifact
+`make reproduce` runs the full test suite, the module-deletion proof, five
+executable lessons, both ablation benchmarks, and byte-for-byte frontier artifact
 verification.
 
 ## Contribute evidence, not integrations on a slide
