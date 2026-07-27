@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -24,6 +26,47 @@ from .models import (
     TaskEconomics,
     TraceEvent,
 )
+
+DECISION_CONTRACT_SCHEMA = "assurance.decision-contract@1"
+ASSURANCE_ENGINE_IMPLEMENTATION = "agent-economics.assurance-engine@1"
+ROUTING_SEMANTICS = "missing-coverage>stop>assist>scale@1"
+
+
+def decision_contract_manifest(
+    checks: Sequence[CheckSpec],
+    required_coverage: frozenset[Coverage],
+) -> dict[str, object]:
+    """Return the canonical configuration that gives a green decision meaning."""
+    return {
+        "schema": DECISION_CONTRACT_SCHEMA,
+        "implementation": ASSURANCE_ENGINE_IMPLEMENTATION,
+        "routing_semantics": ROUTING_SEMANTICS,
+        "required_coverage": sorted(item.value for item in required_coverage),
+        "checks": [
+            {
+                "manifest_id": check.manifest_id,
+                "mode": check.mode.value,
+                "covers": sorted(item.value for item in check.covers),
+                "failure_route": (
+                    check.failure_route.value
+                    if check.failure_route is not None
+                    else ("dynamic" if check.mode is CheckMode.GATE else None)
+                ),
+            }
+            for check in checks
+        ],
+    }
+
+
+def decision_contract_digest(
+    checks: Sequence[CheckSpec],
+    required_coverage: frozenset[Coverage],
+) -> str:
+    payload = decision_contract_manifest(checks, required_coverage)
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def percentile(values: list[float], probability: float) -> float:
@@ -107,6 +150,16 @@ def _validate_check_output(spec: CheckSpec, results: tuple[CheckResult, ...]) ->
                 raise ValueError(
                     f"Passing gate {spec.id!r} cannot have a failure consequence"
                 )
+            if (
+                result.status is CheckStatus.FAIL
+                and spec.failure_route is not None
+                and result.on_failure is not spec.failure_route
+            ):
+                raise ValueError(
+                    f"Gate {spec.id!r} declared route "
+                    f"{spec.failure_route.value} but emitted "
+                    f"{result.on_failure.value if result.on_failure else None}"
+                )
 
 
 @dataclass(frozen=True)
@@ -119,6 +172,20 @@ class AssuranceEngine:
         duplicates = sorted(check_id for check_id, count in counts.items() if count > 1)
         if duplicates:
             raise ValueError(f"Duplicate check IDs: {duplicates}")
+        invalid_routes = [
+            check.id
+            for check in self.checks
+            if (
+                check.mode is CheckMode.DIAGNOSTIC
+                and check.failure_route is not None
+            )
+            or (
+                check.mode is CheckMode.GATE
+                and check.failure_route not in {None, Decision.ASSIST, Decision.STOP}
+            )
+        ]
+        if invalid_routes:
+            raise ValueError(f"Invalid declared failure routes: {invalid_routes}")
 
     def evaluate(self, evidence: EvidenceBundle) -> AssuranceCase:
         evidence_problems = validate_evidence_bundle(evidence)
@@ -126,6 +193,9 @@ class AssuranceEngine:
             raise ValueError(
                 "Invalid evidence bundle: " + "; ".join(evidence_problems)
             )
+        contract_digest = decision_contract_digest(
+            self.checks, self.required_coverage
+        )
         tasks = reconstruct_tasks(
             evidence.events, evidence.outcomes, evidence.rates, evidence.policy
         )
@@ -187,14 +257,15 @@ class AssuranceEngine:
 
         results: list[CheckResult] = []
         findings = []
-        for check in self.checks:
-            try:
-                output = check.run(view)
-            except Exception as error:
-                raise RuntimeError(f"Check {check.manifest_id!r} failed") from error
-            _validate_check_output(check, output.results)
-            results.extend(output.results)
-            findings.extend(output.findings)
+        if not missing_coverage:
+            for check in self.checks:
+                try:
+                    output = check.run(view)
+                except Exception as error:
+                    raise RuntimeError(f"Check {check.manifest_id!r} failed") from error
+                _validate_check_output(check, output.results)
+                results.extend(output.results)
+                findings.extend(output.findings)
 
         failed_gates = [
             result
@@ -233,6 +304,7 @@ class AssuranceEngine:
             ),
             source_manifest_id=evidence.source_manifest_id,
             evidence_digest=evidence.digest,
+            decision_contract_digest=contract_digest,
         )
 
 
