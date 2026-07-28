@@ -49,6 +49,12 @@ normalized loader verifies that the receipt's evidence digest matches the
 reconstructed bundle. This adds source reproducibility without changing the
 kernel's evidence or decision-contract digest schemes.
 
+`source.public-swebench-mini-agent@1` is a pinned public-case mapper rather than a
+general live adapter. It removes conversations and patches, retains published
+hidden-test outcomes, estimated run spend, API-call counts, upstream paths, and
+complete-file digests, and compares two models on identical task identities. Its
+single-arm case and paired frontier use the same unchanged kernel.
+
 ## Single-arm engine
 
 The assurance engine reconstructs task-level full cost, then evaluates an explicit

@@ -1,0 +1,575 @@
+{
+  "cost": {
+    "api_call_count_field": "info.model_stats.api_calls",
+    "authority": "upstream client-side estimate",
+    "field": "info.model_stats.instance_cost"
+  },
+  "license": "MIT",
+  "reference_model": "claude-4.5-haiku-high",
+  "rubric": {
+    "acceptable_field": "info.resolved",
+    "cross_check_field": "info.scores.resolved",
+    "version": "swe-bench-verified.hidden-tests@pinned-upstream"
+  },
+  "schema": "public.swebench-paired-runs@1",
+  "selection": {
+    "digest_encoding": "sorted task IDs, UTF-8, one newline per ID",
+    "eligible_population": "task IDs present for both fixed model labels at the pinned revision",
+    "eligible_task_count": 500,
+    "eligible_task_ids_sha256": "a6b0fd7c8c2969a0eef892e032250adcfa6d32362d395c246930e61b575ac9b9",
+    "offset": 0,
+    "order": "lexicographic task_id",
+    "outcome_blind": true,
+    "selected_task_ids_sha256": "539a7c78003458fb692ebc2213c0c55177d41af13a2d6f254cf9c828161be872",
+    "stride": 20,
+    "take": 20
+  },
+  "target_model": "claude-opus-4.6",
+  "tasks": [
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 55,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.21235584999999996,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/astropy__astropy-12907/astropy__astropy-12907.traj.json",
+          "source_sha256": "877fb8d48108b11fc0795b0df47d5667b3bae838a72fd74fab6348cf6270bbb4",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 36,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.40364050000000007,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/astropy__astropy-12907/astropy__astropy-12907.traj.json",
+          "source_sha256": "6b7952246599a3c715a49f937417b98e7666ce40344b5527f5a37ded21a5f383",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "astropy__astropy-12907"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 60,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.24583010000000005,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/astropy__astropy-8707/astropy__astropy-8707.traj.json",
+          "source_sha256": "dad73efc04604702d1d1058496f88ace68415fdd6331521ffd31d7cc3834e2bc",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 46,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.6098712500000002,
+          "model": "claude-opus-4.6",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/astropy__astropy-8707/astropy__astropy-8707.traj.json",
+          "source_sha256": "58bc7e00dde80349f6d3bc81bf8f47eea5b13e1acf9a36630230c0de0cb15b64",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "astropy__astropy-8707"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 60,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.2589258,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-11211/django__django-11211.traj.json",
+          "source_sha256": "e52dfa15d4f6c9a91bde807110f0c6638c2d35d2547a64c1dafad88ceb45839a",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 36,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.5339864999999999,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-11211/django__django-11211.traj.json",
+          "source_sha256": "1f1bb8d118fab71283f62e19a317dbdcba7a6d5b3230b6dd1111308c3224172f",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-11211"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 63,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.28336355,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-11790/django__django-11790.traj.json",
+          "source_sha256": "9b7fdffa0289adc7c386bb937c6ef06d9b348b44ac94ca23bada184e88c36ca1",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 18,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.252052,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-11790/django__django-11790.traj.json",
+          "source_sha256": "c25d50b01973a7dfa21a068edf866c4ead6a9793a3eaaeb21a2af7e56a378b7f",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-11790"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 64,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.24457150000000005,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-12308/django__django-12308.traj.json",
+          "source_sha256": "2d1244a41ad73442a13b63153b1adad69ad3f13b1c682873f46d19d648e54948",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 22,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.25314424999999996,
+          "model": "claude-opus-4.6",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-12308/django__django-12308.traj.json",
+          "source_sha256": "df7fea516f22a2bfbb391400810b0988e81d81c230f8a69d37c399be71fbd710",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-12308"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 70,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.31617144999999997,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-13128/django__django-13128.traj.json",
+          "source_sha256": "66134ba67270b9454a8400859727f0cd2d6d210d04f1b6d52645d06e3d4a0afb",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 16,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.24308425000000003,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-13128/django__django-13128.traj.json",
+          "source_sha256": "053f84ca790490c92d09f847dcd9051fce6b3cda60bd03d21a483f9b83840b9d",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-13128"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 51,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.2654601,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-13568/django__django-13568.traj.json",
+          "source_sha256": "28cb8cd134624cc5bd880bee3f63dcf927d68d5aef4e0c629f527a77d5cd5336",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 20,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.26459275,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-13568/django__django-13568.traj.json",
+          "source_sha256": "2fc9439ac9a60510134f5ecfa19d2bd443578123baeb4de74b896a84c7f6f462",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-13568"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 75,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.42088194999999995,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-14034/django__django-14034.traj.json",
+          "source_sha256": "8b0632ddef777601eb24d1363d5f8f52cae9e7d558545a51b1287aaf9ddd7a72",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 18,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.214912,
+          "model": "claude-opus-4.6",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-14034/django__django-14034.traj.json",
+          "source_sha256": "c183b2f804a3ecada826a977b064b2e03948b50d18e80697539b5439b62f105d",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-14034"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 69,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.2811219999999999,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-14559/django__django-14559.traj.json",
+          "source_sha256": "23ff49490ee71ad01355cf696dd25b356e11f54f7da8abc6987a2b62a664786b",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 11,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.18402775000000002,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-14559/django__django-14559.traj.json",
+          "source_sha256": "d42b2d932156a50328a29088822460067acf673a2425b7675852cce3e179ae14",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-14559"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 74,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.44346905,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-15128/django__django-15128.traj.json",
+          "source_sha256": "486ca36ffff95e9615667f4a58e4979783d6c43b2dbd7fc2b712a19caeb6a072",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 29,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.6546024999999998,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-15128/django__django-15128.traj.json",
+          "source_sha256": "b8f2e039e10ca6fe8a04ca2216d9517bc4caec9db573b37faf92c06a4b53b6a5",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-15128"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 36,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.13383439999999996,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-15572/django__django-15572.traj.json",
+          "source_sha256": "93d4f90ca6279c8863c9c1136b109d2ac3aa4c52ddcaaf9869bbd683e02f5c9c",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 16,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.21306775000000003,
+          "model": "claude-opus-4.6",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-15572/django__django-15572.traj.json",
+          "source_sha256": "523a0ae8858e5d27c63a825a39f5ad44688300695317253dd8a94c1f8c303104",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-15572"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 47,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.18110274999999998,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-16145/django__django-16145.traj.json",
+          "source_sha256": "087c5db175083cb87adfdbb92f5a5dbd5b3545dac89fb6ba83bfaed4e14938b2",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 12,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.1539335,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-16145/django__django-16145.traj.json",
+          "source_sha256": "c237feb2eea7d271b34f265365b0c0e62039d1f17a5268b969a513591bed02f4",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-16145"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 46,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.17297305000000002,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/django__django-16667/django__django-16667.traj.json",
+          "source_sha256": "82fa83b6bcdae8f9e5a10060f9d13966b24ef46c23979bc17a32114c76c62b9b",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 9,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.16905975000000004,
+          "model": "claude-opus-4.6",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/django__django-16667/django__django-16667.traj.json",
+          "source_sha256": "73d8e260c1a36a226bbb7daa241d2639beba262516834807ed6e1433a20ba83a",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "django__django-16667"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 34,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.12209065000000002,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/matplotlib__matplotlib-22719/matplotlib__matplotlib-22719.traj.json",
+          "source_sha256": "7e6a4b584ac6c7489970f98a2c3565d1be10e994ffcb1407cf981a974e5d28fc",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 19,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.26072949999999995,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/matplotlib__matplotlib-22719/matplotlib__matplotlib-22719.traj.json",
+          "source_sha256": "cbbf262ad1a8dbedf24c24a74ac0b9e8a939a7fe9f445bc8170126b8d7bffde3",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "matplotlib__matplotlib-22719"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 124,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.6171895000000001,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/matplotlib__matplotlib-25775/matplotlib__matplotlib-25775.traj.json",
+          "source_sha256": "38680ecb5ce4d17d2b0a270bed35c321d18f39f410cfbdaca70dd3d1fd376de8",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 66,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 1.3607052499999999,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/matplotlib__matplotlib-25775/matplotlib__matplotlib-25775.traj.json",
+          "source_sha256": "f90067e48af525a8e3801d0c4c0a69c6b5cf820942dcc19074d009176e3e6d59",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "matplotlib__matplotlib-25775"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 38,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.15859545000000005,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/pydata__xarray-3151/pydata__xarray-3151.traj.json",
+          "source_sha256": "7b751ff795c95b93f1475a2f67d0ae1673b7ab5ce8a2326e9e89a0e06a639736",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 16,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.21753000000000003,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/pydata__xarray-3151/pydata__xarray-3151.traj.json",
+          "source_sha256": "9bb23e24836bc5f8df9e0674791c3c84d8125c55de546f50abf9db8208413540",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "pydata__xarray-3151"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 87,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.5170138,
+          "model": "claude-4.5-haiku-high",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/pylint-dev__pylint-4551/pylint-dev__pylint-4551.traj.json",
+          "source_sha256": "e9c9e81212423a474d4346437a634c1f62e7d2878163929dda0234d5f6d5b683",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 56,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 1.4207340000000002,
+          "model": "claude-opus-4.6",
+          "resolved": false,
+          "scores_resolved": 0,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/pylint-dev__pylint-4551/pylint-dev__pylint-4551.traj.json",
+          "source_sha256": "c69064bbe23aaca10603bd5ce2ac1bba774776313bd5655675b34f5e6ab46f5a",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "pylint-dev__pylint-4551"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 32,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.10816765,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/pytest-dev__pytest-7205/pytest-dev__pytest-7205.traj.json",
+          "source_sha256": "5f94529ddf2de03a41d4be4260557b0f677a25ef9df9400c3dd0da213c253d19",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 14,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.2138615,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/pytest-dev__pytest-7205/pytest-dev__pytest-7205.traj.json",
+          "source_sha256": "7e039291baffd5a7a25fa90c0ed3325610bc44dbf5e9461d01af28b1775b8471",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "pytest-dev__pytest-7205"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 54,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.21013915000000005,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/scikit-learn__scikit-learn-13328/scikit-learn__scikit-learn-13328.traj.json",
+          "source_sha256": "72338a6d925cc4666bbefec44dbe47d07426a76441411f852f1e50b64c553766",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 22,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.21872025000000003,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/scikit-learn__scikit-learn-13328/scikit-learn__scikit-learn-13328.traj.json",
+          "source_sha256": "d3e2310148672b54452f49c03938f2a3dbaf4f244cbd0d158dc1c210a95a9fc0",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "scikit-learn__scikit-learn-13328"
+    },
+    {
+      "runs": {
+        "claude-4.5-haiku-high": {
+          "api_calls": 42,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.18167874999999997,
+          "model": "claude-4.5-haiku-high",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-4.5-haiku-high/scikit-learn__scikit-learn-9288/scikit-learn__scikit-learn-9288.traj.json",
+          "source_sha256": "05c5ce28dd0fe57284fe342a736b2b46e94d80b5184d82e02800975c11d274dc",
+          "trajectory_format": "mini-swe-agent-1.1"
+        },
+        "claude-opus-4.6": {
+          "api_calls": 44,
+          "exit_status": "Submitted",
+          "instance_cost_usd": 0.5935475000000001,
+          "model": "claude-opus-4.6",
+          "resolved": true,
+          "scores_resolved": 1,
+          "source_path": "swebench_verified_raw/claude-opus-4.6/scikit-learn__scikit-learn-9288/scikit-learn__scikit-learn-9288.traj.json",
+          "source_sha256": "f38c38320014fdb6bb17b0df1917e515c23c11415eaf40c7c80e791732e47536",
+          "trajectory_format": "mini-swe-agent-1.1"
+        }
+      },
+      "task_id": "scikit-learn__scikit-learn-9288"
+    }
+  ],
+  "upstream": {
+    "dataset": "tarsur385/swebench-verified-trajectories",
+    "dataset_url": "https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories/tree/b55979d6b24850b72ae4d80f912526280cd6058a",
+    "revision": "b55979d6b24850b72ae4d80f912526280cd6058a"
+  }
+}

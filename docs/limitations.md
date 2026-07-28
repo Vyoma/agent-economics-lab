@@ -142,3 +142,16 @@ stable public interchange standard. Pinned fixtures and versioned compatibility
 tests are required when Claude Code changes its record shape. The conversion
 receipt is reproducibility metadata, not a signature or proof that a manual outcome
 label or price card is correct.
+
+## The public case is a benchmark case, not enterprise ROI
+
+The public SWE-bench case uses real published trajectories, hidden-test outcomes,
+client-estimated run spend, and API-call counts. It assigns zero monetized value,
+human cost, remediation cost, and incident loss because the public source does not
+publish defensible business values for those fields. Zero is a conservative credit
+for this routing demonstration, not an estimate that a resolved task has no value.
+
+Its paired Haiku reference is a technical counterfactual, not a human workflow.
+The 20 outcome-blind selected tasks are sufficient for an inspectable demonstration,
+not a population estimate. The frontier's exact harmful-regression upper bound and
+claim boundary make that sampling uncertainty visible.
