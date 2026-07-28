@@ -1,6 +1,11 @@
 """Small, dependency-free primitives for an agent economic assurance case."""
 
-from .adapters import load_normalized_json_bundle, normalized_json_bundle
+from .adapters import (
+    load_normalized_json_bundle,
+    normalized_json_bundle,
+    normalized_json_document,
+    render_normalized_json,
+)
 from .assurance import (
     ASSURANCE_ENGINE_IMPLEMENTATION,
     DECISION_CONTRACT_SCHEMA,
@@ -13,6 +18,16 @@ from .assurance import (
     evaluate_bundle,
 )
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+from .claude_code import (
+    ClaudeCodeSession,
+    claude_code_bundle,
+    claude_code_bundle_from_session,
+    conversion_contract_template,
+    conversion_receipt,
+    inspect_claude_code_jsonl,
+    inspect_to_contract_template,
+    load_conversion_contract,
+)
 from .evidence import make_evidence_bundle
 from .frontier import (
     ArmSummary,
@@ -69,6 +84,7 @@ __all__ = [
     "CheckResult",
     "CheckSpec",
     "CheckStatus",
+    "ClaudeCodeSession",
     "Coverage",
     "DEFAULT_REQUIRED_COVERAGE",
     "DECISION_CONTRACT_SCHEMA",
@@ -90,10 +106,15 @@ __all__ = [
     "default_checks",
     "default_engine",
     "clopper_pearson_upper",
+    "claude_code_bundle",
+    "claude_code_bundle_from_session",
+    "conversion_contract_template",
+    "conversion_receipt",
     "evaluate",
     "evaluate_bundle",
     "evaluate_frontier",
     "load_baseline",
+    "load_conversion_contract",
     "load_csv_bundle",
     "load_experiment",
     "load_normalized_json_bundle",
@@ -104,8 +125,12 @@ __all__ = [
     "load_traces",
     "make_evidence_bundle",
     "normalized_json_bundle",
+    "normalized_json_document",
+    "render_normalized_json",
     "render_frontier_json",
     "render_frontier_markdown",
     "render_frontier_svg",
     "run_frontier",
+    "inspect_claude_code_jsonl",
+    "inspect_to_contract_template",
 ]

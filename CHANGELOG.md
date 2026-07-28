@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.4.0 - 2026-07-28
+
+- Add a contract-first Claude Code JSONL converter and separate `convert` CLI
+  workflow.
+- Deduplicate streamed assistant fragments into unique model calls and join tool
+  uses to exactly one result through the parent-UUID graph.
+- Require explicit outcomes, pricing tiers, cache rates, client/server tool cost,
+  baseline, and policy instead of inferring economic semantics from the transcript.
+- Freeze raw and content-redacted source inventories and embed a conversion receipt
+  that binds source, conversion contract, and canonical evidence digests.
+- Remove prompt, response, thinking, result, argument-key, argument-value, and raw
+  source-ID content from normalized output.
+- Reject stale inventories, incomplete tool calls, sidechains, billing-context
+  drift, and unexpanded delegation that may hide nested model spend.
+- Add byte-reproducible template, bundle, report, and adversarial adapter tests.
+- Keep the checked-in example explicitly synthetic until a permissioned,
+  manually labeled real case has an approved price card and baseline.
+
 ## 0.3.0 - 2026-07-27
 
 - Correct the gate-disablement benchmark claim from evidence deletion to
