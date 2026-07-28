@@ -1,0 +1,76 @@
+{
+  "arms": [
+    {
+      "acceptable_rate": 0.7,
+      "arm_id": "candidate-opus",
+      "assurance_decision": "STOP",
+      "cost_per_acceptable_outcome_usd": 0.602557339286,
+      "decision_contract_digest": "dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983",
+      "dominated": false,
+      "evidence_digest": "2d063279479ebeff05654482a77ad53eb6076441315e462b1881e0c56e5a4394",
+      "expected_net_value_per_attempt_usd": -0.4217901375,
+      "mean_effective_cost_usd": 0.4217901375,
+      "paired_tasks": 20
+    },
+    {
+      "acceptable_rate": 0.55,
+      "arm_id": "reference-haiku",
+      "assurance_decision": "STOP",
+      "cost_per_acceptable_outcome_usd": 0.488630590909,
+      "decision_contract_digest": "dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983",
+      "dominated": false,
+      "evidence_digest": "c88375512518ad44a03ff98b4eb44b8184825aaaeacdcd02eb0e9ce0f8497a4d",
+      "expected_net_value_per_attempt_usd": -0.268746825,
+      "mean_effective_cost_usd": 0.268746825,
+      "paired_tasks": 20
+    }
+  ],
+  "comparisons": [
+    {
+      "acceptable_rate_delta": 0.15,
+      "adjusted_alpha": 0.025,
+      "beneficial_changes": 4,
+      "breakage_rate": 0.05,
+      "breakage_rate_upper": 0.248732762772,
+      "candidate_arm": "candidate-opus",
+      "conditional_breakage_rate": 0.0909090909091,
+      "cost_reduction_rate_lower": -0.936470832215,
+      "eligible": false,
+      "harmful_regressions": 1,
+      "mean_cost_reduction_rate": -0.569470216067,
+      "paired_tasks": 20,
+      "reasons": [
+        "reference assurance decision is STOP, not SCALE",
+        "candidate assurance decision is STOP, not SCALE",
+        "breakage upper bound 24.873% exceeds 5.000%",
+        "cost-reduction lower bound -93.647% is below 0.000%"
+      ],
+      "reference_acceptable_tasks": 11
+    }
+  ],
+  "decision": "HOLD",
+  "experiment_id": "public-swebench-opus-vs-haiku-20-paired-v1",
+  "method": "Exact one-sided Clopper-Pearson breakage bound plus deterministic paired percentile bootstrap for cost reduction; a Bonferroni-adjusted nominal familywise confidence target across planned quality and cost tests. Derived decision endpoints are canonicalized to twelve significant digits.",
+  "numeric_precision_significant_digits": 12,
+  "plan_digest": "14a18582de5f520c43a611e820d3d2596a26cdac060ceaf85375978122cba421",
+  "policy": {
+    "bootstrap_samples": 10000,
+    "confidence_level": 0.95,
+    "expected_adjusted_tail_draws": 250.0,
+    "max_breakage_rate": 0.05,
+    "min_cost_reduction_rate": 0.0,
+    "min_paired_tasks": 20,
+    "seed": 20260728
+  },
+  "problems": [],
+  "reference_arm": "reference-haiku",
+  "schema": "frontier.case@1",
+  "selected_arm": null,
+  "selection": {
+    "confirmation_required_for_generalization": true,
+    "evidence_role": "post_selection_exploratory",
+    "rule": "minimum_observed_mean_cost_among_eligible"
+  },
+  "task_manifest_digest": "a7cd01c2784a6faa780d6f8ca68c84343b31910d85a4ea5feee99d938d9e383a",
+  "task_manifest_path": "task-manifest.json"
+}
