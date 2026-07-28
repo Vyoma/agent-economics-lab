@@ -37,6 +37,24 @@ requires and permits them.
 The source manifest identifies the adapter family. The evidence digest is
 reproducibility metadata, not a signature or attestation.
 
+`source.claude-code-jsonl@1` adds a contract-first intake path. The source transcript
+supplies observable execution facts. A separate, frozen conversion contract
+supplies outcome labels, pricing tiers, explicit client/server tool cost, the
+counterfactual baseline, and policy. The converter emits the same normalized JSON
+boundary used by every downstream decision.
+
+Its embedded conversion receipt records the raw source digest, content-redacted
+inventory digest, conversion-contract digest, and resulting evidence digest. The
+normalized loader verifies that the receipt's evidence digest matches the
+reconstructed bundle. This adds source reproducibility without changing the
+kernel's evidence or decision-contract digest schemes.
+
+`source.public-swebench-mini-agent@1` is a pinned public-case mapper rather than a
+general live adapter. It removes conversations and patches, retains published
+hidden-test outcomes, estimated run spend, API-call counts, upstream paths, and
+complete-file digests, and compares two models on identical task identities. Its
+single-arm case and paired frontier use the same unchanged kernel.
+
 ## Single-arm engine
 
 The assurance engine reconstructs task-level full cost, then evaluates an explicit
