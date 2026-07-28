@@ -45,12 +45,14 @@ The normalized JSON boundary remains the only input to downstream assurance.
 | Goal | Status | Evidence |
 |---|---|---|
 | G1: real source adapter clears the conformance bar | Complete | `tests/test_claude_code_adapter.py` |
-| G2: permissioned non-synthetic case published | Not complete | Requires manual labels, approved prices, and a defensible baseline |
+| G2: non-synthetic case published | Complete at public benchmark scope | 20 paired SWE-bench Verified tasks with public outcomes, spend, calls, and source digests |
 | G3: decided bring-your-own-data CLI path | Complete | `agent-economics convert` |
 | G4: kernel and both digests unchanged | Complete | Existing reproduction suite plus adapter tests |
 
-G2 is not silently replaced with a synthetic claim. The checked-in fixture is a
-schema and conformance case only.
+G2 is satisfied by the public SWE-bench case, not by relabeling the synthetic
+Claude Code fixture. The case uses published hidden-test outcomes, run-cost
+estimates, API-call counts, and a same-task Haiku reference. It intentionally
+assigns zero business value and therefore makes no enterprise ROI claim.
 
 ## Contract-first design
 
@@ -127,7 +129,7 @@ version change are required for incompatible upstream schema changes.
 
 ## Deferred work
 
-- permissioned, manually labeled real assurance case;
+- permissioned enterprise case with manually labeled business outcomes;
 - multi-file parent plus subagent expansion;
 - supported Claude Code `stream-json` adapter if its schema differs materially;
 - generic OpenTelemetry GenAI semantic-convention adapter;

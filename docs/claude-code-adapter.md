@@ -203,9 +203,10 @@ The inspector has been exercised locally against uncommitted Claude Code session
 from observed versions `2.1.165` and `2.1.198`. No prompt, response, contract price,
 or manually assigned outcome from those sessions is checked into this repository.
 
-A publishable non-synthetic assurance case still requires a permissioned session,
-manual labels under a frozen rubric, an approved price card, and a defensible
-baseline. Until those exist, the repository does not claim that goal is complete.
+A public non-synthetic benchmark case now exists under
+[`examples/public-swebench`](../examples/public-swebench/). A permissioned
+enterprise case still requires manual labels under a frozen business rubric, an
+approved price card, and a defensible human or production baseline.
 
 Claude's supported CLI documents structured `json` and `stream-json` output, while
 the local interactive transcript used here is treated as a pinned compatibility

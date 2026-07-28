@@ -64,6 +64,10 @@ source.normalized-json@1
 source.claude-code-jsonl@1
 ```
 
+The public SWE-bench demonstration also records
+`source.public-swebench-mini-agent@1`. That mapper is intentionally scoped to one
+pinned public case and is not advertised as a generic mini-SWE-agent converter.
+
 The JSON adapter is the offline interchange seam for vendor mappers. It does not
 claim that arbitrary Galileo, LangSmith, or OTLP files already match the canonical
 schema. A vendor contribution should be a small, tested mapping into the bundle,

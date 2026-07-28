@@ -109,7 +109,7 @@ survive contact with data.
 For this project, the executable artifact provides:
 
 1. a two-minute result with no cloud account;
-2. transparent math and synthetic evidence;
+2. transparent math, synthetic conformance evidence, and one public paired case;
 3. a sharp, shareable failure case;
 4. a contribution unit: bring one assurance case; and
 5. a narrow adapter seam that lets existing platforms remain in place.
@@ -127,7 +127,8 @@ Build:
 - fail-safe incomplete/scale/assist/stop routing;
 - diagnostic repetition/cycle checks with explicit caveats;
 - a portable Markdown report;
-- runnable lessons, tests, and one synthetic case.
+- runnable lessons, synthetic conformance cases, and a non-synthetic public paired
+  case.
 
 Do not build yet:
 

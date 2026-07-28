@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code benchmark reproduce lessons test
+.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code public-case benchmark reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -42,7 +42,19 @@ claude-code:
 	@python3 -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code.json
 
-reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code
+public-case:
+	@PYTHONPATH=. python3 examples/public-swebench/build_case.py \
+		--source examples/public-swebench/runs.json \
+		--output-dir /tmp/agent-economics-public-swebench
+	@python3 -m agent_economics evaluate \
+		--bundle /tmp/agent-economics-public-swebench/arms/candidate-opus.json
+	@python3 -m agent_economics frontier \
+		/tmp/agent-economics-public-swebench/manifest.json \
+		--output-dir /tmp/agent-economics-public-swebench-rendered \
+		--verify-dir examples/public-swebench/frontier \
+		|| [ $$? -eq 3 ]
+
+reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code public-case
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done

@@ -157,6 +157,25 @@ make modularity
 [Architecture](ARCHITECTURE.md) ·
 [Limitations](docs/limitations.md)
 
+## Run a non-synthetic public case
+
+Twenty paired SWE-bench Verified tasks compare real mini-SWE-agent trajectories
+using Claude Opus 4.6 and Claude Haiku 4.5:
+
+```bash
+make public-case
+```
+
+Opus resolves `14/20` tasks versus Haiku's `11/20`, while costing 56.9% more
+per attempt and 23.3% more per resolved task. The evidence engine returns `STOP`;
+the paired uncertainty-aware frontier returns `HOLD`. Prompts, reasoning, patches,
+and tool output are excluded, while each complete public trajectory remains
+verifiable by its upstream path and SHA-256 digest.
+
+[Inspect the public case](examples/public-swebench/) ·
+[Read the AssuranceCase](examples/public-swebench/assurance-case.md) ·
+[Read the paired frontier](examples/public-swebench/frontier/frontier.md)
+
 ## Convert a Claude Code session without inventing its economics
 
 Claude Code JSONL contains execution facts, not acceptable-outcome labels, a
