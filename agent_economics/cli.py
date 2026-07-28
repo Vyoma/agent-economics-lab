@@ -1,13 +1,23 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Sequence
 
-from .adapters import load_normalized_json_bundle
+from .adapters import load_normalized_json_bundle, render_normalized_json
 from .assurance import evaluate_bundle
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+from .claude_code import (
+    SOURCE_ID as CLAUDE_CODE_SOURCE_ID,
+    SOURCE_VERSION as CLAUDE_CODE_SOURCE_VERSION,
+    claude_code_bundle_from_session,
+    conversion_contract_template,
+    conversion_receipt,
+    inspect_claude_code_jsonl,
+    load_conversion_contract,
+)
 from .frontier import FrontierDecision, run_frontier
 from .frontier_report import (
     render_frontier_json,
@@ -51,6 +61,26 @@ def build_parser() -> argparse.ArgumentParser:
         "--verify-dir",
         help="Fail if generated frontier artifacts differ from this directory.",
     )
+    convert_parser = subparsers.add_parser(
+        "convert",
+        help="Convert a pinned offline source export into normalized JSON.",
+    )
+    convert_parser.add_argument(
+        "--from",
+        dest="source",
+        choices=("claude-code",),
+        required=True,
+    )
+    convert_parser.add_argument("--in", dest="input_path", required=True)
+    convert_parser.add_argument(
+        "--template",
+        help="Write a privacy-preserving conversion-contract template.",
+    )
+    convert_parser.add_argument(
+        "--contract",
+        help="Completed conversion contract with outcomes, prices, baseline, and policy.",
+    )
+    convert_parser.add_argument("--out", help="Normalized JSON output path.")
     subparsers.add_parser("capabilities")
     return parser
 
@@ -61,6 +91,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("SOURCE ADAPTERS")
         print("source.csv@1")
         print("source.normalized-json@1")
+        print(f"{CLAUDE_CODE_SOURCE_ID}@{CLAUDE_CODE_SOURCE_VERSION}")
+        print("\nCONVERTERS")
+        print("converter.claude-code-jsonl@1")
         print("\nCHECKS")
         for check in default_checks():
             required = "required" if check.covers & DEFAULT_REQUIRED_COVERAGE else "optional"
@@ -73,6 +106,58 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("renderer.frontier-svg@1")
         print("\nEXPERIMENTS")
         print("experiment.paired-budget-frontier@1")
+        return 0
+    if args.command == "convert":
+        parser = build_parser()
+        template_mode = bool(args.template)
+        conversion_mode = bool(args.contract or args.out)
+        if template_mode and conversion_mode:
+            parser.error("--template cannot be combined with --contract or --out")
+        if not template_mode and not (args.contract and args.out):
+            parser.error("provide --template or both --contract and --out")
+        source_path = Path(args.input_path)
+        target_path = Path(args.template if template_mode else args.out)
+        protected_paths = [source_path]
+        if args.contract:
+            protected_paths.append(Path(args.contract))
+        if any(
+            target_path.resolve() == protected.resolve()
+            for protected in protected_paths
+        ):
+            print(
+                "INCOMPLETE: conversion output cannot overwrite its input or contract",
+                file=sys.stderr,
+            )
+            return 2
+        try:
+            session = inspect_claude_code_jsonl(source_path)
+            if template_mode:
+                content = (
+                    json.dumps(
+                        conversion_contract_template(session),
+                        sort_keys=True,
+                        indent=2,
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
+            else:
+                contract = load_conversion_contract(args.contract)
+                bundle = claude_code_bundle_from_session(session, contract)
+                receipt = conversion_receipt(session, contract, bundle)
+                content = render_normalized_json(bundle, conversion=receipt)
+            target_path.write_text(content, encoding="utf-8")
+        except (
+            ArithmeticError,
+            AttributeError,
+            KeyError,
+            OSError,
+            TypeError,
+            ValueError,
+        ) as error:
+            print(f"INCOMPLETE: conversion failed: {error}", file=sys.stderr)
+            return 2
+        print(f"Wrote {target_path}")
         return 0
     if args.command == "frontier":
         output_dir = Path(args.output_dir)

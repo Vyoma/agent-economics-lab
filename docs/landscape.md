@@ -1,6 +1,6 @@
 # Landscape and product decision
 
-Research date: 2026-07-13.
+Research date: 2026-07-28.
 
 ## Decision
 
@@ -51,6 +51,18 @@ useful as one transparent lesson, but it is not a defensible category claim.
 - Products such as [Tarmac](https://www.gettarmac.ai/),
   [LensAI](https://getlens.ai/), and [Runrate](https://www.runrate.tech/) already
   market budget controls, outcome/ROI attribution, or cost per outcome.
+- Claude Code transcript parsing is already a populated open-source category.
+  [claude-session-analyzer](https://pypi.org/project/claude-session-analyzer/)
+  reports token, cost, time, and per-skill behavior;
+  [AgentSight](https://www.agentsight.org/) reports usage, cache efficiency, and
+  cost; and
+  [claude-code-usage-analyzer](https://github.com/aarora79/claude-code-usage-analyzer)
+  breaks cost down by token type. Parsing JSONL or showing cache spend is not the
+  novel claim.
+- Anthropic's own [cost guidance](https://code.claude.com/docs/en/costs) exposes
+  session usage and estimated spend. It also notes that local dollar figures may
+  differ from authoritative billing, which is another reason to keep the supplied
+  price card explicit and versioned.
 
 ## The narrower gap
 
@@ -70,6 +82,22 @@ What was attempted?
 Observability products can export the trace. Eval products can supply the outcome.
 Finance systems can provide rates and losses. Runtime guardrails can enforce the
 caps. The assurance case makes their combined claim reviewable and portable.
+
+For the Claude Code adapter, the differentiator is the semantic boundary after
+parsing:
+
+```text
+observed transcript facts
+  + frozen task/outcome contract
+  + explicit cache/client/server price contract
+  + named baseline and policy
+  -> auditable INCOMPLETE / SCALE / ASSIST / STOP decision
+```
+
+Existing analyzers answer, "What did this session consume?" This project asks a
+different question: "What evidence must be present before this workload earns the
+right to scale?" The source inventory and refusal behavior make that distinction
+executable.
 
 ## Why a small executable system beats a wiki at launch
 

@@ -157,6 +157,38 @@ make modularity
 [Architecture](ARCHITECTURE.md) ·
 [Limitations](docs/limitations.md)
 
+## Convert a Claude Code session without inventing its economics
+
+Claude Code JSONL contains execution facts, not acceptable-outcome labels, a
+counterfactual baseline, or a complete price contract. The converter therefore has
+two explicit phases:
+
+```bash
+agent-economics convert \
+  --from claude-code \
+  --in session.jsonl \
+  --template conversion-contract.json
+
+# Complete the labels, rate tiers, tool costs, baseline, and policy.
+
+agent-economics convert \
+  --from claude-code \
+  --in session.jsonl \
+  --contract conversion-contract.json \
+  --out bundle.json
+
+agent-economics evaluate --bundle bundle.json
+```
+
+The adapter deduplicates streamed assistant fragments into model calls, prices
+base/cache/server-tool usage from the supplied contract, discards prompt and
+response content, preserves only content-free tool-argument type shape, and refuses unresolved
+delegation or incomplete tool-call inventories.
+
+[Read the adapter contract](docs/claude-code-adapter.md) ·
+[Review the implemented PRD](docs/adapter-extension-prd.md) ·
+[Inspect the complete fixture](examples/claude-code/)
+
 ## Reproduce everything
 
 ```bash
@@ -168,8 +200,8 @@ make reproduce
 ```
 
 `make reproduce` runs the full test suite, the module-deletion proof, five
-executable lessons, both ablation benchmarks, and byte-for-byte frontier artifact
-verification.
+executable lessons, both ablation benchmarks, the Claude Code conversion, and
+byte-for-byte frontier and adapter artifact verification.
 
 ## Contribute evidence, not integrations on a slide
 
