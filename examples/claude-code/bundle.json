@@ -1,0 +1,264 @@
+{
+  "baseline": {
+    "acceptable_rate": 0.5,
+    "cost_per_attempt_usd": 6.0,
+    "name": "illustrative human-only workflow",
+    "value_per_acceptable_outcome_usd": 10.0
+  },
+  "conversion": {
+    "claude_code_versions": [
+      "2.1.198"
+    ],
+    "contract_schema_version": 1,
+    "conversion_contract_sha256": "af764727e81c84761469bbbe7c0fd0cac9a367e7ea82d30f0ee05aefd1635f42",
+    "counts": {
+      "model_calls": 4,
+      "relevant_records": 9,
+      "tasks": 2,
+      "tool_calls": 2
+    },
+    "evidence_digest": "89816dd5af84f7348bd2be8c619124637ab3146332c8ff565af3378103072980",
+    "inventory_sha256": "63960cd503c846131c7a4d9ac0805581b940a3b128c2ce4c6fc95e0204cc1f53",
+    "label_source": "fixture.manual-review",
+    "price_card_id": "fixture.explicit-rates@2026-07-17",
+    "privacy_mode": "content-redacted-type-shapes-only",
+    "raw_sha256": "72b29b9ae7d8df77aa48a45228d3e52ca559141742e51a72082c40c75d4e1a4d",
+    "rubric_version": "fixture.acceptable-task@1",
+    "source_id": "source.claude-code-jsonl",
+    "source_version": "1",
+    "task_unit": "external-user-prompt"
+  },
+  "events": [
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-17",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 20
+          },
+          "cache_creation_input_tokens": 20,
+          "cache_read_input_tokens": 500,
+          "input_tokens": 80,
+          "output_tokens": 40,
+          "server_tool_use": {
+            "web_search_requests": 0
+          }
+        }
+      },
+      "direct_cost_usd": 0.001065,
+      "event_id": "cc-model-05c744366772a43f8542529a3adc16a5cb715b398a92c985a2c3819785c9038d",
+      "event_type": "model",
+      "input_tokens": 600,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 40,
+      "status": "ok",
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5",
+      "timestamp": "2026-07-17T16:01:01.000Z"
+    },
+    {
+      "arguments": {
+        "field_count": 2,
+        "fields": [
+          {
+            "kind": "integer"
+          },
+          {
+            "kind": "string"
+          }
+        ],
+        "kind": "object"
+      },
+      "direct_cost_usd": 0.0,
+      "event_id": "cc-tool-21ad85a314204b8db751bbd2591dbfbbf90c6f0edd86a658bea8125b23a3f112",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "",
+      "name": "Bash",
+      "output_tokens": 0,
+      "status": "error",
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5",
+      "timestamp": "2026-07-17T16:01:01.000Z"
+    },
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-17",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 600,
+          "input_tokens": 60,
+          "output_tokens": 30,
+          "server_tool_use": {
+            "web_search_requests": 1
+          }
+        }
+      },
+      "direct_cost_usd": 0.01081,
+      "event_id": "cc-model-dff8bc2fee9d6ee393d6022b047802ffa401f4f73b73c64c2997a00f4166a071",
+      "event_type": "model",
+      "input_tokens": 660,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 30,
+      "status": "ok",
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5",
+      "timestamp": "2026-07-17T16:01:03.000Z"
+    },
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-17",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 60,
+            "ephemeral_5m_input_tokens": 40
+          },
+          "cache_creation_input_tokens": 100,
+          "cache_read_input_tokens": 200,
+          "input_tokens": 100,
+          "output_tokens": 50,
+          "server_tool_use": {
+            "web_search_requests": 0
+          }
+        }
+      },
+      "direct_cost_usd": 0.00162,
+      "event_id": "cc-model-638bd890b74650adcf88d5c95bbebe480b699b8e83c82833e90bbad2bfc35bf6",
+      "event_type": "model",
+      "input_tokens": 400,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 50,
+      "status": "ok",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833",
+      "timestamp": "2026-07-17T16:00:01.000Z"
+    },
+    {
+      "arguments": {
+        "field_count": 2,
+        "fields": [
+          {
+            "kind": "integer"
+          },
+          {
+            "kind": "string"
+          }
+        ],
+        "kind": "object"
+      },
+      "direct_cost_usd": 0.0,
+      "event_id": "cc-tool-a167efe3ee2a61acee544c738e36fe1abbf8dc94d9e02b9affe9c410408777ef",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "",
+      "name": "Read",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833",
+      "timestamp": "2026-07-17T16:00:02.000Z"
+    },
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-17",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 400,
+          "input_tokens": 50,
+          "output_tokens": 25,
+          "server_tool_use": {
+            "web_search_requests": 0
+          }
+        }
+      },
+      "direct_cost_usd": 0.000645,
+      "event_id": "cc-model-5c21e7f7fa4fecaf82708ea609fa5e14d538c2b165600f20559103f3b5b4ddb6",
+      "event_type": "model",
+      "input_tokens": 450,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 25,
+      "status": "ok",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833",
+      "timestamp": "2026-07-17T16:00:04.000Z"
+    }
+  ],
+  "outcomes": [
+    {
+      "acceptable": false,
+      "business_value_usd": 0.0,
+      "human_minutes": 2.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 10.0,
+      "human_minutes": 0.5,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833"
+    }
+  ],
+  "policy": {
+    "human_hourly_cost_usd": 60.0,
+    "max_calls_per_task": 5,
+    "max_cost_per_acceptable_outcome_usd": 4.0,
+    "max_p95_task_cost_usd": 6.0,
+    "max_trace_cost_per_task_usd": 3.0,
+    "min_acceptable_rate": 0.75,
+    "min_expected_net_value_per_attempt_usd": 0.0,
+    "min_incremental_net_value_vs_baseline_usd": 0.0,
+    "repetition_warning_threshold": 3
+  },
+  "rates": {
+    "claude-test": {
+      "input_per_million_usd": 3.0,
+      "output_per_million_usd": 15.0
+    }
+  },
+  "task_manifest": [
+    {
+      "input_digest": "f6c6d18ec5fb39bc56ee43391b7a57eecfeea46ae96bfe41b4a138f4cf7a3a1e",
+      "rubric_version": "fixture.acceptable-task@1",
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5"
+    },
+    {
+      "input_digest": "993410b14258bb9bea8537996648be90ae6ea9aeb1d6b7b8d74f31601e72c8aa",
+      "rubric_version": "fixture.acceptable-task@1",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833"
+    }
+  ]
+}
