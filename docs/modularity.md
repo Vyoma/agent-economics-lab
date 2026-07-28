@@ -61,6 +61,7 @@ The built-in adapters are:
 ```text
 source.csv@1
 source.normalized-json@1
+source.claude-code-jsonl@1
 ```
 
 The JSON adapter is the offline interchange seam for vendor mappers. It does not

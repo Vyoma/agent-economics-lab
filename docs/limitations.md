@@ -123,3 +123,22 @@ semantic-evidence boundary. Five decision-material omissions change `ASSIST` to
 cost, and a timed-out event. These cases do not estimate prevalence. They show that
 fixed check coverage cannot prove source completeness when absence is interpreted
 as zero or when no independent attempt inventory exists.
+
+## Claude Code conversion still requires human-owned semantics
+
+`source.claude-code-jsonl@1` observes prompt boundaries, model usage, tool calls,
+tool results, and source inventory. It does not infer whether a task was acceptable,
+what the task was worth, the correct counterfactual, or current provider prices.
+Those values come from a required conversion contract and remain claims owned by
+the data owner.
+
+The v1 adapter treats one external user prompt as one task and one unique assistant
+message ID as one model call. It rejects sidechains and known unexpanded `Agent` or
+`Task` delegations because a single parent JSONL file may omit their nested model
+calls. It also requires exactly one same-task result for every client tool use.
+
+Claude Code's local interactive transcript is an observed source format, not a
+stable public interchange standard. Pinned fixtures and versioned compatibility
+tests are required when Claude Code changes its record shape. The conversion
+receipt is reproducibility metadata, not a signature or proof that a manual outcome
+label or price card is correct.

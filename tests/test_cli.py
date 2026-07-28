@@ -21,6 +21,8 @@ class CliTests(unittest.TestCase):
             exit_code = main(["capabilities"])
         self.assertEqual(exit_code, 0)
         self.assertIn("source.normalized-json@1", output.getvalue())
+        self.assertIn("source.claude-code-jsonl@1", output.getvalue())
+        self.assertIn("converter.claude-code-jsonl@1", output.getvalue())
         self.assertIn("gate.counterfactual@1", output.getvalue())
         self.assertIn("renderer.json@1", output.getvalue())
 

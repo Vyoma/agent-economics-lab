@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity benchmark reproduce lessons test
+.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code benchmark reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -32,7 +32,17 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
-reproduce: test modularity lessons benchmark evidence-ablation frontier
+claude-code:
+	@python3 -m agent_economics convert \
+		--from claude-code \
+		--in examples/claude-code/session.jsonl \
+		--contract examples/claude-code/conversion-contract.json \
+		--out /tmp/agent-economics-claude-code.json
+	@cmp /tmp/agent-economics-claude-code.json examples/claude-code/bundle.json
+	@python3 -m agent_economics evaluate \
+		--bundle /tmp/agent-economics-claude-code.json
+
+reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done
