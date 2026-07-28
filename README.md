@@ -207,6 +207,49 @@ delegation or incomplete tool-call inventories.
 [Review the implemented PRD](docs/adapter-extension-prd.md) ·
 [Inspect the complete fixture](examples/claude-code/)
 
+## Put the decision contract in a pull request
+
+The composite GitHub Action installs the package, runs the same `evaluate --ci`
+path as the CLI, and optionally upserts the Markdown assurance report on the pull
+request. Only `SCALE` passes. `INCOMPLETE`, `ASSIST`, and `STOP` fail the check.
+
+```yaml
+name: agent-economics
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assurance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: Vyoma/agent-economics-lab@main # Preview only. Pin a commit SHA.
+        with:
+          bundle: evidence/agent-economics-bundle.json
+          github-token: ${{ github.token }}
+```
+
+Use exactly one mode:
+
+| Mode | Inputs |
+|---|---|
+| normalized bundle | `bundle` |
+| CSV evidence | `traces`, `outcomes`, `rates`, `baseline`, `policy` |
+| offline conversion | `adapter`, `session`, `contract` |
+
+Partial or conflicting modes return `INCOMPLETE`. The action exposes `decision`,
+`exit-code`, and `report` outputs. During dogfood, pin an exact commit SHA for any
+production use. Stable `v1` tags follow successful dogfood rather than preceding
+it.
+
+[Inspect the action contract](action.yml) ·
+[Read the scope and priorities](docs/roadmap.md)
+
 ## Reproduce everything
 
 ```bash
@@ -237,9 +280,10 @@ customer data, secrets, proprietary prompts, or contract pricing.
 ## Claim boundary
 
 This is a teaching, conformance, and controlled-research lab. It is not a production
-authorization layer, accounting system, or prevalence study. The checked-in cases
-are synthetic. Production use requires representative tasks, label validation,
-assignment controls, subgroup analysis, complete cost attribution, policy ownership,
-and ongoing monitoring.
+authorization layer, accounting system, or prevalence study. The support,
+frontier, and Claude Code fixtures are synthetic. The public SWE-bench case uses
+observed benchmark trajectories but is not enterprise ROI evidence. Production use
+requires representative tasks, label validation, assignment controls, subgroup
+analysis, complete cost attribution, policy ownership, and ongoing monitoring.
 
 Apache-2.0 licensed.

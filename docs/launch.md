@@ -195,7 +195,7 @@ repo because the claim boundary matters as much as the metric.
 
 ## Technical follow-up post
 
-Publish 48–72 hours after launch.
+Publish 48-72 hours after launch.
 
 ```text
 Three repeated tool calls do not prove an AI agent is stuck.
@@ -265,7 +265,7 @@ claim expire?”
 Title:
 
 ```text
-Show HN: Agent Economics Lab – cost per acceptable outcome from raw traces
+Show HN: Agent Economics Lab - cost per acceptable outcome from raw traces
 ```
 
 Text:
