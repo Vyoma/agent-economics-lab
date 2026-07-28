@@ -15,8 +15,12 @@
 - Reject stale inventories, incomplete tool calls, sidechains, billing-context
   drift, and unexpanded delegation that may hide nested model spend.
 - Add byte-reproducible template, bundle, report, and adversarial adapter tests.
-- Keep the checked-in example explicitly synthetic until a permissioned,
-  manually labeled real case has an approved price card and baseline.
+- Keep the checked-in Claude Code conformance fixture explicitly synthetic and
+  separate from claims based on public or permissioned evidence.
+- Add a non-synthetic, content-redacted public case from 40 MIT-licensed
+  mini-SWE-agent trajectories on 20 paired SWE-bench Verified tasks.
+- Publish both a `STOP` AssuranceCase and a `HOLD` paired frontier comparing Opus
+  4.6 with Haiku 4.5 using observed outcomes, estimated spend, and API-call counts.
 
 ## 0.3.0 - 2026-07-27
 
