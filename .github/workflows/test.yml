@@ -14,22 +14,17 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python -m unittest discover -s tests -v
-      - run: make demo
-      - run: make modularity
-      - run: make lessons
-      - run: make benchmark
-      - run: make frontier
+      - run: make reproduce
 
   package:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: python -m pip wheel . --no-deps --wheel-dir /tmp/wheels
@@ -37,3 +32,109 @@ jobs:
       - run: /tmp/agent-economics-venv/bin/pip install /tmp/wheels/agent_economics_lab-*.whl
       - run: /tmp/agent-economics-venv/bin/agent-economics capabilities
         working-directory: /tmp
+
+  action:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Build the public SWE-bench bundle
+        run: >-
+          PYTHONPATH=. python
+          examples/public-swebench/build_case.py
+          --source examples/public-swebench/runs.json
+          --output-dir /tmp/agent-economics-public-swebench
+
+      - name: Dogfood CSV mode
+        id: csv
+        continue-on-error: true
+        uses: ./
+        with:
+          traces: examples/support_trace.csv
+          outcomes: examples/outcomes.csv
+          rates: examples/rates.json
+          baseline: examples/baseline.json
+          policy: examples/policy.json
+          comment: "false"
+
+      - name: Verify CSV mode preserves ASSIST
+        if: always()
+        env:
+          OUTCOME: ${{ steps.csv.outcome }}
+          DECISION: ${{ steps.csv.outputs.decision }}
+          EXIT_CODE: ${{ steps.csv.outputs.exit-code }}
+          REPORT: ${{ steps.csv.outputs.report }}
+        run: |
+          test "$OUTCOME" = "failure"
+          test "$DECISION" = "ASSIST"
+          test "$EXIT_CODE" = "3"
+          grep -F "**Decision: ASSIST**" "$REPORT"
+
+      - name: Dogfood Claude Code conversion mode
+        id: claude
+        continue-on-error: true
+        uses: ./
+        with:
+          adapter: claude-code
+          session: examples/claude-code/session.jsonl
+          contract: examples/claude-code/conversion-contract.json
+          comment: "false"
+
+      - name: Verify conversion mode preserves ASSIST
+        if: always()
+        env:
+          OUTCOME: ${{ steps.claude.outcome }}
+          DECISION: ${{ steps.claude.outputs.decision }}
+          EXIT_CODE: ${{ steps.claude.outputs.exit-code }}
+          REPORT: ${{ steps.claude.outputs.report }}
+        run: |
+          test "$OUTCOME" = "failure"
+          test "$DECISION" = "ASSIST"
+          test "$EXIT_CODE" = "3"
+          cmp "$REPORT" examples/claude-code/assurance-case.md
+
+      - name: Dogfood SCALE pass path
+        id: scale
+        uses: ./
+        with:
+          bundle: examples/compute-frontier/arms/balanced-4-step.json
+          comment: "false"
+
+      - name: Verify SCALE is the only green path
+        if: always()
+        env:
+          OUTCOME: ${{ steps.scale.outcome }}
+          DECISION: ${{ steps.scale.outputs.decision }}
+          EXIT_CODE: ${{ steps.scale.outputs.exit-code }}
+          REPORT: ${{ steps.scale.outputs.report }}
+        run: |
+          test "$OUTCOME" = "success"
+          test "$DECISION" = "SCALE"
+          test "$EXIT_CODE" = "0"
+          grep -F "**Decision: SCALE**" "$REPORT"
+
+      - name: Dogfood normalized bundle mode
+        id: public
+        continue-on-error: true
+        uses: ./
+        with:
+          bundle: /tmp/agent-economics-public-swebench/arms/candidate-opus.json
+          comment: "false"
+
+      - name: Verify public case preserves STOP
+        if: always()
+        env:
+          OUTCOME: ${{ steps.public.outcome }}
+          DECISION: ${{ steps.public.outputs.decision }}
+          EXIT_CODE: ${{ steps.public.outputs.exit-code }}
+          REPORT: ${{ steps.public.outputs.report }}
+        run: |
+          test "$OUTCOME" = "failure"
+          test "$DECISION" = "STOP"
+          test "$EXIT_CODE" = "4"
+          cmp "$REPORT" examples/public-swebench/assurance-case.md

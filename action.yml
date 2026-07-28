@@ -1,0 +1,160 @@
+name: Agent Economics Gate
+description: Fail closed unless an AI-agent workload has a complete SCALE assurance decision
+author: Vyoma Gajjar
+
+branding:
+  icon: shield
+  color: purple
+
+inputs:
+  bundle:
+    description: Path to one normalized Agent Economics JSON bundle
+    required: false
+    default: ""
+  traces:
+    description: Path to the trace CSV for CSV input mode
+    required: false
+    default: ""
+  outcomes:
+    description: Path to the outcome CSV for CSV input mode
+    required: false
+    default: ""
+  rates:
+    description: Path to the model rate-card JSON for CSV input mode
+    required: false
+    default: ""
+  baseline:
+    description: Path to the named baseline JSON for CSV input mode
+    required: false
+    default: ""
+  policy:
+    description: Path to the economic policy JSON for CSV input mode
+    required: false
+    default: ""
+  adapter:
+    description: Source adapter name for conversion mode, currently claude-code
+    required: false
+    default: ""
+  session:
+    description: Path to the offline source session for conversion mode
+    required: false
+    default: ""
+  contract:
+    description: Path to the completed conversion contract for conversion mode
+    required: false
+    default: ""
+  python-version:
+    description: Python version used to run the action
+    required: false
+    default: "3.12"
+  comment:
+    description: Upsert the Markdown report on pull requests when a token is supplied
+    required: false
+    default: "true"
+  github-token:
+    description: GitHub token used only to create or update the pull request comment
+    required: false
+    default: ""
+
+outputs:
+  decision:
+    description: SCALE, INCOMPLETE, ASSIST, or STOP
+    value: ${{ steps.evaluate.outputs.decision }}
+  exit-code:
+    description: Decision exit code, where only 0 means SCALE
+    value: ${{ steps.evaluate.outputs.exit-code }}
+  report:
+    description: Absolute path to the generated Markdown assurance report
+    value: ${{ steps.evaluate.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Agent Economics Lab
+      shell: bash
+      env:
+        AGENT_ECONOMICS_ACTION_PATH: ${{ github.action_path }}
+      run: >-
+        python -m pip install
+        --disable-pip-version-check
+        --no-deps
+        "$AGENT_ECONOMICS_ACTION_PATH"
+
+    - name: Evaluate economic assurance
+      id: evaluate
+      shell: bash
+      env:
+        INPUT_BUNDLE: ${{ inputs.bundle }}
+        INPUT_TRACES: ${{ inputs.traces }}
+        INPUT_OUTCOMES: ${{ inputs.outcomes }}
+        INPUT_RATES: ${{ inputs.rates }}
+        INPUT_BASELINE: ${{ inputs.baseline }}
+        INPUT_POLICY: ${{ inputs.policy }}
+        INPUT_ADAPTER: ${{ inputs.adapter }}
+        INPUT_SESSION: ${{ inputs.session }}
+        INPUT_CONTRACT: ${{ inputs.contract }}
+      run: |
+        python -m agent_economics.github_action \
+          --bundle "$INPUT_BUNDLE" \
+          --traces "$INPUT_TRACES" \
+          --outcomes "$INPUT_OUTCOMES" \
+          --rates "$INPUT_RATES" \
+          --baseline "$INPUT_BASELINE" \
+          --policy "$INPUT_POLICY" \
+          --adapter "$INPUT_ADAPTER" \
+          --session "$INPUT_SESSION" \
+          --contract "$INPUT_CONTRACT" \
+          --report-dir "$RUNNER_TEMP"
+
+    - name: Upsert pull request report
+      if: ${{ inputs.comment == 'true' && inputs.github-token != '' && github.event_name == 'pull_request' }}
+      uses: actions/github-script@v9
+      env:
+        REPORT_PATH: ${{ steps.evaluate.outputs.report }}
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require("fs");
+          const marker = "<!-- agent-economics-lab-report -->";
+          const report = fs.readFileSync(process.env.REPORT_PATH, "utf8");
+          const body = `${marker}\n${report}`;
+          const comments = await github.paginate(
+            github.rest.issues.listComments,
+            {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100
+            }
+          );
+          const existing = comments.find(
+            comment =>
+              comment.user?.type === "Bot" &&
+              comment.body?.includes(marker)
+          );
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existing.id,
+              body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
+          }
+
+    - name: Enforce SCALE-only policy
+      shell: bash
+      env:
+        AGENT_ECONOMICS_EXIT_CODE: ${{ steps.evaluate.outputs.exit-code }}
+      run: exit "$AGENT_ECONOMICS_EXIT_CODE"
