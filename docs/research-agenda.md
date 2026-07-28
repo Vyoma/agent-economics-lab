@@ -59,7 +59,7 @@ weaken the evidence.
 
 ## Sequenced twelve-week plan
 
-### Weeks 1–2: ship the paired frontier
+### Weeks 1-2: ship the paired frontier
 
 - Ship paired task alignment, exact breakage bounds, simultaneous cost intervals,
   fail-closed completeness, portable reports, a protocol, and a transparent fixture.
@@ -67,7 +67,7 @@ weaken the evidence.
   headline.
 - Ask five agent engineers and three eval/FinOps practitioners to reproduce the result.
 
-### Weeks 3–5: real intake and independent reproduction
+### Weeks 3-5: real intake and independent reproduction
 
 - Add one offline OpenTelemetry GenAI mapper with pinned fixtures.
 - Collect one permissioned, redacted matched-task case with at least 100 task IDs and
@@ -75,14 +75,14 @@ weaken the evidence.
 - Freeze the rubric, candidate family, margins, and subgroup plan before analysis.
 - Publish at least one negative or null candidate result, not only the selected arm.
 
-### Weeks 6–9: label reliability and subgroup robustness
+### Weeks 6-9: label reliability and subgroup robustness
 
 - Add outcome-label provenance and agreement metadata.
 - Predeclare critical subgroups and refuse aggregate selection when a protected or
   high-risk slice exceeds breakage tolerance.
 - Test sensitivity to missing failed runs, delayed remediation, and provider drift.
 
-### Weeks 10–12: consolidate evidence
+### Weeks 10-12: consolidate evidence
 
 - Publish one benchmark report and one negative or null finding.
 - Record which hypotheses failed or narrowed.

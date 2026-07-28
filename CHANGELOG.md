@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0 - 2026-07-28
+
+- Add a composite GitHub Action for normalized-bundle, CSV-evidence, and offline
+  Claude Code conversion modes.
+- Preserve the CLI decision contract in CI: only `SCALE` passes, while
+  `INCOMPLETE`, `ASSIST`, and `STOP` fail with exit codes 2, 3, and 4.
+- Reject partial or conflicting Action input modes as `INCOMPLETE`.
+- Upsert the generated Markdown assurance report on pull requests when the caller
+  explicitly provides a GitHub token.
+- Expose decision, exit-code, and report-path outputs for downstream workflows.
+- Dogfood all three input modes against the checked-in support, Claude Code, and
+  public SWE-bench examples.
+- Add a single scope and priority document for the GitHub Action, OpenTelemetry
+  adapter, typed dependency edges, and documentation consolidation.
+
 ## 0.4.0 - 2026-07-28
 
 - Add a contract-first Claude Code JSONL converter and separate `convert` CLI
