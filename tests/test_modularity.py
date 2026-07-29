@@ -76,6 +76,49 @@ class ModularityTests(unittest.TestCase):
                 source_id="source.test",
             )
 
+    def test_dependency_edges_are_typed_normalized_and_hashed(self) -> None:
+        by_task: dict[str, list[str]] = {}
+        for event in self.csv.events:
+            by_task.setdefault(event.task_id, []).append(event.event_id)
+        source, target = next(
+            event_ids[:2]
+            for event_ids in by_task.values()
+            if len(event_ids) >= 2
+        )
+        bundle = make_evidence_bundle(
+            events=self.csv.events,
+            outcomes=self.csv.outcomes,
+            rates=self.csv.rates,
+            baseline=self.csv.baseline,
+            policy=self.csv.policy,
+            source_id="source.test",
+            dependency_edges=((source, target),),
+        )
+        self.assertEqual(bundle.dependency_edges, ((source, target),))
+        self.assertNotEqual(bundle.digest, self.csv.digest)
+
+    def test_dependency_edges_reject_unknown_and_cross_task_endpoints(self) -> None:
+        first = self.csv.events[0]
+        other = next(
+            event for event in self.csv.events if event.task_id != first.task_id
+        )
+        cases = (
+            ((first.event_id, "missing-event"), "unknown event IDs"),
+            ((first.event_id, other.event_id), "crosses task boundaries"),
+        )
+        for edge, message in cases:
+            with self.subTest(edge=edge):
+                with self.assertRaisesRegex(ValueError, message):
+                    make_evidence_bundle(
+                        events=self.csv.events,
+                        outcomes=self.csv.outcomes,
+                        rates=self.csv.rates,
+                        baseline=self.csv.baseline,
+                        policy=self.csv.policy,
+                        source_id="source.test",
+                        dependency_edges=(edge,),
+                    )
+
     def test_duplicate_outcomes_fail_in_normalized_adapter(self) -> None:
         outcome = asdict(next(iter(self.csv.outcomes.values())))
         raw = {

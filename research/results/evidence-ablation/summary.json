@@ -10,7 +10,7 @@
   ],
   "false_scale_transitions": 5,
   "fixed_decision_contract": {
-    "digest": "dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983",
+    "digest": "f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a",
     "enabled_checks": [
       "gate.acceptable-rate@1",
       "gate.unit-economics@1",
@@ -18,7 +18,8 @@
       "gate.net-value@1",
       "gate.counterfactual@1",
       "gate.runtime-caps@1",
-      "diagnostic.repeated-tool-shape@1"
+      "diagnostic.repeated-tool-shape@1",
+      "diagnostic.directed-cycle@1"
     ],
     "required_coverage": [
       "business_value",
@@ -38,6 +39,6 @@
   },
   "operational_refusals": 4,
   "protocol_version": "1",
-  "results_csv_sha256": "b43985f07b25c5c39ff5e09b010d8c8639edaf3f594e61bc9d7d71c1fa484113",
+  "results_csv_sha256": "85452d5ac51d8f49958130b3128cce5f9af04b68b5337a07c5a245c3e241abf1",
   "schema_version": 1
 }

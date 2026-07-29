@@ -116,6 +116,41 @@ def validate_evidence_bundle(
     )
     if duplicate_event_ids:
         problems.append(f"{label}: duplicate event IDs: {duplicate_event_ids}")
+    event_tasks = {
+        event.event_id: event.task_id
+        for event in bundle.events
+        if isinstance(event, TraceEvent)
+        and isinstance(event.event_id, str)
+        and event.event_id
+    }
+    edge_counts = Counter(bundle.dependency_edges)
+    duplicate_edges = sorted(
+        edge for edge, count in edge_counts.items() if count > 1
+    )
+    if duplicate_edges:
+        problems.append(f"{label}: duplicate dependency edges: {duplicate_edges}")
+    for index, edge in enumerate(bundle.dependency_edges):
+        edge_label = f"{label}: dependency_edges[{index}]"
+        if (
+            not isinstance(edge, tuple)
+            or len(edge) != 2
+            or any(not isinstance(node, str) or not node for node in edge)
+        ):
+            problems.append(
+                f"{edge_label} must be a pair of non-empty event ID strings"
+            )
+            continue
+        source, target = edge
+        missing = sorted({node for node in edge if node not in event_tasks})
+        if missing:
+            problems.append(
+                f"{edge_label} references unknown event IDs: {missing}"
+            )
+            continue
+        if event_tasks[source] != event_tasks[target]:
+            problems.append(
+                f"{edge_label} crosses task boundaries"
+            )
 
     for model, rate in bundle.rates.items():
         if not isinstance(model, str) or not model:
@@ -276,6 +311,7 @@ def _canonical_digest(
     baseline: Baseline,
     policy: EconomicPolicy,
     task_manifest: dict[str, TaskIdentity],
+    dependency_edges: tuple[tuple[str, str], ...],
 ) -> str:
     payload = {
         "events": [asdict(event) for event in events],
@@ -288,6 +324,8 @@ def _canonical_digest(
         payload["task_manifest"] = [
             asdict(task_manifest[task_id]) for task_id in sorted(task_manifest)
         ]
+    if dependency_edges:
+        payload["dependency_edges"] = [list(edge) for edge in dependency_edges]
     encoded = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
     ).encode("utf-8")
@@ -304,6 +342,7 @@ def make_evidence_bundle(
     source_id: str,
     source_version: str = "1",
     task_manifest: Mapping[str, TaskIdentity] | None = None,
+    dependency_edges: Sequence[tuple[str, str]] = (),
 ) -> EvidenceBundle:
     """Normalize and fingerprint evidence without depending on its source vendor."""
     event_id_counts = Counter(event.event_id for event in events)
@@ -319,6 +358,9 @@ def make_evidence_bundle(
     normalized_outcomes = dict(sorted(outcomes.items()))
     normalized_rates = dict(sorted(rates.items()))
     normalized_task_manifest = dict(sorted((task_manifest or {}).items()))
+    normalized_dependency_edges = tuple(
+        sorted(tuple(edge) for edge in dependency_edges)
+    )
     for task_id, identity in normalized_task_manifest.items():
         if task_id != identity.task_id:
             raise ValueError(
@@ -331,6 +373,7 @@ def make_evidence_bundle(
         baseline,
         policy,
         normalized_task_manifest,
+        normalized_dependency_edges,
     )
     bundle = EvidenceBundle(
         events=normalized_events,
@@ -342,6 +385,7 @@ def make_evidence_bundle(
         source_version=source_version,
         digest=digest,
         task_manifest=normalized_task_manifest,
+        dependency_edges=normalized_dependency_edges,
     )
     problems = validate_evidence_bundle(bundle)
     if problems:

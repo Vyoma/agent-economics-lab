@@ -1,4 +1,4 @@
-# One Cohesive Research and Open-Source Agenda
+# One cohesive research and open-source agenda
 
 ## Thesis
 
@@ -37,7 +37,7 @@ artifact carry code, data, method, result, and limitations.
 | Source conformance | Raw Evidence Ablation | Schema, semantic-validation, and source-completeness boundaries |
 | Research communication | Frontier protocol and data card | Method, hypotheses, threats to validity, and claim boundary |
 | External validation | Paired frontier contribution lane | Permissioned, redacted matched-workload evidence |
-| Next integration | OpenTelemetry GenAI fixture adapter | A real normalized intake path without a live vendor dependency |
+| Cross-platform intake | OpenTelemetry GenAI fixture adapter | One pinned mapper validated on Langfuse and Arize OpenInference shapes |
 
 Every layer reuses the canonical `EvidenceBundle`, typed checks, a fixed coverage
 contract, plan and evidence digests, decision-contract digests, and reproducibility
@@ -69,7 +69,9 @@ weaken the evidence.
 
 ### Weeks 3-5: real intake and independent reproduction
 
-- Add one offline OpenTelemetry GenAI mapper with pinned fixtures.
+- Maintain the shipped OpenTelemetry GenAI mapper against pinned Langfuse and
+  Arize OpenInference fixtures.
+- Add a third exporter only when it exposes a concrete contract incompatibility.
 - Collect one permissioned, redacted matched-task case with at least 100 task IDs and
   three tested configurations.
 - Freeze the rubric, candidate family, margins, and subgroup plan before analysis.

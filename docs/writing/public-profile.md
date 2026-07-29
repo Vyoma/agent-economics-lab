@@ -1,4 +1,4 @@
-# Public Profile Copy Aligned to the Artifact
+# Public profile copy aligned to the artifact
 
 This copy keeps the open-source, research, teaching, and fellowship narratives on
 one technical spine. Update employer-specific facts separately before publishing.
@@ -132,6 +132,9 @@ public artifacts, reproducibility, and clear negative scope.
 
 - “Enterprise-proven” until independent workload cases are published.
 - “Prevents false approvals” without naming the exact fixed-contract invariant.
-- “Works with Galileo/LangSmith/OpenTelemetry” until their export mappers ship.
+- “Works with every OpenTelemetry vendor.” The shipped claim is narrower: one
+  pinned OTLP JSON contract passes Langfuse and Arize OpenInference fixtures.
+- “Works with Galileo or LangSmith” until separate pinned compatibility fixtures
+  ship.
 - “Semantic loop detection” or “deadlock proof.”
 - “Research benchmark” without linking the protocol, generated rows, and data card.

@@ -36,7 +36,7 @@ The CI exit contract is fixed:
 
 ## P1: GitHub Action
 
-Status: implemented and entering repository dogfood.
+Status: shipped on `main`.
 
 ### Goal
 
@@ -79,7 +79,7 @@ an exact commit SHA. A mutable branch reference is for evaluation only.
 
 ## P2: generic OpenTelemetry GenAI adapter
 
-Status: scoped, not started.
+Status: shipped on `main`.
 
 ### Goal
 
@@ -87,26 +87,26 @@ Map a pinned OpenTelemetry GenAI semantic-convention export into the canonical
 evidence bundle so multiple platforms can share one adapter instead of receiving
 vendor-specific economics engines.
 
-### Design constraints
+### Implemented contract
 
-- Add `agent_economics/otel_genai.py` with a pure
-  `otel_genai_bundle_from_spans(spans, contract)` boundary.
-- Pin the exact semantic-convention version used by the mapper. The specification
-  is evolving, so attribute names must be verified against that version during
-  implementation.
-- Reuse the contract-first pattern for outcomes, rates, baseline, and policy. Do
-  not infer acceptable outcomes or prices from span presence.
-- Fail closed on unresolved models, usage buckets, tool charges, parentage, task
-  identity, or outcome identity.
-- Add `otel-genai` as the second explicit `convert --from` value.
-- Factor a shared conversion-contract loader only where the second implementation
-  demonstrates identical behavior.
+- `agent_economics/otel_genai.py` maps pinned offline OTLP JSON.
+- The mapper freezes Semantic Conventions `1.43.0` and GenAI commit
+  `799e014b68f0e786dc44d9117c30758c5f864510`.
+- A shared conversion-contract module owns strict JSON loading, outcome identity,
+  baseline, and policy parsing for both adapters.
+- Outcomes, task mapping, prices, baseline, and policy remain explicit contract
+  claims. They are not inferred from span presence.
+- Unresolved models, operations, usage, tool prices, parentage, task identity, and
+  outcome identity fail closed.
+- `otel-genai` is the second explicit `convert --from` value and is supported by
+  the composite GitHub Action.
 
 ### Proof of genericity
 
-Use pinned, content-safe fixtures from at least two independent platforms that
-export OpenTelemetry GenAI spans. One vendor fixture does not support a generic
-adapter claim.
+Pinned, content-safe fixtures derived from Langfuse and Arize OpenInference run
+through the same mapper. Each fixture records upstream repository, commit, path,
+digest, and transformation. This proves two-platform conformance, not universal
+export compatibility.
 
 ### Registry trigger
 
@@ -116,26 +116,22 @@ explicit mapping cannot handle cleanly.
 
 ## P3a: directed-cycle diagnostic
 
-Status: scoped, not started.
+Status: shipped on `main`.
 
-`find_directed_cycles` exists, but the canonical evidence bundle does not yet
-contain typed dependency edges. Reading a reserved key from an untyped arguments
-dictionary would create an implicit schema.
+`EvidenceBundle` now has an optional typed
+`dependency_edges: tuple[tuple[str, str], ...]` field. Its endpoints must be known
+events from the same task, and present edges are covered by the evidence digest.
 
-The recommended design is an optional typed
-`dependency_edges: tuple[tuple[str, str], ...]` field on `EvidenceBundle`.
-Adapters with real parentage may populate it. A diagnostic can run cycle detection
-when edges are present and do nothing when they are absent. Missing structural
-evidence must not be fabricated.
-
-The Claude Code parent-UUID graph is the first real source. A later OpenTelemetry
-adapter can provide a second source through span parent IDs.
+Claude Code populates the field from `parentUuid` joins. OpenTelemetry populates it
+from resolved `parentSpanId` joins. The default diagnostic emits warnings for
+cycles but cannot route a decision. Missing structural evidence is never
+fabricated.
 
 ## P3b: documentation consolidation
 
-Status: scoped, not started.
+Status: shipped on `main`.
 
-Move writing and launch material under `docs/writing/`:
+Writing and launch material now lives under `docs/writing/`:
 
 - `article.md`
 - `substack-article.md`
@@ -154,18 +150,18 @@ Keep load-bearing technical references at their stable locations:
 - `docs/adapter-extension-prd.md`
 - `docs/claude-code-adapter.md`
 
-Links must move atomically with files so cleanup cannot create stale navigation.
+Technical references remain at stable locations. The writing index and repository
+links are checked with the rest of the documentation.
 
 ## Priority
 
 | Rank | Item | Status | Effort | Dependency | Why now |
 |---:|---|---|---|---|---|
 | 0 | P0: Claude Code + public case | shipped | complete | none | Proven foundation |
-| 1 | P1: GitHub Action | dogfood | S-M | none | Smallest distribution step using existing semantics |
-| 2 | P2: OpenTelemetry GenAI adapter | scoped | M-L | benefits from P1 | First genuinely cross-platform source adapter |
-| 3 | P3a: cycle diagnostic | scoped | S | none | Small typed improvement with existing algorithm |
-| 3 | P3b: documentation consolidation | scoped | S | none | Low-risk cleanup with no runtime impact |
+| 1 | P1: GitHub Action | shipped | complete | none | Distribution layer over fixed semantics |
+| 2 | P2: OpenTelemetry GenAI adapter | shipped | complete | P1 dogfood | Cross-platform source contract |
+| 3 | P3a: cycle diagnostic | shipped | complete | typed parentage | Structural warning without routing |
+| 3 | P3b: documentation consolidation | shipped | complete | none | Stable technical navigation |
 
-The sequence is P1, then P2, with P3a and P3b placed between them when convenient.
-P3 work is independent and must not delay validation of P1 or source research for
-P2.
+The next release boundary is validation of the complete package and Action across
+the supported Python matrix. Marketplace tags remain separate from implementation.

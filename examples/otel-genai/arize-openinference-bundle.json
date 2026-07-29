@@ -1,0 +1,92 @@
+{
+  "baseline": {
+    "acceptable_rate": 0.8,
+    "cost_per_attempt_usd": 5.0,
+    "name": "fixture human-only workflow",
+    "value_per_acceptable_outcome_usd": 10.0
+  },
+  "conversion": {
+    "contract_schema_version": 1,
+    "conversion_contract_sha256": "e69ba435fffcd67ad1a061c3da42f522966907d819b76a774c14e680ff292209",
+    "counts": {
+      "dependency_edges": 0,
+      "model_calls": 1,
+      "spans": 1,
+      "structural_spans": 0,
+      "tasks": 1,
+      "tool_calls": 0
+    },
+    "evidence_digest": "4a485c87a31340312f60327407553d40cf60c5df97d70f93deb796fd2c52e109",
+    "inventory_sha256": "7c188d92d662fccd9d130d319bfc919d2f92b18b387d76a0baf35dbdb8b0414d",
+    "label_source": "fixture.manual-review",
+    "price_card_id": "fixture.otel-rates@2026-07-28",
+    "privacy_mode": "content-dropped-semantic-attributes-only",
+    "raw_sha256": "b69c0ae08d99866a03c67a4ae0648ace84e55b61a30c7255516a575af814fd61",
+    "rubric_version": "fixture.acceptable-task@1",
+    "scopes": [
+      "@arizeai/openinference-instrumentation@1.0.0"
+    ],
+    "semantic_conventions_genai_commit": "799e014b68f0e786dc44d9117c30758c5f864510",
+    "semantic_conventions_version": "1.43.0",
+    "source_id": "source.otel-genai",
+    "source_version": "1",
+    "task_mapping_approved_by": "fixture maintainer: Vyoma Gajjar",
+    "task_unit": "contract-approved-otel-trace"
+  },
+  "events": [
+    {
+      "arguments": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "instrumentation_scope": "@arizeai/openinference-instrumentation@1.0.0",
+        "operation": "chat",
+        "price_card_id": "fixture.otel-rates@2026-07-28",
+        "provider": "openai"
+      },
+      "direct_cost_usd": null,
+      "event_id": "otel-event-771bfa8dffb07bcff99e6c19866db16e69b27e81907785a34d5cf2b08b4af91b",
+      "event_type": "model",
+      "input_tokens": 97,
+      "model": "gpt-4-0613",
+      "name": "otel.gen_ai.chat",
+      "output_tokens": 52,
+      "status": "ok",
+      "task_id": "otel-task-5d0b193317e951a7444b9bd4c632e0f1793fcbdfad115ae4caeba4f7ae39cca5",
+      "timestamp": "2025-04-30T15:45:30.686364157Z"
+    }
+  ],
+  "outcomes": [
+    {
+      "acceptable": true,
+      "business_value_usd": 10.0,
+      "human_minutes": 0.2,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "otel-task-5d0b193317e951a7444b9bd4c632e0f1793fcbdfad115ae4caeba4f7ae39cca5"
+    }
+  ],
+  "policy": {
+    "human_hourly_cost_usd": 60.0,
+    "max_calls_per_task": 5,
+    "max_cost_per_acceptable_outcome_usd": 1.0,
+    "max_p95_task_cost_usd": 1.0,
+    "max_trace_cost_per_task_usd": 0.1,
+    "min_acceptable_rate": 0.9,
+    "min_expected_net_value_per_attempt_usd": 5.0,
+    "min_incremental_net_value_vs_baseline_usd": 1.0,
+    "repetition_warning_threshold": 3
+  },
+  "rates": {
+    "gpt-4-0613": {
+      "input_per_million_usd": 30.0,
+      "output_per_million_usd": 60.0
+    }
+  },
+  "task_manifest": [
+    {
+      "input_digest": "e8ae0e9d167a7361bc11ee8658c99ab57772c41335edbf0a078fc61db86cb324",
+      "rubric_version": "fixture.acceptable-task@1",
+      "task_id": "otel-task-5d0b193317e951a7444b9bd4c632e0f1793fcbdfad115ae4caeba4f7ae39cca5"
+    }
+  ]
+}

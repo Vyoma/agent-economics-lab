@@ -1,4 +1,4 @@
-# Your AI Agent Passed Every Enabled Check. One Required Check Never Ran.
+# Your AI Agent Passed Every Enabled Check. One Required Check Never Ran
 
 I disabled one required gate at a time across 588 synthetic gate-disablement
 comparisons. An engine that redefined completeness around the remaining gates
@@ -133,10 +133,10 @@ python3 evidence_ablation.py
 ```
 
 The repository checks in the complete
-[decision-coverage drift protocol](../research/FALSE_GREEN_PROTOCOL.md),
-[588 comparison rows](../research/results/decision-coverage-drift/results.csv),
-[raw evidence-ablation protocol](../research/EVIDENCE_ABLATION_PROTOCOL.md), and
-[nine ablation rows](../research/results/evidence-ablation/results.csv). Tests
+[decision-coverage drift protocol](../../research/FALSE_GREEN_PROTOCOL.md),
+[588 comparison rows](../../research/results/decision-coverage-drift/results.csv),
+[raw evidence-ablation protocol](../../research/EVIDENCE_ABLATION_PROTOCOL.md), and
+[nine ablation rows](../../research/results/evidence-ablation/results.csv). Tests
 verify that regenerated artifacts are byte-identical before publication.
 
 ## Three operating rules

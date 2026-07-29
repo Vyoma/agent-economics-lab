@@ -98,12 +98,14 @@ correctly implements the coverage it claims. Review module code, pin its ID/vers
 test counterexamples, and treat the evidence digest as reproducibility metadata, not
 as a signature or security attestation.
 
-## Generic interchange is not a finished vendor adapter
+## One OpenTelemetry contract is not every vendor export
 
-`source.normalized-json@1` is the stable offline boundary for mappers. It does not
-mean arbitrary Galileo, LangSmith, or OpenTelemetry exports can be consumed without
-normalization. Vendor formats evolve; every adapter needs pinned fixtures and an
-equivalence test.
+`source.otel-genai@1` consumes the pinned OTLP JSON and GenAI semantic-attribute
+contract documented in
+[`otel-genai-adapter.md`](otel-genai-adapter.md). Langfuse and Arize
+OpenInference fixtures exercise one shared mapper, but arbitrary Galileo,
+LangSmith, proprietary, or future OpenTelemetry exports still require an explicit
+compatibility test. Vendor and semantic-convention formats evolve.
 
 ## Event and cost semantics must be mapped explicitly
 

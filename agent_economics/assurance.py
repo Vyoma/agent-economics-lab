@@ -234,6 +234,7 @@ class AssuranceEngine:
             )
         view = EvaluationView(
             events=evidence.events,
+            dependency_edges=evidence.dependency_edges,
             rates=evidence.rates,
             policy=evidence.policy,
             baseline=evidence.baseline,

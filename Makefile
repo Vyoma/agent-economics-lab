@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code public-case benchmark reproduce lessons test
+.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code otel-genai public-case benchmark reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -42,6 +42,26 @@ claude-code:
 	@python3 -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code.json
 
+otel-genai:
+	@python3 -m agent_economics convert \
+		--from otel-genai \
+		--in examples/otel-genai/langfuse-otlp.json \
+		--contract examples/otel-genai/langfuse-conversion-contract.json \
+		--out /tmp/agent-economics-otel-langfuse.json
+	@cmp /tmp/agent-economics-otel-langfuse.json examples/otel-genai/langfuse-bundle.json
+	@python3 -m agent_economics evaluate \
+		--bundle /tmp/agent-economics-otel-langfuse.json \
+		--ci
+	@python3 -m agent_economics convert \
+		--from otel-genai \
+		--in examples/otel-genai/arize-openinference-otlp.json \
+		--contract examples/otel-genai/arize-openinference-conversion-contract.json \
+		--out /tmp/agent-economics-otel-arize.json
+	@cmp /tmp/agent-economics-otel-arize.json examples/otel-genai/arize-openinference-bundle.json
+	@python3 -m agent_economics evaluate \
+		--bundle /tmp/agent-economics-otel-arize.json \
+		--ci
+
 public-case:
 	@PYTHONPATH=. python3 examples/public-swebench/build_case.py \
 		--source examples/public-swebench/runs.json \
@@ -54,7 +74,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code public-case
+reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code otel-genai public-case
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done

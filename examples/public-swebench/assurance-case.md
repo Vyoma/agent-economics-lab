@@ -8,7 +8,7 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
 
 - Source adapter: `source.public-swebench-mini-agent@1`
 - Evidence digest: `2d063279479ebeff05654482a77ad53eb6076441315e462b1881e0c56e5a4394`
-- Decision-contract digest: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+- Decision-contract digest: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
 - Report renderer: `renderer.markdown@1`
 - Enabled checks:
   - `gate.acceptable-rate@1`
@@ -18,6 +18,7 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
   - `gate.counterfactual@1`
   - `gate.runtime-caps@1`
   - `diagnostic.repeated-tool-shape@1`
+  - `diagnostic.directed-cycle@1`
 - Required coverage:
   - `business_value`
   - `counterfactual`

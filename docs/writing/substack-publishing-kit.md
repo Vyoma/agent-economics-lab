@@ -1,4 +1,4 @@
-# Substack Publishing Kit
+# Substack publishing kit
 
 ## Recommended title
 

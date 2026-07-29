@@ -132,8 +132,9 @@ version change are required for incompatible upstream schema changes.
 - permissioned enterprise case with manually labeled business outcomes;
 - multi-file parent plus subagent expansion;
 - supported Claude Code `stream-json` adapter if its schema differs materially;
-- generic OpenTelemetry GenAI semantic-convention adapter;
-- GitHub Action distribution;
+- broader OpenTelemetry operation and cache-pricing semantics beyond the pinned v1
+  contract;
+- stable GitHub Action release tags after repository dogfood;
 - subgroup and segment assurance; and
 - registry discussion only after two independent adapters expose real wiring
   friction.

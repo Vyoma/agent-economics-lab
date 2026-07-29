@@ -98,6 +98,28 @@ jobs:
           test "$EXIT_CODE" = "3"
           cmp "$REPORT" examples/claude-code/assurance-case.md
 
+      - name: Dogfood OpenTelemetry conversion mode
+        id: otel
+        uses: ./
+        with:
+          adapter: otel-genai
+          session: examples/otel-genai/langfuse-otlp.json
+          contract: examples/otel-genai/langfuse-conversion-contract.json
+          comment: "false"
+
+      - name: Verify OpenTelemetry conversion preserves SCALE
+        if: always()
+        env:
+          OUTCOME: ${{ steps.otel.outcome }}
+          DECISION: ${{ steps.otel.outputs.decision }}
+          EXIT_CODE: ${{ steps.otel.outputs.exit-code }}
+          REPORT: ${{ steps.otel.outputs.report }}
+        run: |
+          test "$OUTCOME" = "success"
+          test "$DECISION" = "SCALE"
+          test "$EXIT_CODE" = "0"
+          grep -F "**Decision: SCALE**" "$REPORT"
+
       - name: Dogfood SCALE pass path
         id: scale
         uses: ./

@@ -1,4 +1,4 @@
-# Launch plan and ready-to-publish copy
+# Launch plan and publication copy
 
 ## Positioning
 
@@ -33,9 +33,11 @@ with the compatibility promise and the decision existing tools leave fragmented:
 ```text
 Keep the observability and evaluation stack you already use.
 
-Today Agent Economics Lab accepts its own CSV and normalized JSON evidence
-boundary. Fixture-backed Galileo, LangSmith, OpenTelemetry, and internal export
-mappers are contribution lanes, not integrations I am claiming have shipped.
+Today Agent Economics Lab accepts CSV, normalized JSON, Claude Code JSONL, and one
+pinned OpenTelemetry GenAI OTLP JSON contract. The OpenTelemetry mapper is tested
+against content-safe Langfuse and Arize OpenInference fixtures. Galileo,
+LangSmith, and internal export mappers remain contribution lanes, not shipped
+integrations.
 
 The missing layer is not another agent dashboard. It is a portable answer to an
 enterprise decision:

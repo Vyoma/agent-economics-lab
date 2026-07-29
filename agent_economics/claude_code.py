@@ -9,10 +9,15 @@ from numbers import Real
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from .conversion_contract import (
+    load_conversion_contract,
+    loads_strict_json,
+    parse_baseline,
+    parse_outcomes_and_manifest,
+    parse_policy,
+)
 from .evidence import make_evidence_bundle, validate_evidence_bundle
 from .models import (
-    Baseline,
-    EconomicPolicy,
     EvidenceBundle,
     ModelRate,
     Outcome,
@@ -40,6 +45,7 @@ class ClaudeCodeTask:
 @dataclass(frozen=True)
 class ClaudeCodeModelCall:
     source_message_id: str
+    source_record_uuids: tuple[str, ...]
     event_id: str
     task_id: str
     timestamp: str
@@ -50,6 +56,8 @@ class ClaudeCodeModelCall:
 @dataclass(frozen=True)
 class ClaudeCodeToolCall:
     source_tool_use_id: str
+    source_record_uuid: str
+    result_record_uuid: str
     event_id: str
     task_id: str
     timestamp: str
@@ -67,6 +75,7 @@ class ClaudeCodeSession:
     tasks: tuple[ClaudeCodeTask, ...]
     model_calls: tuple[ClaudeCodeModelCall, ...]
     tool_calls: tuple[ClaudeCodeToolCall, ...]
+    dependency_edges: tuple[tuple[str, str], ...]
     inventory_sha256: str
     unexpanded_delegation_tools: tuple[str, ...]
 
@@ -91,40 +100,6 @@ def _sha256_json(value: Any) -> str:
 def _opaque_id(prefix: str, session_id: str, source_id: str) -> str:
     digest = _sha256_bytes(f"{session_id}\0{source_id}".encode("utf-8"))
     return f"{prefix}-{digest}"
-
-
-def _object_without_duplicate_keys(
-    pairs: Sequence[tuple[str, Any]],
-) -> dict[str, Any]:
-    result: dict[str, Any] = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError(f"Duplicate JSON key: {key!r}")
-        result[key] = value
-    return result
-
-
-def _reject_json_constant(value: str) -> None:
-    raise ValueError(f"Non-finite JSON number is not allowed: {value}")
-
-
-def _loads_strict_json(raw: str, *, label: str) -> Any:
-    try:
-        return json.loads(
-            raw,
-            object_pairs_hook=_object_without_duplicate_keys,
-            parse_constant=_reject_json_constant,
-        )
-    except (json.JSONDecodeError, ValueError) as error:
-        raise ValueError(f"Invalid {label}: {error}") from error
-
-
-def load_conversion_contract(path: str | Path) -> dict[str, Any]:
-    raw = Path(path).read_text(encoding="utf-8")
-    value = _loads_strict_json(raw, label=f"conversion contract {str(path)!r}")
-    if not isinstance(value, dict):
-        raise ValueError("Conversion contract must be a JSON object")
-    return value
 
 
 def _nonnegative_int(value: Any, *, label: str) -> int:
@@ -323,7 +298,7 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
     for line_number, line in enumerate(raw_text.splitlines(), start=1):
         if not line.strip():
             continue
-        value = _loads_strict_json(line, label=f"JSONL line {line_number}")
+        value = loads_strict_json(line, label=f"JSONL line {line_number}")
         if not isinstance(value, dict):
             raise ValueError(f"JSONL line {line_number} must be an object")
         records.append(value)
@@ -470,6 +445,9 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
         model_calls.append(
             ClaudeCodeModelCall(
                 source_message_id=message_id,
+                source_record_uuids=tuple(
+                    sorted(str(row["uuid"]) for row in rows)
+                ),
                 event_id=_opaque_id("cc-model", session_id, message_id),
                 task_id=tasks_by_source_uuid[source_task_uuid].task_id,
                 timestamp=min(timestamps),
@@ -478,7 +456,7 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
             )
         )
 
-    tool_results: dict[str, list[tuple[bool, str]]] = defaultdict(list)
+    tool_results: dict[str, list[tuple[bool, str, str]]] = defaultdict(list)
     for record in relevant_records:
         if record.get("type") != "user":
             continue
@@ -497,7 +475,9 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
                     f"tool result {tool_use_id!r} is_error must be boolean"
                 )
             result_task_uuid = nearest_task_uuid(str(record["uuid"]))
-            tool_results[tool_use_id].append((is_error, result_task_uuid))
+            tool_results[tool_use_id].append(
+                (is_error, result_task_uuid, str(record["uuid"]))
+            )
 
     tool_calls: list[ClaudeCodeToolCall] = []
     source_tool_ids: list[str] = []
@@ -522,12 +502,14 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
                     f"Tool use {source_tool_id!r} must have exactly one tool result"
                 )
             source_task_uuid = nearest_task_uuid(str(record["uuid"]))
-            is_error, result_task_uuid = results[0]
+            is_error, result_task_uuid, result_record_uuid = results[0]
             if result_task_uuid != source_task_uuid:
                 cross_task_tool_results.append(source_tool_id)
             tool_calls.append(
                 ClaudeCodeToolCall(
                     source_tool_use_id=source_tool_id,
+                    source_record_uuid=str(record["uuid"]),
+                    result_record_uuid=result_record_uuid,
                     event_id=_opaque_id("cc-tool", session_id, source_tool_id),
                     task_id=tasks_by_source_uuid[source_task_uuid].task_id,
                     timestamp=_required_string(
@@ -573,6 +555,53 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
     if empty_tasks:
         raise ValueError(f"External prompts contain no execution events: {empty_tasks}")
 
+    model_event_by_record_uuid = {
+        source_uuid: call.event_id
+        for call in normalized_model_calls
+        for source_uuid in call.source_record_uuids
+    }
+    tool_event_by_result_uuid = {
+        call.result_record_uuid: call.event_id for call in normalized_tool_calls
+    }
+    event_by_record_uuid = {
+        **model_event_by_record_uuid,
+        **tool_event_by_result_uuid,
+    }
+    dependency_edges: set[tuple[str, str]] = set()
+    for call in normalized_model_calls:
+        for source_record_uuid in call.source_record_uuids:
+            visited: set[str] = set()
+            current = source_record_uuid
+            while True:
+                if current in visited:
+                    raise ValueError(
+                        "Cycle detected while resolving Claude Code event parentage"
+                    )
+                visited.add(current)
+                row = records_by_uuid[current]
+                parent = row.get("parentUuid")
+                if not isinstance(parent, str) or not parent:
+                    break
+                if parent in task_rows:
+                    break
+                parent_event = event_by_record_uuid.get(parent)
+                if parent_event is not None and parent_event != call.event_id:
+                    dependency_edges.add((parent_event, call.event_id))
+                    break
+                if parent not in records_by_uuid:
+                    raise ValueError(
+                        f"Record {source_record_uuid!r} has unresolved event parentage"
+                    )
+                current = parent
+    for call in normalized_tool_calls:
+        model_event = model_event_by_record_uuid.get(call.source_record_uuid)
+        if model_event is None:
+            raise ValueError(
+                f"Tool use {call.source_tool_use_id!r} has no model-call parent"
+            )
+        dependency_edges.add((model_event, call.event_id))
+    normalized_dependency_edges = tuple(sorted(dependency_edges))
+
     versions = tuple(
         sorted(
             {
@@ -613,6 +642,9 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
             }
             for call in normalized_tool_calls
         ],
+        "dependency_edges": [
+            list(edge) for edge in normalized_dependency_edges
+        ],
     }
     delegation_tools = tuple(
         sorted(
@@ -631,6 +663,7 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
         tasks=tasks,
         model_calls=normalized_model_calls,
         tool_calls=normalized_tool_calls,
+        dependency_edges=normalized_dependency_edges,
         inventory_sha256=_sha256_json(inventory_payload),
         unexpanded_delegation_tools=delegation_tools,
     )
@@ -671,6 +704,7 @@ def conversion_contract_template(
             "task_count": len(session.tasks),
             "model_call_count": len(session.model_calls),
             "tool_call_count": len(session.tool_calls),
+            "dependency_edge_count": len(session.dependency_edges),
             "claude_code_versions": list(session.claude_code_versions),
             "unexpanded_delegation_tools": list(
                 session.unexpanded_delegation_tools
@@ -755,6 +789,7 @@ def _validate_inventory(
         "task_count": len(session.tasks),
         "model_call_count": len(session.model_calls),
         "tool_call_count": len(session.tool_calls),
+        "dependency_edge_count": len(session.dependency_edges),
         "claude_code_versions": list(session.claude_code_versions),
         "unexpanded_delegation_tools": list(session.unexpanded_delegation_tools),
     }
@@ -791,70 +826,17 @@ def _parse_task_contract(
     raw_tasks: Any,
     outcome_contract_raw: Any,
 ) -> tuple[dict[str, Outcome], dict[str, TaskIdentity], str, str]:
-    outcome_contract = _required_mapping(
-        outcome_contract_raw, label="outcome_contract"
+    return parse_outcomes_and_manifest(
+        raw_tasks=raw_tasks,
+        outcome_contract_raw=outcome_contract_raw,
+        expected_tasks={
+            task.task_id: {
+                "input_digest": task.input_digest,
+                "started_at": task.started_at,
+            }
+            for task in session.tasks
+        },
     )
-    rubric_version = _required_string(
-        outcome_contract.get("rubric_version"),
-        label="outcome_contract.rubric_version",
-    )
-    label_source = _required_string(
-        outcome_contract.get("label_source"),
-        label="outcome_contract.label_source",
-    )
-    rows = _required_list(raw_tasks, label="tasks")
-    rows_by_id: dict[str, dict[str, Any]] = {}
-    for index, value in enumerate(rows):
-        row = _required_mapping(value, label=f"tasks[{index}]")
-        task_id = _required_string(
-            row.get("task_id"), label=f"tasks[{index}].task_id"
-        )
-        if task_id in rows_by_id:
-            raise ValueError(f"Duplicate outcome task ID: {task_id!r}")
-        rows_by_id[task_id] = row
-    expected_tasks = {task.task_id: task for task in session.tasks}
-    if set(rows_by_id) != set(expected_tasks):
-        raise ValueError(
-            "Contract task IDs must exactly match the frozen source inventory"
-        )
-
-    outcomes: dict[str, Outcome] = {}
-    identities: dict[str, TaskIdentity] = {}
-    for task_id, task in expected_tasks.items():
-        row = rows_by_id[task_id]
-        if row.get("input_digest") != task.input_digest:
-            raise ValueError(f"Task {task_id!r} input_digest does not match source")
-        if row.get("started_at") != task.started_at:
-            raise ValueError(f"Task {task_id!r} started_at does not match source")
-        acceptable = _required_bool(
-            row.get("acceptable"), label=f"task {task_id} acceptable"
-        )
-        outcomes[task_id] = Outcome(
-            task_id=task_id,
-            acceptable=acceptable,
-            business_value_usd=_nonnegative_number(
-                row.get("business_value_usd"),
-                label=f"task {task_id} business_value_usd",
-            ),
-            human_minutes=_nonnegative_number(
-                row.get("human_minutes"),
-                label=f"task {task_id} human_minutes",
-            ),
-            remediation_cost_usd=_nonnegative_number(
-                row.get("remediation_cost_usd"),
-                label=f"task {task_id} remediation_cost_usd",
-            ),
-            incident_loss_usd=_nonnegative_number(
-                row.get("incident_loss_usd"),
-                label=f"task {task_id} incident_loss_usd",
-            ),
-        )
-        identities[task_id] = TaskIdentity(
-            task_id=task_id,
-            input_digest=task.input_digest,
-            rubric_version=rubric_version,
-        )
-    return outcomes, identities, rubric_version, label_source
 
 
 def _parse_tiers(
@@ -983,66 +965,6 @@ def _select_tier(
             return tier
     raise ValueError(
         f"No pricing tier covers {total_input_tokens} input tokens for {model!r}"
-    )
-
-
-def _parse_baseline(raw: Any) -> Baseline:
-    baseline = _required_mapping(raw, label="baseline")
-    return Baseline(
-        name=_required_string(baseline.get("name"), label="baseline.name"),
-        cost_per_attempt_usd=_nonnegative_number(
-            baseline.get("cost_per_attempt_usd"),
-            label="baseline.cost_per_attempt_usd",
-        ),
-        acceptable_rate=_nonnegative_number(
-            baseline.get("acceptable_rate"), label="baseline.acceptable_rate"
-        ),
-        value_per_acceptable_outcome_usd=_nonnegative_number(
-            baseline.get("value_per_acceptable_outcome_usd"),
-            label="baseline.value_per_acceptable_outcome_usd",
-        ),
-    )
-
-
-def _parse_policy(raw: Any) -> EconomicPolicy:
-    policy = _required_mapping(raw, label="policy")
-    return EconomicPolicy(
-        human_hourly_cost_usd=_nonnegative_number(
-            policy.get("human_hourly_cost_usd"),
-            label="policy.human_hourly_cost_usd",
-        ),
-        min_acceptable_rate=_nonnegative_number(
-            policy.get("min_acceptable_rate"),
-            label="policy.min_acceptable_rate",
-        ),
-        max_cost_per_acceptable_outcome_usd=_nonnegative_number(
-            policy.get("max_cost_per_acceptable_outcome_usd"),
-            label="policy.max_cost_per_acceptable_outcome_usd",
-        ),
-        max_p95_task_cost_usd=_nonnegative_number(
-            policy.get("max_p95_task_cost_usd"),
-            label="policy.max_p95_task_cost_usd",
-        ),
-        max_trace_cost_per_task_usd=_nonnegative_number(
-            policy.get("max_trace_cost_per_task_usd"),
-            label="policy.max_trace_cost_per_task_usd",
-        ),
-        max_calls_per_task=_nonnegative_int(
-            policy.get("max_calls_per_task"),
-            label="policy.max_calls_per_task",
-        ),
-        min_expected_net_value_per_attempt_usd=_finite_number(
-            policy.get("min_expected_net_value_per_attempt_usd"),
-            label="policy.min_expected_net_value_per_attempt_usd",
-        ),
-        min_incremental_net_value_vs_baseline_usd=_finite_number(
-            policy.get("min_incremental_net_value_vs_baseline_usd"),
-            label="policy.min_incremental_net_value_vs_baseline_usd",
-        ),
-        repetition_warning_threshold=_nonnegative_int(
-            policy.get("repetition_warning_threshold"),
-            label="policy.repetition_warning_threshold",
-        ),
     )
 
 
@@ -1200,11 +1122,12 @@ def claude_code_bundle_from_session(
         events=events,
         outcomes=outcomes,
         rates=rates,
-        baseline=_parse_baseline(contract.get("baseline")),
-        policy=_parse_policy(contract.get("policy")),
+        baseline=parse_baseline(contract.get("baseline")),
+        policy=parse_policy(contract.get("policy")),
         source_id=SOURCE_ID,
         source_version=SOURCE_VERSION,
         task_manifest=task_manifest,
+        dependency_edges=session.dependency_edges,
     )
     strict_problems = validate_evidence_bundle(
         bundle,
@@ -1261,6 +1184,7 @@ def conversion_receipt(
             "tasks": len(session.tasks),
             "model_calls": len(session.model_calls),
             "tool_calls": len(session.tool_calls),
+            "dependency_edges": len(session.dependency_edges),
         },
         "claude_code_versions": list(session.claude_code_versions),
     }

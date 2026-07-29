@@ -1,0 +1,74 @@
+{
+  "adapter": {
+    "privacy_mode": "content-dropped-semantic-attributes-only",
+    "semantic_conventions_genai_commit": "799e014b68f0e786dc44d9117c30758c5f864510",
+    "semantic_conventions_version": "1.43.0",
+    "source_id": "source.otel-genai",
+    "source_version": "1",
+    "task_unit": "contract-approved-otel-trace"
+  },
+  "baseline": {
+    "acceptable_rate": 0.8,
+    "cost_per_attempt_usd": 5.0,
+    "name": "fixture human-only workflow",
+    "value_per_acceptable_outcome_usd": 10.0
+  },
+  "outcome_contract": {
+    "label_source": "fixture.manual-review",
+    "rubric_version": "fixture.acceptable-task@1"
+  },
+  "policy": {
+    "human_hourly_cost_usd": 60.0,
+    "max_calls_per_task": 5,
+    "max_cost_per_acceptable_outcome_usd": 1.0,
+    "max_p95_task_cost_usd": 1.0,
+    "max_trace_cost_per_task_usd": 0.1,
+    "min_acceptable_rate": 0.9,
+    "min_expected_net_value_per_attempt_usd": 5.0,
+    "min_incremental_net_value_vs_baseline_usd": 1.0,
+    "repetition_warning_threshold": 3
+  },
+  "pricing": {
+    "models": {
+      "test-model": {
+        "input_per_million_usd": 2.0,
+        "output_per_million_usd": 8.0
+      }
+    },
+    "price_card_id": "fixture.otel-rates@2026-07-28",
+    "tools": {
+      "retrieve": 0.001
+    }
+  },
+  "schema_version": 1,
+  "source_inventory": {
+    "dependency_edge_count": 1,
+    "inventory_sha256": "ce5915feb15bc494af07b07d5d3d39f2023fb23da1d7620dcf00e2800610ec5c",
+    "model_call_count": 1,
+    "raw_sha256": "577c1fcdd40b4ab6db2d9c8c74b3bef786fafe5d24cadcc800035a5339db6c48",
+    "scopes": [
+      "pydantic-ai@1.0.0"
+    ],
+    "span_count": 2,
+    "structural_span_count": 0,
+    "task_count": 1,
+    "tool_call_count": 1
+  },
+  "task_mapping": {
+    "approved_by": "fixture maintainer: Vyoma Gajjar",
+    "policy": "one-export-trace-is-one-evaluation-task"
+  },
+  "tasks": [
+    {
+      "acceptable": true,
+      "business_value_usd": 10.0,
+      "human_minutes": 0.1,
+      "incident_loss_usd": 0.0,
+      "input_digest": "55319dbd0fd226c8d3293275e5b0ff631dd944f808831e3c25a2c5c518d902ea",
+      "remediation_cost_usd": 0.0,
+      "started_at": "2025-04-30T15:28:50.686364157Z",
+      "task_id": "otel-task-5947d7c33d783f94b3b4c1a96ebc8991ed28f1b069b71e03376cba8caa98a720",
+      "trace_id_sha256": "a8faed6abbf35c12a4b26e40f6feb19d736d90045c83b9f9a31f638d323e6811"
+    }
+  ]
+}

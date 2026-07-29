@@ -175,6 +175,7 @@ class CheckSpec:
 @dataclass(frozen=True)
 class EvaluationView:
     events: tuple[TraceEvent, ...]
+    dependency_edges: tuple[tuple[str, str], ...]
     rates: dict[str, ModelRate]
     policy: EconomicPolicy
     baseline: Baseline
@@ -199,6 +200,7 @@ class EvidenceBundle:
     source_version: str
     digest: str
     task_manifest: dict[str, TaskIdentity] = field(default_factory=dict)
+    dependency_edges: tuple[tuple[str, str], ...] = ()
 
     @property
     def source_manifest_id(self) -> str:

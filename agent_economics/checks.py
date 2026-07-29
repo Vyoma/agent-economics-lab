@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from .controls import repetition_findings
+from .controls import find_directed_cycles, repetition_findings
 from .models import (
     CheckMode,
     CheckOutput,
@@ -10,6 +10,7 @@ from .models import (
     CheckSpec,
     CheckStatus,
     Coverage,
+    ControlFinding,
     Decision,
     EvaluationView,
 )
@@ -161,6 +162,26 @@ def _repeated_tool_shape(view: EvaluationView) -> CheckOutput:
     )
 
 
+def _directed_cycle(view: EvaluationView) -> CheckOutput:
+    task_by_event = {event.event_id: event.task_id for event in view.events}
+    findings = []
+    for cycle in find_directed_cycles(view.dependency_edges):
+        closed_cycle = cycle + (cycle[0],)
+        findings.append(
+            ControlFinding(
+                task_id=task_by_event[cycle[0]],
+                control="directed_dependency_cycle",
+                severity="warning",
+                evidence="dependency cycle: " + " -> ".join(closed_cycle),
+                interpretation=(
+                    "Observed dependency parentage contains a cycle. This is a "
+                    "structural warning, not proof of a runtime deadlock."
+                ),
+            )
+        )
+    return CheckOutput(findings=tuple(findings))
+
+
 def default_checks() -> tuple[CheckSpec, ...]:
     """Return explicit built-ins. Callers may add or remove specs as ordinary data."""
     return (
@@ -218,5 +239,12 @@ def default_checks() -> tuple[CheckSpec, ...]:
             mode=CheckMode.DIAGNOSTIC,
             covers=frozenset(),
             run=_repeated_tool_shape,
+        ),
+        CheckSpec(
+            id="diagnostic.directed-cycle",
+            version="1",
+            mode=CheckMode.DIAGNOSTIC,
+            covers=frozenset(),
+            run=_directed_cycle,
         ),
     )

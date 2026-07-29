@@ -18,6 +18,14 @@ from .claude_code import (
     inspect_claude_code_jsonl,
     load_conversion_contract,
 )
+from .otel_genai import (
+    SOURCE_ID as OTEL_GENAI_SOURCE_ID,
+    SOURCE_VERSION as OTEL_GENAI_SOURCE_VERSION,
+    conversion_contract_template as otel_genai_conversion_contract_template,
+    conversion_receipt as otel_genai_conversion_receipt,
+    inspect_otel_genai_json,
+    otel_genai_bundle_from_session,
+)
 from .frontier import FrontierDecision, run_frontier
 from .frontier_report import (
     render_frontier_json,
@@ -68,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     convert_parser.add_argument(
         "--from",
         dest="source",
-        choices=("claude-code",),
+        choices=("claude-code", "otel-genai"),
         required=True,
     )
     convert_parser.add_argument("--in", dest="input_path", required=True)
@@ -92,8 +100,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("source.csv@1")
         print("source.normalized-json@1")
         print(f"{CLAUDE_CODE_SOURCE_ID}@{CLAUDE_CODE_SOURCE_VERSION}")
+        print(f"{OTEL_GENAI_SOURCE_ID}@{OTEL_GENAI_SOURCE_VERSION}")
         print("\nCONVERTERS")
         print("converter.claude-code-jsonl@1")
+        print("converter.otel-genai@1")
         print("\nCHECKS")
         for check in default_checks():
             required = "required" if check.covers & DEFAULT_REQUIRED_COVERAGE else "optional"
@@ -130,11 +140,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             return 2
         try:
-            session = inspect_claude_code_jsonl(source_path)
+            if args.source == "claude-code":
+                session = inspect_claude_code_jsonl(source_path)
+                template = conversion_contract_template(session)
+                if not template_mode:
+                    contract = load_conversion_contract(args.contract)
+                    bundle = claude_code_bundle_from_session(session, contract)
+                    receipt = conversion_receipt(session, contract, bundle)
+            else:
+                session = inspect_otel_genai_json(source_path)
+                template = otel_genai_conversion_contract_template(session)
+                if not template_mode:
+                    contract = load_conversion_contract(args.contract)
+                    bundle = otel_genai_bundle_from_session(session, contract)
+                    receipt = otel_genai_conversion_receipt(
+                        session, contract, bundle
+                    )
             if template_mode:
                 content = (
                     json.dumps(
-                        conversion_contract_template(session),
+                        template,
                         sort_keys=True,
                         indent=2,
                         ensure_ascii=False,
@@ -142,9 +167,6 @@ def main(argv: Sequence[str] | None = None) -> int:
                     + "\n"
                 )
             else:
-                contract = load_conversion_contract(args.contract)
-                bundle = claude_code_bundle_from_session(session, contract)
-                receipt = conversion_receipt(session, contract, bundle)
                 content = render_normalized_json(bundle, conversion=receipt)
             target_path.write_text(content, encoding="utf-8")
         except (
