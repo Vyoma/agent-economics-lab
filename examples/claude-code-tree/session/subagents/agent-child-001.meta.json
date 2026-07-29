@@ -1,0 +1,7 @@
+{
+  "agentType": "researcher",
+  "description": "SECRET_META_DESCRIPTION",
+  "isFork": true,
+  "spawnDepth": 1,
+  "toolUseId": "tool-root-agent"
+}

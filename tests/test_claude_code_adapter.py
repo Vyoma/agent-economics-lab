@@ -210,6 +210,44 @@ class ClaudeCodeAdapterTests(unittest.TestCase):
             evaluate_bundle(first).breaches, evaluate_bundle(second).breaches
         )
 
+    def test_streamed_usage_uses_the_complete_cumulative_variant(self) -> None:
+        rows = [
+            json.loads(line)
+            for line in SESSION.read_text(encoding="utf-8").splitlines()
+        ]
+        rows[1]["message"]["usage"]["output_tokens"] = 2
+        rows[1]["message"]["usage"].pop("speed", None)
+        rows[2]["message"]["usage"]["speed"] = "standard"
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "cumulative.jsonl"
+            _write_jsonl(source, rows)
+            session = inspect_claude_code_jsonl(source)
+            first_call = next(
+                call
+                for call in session.model_calls
+                if call.source_message_id == "message-alpha-1"
+            )
+        self.assertEqual(first_call.usage["output_tokens"], 50)
+        self.assertEqual(
+            first_call.usage["billing_context"]["speed"],
+            "standard",
+        )
+
+    def test_streamed_usage_cannot_change_input_accounting(self) -> None:
+        rows = [
+            json.loads(line)
+            for line in SESSION.read_text(encoding="utf-8").splitlines()
+        ]
+        rows[1]["message"]["usage"]["input_tokens"] = 101
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "inconsistent-input.jsonl"
+            _write_jsonl(source, rows)
+            with self.assertRaisesRegex(
+                ValueError,
+                "inconsistent input_tokens",
+            ):
+                inspect_claude_code_jsonl(source)
+
     def test_equivalent_csv_rows_produce_the_same_digest_and_decision(self) -> None:
         bundle = claude_code_bundle(SESSION, _completed_contract(SESSION))
         with tempfile.TemporaryDirectory() as directory:
@@ -373,6 +411,78 @@ class ClaudeCodeAdapterTests(unittest.TestCase):
                 ValueError, "nested model calls may be absent"
             ):
                 claude_code_bundle(delegated, contract)
+
+    def test_zero_usage_api_error_placeholder_is_not_a_model_call(self) -> None:
+        rows = [
+            json.loads(line)
+            for line in SESSION.read_text(encoding="utf-8").splitlines()
+        ]
+        api_error = {
+            "isApiErrorMessage": True,
+            "isSidechain": False,
+            "message": {
+                "content": [
+                    {
+                        "text": "SECRET_API_ERROR",
+                        "type": "text",
+                    }
+                ],
+                "id": "synthetic-api-error",
+                "model": "<synthetic>",
+                "role": "assistant",
+                "stop_reason": "stop_sequence",
+                "type": "message",
+                "usage": {
+                    "cache_creation": {
+                        "ephemeral_1h_input_tokens": 0,
+                        "ephemeral_5m_input_tokens": 0,
+                    },
+                    "cache_creation_input_tokens": 0,
+                    "cache_read_input_tokens": 0,
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "server_tool_use": {
+                        "web_fetch_requests": 0,
+                        "web_search_requests": 0,
+                    },
+                    "service_tier": None,
+                },
+            },
+            "parentUuid": "user-alpha",
+            "sessionId": "session-example-001",
+            "timestamp": "2026-07-17T16:00:00.500Z",
+            "type": "assistant",
+            "uuid": "api-error-alpha",
+            "version": "2.1.212",
+        }
+        rows[1]["parentUuid"] = "api-error-alpha"
+        rows.insert(1, api_error)
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "api-error.jsonl"
+            _write_jsonl(source, rows)
+            session = inspect_claude_code_jsonl(source)
+            rendered = json.dumps(
+                conversion_contract_template(session),
+                sort_keys=True,
+            )
+        self.assertEqual(session.relevant_record_count, 10)
+        self.assertEqual(len(session.model_calls), 4)
+        self.assertNotIn("SECRET_API_ERROR", rendered)
+
+    def test_api_error_marker_cannot_hide_billable_usage(self) -> None:
+        rows = [
+            json.loads(line)
+            for line in SESSION.read_text(encoding="utf-8").splitlines()
+        ]
+        rows[1]["isApiErrorMessage"] = True
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "billable-api-error.jsonl"
+            _write_jsonl(source, rows)
+            with self.assertRaisesRegex(
+                ValueError,
+                "contains billable usage",
+            ):
+                inspect_claude_code_jsonl(source)
 
     def test_rendered_bundle_discards_prompt_response_and_argument_values(self) -> None:
         contract = _completed_contract(SESSION)

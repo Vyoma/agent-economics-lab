@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use Agent Economics Lab, cite this software and the exact release."
 title: "Agent Economics Lab"
 type: software
-version: 0.6.0
-date-released: 2026-07-28
+version: 0.7.0
+date-released: 2026-07-29
 authors:
   - family-names: Gajjar
     given-names: Vyoma

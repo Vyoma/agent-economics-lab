@@ -207,6 +207,34 @@ delegation or incomplete tool-call inventories.
 [Review the implemented PRD](docs/adapter-extension-prd.md) ·
 [Inspect the complete fixture](examples/claude-code/)
 
+## Include delegated Claude Code subagent spend
+
+The separate `claude-code-tree` adapter expands the parent transcript and every
+paired subagent transcript before applying the same conversion contract:
+
+```bash
+agent-economics convert \
+  --from claude-code-tree \
+  --in session.jsonl \
+  --template conversion-contract.json
+```
+
+The adapter discovers `session/subagents/agent-<id>.jsonl` and its matching
+metadata files next to `session.jsonl`. Root external prompts remain the economic
+tasks. Child model and tool calls inherit the task that spawned them. The source
+digest binds the parent, every child transcript, and every metadata file.
+
+Missing pairs, unknown delegation links, duplicate tool identities, inconsistent
+spawn depth, and any remaining unexpanded `Agent` or `Task` call return
+`INCOMPLETE`. The child bootstrap envelope is verified but not counted twice.
+
+```bash
+make claude-code-tree
+```
+
+[Read the session-tree contract](docs/claude-code-tree-adapter.md) ·
+[Inspect the complete tree fixture](examples/claude-code-tree/)
+
 ## Convert OpenTelemetry GenAI exports with one pinned contract
 
 The generic OTLP JSON adapter is tested against content-safe fixtures derived from
