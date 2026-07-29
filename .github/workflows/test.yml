@@ -22,28 +22,52 @@ jobs:
 
   package:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
       - run: python -m pip wheel . --no-deps --wheel-dir /tmp/wheels
       - run: python -m venv /tmp/agent-economics-venv
       - run: /tmp/agent-economics-venv/bin/pip install /tmp/wheels/agent_economics_lab-*.whl
       - run: /tmp/agent-economics-venv/bin/agent-economics capabilities
         working-directory: /tmp
+      - name: Evaluate a real bundle through the installed wheel
+        working-directory: /tmp
+        env:
+          BUNDLE: ${{ github.workspace }}/examples/claude-code/bundle.json
+          EXPECTED_REPORT: ${{ github.workspace }}/examples/claude-code/assurance-case.md
+        run: |
+          set +e
+          /tmp/agent-economics-venv/bin/agent-economics evaluate \
+            --bundle "$BUNDLE" \
+            --ci \
+            --output /tmp/installed-wheel-assurance-case.md
+          exit_code=$?
+          set -e
+          test "$exit_code" = "3"
+          cmp /tmp/installed-wheel-assurance-case.md "$EXPECTED_REPORT"
 
   action:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       - name: Build the public SWE-bench bundle
+        if: ${{ matrix.python-version == '3.12' }}
         run: >-
           PYTHONPATH=. python
           examples/public-swebench/build_case.py
@@ -60,6 +84,7 @@ jobs:
           rates: examples/rates.json
           baseline: examples/baseline.json
           policy: examples/policy.json
+          python-version: ${{ matrix.python-version }}
           comment: "false"
 
       - name: Verify CSV mode preserves ASSIST
@@ -76,6 +101,7 @@ jobs:
           grep -F "**Decision: ASSIST**" "$REPORT"
 
       - name: Dogfood Claude Code conversion mode
+        if: ${{ matrix.python-version == '3.12' }}
         id: claude
         continue-on-error: true
         uses: ./
@@ -83,10 +109,11 @@ jobs:
           adapter: claude-code
           session: examples/claude-code/session.jsonl
           contract: examples/claude-code/conversion-contract.json
+          python-version: ${{ matrix.python-version }}
           comment: "false"
 
       - name: Verify conversion mode preserves ASSIST
-        if: always()
+        if: ${{ always() && matrix.python-version == '3.12' }}
         env:
           OUTCOME: ${{ steps.claude.outcome }}
           DECISION: ${{ steps.claude.outputs.decision }}
@@ -105,6 +132,7 @@ jobs:
           adapter: otel-genai
           session: examples/otel-genai/langfuse-otlp.json
           contract: examples/otel-genai/langfuse-conversion-contract.json
+          python-version: ${{ matrix.python-version }}
           comment: "false"
 
       - name: Verify OpenTelemetry conversion preserves SCALE
@@ -121,14 +149,16 @@ jobs:
           grep -F "**Decision: SCALE**" "$REPORT"
 
       - name: Dogfood SCALE pass path
+        if: ${{ matrix.python-version == '3.12' }}
         id: scale
         uses: ./
         with:
           bundle: examples/compute-frontier/arms/balanced-4-step.json
+          python-version: ${{ matrix.python-version }}
           comment: "false"
 
       - name: Verify SCALE is the only green path
-        if: always()
+        if: ${{ always() && matrix.python-version == '3.12' }}
         env:
           OUTCOME: ${{ steps.scale.outcome }}
           DECISION: ${{ steps.scale.outputs.decision }}
@@ -141,15 +171,17 @@ jobs:
           grep -F "**Decision: SCALE**" "$REPORT"
 
       - name: Dogfood normalized bundle mode
+        if: ${{ matrix.python-version == '3.12' }}
         id: public
         continue-on-error: true
         uses: ./
         with:
           bundle: /tmp/agent-economics-public-swebench/arms/candidate-opus.json
+          python-version: ${{ matrix.python-version }}
           comment: "false"
 
       - name: Verify public case preserves STOP
-        if: always()
+        if: ${{ always() && matrix.python-version == '3.12' }}
         env:
           OUTCOME: ${{ steps.public.outcome }}
           DECISION: ${{ steps.public.outputs.decision }}
