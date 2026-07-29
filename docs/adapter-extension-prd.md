@@ -1,6 +1,8 @@
 # Adapter and Extension Layer PRD
 
-Status: P0 implemented on `codex/claude-code-adapter`
+Status: P0 through P4 shipped on `main`. This document preserves the original
+scoping rationale. See the [roadmap](roadmap.md) for current shipped and planned
+work.
 
 ## Fixed kernel
 
