@@ -153,6 +153,25 @@ Keep load-bearing technical references at their stable locations:
 Technical references remain at stable locations. The writing index and repository
 links are checked with the rest of the documentation.
 
+## P4: supported Python matrix validation
+
+Status: shipped on `main`.
+
+The declared Python 3.10 through 3.13 support range is now exercised at three
+distribution boundaries:
+
+- `make reproduce` validates the source checkout on every supported version;
+- the package job builds, installs, and evaluates a real bundle through the wheel
+  from outside the source checkout on every supported version; and
+- the composite Action runs CSV `ASSIST` and OpenTelemetry `SCALE` paths on every
+  supported version while preserving the full five-scenario dogfood suite on
+  Python 3.12.
+
+The installed-wheel smoke test asserts the expected `ASSIST` exit code and
+byte-identical report rather than treating the intentional non-zero CI result as a
+workflow failure. Package metadata publishes explicit Python 3.10, 3.11, 3.12,
+and 3.13 classifiers.
+
 ## Priority
 
 | Rank | Item | Status | Effort | Dependency | Why now |
@@ -162,6 +181,7 @@ links are checked with the rest of the documentation.
 | 2 | P2: OpenTelemetry GenAI adapter | shipped | complete | P1 dogfood | Cross-platform source contract |
 | 3 | P3a: cycle diagnostic | shipped | complete | typed parentage | Structural warning without routing |
 | 3 | P3b: documentation consolidation | shipped | complete | none | Stable technical navigation |
+| 4 | P4: supported Python matrix | shipped | complete | P0 through P3b | Distribution validation |
 
-The next release boundary is validation of the complete package and Action across
-the supported Python matrix. Marketplace tags remain separate from implementation.
+Marketplace tags remain separate from implementation and cross-version
+validation.
