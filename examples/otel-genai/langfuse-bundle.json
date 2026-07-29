@@ -1,0 +1,116 @@
+{
+  "baseline": {
+    "acceptable_rate": 0.8,
+    "cost_per_attempt_usd": 5.0,
+    "name": "fixture human-only workflow",
+    "value_per_acceptable_outcome_usd": 10.0
+  },
+  "conversion": {
+    "contract_schema_version": 1,
+    "conversion_contract_sha256": "370b4f11cc07d1f9a62468b2804f7f22030b7c19d1d9ed97d6588646e6eece12",
+    "counts": {
+      "dependency_edges": 1,
+      "model_calls": 1,
+      "spans": 2,
+      "structural_spans": 0,
+      "tasks": 1,
+      "tool_calls": 1
+    },
+    "evidence_digest": "fb6e7ddd4a0c133fe77b21622ce17c1b2edc7dffd270514a52427a0c4391c3a6",
+    "inventory_sha256": "ce5915feb15bc494af07b07d5d3d39f2023fb23da1d7620dcf00e2800610ec5c",
+    "label_source": "fixture.manual-review",
+    "price_card_id": "fixture.otel-rates@2026-07-28",
+    "privacy_mode": "content-dropped-semantic-attributes-only",
+    "raw_sha256": "577c1fcdd40b4ab6db2d9c8c74b3bef786fafe5d24cadcc800035a5339db6c48",
+    "rubric_version": "fixture.acceptable-task@1",
+    "scopes": [
+      "pydantic-ai@1.0.0"
+    ],
+    "semantic_conventions_genai_commit": "799e014b68f0e786dc44d9117c30758c5f864510",
+    "semantic_conventions_version": "1.43.0",
+    "source_id": "source.otel-genai",
+    "source_version": "1",
+    "task_mapping_approved_by": "fixture maintainer: Vyoma Gajjar",
+    "task_unit": "contract-approved-otel-trace"
+  },
+  "dependency_edges": [
+    [
+      "otel-event-b0c8f8645f6858664c39cd3104a55c1a00c853086ae10f903b544d9ec84a9bfe",
+      "otel-event-b236209f46b3b9bf4d02e0c4a672419bbd021d0523208a204787197eba333ca1"
+    ]
+  ],
+  "events": [
+    {
+      "arguments": {
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 12,
+        "instrumentation_scope": "pydantic-ai@1.0.0",
+        "operation": "chat",
+        "price_card_id": "fixture.otel-rates@2026-07-28",
+        "provider": "openai"
+      },
+      "direct_cost_usd": null,
+      "event_id": "otel-event-b0c8f8645f6858664c39cd3104a55c1a00c853086ae10f903b544d9ec84a9bfe",
+      "event_type": "model",
+      "input_tokens": 42,
+      "model": "test-model",
+      "name": "otel.gen_ai.chat",
+      "output_tokens": 18,
+      "status": "ok",
+      "task_id": "otel-task-5947d7c33d783f94b3b4c1a96ebc8991ed28f1b069b71e03376cba8caa98a720",
+      "timestamp": "2025-04-30T15:28:50.686364157Z"
+    },
+    {
+      "arguments": {
+        "instrumentation_scope": "pydantic-ai@1.0.0",
+        "operation": "execute_tool",
+        "price_card_id": "fixture.otel-rates@2026-07-28",
+        "provider": "openai"
+      },
+      "direct_cost_usd": 0.001,
+      "event_id": "otel-event-b236209f46b3b9bf4d02e0c4a672419bbd021d0523208a204787197eba333ca1",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "",
+      "name": "retrieve",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "otel-task-5947d7c33d783f94b3b4c1a96ebc8991ed28f1b069b71e03376cba8caa98a720",
+      "timestamp": "2025-04-30T15:28:50.686464157Z"
+    }
+  ],
+  "outcomes": [
+    {
+      "acceptable": true,
+      "business_value_usd": 10.0,
+      "human_minutes": 0.1,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "otel-task-5947d7c33d783f94b3b4c1a96ebc8991ed28f1b069b71e03376cba8caa98a720"
+    }
+  ],
+  "policy": {
+    "human_hourly_cost_usd": 60.0,
+    "max_calls_per_task": 5,
+    "max_cost_per_acceptable_outcome_usd": 1.0,
+    "max_p95_task_cost_usd": 1.0,
+    "max_trace_cost_per_task_usd": 0.1,
+    "min_acceptable_rate": 0.9,
+    "min_expected_net_value_per_attempt_usd": 5.0,
+    "min_incremental_net_value_vs_baseline_usd": 1.0,
+    "repetition_warning_threshold": 3
+  },
+  "rates": {
+    "test-model": {
+      "input_per_million_usd": 2.0,
+      "output_per_million_usd": 8.0
+    }
+  },
+  "task_manifest": [
+    {
+      "input_digest": "55319dbd0fd226c8d3293275e5b0ff631dd944f808831e3c25a2c5c518d902ea",
+      "rubric_version": "fixture.acceptable-task@1",
+      "task_id": "otel-task-5947d7c33d783f94b3b4c1a96ebc8991ed28f1b069b71e03376cba8caa98a720"
+    }
+  ]
+}

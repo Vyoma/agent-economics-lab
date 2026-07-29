@@ -1,0 +1,116 @@
+{
+  "_provenance": {
+    "platform": "Langfuse",
+    "repository": "https://github.com/langfuse/langfuse",
+    "commit": "429ec4fff6512fff49aef50fccb92846f674a98a",
+    "path": "web/src/__tests__/server/otel-api.servertest.ts",
+    "upstream_sha256": "2a4502b758131d6e2be85073ab464bce9d1fc662a44a23c9d24743d99ddfdbce",
+    "transformation": "Reduced to content-safe OTLP fields. Added standard GenAI identity fields and one content-free execute_tool child to exercise the pinned conversion contract."
+  },
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": []
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "pydantic-ai",
+            "version": "1.0.0"
+          },
+          "spans": [
+            {
+              "traceId": "00112233445566778899aabbccddeeff",
+              "spanId": "1020304050607080",
+              "startTimeUnixNano": "1746026930686364157",
+              "endTimeUnixNano": "1746026930686764157",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "openai"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "test-model"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "42"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "18"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.cache_read.input_tokens",
+                  "value": {
+                    "intValue": "12"
+                  }
+                },
+                {
+                  "key": "gen_ai.input.messages",
+                  "value": {
+                    "stringValue": "CONTENT_FIREWALL_SENTINEL"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            },
+            {
+              "traceId": "00112233445566778899aabbccddeeff",
+              "spanId": "2030405060708090",
+              "parentSpanId": "1020304050607080",
+              "startTimeUnixNano": "1746026930686464157",
+              "endTimeUnixNano": "1746026930686564157",
+              "attributes": [
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "execute_tool"
+                  }
+                },
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "openai"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.name",
+                  "value": {
+                    "stringValue": "retrieve"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": {
+                    "stringValue": "CONTENT_FIREWALL_SENTINEL"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

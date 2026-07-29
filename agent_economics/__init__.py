@@ -28,6 +28,14 @@ from .claude_code import (
     inspect_to_contract_template,
     load_conversion_contract,
 )
+from .otel_genai import (
+    OtelGenAISession,
+    conversion_contract_template as otel_genai_conversion_contract_template,
+    conversion_receipt as otel_genai_conversion_receipt,
+    inspect_otel_genai_json,
+    otel_genai_bundle,
+    otel_genai_bundle_from_session,
+)
 from .evidence import make_evidence_bundle
 from .frontier import (
     ArmSummary,
@@ -97,6 +105,7 @@ __all__ = [
     "FrontierDecision",
     "ModelRate",
     "Outcome",
+    "OtelGenAISession",
     "PairedComparison",
     "TaskIdentity",
     "TraceEvent",
@@ -133,4 +142,9 @@ __all__ = [
     "run_frontier",
     "inspect_claude_code_jsonl",
     "inspect_to_contract_template",
+    "inspect_otel_genai_json",
+    "otel_genai_bundle",
+    "otel_genai_bundle_from_session",
+    "otel_genai_conversion_contract_template",
+    "otel_genai_conversion_receipt",
 ]

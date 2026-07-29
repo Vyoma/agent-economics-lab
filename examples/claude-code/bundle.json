@@ -10,15 +10,16 @@
       "2.1.198"
     ],
     "contract_schema_version": 1,
-    "conversion_contract_sha256": "af764727e81c84761469bbbe7c0fd0cac9a367e7ea82d30f0ee05aefd1635f42",
+    "conversion_contract_sha256": "2f272f8c6aee02d3f7ec41ef5ff9cd257a9cf4e2ebaea394254692fc0f0f4606",
     "counts": {
+      "dependency_edges": 4,
       "model_calls": 4,
       "relevant_records": 9,
       "tasks": 2,
       "tool_calls": 2
     },
-    "evidence_digest": "89816dd5af84f7348bd2be8c619124637ab3146332c8ff565af3378103072980",
-    "inventory_sha256": "63960cd503c846131c7a4d9ac0805581b940a3b128c2ce4c6fc95e0204cc1f53",
+    "evidence_digest": "e09586e95397d55d87535ebe14d51e1dfd3aaeb594f72fa8d8a8ab9ad281e238",
+    "inventory_sha256": "d99358abf88090f717d4e361ced9b38a5a9c5dee571e8e8ca854f4c06f73487f",
     "label_source": "fixture.manual-review",
     "price_card_id": "fixture.explicit-rates@2026-07-17",
     "privacy_mode": "content-redacted-type-shapes-only",
@@ -28,6 +29,24 @@
     "source_version": "1",
     "task_unit": "external-user-prompt"
   },
+  "dependency_edges": [
+    [
+      "cc-model-05c744366772a43f8542529a3adc16a5cb715b398a92c985a2c3819785c9038d",
+      "cc-tool-21ad85a314204b8db751bbd2591dbfbbf90c6f0edd86a658bea8125b23a3f112"
+    ],
+    [
+      "cc-model-638bd890b74650adcf88d5c95bbebe480b699b8e83c82833e90bbad2bfc35bf6",
+      "cc-tool-a167efe3ee2a61acee544c738e36fe1abbf8dc94d9e02b9affe9c410408777ef"
+    ],
+    [
+      "cc-tool-21ad85a314204b8db751bbd2591dbfbbf90c6f0edd86a658bea8125b23a3f112",
+      "cc-model-dff8bc2fee9d6ee393d6022b047802ffa401f4f73b73c64c2997a00f4166a071"
+    ],
+    [
+      "cc-tool-a167efe3ee2a61acee544c738e36fe1abbf8dc94d9e02b9affe9c410408777ef",
+      "cc-model-5c21e7f7fa4fecaf82708ea609fa5e14d538c2b165600f20559103f3b5b4ddb6"
+    ]
+  ],
   "events": [
     {
       "arguments": {

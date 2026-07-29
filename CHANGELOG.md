@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.0 - 2026-07-28
+
+- Add one contract-first OpenTelemetry GenAI adapter pinned to Semantic
+  Conventions 1.43.0 and GenAI commit `799e014`.
+- Prove the shared mapper against content-safe Langfuse and Arize OpenInference
+  fixtures with pinned upstream provenance.
+- Add `otel-genai` to the CLI and composite GitHub Action.
+- Introduce a shared strict conversion-contract boundary for both offline
+  adapters.
+- Add typed dependency edges to canonical evidence and bind present edges into
+  the evidence digest.
+- Populate real edges from Claude Code `parentUuid` and OpenTelemetry
+  `parentSpanId`.
+- Add a diagnostic-only directed-cycle check that cannot alter routing.
+- Consolidate publication material under `docs/writing/` and repair navigation.
+- Regenerate every checked artifact under the expanded decision contract.
+
 ## 0.5.0 - 2026-07-28
 
 - Add a composite GitHub Action for normalized-bundle, CSV-evidence, and offline

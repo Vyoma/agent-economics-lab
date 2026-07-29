@@ -112,6 +112,7 @@ class ClaudeCodeAdapterTests(unittest.TestCase):
         self.assertEqual(len(session.tasks), 2)
         self.assertEqual(len(session.model_calls), 4)
         self.assertEqual(len(session.tool_calls), 2)
+        self.assertEqual(len(session.dependency_edges), 4)
         self.assertEqual(session.relevant_record_count, 9)
         rendered = json.dumps(
             conversion_contract_template(session), sort_keys=True
@@ -134,6 +135,7 @@ class ClaudeCodeAdapterTests(unittest.TestCase):
         case = evaluate_bundle(bundle)
         self.assertEqual(bundle.source_manifest_id, "source.claude-code-jsonl@1")
         self.assertEqual(len(bundle.events), 6)
+        self.assertEqual(len(bundle.dependency_edges), 4)
         self.assertEqual(case.decision, Decision.ASSIST)
         self.assertEqual(case.acceptable_rate, 0.5)
         self.assertEqual(case.breaches, ("acceptable_rate 50.0% < 75.0%",))
@@ -269,6 +271,7 @@ class ClaudeCodeAdapterTests(unittest.TestCase):
                 policy=bundle.policy,
                 source_id="source.csv",
                 task_manifest=bundle.task_manifest,
+                dependency_edges=bundle.dependency_edges,
             )
         self.assertEqual(bundle.digest, csv_bundle.digest)
         self.assertEqual(

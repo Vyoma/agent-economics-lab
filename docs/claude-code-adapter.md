@@ -67,7 +67,8 @@ The v1 mapping is deliberately narrow:
   economic calls.
 
 The parent-UUID graph assigns every model and tool call to its nearest external
-prompt. Record order does not define the join.
+prompt. It also emits typed dependency edges between model calls, tool calls, and
+subsequent model calls. Record order does not define either join.
 
 This distinction matters because one streamed model response can appear as several
 assistant rows. Counting rows would overstate both calls and cost.
@@ -112,11 +113,13 @@ The generated contract freezes:
 - task count;
 - unique model-call count;
 - tool-call count;
+- dependency-edge count;
 - observed Claude Code versions; and
 - known unexpanded delegation tools.
 
 The inventory digest covers opaque task identities, input digests, unique model
 calls, token usage, tool calls, statuses, timestamps, and redacted argument shapes.
+It also covers the resolved dependency edges.
 Deleting a failed tool result, model call, task, or source row invalidates the
 contract.
 
@@ -169,6 +172,7 @@ canonical evidence digest
 price-card ID
 rubric version and label source
 task/model/tool counts
+dependency-edge count
 observed Claude Code versions
 ```
 
@@ -191,6 +195,7 @@ to verify that conversion removes content. It produces:
 2 tasks
 4 unique model calls
 2 client tool calls
+4 dependency edges
 1 acceptable outcome
 ASSIST
 ```
