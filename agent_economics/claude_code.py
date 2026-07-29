@@ -78,6 +78,14 @@ class ClaudeCodeSession:
     dependency_edges: tuple[tuple[str, str], ...]
     inventory_sha256: str
     unexpanded_delegation_tools: tuple[str, ...]
+    source_id: str = SOURCE_ID
+    source_version: str = SOURCE_VERSION
+    task_unit: str = TASK_UNIT
+    privacy_mode: str = PRIVACY_MODE
+    source_file_count: int = 1
+    subagent_count: int = 0
+    expanded_delegation_count: int = 0
+    max_spawn_depth: int = 0
 
 
 def _canonical_json(value: Any) -> str:
@@ -228,7 +236,12 @@ def _redact_argument_values(value: Any) -> Any:
     return {"kind": "unsupported"}
 
 
-def _normalize_usage(raw: Any, *, label: str) -> dict[str, Any]:
+def _normalize_usage(
+    raw: Any,
+    *,
+    label: str,
+    allow_zero: bool = False,
+) -> dict[str, Any]:
     usage = _required_mapping(raw, label=label)
     input_tokens = _nonnegative_int(
         usage.get("input_tokens", 0), label=f"{label}.input_tokens"
@@ -273,7 +286,11 @@ def _normalize_usage(raw: Any, *, label: str) -> dict[str, Any]:
         if value is not None and not isinstance(value, str):
             raise ValueError(f"{label}.{field} must be a string or null")
         billing_context[field] = value
-    if input_tokens + output_tokens + cache_read + cache_creation_total <= 0:
+    has_usage = (
+        input_tokens + output_tokens + cache_read + cache_creation_total > 0
+        or any(normalized_server_tools.values())
+    )
+    if not has_usage and not allow_zero:
         raise ValueError(f"{label} contains no positive token usage")
     return {
         "input_tokens": input_tokens,
@@ -286,9 +303,70 @@ def _normalize_usage(raw: Any, *, label: str) -> dict[str, Any]:
     }
 
 
-def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
-    source = Path(path)
-    raw_bytes = source.read_bytes()
+def _merge_streamed_usage(
+    variants: Sequence[dict[str, Any]],
+    *,
+    label: str,
+) -> dict[str, Any]:
+    if not variants:
+        raise ValueError(f"{label} has no usage records")
+    fixed_fields = (
+        "input_tokens",
+        "cache_read_input_tokens",
+        "cache_creation_input_tokens",
+        "cache_creation",
+    )
+    for field in fixed_fields:
+        values = {
+            _canonical_json(variant[field])
+            for variant in variants
+        }
+        if len(values) != 1:
+            raise ValueError(f"{label} has inconsistent {field}")
+
+    billing_context: dict[str, str | None] = {}
+    for field in ("service_tier", "speed", "inference_geo"):
+        observed = {
+            variant["billing_context"][field]
+            for variant in variants
+            if variant["billing_context"][field] is not None
+        }
+        if len(observed) > 1:
+            raise ValueError(f"{label} has inconsistent billing context")
+        billing_context[field] = next(iter(observed)) if observed else None
+
+    server_tool_names = {
+        name
+        for variant in variants
+        for name in variant["server_tool_use"]
+    }
+    first = variants[0]
+    return {
+        "input_tokens": first["input_tokens"],
+        "output_tokens": max(
+            variant["output_tokens"] for variant in variants
+        ),
+        "cache_read_input_tokens": first["cache_read_input_tokens"],
+        "cache_creation_input_tokens": first[
+            "cache_creation_input_tokens"
+        ],
+        "cache_creation": first["cache_creation"],
+        "server_tool_use": {
+            name: max(
+                variant["server_tool_use"].get(name, 0)
+                for variant in variants
+            )
+            for name in sorted(server_tool_names)
+        },
+        "billing_context": billing_context,
+    }
+
+
+def _inspect_claude_code_jsonl_bytes(
+    raw_bytes: bytes,
+    *,
+    allow_empty_tasks: bool = False,
+) -> ClaudeCodeSession:
     try:
         raw_text = raw_bytes.decode("utf-8")
     except UnicodeDecodeError as error:
@@ -399,6 +477,24 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
         message = _required_mapping(
             record.get("message"), label="assistant message"
         )
+        if record.get("isApiErrorMessage") is True:
+            usage = _normalize_usage(
+                message.get("usage"),
+                label="API error assistant usage",
+                allow_zero=True,
+            )
+            if (
+                usage["input_tokens"]
+                + usage["output_tokens"]
+                + usage["cache_read_input_tokens"]
+                + usage["cache_creation_input_tokens"]
+                > 0
+                or any(usage["server_tool_use"].values())
+            ):
+                raise ValueError(
+                    "API error assistant record contains billable usage"
+                )
+            continue
         message_id = _required_string(
             message.get("id"), label="assistant message.id"
         )
@@ -409,8 +505,7 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
         models: set[str] = set()
         task_source_uuids: set[str] = set()
         requests: set[str] = set()
-        usage_variants: set[str] = set()
-        normalized_usage: dict[str, Any] | None = None
+        usage_variants: list[dict[str, Any]] = []
         timestamps: list[str] = []
         for row in rows:
             message = _required_mapping(row.get("message"), label="assistant message")
@@ -426,8 +521,7 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
             usage = _normalize_usage(
                 message.get("usage"), label=f"message {message_id} usage"
             )
-            usage_variants.add(_canonical_json(usage))
-            normalized_usage = usage
+            usage_variants.append(usage)
             timestamps.append(
                 _required_string(
                     row.get("timestamp"), label=f"message {message_id} timestamp"
@@ -439,8 +533,10 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
             raise ValueError(f"Message {message_id!r} crosses task boundaries")
         if len(requests) > 1:
             raise ValueError(f"Message {message_id!r} has inconsistent request IDs")
-        if len(usage_variants) != 1 or normalized_usage is None:
-            raise ValueError(f"Message {message_id!r} has inconsistent usage")
+        normalized_usage = _merge_streamed_usage(
+            usage_variants,
+            label=f"Message {message_id!r}",
+        )
         source_task_uuid = next(iter(task_source_uuids))
         model_calls.append(
             ClaudeCodeModelCall(
@@ -552,7 +648,7 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
         call.task_id for call in normalized_model_calls
     } | {call.task_id for call in normalized_tool_calls}
     empty_tasks = sorted({task.task_id for task in tasks} - tasks_with_events)
-    if empty_tasks:
+    if empty_tasks and not allow_empty_tasks:
         raise ValueError(f"External prompts contain no execution events: {empty_tasks}")
 
     model_event_by_record_uuid = {
@@ -669,6 +765,10 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
     )
 
 
+def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
+    return _inspect_claude_code_jsonl_bytes(Path(path).read_bytes())
+
+
 def conversion_contract_template(
     session: ClaudeCodeSession,
 ) -> dict[str, Any]:
@@ -692,10 +792,10 @@ def conversion_contract_template(
     return {
         "schema_version": CONTRACT_SCHEMA_VERSION,
         "adapter": {
-            "source_id": SOURCE_ID,
-            "source_version": SOURCE_VERSION,
-            "task_unit": TASK_UNIT,
-            "privacy_mode": PRIVACY_MODE,
+            "source_id": session.source_id,
+            "source_version": session.source_version,
+            "task_unit": session.task_unit,
+            "privacy_mode": session.privacy_mode,
         },
         "source_inventory": {
             "raw_sha256": session.raw_sha256,
@@ -708,6 +808,18 @@ def conversion_contract_template(
             "claude_code_versions": list(session.claude_code_versions),
             "unexpanded_delegation_tools": list(
                 session.unexpanded_delegation_tools
+            ),
+            **(
+                {
+                    "source_file_count": session.source_file_count,
+                    "subagent_count": session.subagent_count,
+                    "expanded_delegation_count": (
+                        session.expanded_delegation_count
+                    ),
+                    "max_spawn_depth": session.max_spawn_depth,
+                }
+                if session.subagent_count
+                else {}
             ),
         },
         "outcome_contract": {
@@ -792,6 +904,16 @@ def _validate_inventory(
         "dependency_edge_count": len(session.dependency_edges),
         "claude_code_versions": list(session.claude_code_versions),
         "unexpanded_delegation_tools": list(session.unexpanded_delegation_tools),
+        **(
+            {
+                "source_file_count": session.source_file_count,
+                "subagent_count": session.subagent_count,
+                "expanded_delegation_count": session.expanded_delegation_count,
+                "max_spawn_depth": session.max_spawn_depth,
+            }
+            if session.subagent_count
+            else {}
+        ),
     }
     for field, expected_value in expected.items():
         if inventory.get(field) != expected_value:
@@ -806,13 +928,13 @@ def _validate_inventory(
         )
 
 
-def _validate_adapter_contract(raw: Any) -> None:
+def _validate_adapter_contract(session: ClaudeCodeSession, raw: Any) -> None:
     adapter = _required_mapping(raw, label="adapter")
     expected = {
-        "source_id": SOURCE_ID,
-        "source_version": SOURCE_VERSION,
-        "task_unit": TASK_UNIT,
-        "privacy_mode": PRIVACY_MODE,
+        "source_id": session.source_id,
+        "source_version": session.source_version,
+        "task_unit": session.task_unit,
+        "privacy_mode": session.privacy_mode,
     }
     for field, expected_value in expected.items():
         if adapter.get(field) != expected_value:
@@ -976,7 +1098,7 @@ def claude_code_bundle_from_session(
         raise ValueError(
             f"schema_version must be {CONTRACT_SCHEMA_VERSION}"
         )
-    _validate_adapter_contract(contract.get("adapter"))
+    _validate_adapter_contract(session, contract.get("adapter"))
     _validate_inventory(session, contract.get("source_inventory"))
     outcomes, task_manifest, _, _ = _parse_task_contract(
         session,
@@ -1124,8 +1246,8 @@ def claude_code_bundle_from_session(
         rates=rates,
         baseline=parse_baseline(contract.get("baseline")),
         policy=parse_policy(contract.get("policy")),
-        source_id=SOURCE_ID,
-        source_version=SOURCE_VERSION,
+        source_id=session.source_id,
+        source_version=session.source_version,
         task_manifest=task_manifest,
         dependency_edges=session.dependency_edges,
     )
@@ -1159,15 +1281,15 @@ def conversion_receipt(
     )
     pricing = _required_mapping(contract.get("pricing"), label="pricing")
     return {
-        "source_id": SOURCE_ID,
-        "source_version": SOURCE_VERSION,
+        "source_id": session.source_id,
+        "source_version": session.source_version,
         "contract_schema_version": CONTRACT_SCHEMA_VERSION,
         "raw_sha256": session.raw_sha256,
         "inventory_sha256": session.inventory_sha256,
         "conversion_contract_sha256": _sha256_json(contract),
         "evidence_digest": bundle.digest,
-        "task_unit": TASK_UNIT,
-        "privacy_mode": PRIVACY_MODE,
+        "task_unit": session.task_unit,
+        "privacy_mode": session.privacy_mode,
         "price_card_id": _required_string(
             pricing.get("price_card_id"), label="pricing.price_card_id"
         ),
@@ -1185,6 +1307,18 @@ def conversion_receipt(
             "model_calls": len(session.model_calls),
             "tool_calls": len(session.tool_calls),
             "dependency_edges": len(session.dependency_edges),
+            **(
+                {
+                    "source_files": session.source_file_count,
+                    "subagents": session.subagent_count,
+                    "expanded_delegations": (
+                        session.expanded_delegation_count
+                    ),
+                    "max_spawn_depth": session.max_spawn_depth,
+                }
+                if session.subagent_count
+                else {}
+            ),
         },
         "claude_code_versions": list(session.claude_code_versions),
     }

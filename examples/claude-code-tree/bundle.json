@@ -1,0 +1,264 @@
+{
+  "baseline": {
+    "acceptable_rate": 1.0,
+    "cost_per_attempt_usd": 6.0,
+    "name": "fixture human-only workflow",
+    "value_per_acceptable_outcome_usd": 10.0
+  },
+  "conversion": {
+    "claude_code_versions": [
+      "2.1.212"
+    ],
+    "contract_schema_version": 1,
+    "conversion_contract_sha256": "58c8d058f07d6e6eb5782de248a95555187318c3b6aaa1346e5cbd553d2ef5f8",
+    "counts": {
+      "dependency_edges": 6,
+      "expanded_delegations": 1,
+      "max_spawn_depth": 1,
+      "model_calls": 4,
+      "relevant_records": 9,
+      "source_files": 3,
+      "subagents": 1,
+      "tasks": 1,
+      "tool_calls": 2
+    },
+    "evidence_digest": "ce14291c0a500e227bcc2282cd9147f6f3188f3e94ae7754bff65ea7cd1dcebf",
+    "inventory_sha256": "22776e193279ab062d3599831fafc3b6fb39523c44a937358d208c487eb7bbe2",
+    "label_source": "fixture.manual-review",
+    "price_card_id": "fixture.explicit-rates@2026-07-29",
+    "privacy_mode": "content-redacted-type-shapes-only",
+    "raw_sha256": "874e967ff9f07951105373dd8f72877d2c4cb020b590bf1843490d86dfb93f2d",
+    "rubric_version": "fixture.acceptable-task@1",
+    "source_id": "source.claude-code-session-tree",
+    "source_version": "1",
+    "task_unit": "root-external-user-prompt"
+  },
+  "dependency_edges": [
+    [
+      "cc-model-52879c01c415f3802e980c960122ecc8520b486aa3230656492ec0049b3ffe11",
+      "cc-model-674b703c702a33255d8ccd179434a91db261045c23ae133a528b7f150baae5f8"
+    ],
+    [
+      "cc-model-8b3e37e9d89d048b5277914d61f87cd833af93ad374a1e0a6055d86be388fc61",
+      "cc-tool-01538cb95574cd2b9c9729cf41c08e75d374bce86f080779ee1fccceec0c0ac7"
+    ],
+    [
+      "cc-model-e1ddceb979299f3b907a4e5cc8ed1b82fb17965a57c1ed86403614d6372bf46a",
+      "cc-tool-e3a391952a1492a3c7e40c1ee6485e4a8ad37c7101a3cd6e7b1a9f24cc3cde33"
+    ],
+    [
+      "cc-tool-01538cb95574cd2b9c9729cf41c08e75d374bce86f080779ee1fccceec0c0ac7",
+      "cc-model-674b703c702a33255d8ccd179434a91db261045c23ae133a528b7f150baae5f8"
+    ],
+    [
+      "cc-tool-01538cb95574cd2b9c9729cf41c08e75d374bce86f080779ee1fccceec0c0ac7",
+      "cc-model-e1ddceb979299f3b907a4e5cc8ed1b82fb17965a57c1ed86403614d6372bf46a"
+    ],
+    [
+      "cc-tool-e3a391952a1492a3c7e40c1ee6485e4a8ad37c7101a3cd6e7b1a9f24cc3cde33",
+      "cc-model-52879c01c415f3802e980c960122ecc8520b486aa3230656492ec0049b3ffe11"
+    ]
+  ],
+  "events": [
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-29",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {},
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 100,
+          "output_tokens": 20,
+          "server_tool_use": {}
+        }
+      },
+      "direct_cost_usd": 0.0006,
+      "event_id": "cc-model-8b3e37e9d89d048b5277914d61f87cd833af93ad374a1e0a6055d86be388fc61",
+      "event_type": "model",
+      "input_tokens": 100,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 20,
+      "status": "ok",
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e",
+      "timestamp": "2026-07-29T16:00:01.000Z"
+    },
+    {
+      "arguments": {
+        "field_count": 3,
+        "fields": [
+          {
+            "kind": "string"
+          },
+          {
+            "kind": "string"
+          },
+          {
+            "kind": "string"
+          }
+        ],
+        "kind": "object"
+      },
+      "direct_cost_usd": 0.0,
+      "event_id": "cc-tool-01538cb95574cd2b9c9729cf41c08e75d374bce86f080779ee1fccceec0c0ac7",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "",
+      "name": "Agent",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e",
+      "timestamp": "2026-07-29T16:00:01.000Z"
+    },
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-29",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 50,
+          "input_tokens": 120,
+          "output_tokens": 30,
+          "server_tool_use": {}
+        }
+      },
+      "direct_cost_usd": 0.000825,
+      "event_id": "cc-model-e1ddceb979299f3b907a4e5cc8ed1b82fb17965a57c1ed86403614d6372bf46a",
+      "event_type": "model",
+      "input_tokens": 170,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 30,
+      "status": "ok",
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e",
+      "timestamp": "2026-07-29T16:00:03.000Z"
+    },
+    {
+      "arguments": {
+        "field_count": 1,
+        "fields": [
+          {
+            "kind": "string"
+          }
+        ],
+        "kind": "object"
+      },
+      "direct_cost_usd": 0.0,
+      "event_id": "cc-tool-e3a391952a1492a3c7e40c1ee6485e4a8ad37c7101a3cd6e7b1a9f24cc3cde33",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "",
+      "name": "Read",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e",
+      "timestamp": "2026-07-29T16:00:03.500Z"
+    },
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-29",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {},
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 90,
+          "output_tokens": 45,
+          "server_tool_use": {}
+        }
+      },
+      "direct_cost_usd": 0.000945,
+      "event_id": "cc-model-52879c01c415f3802e980c960122ecc8520b486aa3230656492ec0049b3ffe11",
+      "event_type": "model",
+      "input_tokens": 90,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 45,
+      "status": "ok",
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e",
+      "timestamp": "2026-07-29T16:00:05.000Z"
+    },
+    {
+      "arguments": {
+        "price_card_id": "fixture.explicit-rates@2026-07-29",
+        "pricing_tier_up_to_input_tokens": null,
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {},
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 0,
+          "input_tokens": 80,
+          "output_tokens": 40,
+          "server_tool_use": {}
+        }
+      },
+      "direct_cost_usd": 0.00084,
+      "event_id": "cc-model-674b703c702a33255d8ccd179434a91db261045c23ae133a528b7f150baae5f8",
+      "event_type": "model",
+      "input_tokens": 80,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 40,
+      "status": "ok",
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e",
+      "timestamp": "2026-07-29T16:00:06.000Z"
+    }
+  ],
+  "outcomes": [
+    {
+      "acceptable": true,
+      "business_value_usd": 10.0,
+      "human_minutes": 0.5,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e"
+    }
+  ],
+  "policy": {
+    "human_hourly_cost_usd": 60.0,
+    "max_calls_per_task": 10,
+    "max_cost_per_acceptable_outcome_usd": 1.0,
+    "max_p95_task_cost_usd": 1.0,
+    "max_trace_cost_per_task_usd": 1.0,
+    "min_acceptable_rate": 1.0,
+    "min_expected_net_value_per_attempt_usd": 5.0,
+    "min_incremental_net_value_vs_baseline_usd": 1.0,
+    "repetition_warning_threshold": 3
+  },
+  "rates": {
+    "claude-test": {
+      "input_per_million_usd": 3.0,
+      "output_per_million_usd": 15.0
+    }
+  },
+  "task_manifest": [
+    {
+      "input_digest": "e8ef23815f643e6df482908ce0808c3b33be78b76d65550be2af5b292240b395",
+      "rubric_version": "fixture.acceptable-task@1",
+      "task_id": "cc-task-988bb350b33f274db7b05f1104c51d2604f49708cead27952131dfb5ff745a9e"
+    }
+  ]
+}

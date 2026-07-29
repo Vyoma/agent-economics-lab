@@ -172,6 +172,28 @@ byte-identical report rather than treating the intentional non-zero CI result as
 workflow failure. Package metadata publishes explicit Python 3.10, 3.11, 3.12,
 and 3.13 classifiers.
 
+## P5: delegated Claude Code session-tree accounting
+
+Status: shipped on `main`.
+
+`source.claude-code-session-tree@1` is an additive adapter over the unchanged
+single-file and normalized evidence boundaries.
+
+It discovers the documented adjacent subagent transcript layout, requires a
+paired metadata record for every child, and binds all source files into one frozen
+manifest. Root prompts remain economic tasks. Child model and tool calls inherit
+the spawning task, including recursively nested children.
+
+The adapter verifies and removes duplicated fork bootstrap envelopes before
+accounting, retains the parent delegation event, and adds cross-file dependency
+edges. Missing files, unknown delegation tools, duplicate identities, spawn
+cycles, incorrect depth, and remaining unexpanded delegation fail closed.
+
+The conformance case is synthetic and content-marked. It proves complete
+parent-child accounting, privacy filtering, source drift detection, legacy and
+current bootstrap shapes, nested attribution, CLI conversion, Action execution,
+and byte-reproducible artifacts. It does not claim enterprise ROI.
+
 ## Priority
 
 | Rank | Item | Status | Effort | Dependency | Why now |
@@ -182,6 +204,7 @@ and 3.13 classifiers.
 | 3 | P3a: cycle diagnostic | shipped | complete | typed parentage | Structural warning without routing |
 | 3 | P3b: documentation consolidation | shipped | complete | none | Stable technical navigation |
 | 4 | P4: supported Python matrix | shipped | complete | P0 through P3b | Distribution validation |
+| 5 | P5: delegated session tree | shipped | complete | P0 adapter contract | Include nested agent spend without weakening v1 |
 
 Marketplace tags remain separate from implementation and cross-version
 validation.

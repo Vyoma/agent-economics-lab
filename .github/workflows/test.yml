@@ -125,6 +125,30 @@ jobs:
           test "$EXIT_CODE" = "3"
           cmp "$REPORT" examples/claude-code/assurance-case.md
 
+      - name: Dogfood Claude Code session-tree conversion mode
+        if: ${{ matrix.python-version == '3.12' }}
+        id: claude_tree
+        uses: ./
+        with:
+          adapter: claude-code-tree
+          session: examples/claude-code-tree/session.jsonl
+          contract: examples/claude-code-tree/conversion-contract.json
+          python-version: ${{ matrix.python-version }}
+          comment: "false"
+
+      - name: Verify session-tree conversion preserves SCALE
+        if: ${{ always() && matrix.python-version == '3.12' }}
+        env:
+          OUTCOME: ${{ steps.claude_tree.outcome }}
+          DECISION: ${{ steps.claude_tree.outputs.decision }}
+          EXIT_CODE: ${{ steps.claude_tree.outputs.exit-code }}
+          REPORT: ${{ steps.claude_tree.outputs.report }}
+        run: |
+          test "$OUTCOME" = "success"
+          test "$DECISION" = "SCALE"
+          test "$EXIT_CODE" = "0"
+          cmp "$REPORT" examples/claude-code-tree/assurance-case.md
+
       - name: Dogfood OpenTelemetry conversion mode
         id: otel
         uses: ./

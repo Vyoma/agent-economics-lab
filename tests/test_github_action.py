@@ -117,6 +117,26 @@ class GitHubActionTests(unittest.TestCase):
         self.assertEqual(result.exit_code, 0)
         self.assertIn("**Decision: SCALE**", rendered)
 
+    def test_claude_code_tree_adapter_mode_propagates_scale(self) -> None:
+        fixture = EXAMPLES / "claude-code-tree"
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "report.md"
+            result = run_action(
+                ActionInputs(
+                    adapter="claude-code-tree",
+                    session=str(fixture / "session.jsonl"),
+                    contract=str(fixture / "conversion-contract.json"),
+                ),
+                report,
+            )
+            rendered = report.read_text(encoding="utf-8")
+        self.assertEqual(result.decision, "SCALE")
+        self.assertEqual(result.exit_code, 0)
+        self.assertEqual(
+            rendered,
+            (fixture / "assurance-case.md").read_text(encoding="utf-8"),
+        )
+
     def test_partial_or_conflicting_inputs_fail_closed(self) -> None:
         cases = (
             ActionInputs(traces="traces.csv"),

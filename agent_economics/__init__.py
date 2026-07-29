@@ -28,6 +28,11 @@ from .claude_code import (
     inspect_to_contract_template,
     load_conversion_contract,
 )
+from .claude_code_tree import (
+    claude_code_tree_bundle,
+    claude_code_tree_bundle_from_session,
+    inspect_claude_code_session_tree,
+)
 from .otel_genai import (
     OtelGenAISession,
     conversion_contract_template as otel_genai_conversion_contract_template,
@@ -117,6 +122,8 @@ __all__ = [
     "clopper_pearson_upper",
     "claude_code_bundle",
     "claude_code_bundle_from_session",
+    "claude_code_tree_bundle",
+    "claude_code_tree_bundle_from_session",
     "conversion_contract_template",
     "conversion_receipt",
     "evaluate",
@@ -141,6 +148,7 @@ __all__ = [
     "render_frontier_svg",
     "run_frontier",
     "inspect_claude_code_jsonl",
+    "inspect_claude_code_session_tree",
     "inspect_to_contract_template",
     "inspect_otel_genai_json",
     "otel_genai_bundle",

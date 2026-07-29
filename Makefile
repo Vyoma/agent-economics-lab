@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code otel-genai public-case benchmark reproduce lessons test
+.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -42,6 +42,17 @@ claude-code:
 	@python3 -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code.json
 
+claude-code-tree:
+	@python3 -m agent_economics convert \
+		--from claude-code-tree \
+		--in examples/claude-code-tree/session.jsonl \
+		--contract examples/claude-code-tree/conversion-contract.json \
+		--out /tmp/agent-economics-claude-code-tree.json
+	@cmp /tmp/agent-economics-claude-code-tree.json examples/claude-code-tree/bundle.json
+	@python3 -m agent_economics evaluate \
+		--bundle /tmp/agent-economics-claude-code-tree.json \
+		--ci
+
 otel-genai:
 	@python3 -m agent_economics convert \
 		--from otel-genai \
@@ -74,7 +85,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code otel-genai public-case
+reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done

@@ -32,7 +32,7 @@ inputs:
     required: false
     default: ""
   adapter:
-    description: Source adapter name for conversion mode, claude-code or otel-genai
+    description: Source adapter name, claude-code, claude-code-tree, or otel-genai
     required: false
     default: ""
   session:

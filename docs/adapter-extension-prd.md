@@ -1,6 +1,6 @@
 # Adapter and Extension Layer PRD
 
-Status: P0 through P4 shipped on `main`. This document preserves the original
+Status: P0 through P5 shipped on `main`. This document preserves the original
 scoping rationale. See the [roadmap](roadmap.md) for current shipped and planned
 work.
 
@@ -125,14 +125,36 @@ The adapter must:
 P0 targets the observed local interactive Claude Code session JSONL shape. It does
 not claim that this internal transcript is a stable public vendor API.
 
-The inspector has been exercised locally against uncommitted sessions from
-observed versions `2.1.165` and `2.1.198`. Pinned fixtures and a source adapter
-version change are required for incompatible upstream schema changes.
+The inspectors have been exercised locally against uncommitted sessions from
+observed versions `2.1.156`, `2.1.162`, `2.1.165`, `2.1.198`, and `2.1.212`.
+Pinned fixtures and a source adapter version change are required for incompatible
+upstream schema changes.
+
+Complete session-tree inspection passes the observed `2.1.156` and `2.1.212`
+trees. The observed `2.1.162` tree remains refused because it contains root prompt
+boundaries with no execution events. That refusal is preserved instead of
+assuming those ambiguous prompts were zero-cost attempts.
+
+## P5 outcome: complete delegated-session accounting
+
+`source.claude-code-session-tree@1` expands the parent transcript and paired
+`agent-<id>.jsonl` child transcripts without changing
+`source.claude-code-jsonl@1`.
+
+The adapter:
+
+- keeps root external prompts as the economic task unit;
+- maps every child call to the task that owns its spawning delegation;
+- supports nested delegation with verified spawn depth;
+- verifies but does not double count the child bootstrap envelope;
+- binds every parent, child, and metadata file into the source digest;
+- adds cross-file dependency edges from delegation through child execution; and
+- refuses missing pairs, unknown links, cycles, identity collisions, or any
+  remaining unexpanded delegation.
 
 ## Deferred work
 
 - permissioned enterprise case with manually labeled business outcomes;
-- multi-file parent plus subagent expansion;
 - supported Claude Code `stream-json` adapter if its schema differs materially;
 - broader OpenTelemetry operation and cache-pricing semantics beyond the pinned v1
   contract;

@@ -53,6 +53,10 @@ agent-economics evaluate --bundle bundle.json
 
 An incomplete or stale contract returns exit code 2 and does not write the output.
 
+For a parent session with persisted subagents, use the separate
+[`claude-code-tree` adapter](claude-code-tree-adapter.md). The single-file
+contract intentionally remains fail closed for delegation.
+
 ## Exact task and call semantics
 
 The v1 mapping is deliberately narrow:
@@ -204,9 +208,10 @@ The example is a schema and conformance fixture, not a real-world economic resul
 
 ## Real-data status
 
-The inspector has been exercised locally against uncommitted Claude Code sessions
-from observed versions `2.1.165` and `2.1.198`. No prompt, response, contract price,
-or manually assigned outcome from those sessions is checked into this repository.
+The inspectors have been exercised locally against uncommitted Claude Code
+sessions from observed versions `2.1.156`, `2.1.162`, `2.1.165`, `2.1.198`, and
+`2.1.212`. No prompt, response, contract price, or manually assigned outcome from
+those sessions is checked into this repository.
 
 A public non-synthetic benchmark case now exists under
 [`examples/public-swebench`](../examples/public-swebench/). A permissioned

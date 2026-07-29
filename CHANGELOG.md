@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.7.0 - 2026-07-29
+
+- Add a separate `claude-code-tree` converter for parent plus persisted subagent
+  transcripts.
+- Attribute child and recursively nested calls to the root economic task that
+  owns the delegation.
+- Verify and remove duplicated fork bootstrap envelopes before cost accounting.
+- Bind every parent transcript, child transcript, and child metadata file into
+  the frozen source inventory.
+- Add cross-file dependency edges from delegation through child execution.
+- Resolve cyclic child graphs through deterministic component boundaries while
+  preserving the diagnostic cycle finding.
+- Select the complete cumulative usage variant from streamed message fragments,
+  exclude only explicit zero-usage API-error placeholders, and retain
+  zero-compute child transcripts without inventing events.
+- Hash mixed root prompt structures in memory without decoding or emitting their
+  content.
+- Refuse missing file pairs, unknown delegation links, duplicate identities,
+  spawn cycles, inconsistent depth, source drift, and unexpanded delegation.
+- Extend the CLI, package capabilities, composite GitHub Action, and Python
+  matrix reproduction path.
+- Add a content-marked conformance tree with byte-reproducible bundle and report.
+
 ## 0.6.0 - 2026-07-28
 
 - Add one contract-first OpenTelemetry GenAI adapter pinned to Semantic
