@@ -63,6 +63,20 @@ useful as one transparent lesson, but it is not a defensible category claim.
   session usage and estimated spend. It also notes that local dollar figures may
   differ from authoritative billing, which is another reason to keep the supplied
   price card explicit and versioned.
+- OpenTelemetry export is already a populated integration seam, not a greenfield
+  category. [Langfuse](https://langfuse.com/integrations/native/opentelemetry)
+  receives OTLP traces, and its OpenTelemetry-native SDK emits LLM-relevant spans.
+  [Arize OpenInference](https://github.com/Arize-ai/openinference) publishes
+  complementary semantic conventions and OpenTelemetry instrumentation for LLM
+  and agent traces.
+  [Traceloop OpenLLMetry](https://github.com/traceloop/openllmetry) provides LLM
+  instrumentation on top of OpenTelemetry and emits standard OpenTelemetry data.
+  Those cited tracing contracts do not define this repository's full economic
+  decision contract: adjudicated acceptability, labor and incident cost, a named
+  counterfactual, and fixed required coverage. Capturing the span is therefore not
+  the differentiation. The shipped contribution is a pinned offline mapper that
+  refuses incomplete economic evidence and is exercised against two independently
+  maintained, content-safe platform fixture shapes.
 
 ## The narrower gap
 
