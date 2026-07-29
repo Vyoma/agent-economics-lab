@@ -94,10 +94,14 @@ def _select_mode(inputs: ActionInputs) -> str:
                 "adapter mode requires adapter, session, and contract; missing: "
                 + ", ".join(missing)
             )
-        if inputs.adapter not in {"claude-code", "otel-genai"}:
+        if inputs.adapter not in {
+            "claude-code",
+            "claude-code-tree",
+            "otel-genai",
+        }:
             raise ValueError(
                 f"unsupported adapter {inputs.adapter!r}; supported: "
-                "claude-code, otel-genai"
+                "claude-code, claude-code-tree, otel-genai"
             )
     return mode
 

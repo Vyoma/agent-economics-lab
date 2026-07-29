@@ -139,6 +139,13 @@ message ID as one model call. It rejects sidechains and known unexpanded `Agent`
 `Task` delegations because a single parent JSONL file may omit their nested model
 calls. It also requires exactly one same-task result for every client tool use.
 
+`source.claude-code-session-tree@1` is a separate, explicit adapter for the
+adjacent parent plus subagent transcript layout. It does not make the single-file
+adapter permissive. It requires paired child transcript and metadata files, binds
+all files into the source digest, and still refuses any delegation that cannot be
+expanded. Its conformance fixture proves the pinned layouts and recursive task
+attribution, not compatibility with every past or future Claude Code release.
+
 Claude Code's local interactive transcript is an observed source format, not a
 stable public interchange standard. Pinned fixtures and versioned compatibility
 tests are required when Claude Code changes its record shape. The conversion

@@ -18,6 +18,12 @@ from .claude_code import (
     inspect_claude_code_jsonl,
     load_conversion_contract,
 )
+from .claude_code_tree import (
+    SOURCE_ID as CLAUDE_CODE_TREE_SOURCE_ID,
+    SOURCE_VERSION as CLAUDE_CODE_TREE_SOURCE_VERSION,
+    claude_code_tree_bundle_from_session,
+    inspect_claude_code_session_tree,
+)
 from .otel_genai import (
     SOURCE_ID as OTEL_GENAI_SOURCE_ID,
     SOURCE_VERSION as OTEL_GENAI_SOURCE_VERSION,
@@ -76,7 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
     convert_parser.add_argument(
         "--from",
         dest="source",
-        choices=("claude-code", "otel-genai"),
+        choices=("claude-code", "claude-code-tree", "otel-genai"),
         required=True,
     )
     convert_parser.add_argument("--in", dest="input_path", required=True)
@@ -100,9 +106,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("source.csv@1")
         print("source.normalized-json@1")
         print(f"{CLAUDE_CODE_SOURCE_ID}@{CLAUDE_CODE_SOURCE_VERSION}")
+        print(
+            f"{CLAUDE_CODE_TREE_SOURCE_ID}@{CLAUDE_CODE_TREE_SOURCE_VERSION}"
+        )
         print(f"{OTEL_GENAI_SOURCE_ID}@{OTEL_GENAI_SOURCE_VERSION}")
         print("\nCONVERTERS")
         print("converter.claude-code-jsonl@1")
+        print("converter.claude-code-session-tree@1")
         print("converter.otel-genai@1")
         print("\nCHECKS")
         for check in default_checks():
@@ -128,6 +138,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         source_path = Path(args.input_path)
         target_path = Path(args.template if template_mode else args.out)
         protected_paths = [source_path]
+        if args.source == "claude-code-tree":
+            subagent_dir = source_path.with_suffix("") / "subagents"
+            if subagent_dir.is_dir():
+                protected_paths.extend(
+                    path
+                    for path in subagent_dir.rglob("*")
+                    if path.is_file()
+                )
         if args.contract:
             protected_paths.append(Path(args.contract))
         if any(
@@ -146,6 +164,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if not template_mode:
                     contract = load_conversion_contract(args.contract)
                     bundle = claude_code_bundle_from_session(session, contract)
+                    receipt = conversion_receipt(session, contract, bundle)
+            elif args.source == "claude-code-tree":
+                session = inspect_claude_code_session_tree(source_path)
+                template = conversion_contract_template(session)
+                if not template_mode:
+                    contract = load_conversion_contract(args.contract)
+                    bundle = claude_code_tree_bundle_from_session(
+                        session,
+                        contract,
+                    )
                     receipt = conversion_receipt(session, contract, bundle)
             else:
                 session = inspect_otel_genai_json(source_path)
