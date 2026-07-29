@@ -46,7 +46,7 @@ The 23 is a property of a synthetic fixture. The zero is an enforced invariant.
 Neither is a production prevalence estimate. Read the
 [protocol](research/FALSE_GREEN_PROTOCOL.md), inspect all
 [588 rows](research/results/decision-coverage-drift/results.csv), or read the
-[technical article](docs/article.md).
+[technical article](docs/writing/article.md).
 
 For a product-team version with a 30-minute operating exercise, read
 [one-page decision contract](templates/agent-scale-decision-contract.md).
@@ -207,6 +207,39 @@ delegation or incomplete tool-call inventories.
 [Review the implemented PRD](docs/adapter-extension-prd.md) ·
 [Inspect the complete fixture](examples/claude-code/)
 
+## Convert OpenTelemetry GenAI exports with one pinned contract
+
+The generic OTLP JSON adapter is tested against content-safe fixtures derived from
+Langfuse and Arize OpenInference. It is pinned to OpenTelemetry Semantic
+Conventions `1.43.0` and GenAI commit `799e014`.
+
+```bash
+agent-economics convert \
+  --from otel-genai \
+  --in traces.otlp.json \
+  --template conversion-contract.json
+
+# Approve trace-to-task mapping. Add labels, prices, baseline, and policy.
+
+agent-economics convert \
+  --from otel-genai \
+  --in traces.otlp.json \
+  --contract conversion-contract.json \
+  --out bundle.json
+```
+
+The adapter decodes only economic GenAI attributes. It drops prompt, response,
+message, tool-definition, argument, and result values. Unknown operations,
+unresolved parents, unapproved task mapping, missing usage, and incomplete price
+cards return `INCOMPLETE`.
+
+Parent span relationships become typed dependency edges covered by the evidence
+digest. The same typed edge field is also populated from Claude Code `parentUuid`
+relationships.
+
+[Read the OpenTelemetry contract](docs/otel-genai-adapter.md) ·
+[Inspect both fixtures](examples/otel-genai/)
+
 ## Put the decision contract in a pull request
 
 The composite GitHub Action installs the package, runs the same `evaluate --ci`
@@ -257,12 +290,13 @@ make coverage-drift
 make evidence-ablation
 make demo
 make frontier
+make otel-genai
 make reproduce
 ```
 
 `make reproduce` runs the full test suite, the module-deletion proof, five
 executable lessons, both ablation benchmarks, the Claude Code conversion, and
-byte-for-byte frontier and adapter artifact verification.
+byte-for-byte frontier and both adapter artifact verifications.
 
 ## Contribute evidence, not integrations on a slide
 

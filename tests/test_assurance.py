@@ -205,7 +205,7 @@ class AssuranceTests(unittest.TestCase):
         self.assertEqual(case.decision_contract_digest, digest)
         self.assertEqual(
             digest,
-            "dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983",
+            "f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a",
         )
         self.assertNotEqual(
             digest,

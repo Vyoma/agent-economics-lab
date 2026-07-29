@@ -8,7 +8,8 @@ offline platform exports
           |
           v
 canonical EvidenceBundle per tested arm
-  task fingerprints + rubric + traces + outcomes + rates + baseline + policy
+  task fingerprints + rubric + traces + dependency edges
+  outcomes + rates + baseline + policy
   evidence digest
           |
           +-------------------------------+
@@ -49,6 +50,11 @@ normalized loader verifies that the receipt's evidence digest matches the
 reconstructed bundle. This adds source reproducibility without changing the
 kernel's evidence or decision-contract digest schemes.
 
+`source.otel-genai@1` maps pinned OTLP JSON using OpenTelemetry GenAI semantic
+attributes. It requires an explicit trace-to-task approval, outcome contract, and
+price card. It reads only a fixed economic attribute allowlist and turns resolvable
+`parentSpanId` relationships into typed dependency edges.
+
 `source.public-swebench-mini-agent@1` is a pinned public-case mapper rather than a
 general live adapter. It removes conversations and patches, retains published
 hidden-test outcomes, estimated run spend, API-call counts, upstream paths, and
@@ -66,6 +72,10 @@ separately binds policy thresholds, the rate card, baseline, events, outcomes, a
 task manifest. A verdict is reproducible only with both digests. Disabling a
 sole-provider gate while the fixed contract still requires its dimension returns
 `INCOMPLETE` before any remaining check executes.
+
+Dependency-cycle detection is a diagnostic. It can add a warning but cannot alter
+the routing decision. The evidence digest covers typed edges when an adapter
+provides them; absent edges are never fabricated.
 
 ## Paired frontier engine
 

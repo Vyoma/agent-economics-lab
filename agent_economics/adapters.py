@@ -72,6 +72,9 @@ def normalized_json_bundle(raw: Mapping[str, Any]) -> EvidenceBundle:
         source_id=source_id,
         source_version=source_version,
         task_manifest=task_manifest,
+        dependency_edges=tuple(
+            tuple(edge) for edge in raw.get("dependency_edges", ())
+        ),
     )
     if conversion is not None:
         expected_digest = conversion.get("evidence_digest")
@@ -103,6 +106,10 @@ def normalized_json_document(
         document["task_manifest"] = [
             asdict(bundle.task_manifest[task_id])
             for task_id in sorted(bundle.task_manifest)
+        ]
+    if bundle.dependency_edges:
+        document["dependency_edges"] = [
+            list(edge) for edge in bundle.dependency_edges
         ]
     if conversion is not None:
         document["conversion"] = dict(conversion)

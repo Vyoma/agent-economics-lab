@@ -1,0 +1,74 @@
+{
+  "_provenance": {
+    "platform": "Arize OpenInference",
+    "repository": "https://github.com/Arize-ai/openinference",
+    "commit": "a1392c50d2d5b20fb805c195fb6006c80d5a6106",
+    "path": "js/packages/openinference-genai/test/__fixtures__/otel_genai_client_span_tool_calls.json",
+    "upstream_sha256": "2abfb68d529e23debf7fed5219e31a4775c7e40fb3da0b408680f89275c1c5ac",
+    "transformation": "Wrapped the upstream content-safe GenAI attribute subset in a standard OTLP JSON envelope. Prompt, response, message, and tool-argument fields were removed."
+  },
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": []
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "@arizeai/openinference-instrumentation",
+            "version": "1.0.0"
+          },
+          "spans": [
+            {
+              "traceId": "ffeeddccbbaa99887766554433221100",
+              "spanId": "9080706050403020",
+              "startTimeUnixNano": "1746027930686364157",
+              "endTimeUnixNano": "1746027930686764157",
+              "attributes": [
+                {
+                  "key": "gen_ai.provider.name",
+                  "value": {
+                    "stringValue": "openai"
+                  }
+                },
+                {
+                  "key": "gen_ai.operation.name",
+                  "value": {
+                    "stringValue": "chat"
+                  }
+                },
+                {
+                  "key": "gen_ai.request.model",
+                  "value": {
+                    "stringValue": "gpt-4"
+                  }
+                },
+                {
+                  "key": "gen_ai.response.model",
+                  "value": {
+                    "stringValue": "gpt-4-0613"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.input_tokens",
+                  "value": {
+                    "intValue": "97"
+                  }
+                },
+                {
+                  "key": "gen_ai.usage.output_tokens",
+                  "value": {
+                    "intValue": "52"
+                  }
+                }
+              ],
+              "status": {
+                "code": "STATUS_CODE_OK"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

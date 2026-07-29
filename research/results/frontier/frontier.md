@@ -59,13 +59,13 @@ The governing breakage estimand is the absolute paired-population rate of tasks 
 ## Evidence and decision manifests
 
 - `balanced-4-step` evidence: `32fa0e4a4953b298352d58e0849cc2ffc18636d67093a77ce0fae0673896638f`
-  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+  - decision contract: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
 - `cheap-2-step` evidence: `25259104ba610bae17322c6b40d1b301362c52c806c796466ce3e46adfb7ff7a`
-  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+  - decision contract: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
 - `premium-12-step` evidence: `8316e57badbc4fcc1cbab1233ba66873237a549f6f1df583bee1901a0204cb05`
-  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+  - decision contract: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
 - `premium-8-step` evidence: `91526aecd73578ba43d2bc1cf4bfdb9cedcb26841967b2899dddfe1348fb9756`
-  - decision contract: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+  - decision contract: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
 
 ## Claim boundary
 

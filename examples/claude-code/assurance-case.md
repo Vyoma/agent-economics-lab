@@ -7,8 +7,8 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
 ## Assurance manifest
 
 - Source adapter: `source.claude-code-jsonl@1`
-- Evidence digest: `89816dd5af84f7348bd2be8c619124637ab3146332c8ff565af3378103072980`
-- Decision-contract digest: `dc7704f81861ba246016e78f077fd5b38238be846a9e95db7a13118a655d5983`
+- Evidence digest: `e09586e95397d55d87535ebe14d51e1dfd3aaeb594f72fa8d8a8ab9ad281e238`
+- Decision-contract digest: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
 - Report renderer: `renderer.markdown@1`
 - Enabled checks:
   - `gate.acceptable-rate@1`
@@ -18,6 +18,7 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
   - `gate.counterfactual@1`
   - `gate.runtime-caps@1`
   - `diagnostic.repeated-tool-shape@1`
+  - `diagnostic.directed-cycle@1`
 - Required coverage:
   - `business_value`
   - `counterfactual`
