@@ -30,7 +30,7 @@
     "semantic_conventions_version": "1.43.0",
     "source_id": "source.otel-genai",
     "source_version": "1",
-    "task_mapping_approved_by": "fixture maintainer: Vyoma Gajjar",
+    "task_mapping_approved_by": "fixture maintainer",
     "task_unit": "contract-approved-otel-trace"
   },
   "events": [

@@ -53,7 +53,7 @@
     "tool_call_count": 0
   },
   "task_mapping": {
-    "approved_by": "fixture maintainer: Vyoma Gajjar",
+    "approved_by": "fixture maintainer",
     "policy": "one-export-trace-is-one-evaluation-task"
   },
   "tasks": [
