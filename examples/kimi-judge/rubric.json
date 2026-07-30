@@ -1,0 +1,26 @@
+{
+  "rubric_id": "support-v1",
+  "task_type": "Software customer support: the agent receives a user question about a product or API and must provide an accurate, policy-compliant, professional resolution.",
+  "acceptable_threshold": 0.70,
+  "business_value_usd_if_acceptable": 8.00,
+  "human_minutes_if_not_acceptable": 8.0,
+  "remediation_cost_usd_if_not_acceptable": 0.75,
+  "incident_loss_usd_if_not_acceptable": 0.0,
+  "criteria": [
+    {
+      "id": "accuracy",
+      "question": "Did the agent correctly resolve the user's issue with accurate information (correct API names, steps, or explanations)?",
+      "weight": 0.50
+    },
+    {
+      "id": "policy",
+      "question": "Did the response comply with policy (no hallucinated features, no commitments outside scope, no PII mishandling)?",
+      "weight": 0.30
+    },
+    {
+      "id": "tone",
+      "question": "Was the tone professional, clear, and appropriately concise for a support interaction?",
+      "weight": 0.20
+    }
+  ]
+}
