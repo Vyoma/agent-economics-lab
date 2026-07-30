@@ -9,6 +9,8 @@ from typing import Sequence
 from .adapters import load_normalized_json_bundle, render_normalized_json
 from .assurance import evaluate_bundle
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+from .kimi_analyst import analyse_report
+from .kimi_judge import judge as kimi_judge
 from .claude_code import (
     SOURCE_ID as CLAUDE_CODE_SOURCE_ID,
     SOURCE_VERSION as CLAUDE_CODE_SOURCE_VERSION,
@@ -96,6 +98,31 @@ def build_parser() -> argparse.ArgumentParser:
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
     subparsers.add_parser("capabilities")
+
+    judge_parser = subparsers.add_parser(
+        "judge",
+        help="Label agent task outcomes using Kimi. Writes outcomes.csv + audit sidecar.",
+    )
+    judge_parser.add_argument("--task-results", required=True,
+                              help="CSV with columns: task_id, output, context (optional)")
+    judge_parser.add_argument("--rubric", required=True, help="rubric.json path")
+    judge_parser.add_argument("--out", required=True, help="Output outcomes.csv path")
+    judge_parser.add_argument("--model", default="kimi-k3")
+    judge_parser.add_argument("--rate-limit", type=int, default=5,
+                              help="Max Kimi API calls per second (0 = unlimited)")
+
+    analyse_parser = subparsers.add_parser(
+        "analyse",
+        help="Get Kimi recommendations from an evaluate --format json report.",
+    )
+    analyse_parser.add_argument("--case", required=True,
+                                help="JSON report from `evaluate --format json`")
+    analyse_parser.add_argument("--policy", help="policy.json for precise threshold gaps")
+    analyse_parser.add_argument("--baseline", help="baseline.json for counterfactual context")
+    analyse_parser.add_argument("--model", default="kimi-k3")
+    analyse_parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    analyse_parser.add_argument("--out", help="Output path (default: stdout)")
+
     return parser
 
 
@@ -126,6 +153,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("renderer.frontier-svg@1")
         print("\nEXPERIMENTS")
         print("experiment.paired-budget-frontier@1")
+        print("\nKIMI INTEGRATIONS")
+        print("kimi-judge@1  (MOONSHOT_API_KEY required)")
+        print("kimi-analyst@1  (MOONSHOT_API_KEY required)")
         return 0
     if args.command == "convert":
         parser = build_parser()
@@ -291,6 +321,38 @@ def main(argv: Sequence[str] | None = None) -> int:
                 Decision.ASSIST: 3,
                 Decision.STOP: 4,
             }[case.decision]
+        return 0
+    if args.command == "judge":
+        import logging
+        logging.basicConfig(level=logging.INFO, format="%(message)s")
+        try:
+            kimi_judge(
+                args.task_results, args.rubric, args.out,
+                model=args.model, rate_limit=args.rate_limit,
+            )
+            return 0
+        except (RuntimeError, ValueError, OSError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 2
+    if args.command == "analyse":
+        import logging
+        logging.basicConfig(level=logging.INFO, format="%(message)s")
+        try:
+            report = json.loads(Path(args.case).read_text())
+            policy = json.loads(Path(args.policy).read_text()) if args.policy else None
+            baseline = json.loads(Path(args.baseline).read_text()) if args.baseline else None
+            result = analyse_report(report, policy, baseline, model=args.model)
+        except (RuntimeError, ValueError, KeyError, OSError, json.JSONDecodeError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 2
+        output = (
+            json.dumps(result.to_dict(), indent=2)
+            if args.format == "json"
+            else result.render_markdown()
+        )
+        if args.out:
+            Path(args.out).write_text(output)
+        print(output)
         return 0
     return 2
 
