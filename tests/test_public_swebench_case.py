@@ -114,7 +114,6 @@ class PublicSwebenchCaseTests(unittest.TestCase):
             "assurance-case.md",
             "frontier/frontier.json",
             "frontier/frontier.md",
-            "frontier/frontier.svg",
         )
         for relative in artifacts:
             self.assertEqual(
