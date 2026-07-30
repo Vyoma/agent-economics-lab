@@ -12,6 +12,52 @@ into one bounded decision:
 
 `INCOMPLETE` / `SCALE` / `ASSIST` / `STOP`
 
+## What makes this different
+
+We ran 588 gate-removal mutations against the evaluation harness itself. The fixed-contract engine killed 100% of them. A dynamic engine let 23 survive: 23 false SCALE verdicts on unchanged agents.
+
+The difference is one invariant. A dynamic engine derives its required evidence from whichever gates are currently enabled, so requirements can silently shrink when a gate is disabled during an incident or a config migration. The fixed contract pins a versioned, immutable list: any missing or disabled gate makes INCOMPLETE the only legal answer.
+
+Decisions are framed economically, not by accuracy: `acceptable_rate`, `cost_per_acceptable_outcome`, `tail_risk`, `runtime_caps`, `expected_net_value`, and a counterfactual against a named baseline. Every verdict ships with a tamper-evident `EvidenceBundle` and an `AssuranceCase` audit trail.
+
+A missing gate is not a passing gate.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    subgraph Inputs
+        T[TraceEvent stream]
+        O[Outcome labels]
+        P[EconomicPolicy]
+        B[Baseline]
+    end
+
+    T & O --> EB["EvidenceBundle\ntamper-evident digest"]
+    P & B --> DC
+    EB --> DC["DecisionContract\nfixed versioned gates"]
+
+    DC --> CHECK{"All required\ngates present?"}
+    CHECK -->|No| INC["INCOMPLETE"]
+    CHECK -->|Yes| G
+
+    subgraph G["Economic Gates"]
+        G1[acceptable_rate]
+        G2[cost_per_acceptable]
+        G3[tail_risk]
+        G4[runtime_caps]
+        G5[expected_net_value]
+        G6[counterfactual vs baseline]
+    end
+
+    G --> V{"All gates\npass?"}
+    V -->|All pass| S["SCALE"]
+    V -->|Partial| A["ASSIST"]
+    V -->|Hard fail| ST["STOP"]
+
+    S & A & ST & INC --> AC["AssuranceCase\naudit trail"]
+```
+
 The dangerous failure is a contract that changes with the checks that happen to be
 enabled. One file reproduces the controlled failure mode:
 
@@ -45,10 +91,7 @@ contract keeps all six requirements and refuses every reduced composition.
 The 23 is a property of a synthetic fixture. The zero is an enforced invariant.
 Neither is a production prevalence estimate. Read the
 [protocol](research/FALSE_GREEN_PROTOCOL.md), inspect all
-[588 rows](research/results/decision-coverage-drift/results.csv), or read the
-[technical article](docs/writing/article.md).
-
-For a product-team version with a 30-minute operating exercise, read
+[588 rows](research/results/decision-coverage-drift/results.csv), or copy the
 [one-page decision contract](templates/agent-scale-decision-contract.md).
 
 ## Delete actual evidence
@@ -204,7 +247,6 @@ response content, preserves only content-free tool-argument type shape, and refu
 delegation or incomplete tool-call inventories.
 
 [Read the adapter contract](docs/claude-code-adapter.md) ·
-[Review the implemented PRD](docs/adapter-extension-prd.md) ·
 [Inspect the complete fixture](examples/claude-code/)
 
 ## Include delegated Claude Code subagent spend
@@ -308,8 +350,7 @@ Partial or conflicting modes return `INCOMPLETE`. The action exposes `decision`,
 production use. Stable `v1` tags follow successful dogfood rather than preceding
 it.
 
-[Inspect the action contract](action.yml) ·
-[Read the scope and priorities](docs/roadmap.md)
+[Inspect the action contract](action.yml)
 
 ## Reproduce everything
 
