@@ -1,6 +1,6 @@
 # Landscape and product decision
 
-Research date: 2026-07-28.
+Research date: 2026-07-30.
 
 ## Decision
 
@@ -59,6 +59,19 @@ useful as one transparent lesson, but it is not a defensible category claim.
   [claude-code-usage-analyzer](https://github.com/aarora79/claude-code-usage-analyzer)
   breaks cost down by token type. Parsing JSONL or showing cache spend is not the
   novel claim.
+- Multi-agent trace trees and child-cost rollups are also existing product
+  capabilities. [Braintrust trace views](https://www.braintrust.dev/docs/observe/examine-traces)
+  propagate child-span cost to parent spans, while
+  [LangSmith cost tracking](https://docs.langchain.com/langsmith/cost-tracking)
+  shows cost on parent and child runs and aggregates child runs when thread
+  metadata is present. Anthropic documents that
+  [Claude Code subagent transcripts](https://code.claude.com/docs/en/sub-agents)
+  persist separately from the main conversation. This repository therefore does
+  not claim that hierarchical tracing, subagent discovery, or cost rollup is
+  novel. The shipped distinction is an offline, file-bound join that attributes
+  each expanded child to one root business attempt, guards against duplicate
+  execution evidence, and then applies the same outcome, labor, loss,
+  counterfactual, and fixed-coverage decision contract as every other adapter.
 - Anthropic's own [cost guidance](https://code.claude.com/docs/en/costs) exposes
   session usage and estimated spend. It also notes that local dollar figures may
   differ from authoritative billing, which is another reason to keep the supplied
