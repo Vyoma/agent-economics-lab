@@ -38,7 +38,6 @@ from .frontier import FrontierDecision, run_frontier
 from .frontier_report import (
     render_frontier_json,
     render_frontier_markdown,
-    render_frontier_svg,
 )
 from .io import load_csv_bundle
 from .models import Decision
@@ -255,7 +254,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         artifacts = {
             "frontier.md": render_frontier_markdown(case),
             "frontier.json": render_frontier_json(case),
-            "frontier.svg": render_frontier_svg(case),
         }
         if args.verify_dir:
             verify_dir = Path(args.verify_dir)

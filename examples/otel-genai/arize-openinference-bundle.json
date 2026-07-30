@@ -7,7 +7,7 @@
   },
   "conversion": {
     "contract_schema_version": 1,
-    "conversion_contract_sha256": "e69ba435fffcd67ad1a061c3da42f522966907d819b76a774c14e680ff292209",
+    "conversion_contract_sha256": "97728802b7dbf2105376c5afd261fdfa16b49dbf426080e5df0388626faaa13a",
     "counts": {
       "dependency_edges": 0,
       "model_calls": 1,
