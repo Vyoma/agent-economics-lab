@@ -1,5 +1,155 @@
 # Changelog
 
+## 0.8.0 - 2026-07-31
+
+Tightens the decision contract, adds a judge eval, and expands the test suite to
+stress, property, statistical, and regression coverage.
+
+### Decision contract
+
+- **Breaking:** the contract is now `assurance.decision-contract@2`. Every check
+  entry records an `implementation_digest`, a SHA-256 over the normalized source of
+  its `run` function. Declared identity alone cannot distinguish an enforcing gate
+  from a same-named, same-coverage gate that no longer enforces anything, so the
+  fingerprint is what makes a permissive substitution visible. All published
+  contract digests change and every checked-in artifact is regenerated.
+- Checks whose source cannot be retrieved (built-ins, C functions,
+  `functools.partial`, interactively defined callables) are refused rather than
+  admitted with an unbindable implementation.
+- Summed costs route through a guarded reducer. Individually valid finite values can
+  produce an unrepresentable total, and a fail-closed engine must answer that with an
+  explained refusal rather than a stdlib `OverflowError`. `percentile` validates its
+  probability argument.
+
+### Harness measurement
+
+- `mutation_score.py` injects two operators and excludes equivalent mutants.
+  Gate **removal** is detected by the coverage contract by construction, so a
+  perfect score against it is arithmetic rather than evidence. Gate
+  **substitution**, where a replacement keeps its ID, version, coverage, and failure
+  route while enforcing nothing, is the operator that discriminates: the fixed
+  contract scores 95.5% against it, identical to a dynamic engine. The
+  implementation fingerprint is what surfaces those cases.
+- `sensitivity_sweep.py` reports decision robustness across a 48-cell grid of
+  economic assumptions plus baseline perturbations. 55 of 98 scenarios change verdict
+  under plausible assumptions, and a 50% baseline error flips 25 counterfactual
+  gates. The grid now shares one fixture construction with the drift benchmark so the
+  identity cell reproduces the unperturbed verdict exactly.
+- `false_green.build_evidence` accepts economic overrides. Coverage-drift artifacts
+  remain byte-identical.
+- `mutation-score`, `sensitivity`, and `completion-vs-verdict` are wired into
+  `make reproduce` with pinned, byte-verified artifacts.
+- `completion_vs_verdict.py` replaces `real_trace_verdict.py`, which described the
+  synthetic Claude Code fixture as a captured session.
+
+### Inference: single provider, enforced
+
+- `agent_economics/kimi_client.py` is the package's only inference egress. Provider,
+  model, request contract, and retry policy are declared once, ending duplication
+  that had already let the two integrations drift to different reasoning depths.
+- `tests/test_inference_routing.py` enforces the boundary: no module may open its own
+  connection, declare a second endpoint, import another provider's SDK, reference
+  another provider's host, or reach the client from an undeclared module. A separate
+  assertion keeps the deterministic kernel free of inference, since a model call
+  there would void byte-reproducible verdicts.
+- `agent-economics capabilities` reports the active provider, model, reasoning
+  effort, and egress path.
+
+### Kimi request contract
+
+Pinned to the documented `kimi-k3` contract:
+
+- Verdicts are forced through a strict JSON schema derived from the rubric. Moonshot
+  Flavored JSON Schema accepts only `type`, `enum`, and `required` for validation and
+  rejects range keywords with HTTP 400, so bounds are stated in each field's
+  `description` and enforced by `_validate_verdict` after parsing.
+  `assert_mfjs_compatible` raises locally before a request goes out.
+- `max_completion_tokens` replaces `max_tokens`, at 32768 for the judge and 65536 for
+  the analyst. Reasoning shares the budget, so it must fit `reasoning_effort=max`.
+- Sampling parameters are omitted because K3 fixes them server-side.
+- Request timeouts follow the reasoning depth: 60s low, 180s high, 420s max. A
+  chat-sized timeout turns every deep-reasoning call into repeated timed-out attempts.
+- The invariant system prompt is sent first so automatic context caching keeps a
+  stable prefix.
+- Retries cover `408/409/425/429/5xx`. Everything else raises `KimiRequestError` and
+  is not caught by `judge`: a rejected schema or credential is a defect in the
+  request, not a verdict about the task, so the run aborts without writing outcomes.
+- All three Moonshot credential systems are reachable. Keys and base URLs are not
+  interchangeable across the international Open Platform, the China Open Platform,
+  and Kimi Code, and Kimi Code uses a different path as well as a different host.
+  `MOONSHOT_BASE_URL` selects the system and is validated against `KIMI_HOSTS`, so it
+  cannot redirect inference to another provider.
+- `401` responses name the system that was called, tabulate all three with their
+  consoles, and give the override to reach each. Keys are stripped of surrounding
+  whitespace and quotes, and templated or too-short values are refused locally
+  instead of costing a network round trip.
+- `check_kimi_auth.py` and `make kimi-doctor` report key shape and per-system HTTP
+  status without printing the key.
+- The judge audit sidecar records `model_id`, `reasoning_effort`, and
+  `output_contract` alongside every per-criterion score.
+
+### Judge eval
+
+- `research/eval/judge-eval-set.json` holds 25 cases across eight categories, with
+  expected labels that follow from the rubric's own weights. A test asserts that
+  arithmetic against the rubric file: accuracy plus policy clears the threshold, so a
+  blunt correct answer must pass, while policy plus tone cannot, so a factually wrong
+  answer cannot.
+- `make kimi-eval` reports agreement, per-class precision and recall, a confusion
+  matrix, a per-category breakdown, and a **false-accept rate**, the error that
+  inflates `acceptable_rate` and can turn a `STOP` into a `SCALE`. Judge errors are
+  counted apart from the confusion matrix so an outage cannot read as strictness.
+- `--limit`, `--only`, and `--repeat` support smoke runs, single-case checks, and
+  verdict-stability measurement. Full verdicts are saved and rationales printed for
+  any disagreement.
+- Measured: `kimi-k3` at `reasoning_effort=max` scores 95.8% agreement on eval
+  version 1 and 100% on version 3, both with a 0% false-accept rate and no errors.
+  Version 1 is the stronger evidence: version 3 was partly informed by the model
+  under test, and two of its verdicts sit 0.02 from the threshold. Every recorded run
+  is pinned to the eval version it measured, and a test requires those caveats to stay
+  attached to a perfect score.
+- Judge calibration: `kimi-k3` requires caveats about permissions and recoverability
+  before endorsing destructive operations, and scores comparable non-destructive
+  product-specific answers well above threshold. Supply product ground truth in the
+  `context` column or true statements can be scored as unsupported.
+
+### Label sensitivity
+
+On identical traces, rates, baseline, policy, and decision-contract digest, swapping
+hand-authored labels for `kimi-k3` labels moved the support fixture from `ASSIST` to
+`STOP`, took the acceptable rate from 75.0% to 37.5%, moved cost per acceptable
+outcome from $3.50 to $14.76, and flipped incremental net value from $2.77 to
+$-3.13. Neither label set is validated ground truth; the finding is the leverage the
+label source holds over the verdict.
+
+### Tests
+
+- `tests/test_stress_properties.py`: fail-closed behavior on hostile economics,
+  derived-metric consistency across 200 randomized scenarios, determinism under event
+  permutation, monotonicity of cost and quality, and 1000-task scale.
+- `tests/test_frontier_statistics.py`: the exact Clopper-Pearson bound checked
+  against its closed form at zero observations, monotonicity, interval tightening,
+  and paired-bootstrap pairing preservation.
+- `tests/test_regressions.py`: one test per invariant the release establishes.
+- `tests/test_harness_reports.py`, `tests/test_inference_routing.py`, and
+  `tests/test_kimi_eval.py` cover the harness artifacts, the provider boundary, and
+  the eval scoring math.
+
+### Documentation
+
+- `docs/landscape.md` records fail-closed required coverage as prior art: GitHub
+  required status checks, Kubernetes `failurePolicy: Fail`, in-toto layouts, SLSA,
+  OPA, DO-178C, and ISO 26262. The mechanism is borrowed; the economic dimensions it
+  is applied to are the contribution.
+- `README.md` adds a plain-language summary, quotes literal `make demo` output with a
+  test asserting every quoted line matches the engine, and surfaces the sensitivity
+  and mutation-score results rather than burying them.
+- `docs/kimi-integration.md` documents the request contract, the three credential
+  systems, the eval, and the calibration finding.
+- `assets/demo.gif` is removed. A recording cannot be re-verified when the code
+  changes, and its claim-boundary text no longer matched the engine.
+- Stale links to `frontier.svg` and `research/NOTE.md` are removed.
+
 ## 0.7.0 - 2026-07-29
 
 - Add a separate `claude-code-tree` converter for parent plus persisted subagent

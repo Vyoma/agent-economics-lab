@@ -59,6 +59,7 @@ from .frontier_report import (
     render_frontier_markdown,
     render_frontier_svg,
 )
+from .kimi_client import KimiRequestError
 from .io import (
     load_baseline,
     load_csv_bundle,
@@ -84,6 +85,7 @@ from .models import (
     Outcome,
     TaskIdentity,
     TraceEvent,
+    implementation_fingerprint,
 )
 
 __all__ = [
@@ -107,6 +109,7 @@ __all__ = [
     "ExperimentPlan",
     "EvidenceBundle",
     "FrontierCase",
+    "KimiRequestError",
     "FrontierDecision",
     "ModelRate",
     "Outcome",
@@ -129,6 +132,7 @@ __all__ = [
     "evaluate",
     "evaluate_bundle",
     "evaluate_frontier",
+    "implementation_fingerprint",
     "load_baseline",
     "load_conversion_contract",
     "load_csv_bundle",

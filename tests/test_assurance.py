@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import math
 import unittest
 from dataclasses import replace
@@ -18,6 +19,7 @@ from agent_economics import (
     default_checks,
     evaluate,
     evaluate_bundle,
+    implementation_fingerprint,
     load_baseline,
     load_csv_bundle,
     load_outcomes,
@@ -25,12 +27,17 @@ from agent_economics import (
     load_rates,
     load_traces,
 )
-from agent_economics.assurance import AssuranceEngine
+from agent_economics.assurance import AssuranceEngine, decision_contract_manifest
 from agent_economics.report import render_json, render_markdown
 
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
+
+
+def _permissive_gate(view):
+    """A gate that enforces nothing while still claiming its coverage."""
+    return CheckOutput(results=())
 
 
 class AssuranceTests(unittest.TestCase):
@@ -205,7 +212,7 @@ class AssuranceTests(unittest.TestCase):
         self.assertEqual(case.decision_contract_digest, digest)
         self.assertEqual(
             digest,
-            "f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a",
+            "e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab",
         )
         self.assertNotEqual(
             digest,
@@ -235,6 +242,90 @@ class AssuranceTests(unittest.TestCase):
                     DEFAULT_REQUIRED_COVERAGE - {Coverage.OUTCOME_QUALITY}
                 ),
             ),
+        )
+
+    def test_contract_digest_detects_a_permissive_substitution(self) -> None:
+        """Declared identity and coverage cannot distinguish enforcement.
+
+        Gate removal is the mutation a fixed coverage contract detects by
+        construction. Gate substitution is the mutation that survives it: the
+        replacement keeps the same ID, version, coverage, and failure route, so
+        required coverage still appears satisfied and the gate simply stops
+        failing. Only the implementation fingerprint makes that visible.
+        """
+        checks = default_checks()
+        digest = decision_contract_digest(checks, DEFAULT_REQUIRED_COVERAGE)
+        gates = [check for check in checks if check.mode is CheckMode.GATE]
+        self.assertEqual(len(gates), 6)
+        for gate in gates:
+            substituted = tuple(
+                replace(check, run=_permissive_gate)
+                if check.id == gate.id
+                else check
+                for check in checks
+            )
+            self.assertEqual(
+                frozenset(
+                    coverage
+                    for check in substituted
+                    if check.mode is CheckMode.GATE
+                    for coverage in check.covers
+                ),
+                DEFAULT_REQUIRED_COVERAGE,
+                f"{gate.id}: substitution must leave required coverage satisfied",
+            )
+            self.assertNotEqual(
+                digest,
+                decision_contract_digest(substituted, DEFAULT_REQUIRED_COVERAGE),
+                f"{gate.id}: permissive substitution must change the contract digest",
+            )
+
+    def test_every_contract_entry_records_an_implementation_digest(self) -> None:
+        manifest = decision_contract_manifest(
+            default_checks(), DEFAULT_REQUIRED_COVERAGE
+        )
+        entries = manifest["checks"]
+        assert isinstance(entries, list)
+        self.assertEqual(len(entries), 8)
+        for entry in entries:
+            digest = entry["implementation_digest"]
+            self.assertEqual(len(digest), 64)
+            self.assertTrue(all(char in "0123456789abcdef" for char in digest))
+        self.assertEqual(
+            len({entry["implementation_digest"] for entry in entries}),
+            len(entries),
+            "each built-in check must have a distinct implementation fingerprint",
+        )
+
+    def test_unfingerprintable_check_cannot_enter_a_contract(self) -> None:
+        """Fail closed rather than admit a check whose code cannot be bound."""
+        for unfingerprintable in (
+            len,
+            functools.partial(_permissive_gate),
+        ):
+            with self.assertRaises(ValueError):
+                implementation_fingerprint(unfingerprintable)
+        opaque = CheckSpec(
+            id="gate.opaque",
+            version="1",
+            mode=CheckMode.GATE,
+            covers=frozenset({Coverage.OUTCOME_QUALITY}),
+            run=functools.partial(_permissive_gate),
+            failure_route=Decision.ASSIST,
+        )
+        with self.assertRaises(ValueError):
+            decision_contract_digest((opaque,), DEFAULT_REQUIRED_COVERAGE)
+
+    def test_implementation_fingerprint_ignores_nesting_depth(self) -> None:
+        """Indentation must not change the fingerprint of identical logic."""
+        self.assertEqual(
+            implementation_fingerprint(_permissive_gate),
+            implementation_fingerprint(_permissive_gate),
+        )
+        original = default_checks()[0]
+        self.assertEqual(
+            original.implementation_digest,
+            implementation_fingerprint(original.run),
         )
 
     def test_custom_gate_can_route_to_stop_without_core_edit(self) -> None:

@@ -19,7 +19,6 @@ reduction. Missing tasks, arms, cost evidence, or assurance coverage return
 - [Data card](FRONTIER_DATA_CARD.md)
 - [Generated decision](results/frontier/frontier.md)
 - [Machine-readable result](results/frontier/frontier.json)
-- [Cost-quality plot](results/frontier/frontier.svg)
 - [Transparent fixture generator](../examples/compute-frontier/generate.py)
 
 The checked-in 180-task study is synthetic. It validates the implementation and
@@ -40,13 +39,56 @@ bundle is unchanged in every comparison.
 - [Generated rows](results/decision-coverage-drift/results.csv)
 - [Summary](results/SUMMARY.md)
 - [Structured summary](results/decision-coverage-drift/summary.json)
-- [Research note](NOTE.md)
 
 This benchmark validates routing semantics under constructed perturbations. The
 zero fixed-contract result follows from the required-coverage invariant and should
 not be described as an empirical ecosystem result or a missing-data experiment.
+Because gate removal is the one operator the invariant catches by construction,
+this experiment cannot speak to how hard the harness is to fool. Experiment 3
+exists for that question.
 
-## 3. Raw Evidence Ablation
+## 3. Harness Mutation Score
+
+**Question:** Under which mutation operators does the fixed contract actually
+outperform a dynamic one?
+
+Two operators are injected across the same 98-scenario matrix, with equivalent
+mutants excluded from the denominator. `REMOVAL` deletes a required gate.
+`SUBSTITUTION` replaces one with a permissive implementation that keeps the same
+ID, version, declared coverage, and failure route.
+
+Removal is killed 510/510 by the fixed contract, which is forced by the coverage
+invariant. Substitution is killed 487/510 by *both* engines: identical scores,
+because required coverage still appears satisfied. The per-check implementation
+fingerprint in the decision-contract digest changes for 588/588 substitutions and
+is the only mechanism that surfaces them.
+
+- [Summary](results/mutation-score/summary.md)
+- [Structured summary](results/mutation-score/summary.json)
+- [Executable](../mutation_score.py)
+
+The honest reading: the fixed contract removes one failure mode by construction
+and leaves the more realistic one to digest review.
+
+## 4. Decision Sensitivity Sweep
+
+**Question:** How much of a verdict is the agent, and how much is the economic
+assumptions behind it?
+
+A 48-cell grid of incident-loss and remediation-cost assumptions is swept per
+scenario, plus six perturbations of the baseline acceptable rate. 43 of 98
+scenarios never change verdict; 55 change in three or more cells. A 50% baseline
+error flips the counterfactual gate in 25 of 98.
+
+- [Summary](results/sensitivity/summary.md)
+- [Structured summary](results/sensitivity/summary.json)
+- [Executable](../sensitivity_sweep.py)
+
+Flip counts characterize this matrix under this policy. They are not a production
+prevalence estimate, and they are a reason to publish a fragility index beside
+any verdict.
+
+## 5. Raw Evidence Ablation
 
 **Question:** What happens when an outcome record, cost field, policy threshold,
 manifest row, baseline, or timed-out event is actually deleted while the decision

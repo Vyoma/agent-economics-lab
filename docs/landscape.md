@@ -91,6 +91,62 @@ useful as one transparent lesson, but it is not a defensible category claim.
   refuses incomplete economic evidence and is exercised against two independently
   maintained, content-safe platform fixture shapes.
 
+## Fail-closed required coverage is not a new idea
+
+An earlier version of this document surveyed the economics and observability lane
+thoroughly and omitted the lane where this project's central invariant actually
+originates. That omission made a decades-old idea look like a contribution. The
+invariant is:
+
+> A required check that did not run must not read as a check that passed.
+
+That is prior art, and well-established prior art:
+
+- [GitHub required status checks](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#require-status-checks-before-merging)
+  pin a required list in branch-protection configuration. A check that never
+  reports stays pending and blocks the merge; it does not become green because
+  the checks that did run passed. This is the same fixed-contract behavior,
+  shipped since 2015.
+- [Kubernetes admission webhooks](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#failure-policy)
+  with `failurePolicy: Fail` reject a request when a required admission
+  controller is unreachable, rather than admitting it unchecked.
+- [in-toto](https://in-toto.io/) layouts sign an expected list of supply-chain
+  steps. Missing link metadata for a required step fails verification. The
+  layout is the fixed contract; the links are the evidence.
+- [SLSA](https://slsa.dev/) provenance and
+  [OPA](https://www.openpolicyagent.org/) / Conftest deny-by-default policy
+  bundles express the same default: absence of an attestation is not a
+  satisfied requirement.
+- Safety-case practice in
+  [DO-178C](https://www.rtca.org/) and
+  [ISO 26262](https://www.iso.org/standard/68383.html), and Goal Structuring
+  Notation more generally, treat argument completeness as an explicit
+  obligation. An unsupported goal invalidates the case; it is not silently
+  dropped.
+
+So the delta claimed here is narrower than "fail-closed coverage." It is:
+
+```text
+fail-closed required coverage applied to ECONOMIC decision dimensions
+  + an adjudicated acceptable-outcome label
+  + full cost including labor, remediation, and incident loss
+  + a named counterfactual baseline
+  + one portable artifact that engineering, finance, product, and risk read
+```
+
+The gate-completeness mechanism is borrowed. The economic dimensions it is
+applied to, and the refusal to issue a verdict without a counterfactual, are the
+parts worth reviewing.
+
+One further correction belongs here, because it bounds the mechanism itself.
+Fixed required coverage detects a *removed* gate by construction. It does not
+detect a *substituted* gate that keeps its declared ID, version, and coverage
+while ceasing to enforce anything, and against that operator a fixed contract
+scores no better than a dynamic one. The per-check implementation fingerprint in
+the decision-contract digest exists for that case. `make mutation-score` reports
+both operators side by side, and
+[docs/limitations.md](limitations.md) states the residual gap.
+
 ## The narrower gap
 
 The under-owned artifact is a vendor-neutral, inspectable package that can move

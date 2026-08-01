@@ -1,0 +1,87 @@
+{
+  "claim_boundary": "Synthetic conformance fixture. Removal detection is forced by the fixed coverage contract and is therefore not evidence of harness hardness. Substitution is the operator that discriminates.",
+  "equivalent_mutants_excluded": 156,
+  "experiment_id": "harness-mutation-score",
+  "experiment_version": "2",
+  "mutants_injected": 1176,
+  "operators": {
+    "removal": {
+      "by_dimension": {
+        "business_value": {
+          "dynamic_survived": 1,
+          "fixed_survived": 0
+        },
+        "counterfactual": {
+          "dynamic_survived": 3,
+          "fixed_survived": 0
+        },
+        "outcome_quality": {
+          "dynamic_survived": 2,
+          "fixed_survived": 0
+        },
+        "runtime_caps": {
+          "dynamic_survived": 8,
+          "fixed_survived": 0
+        },
+        "tail_risk": {
+          "dynamic_survived": 8,
+          "fixed_survived": 0
+        },
+        "unit_economics": {
+          "dynamic_survived": 1,
+          "fixed_survived": 0
+        }
+      },
+      "contract_digest_changed": 588,
+      "detected_by_coverage_contract_by_construction": true,
+      "dynamic_coverage_killed": 487,
+      "dynamic_coverage_score": 0.9549019607843138,
+      "dynamic_coverage_survived": 23,
+      "fixed_contract_killed": 510,
+      "fixed_contract_score": 1.0,
+      "fixed_contract_survived": 0,
+      "mutants": 588,
+      "scored_mutants": 510
+    },
+    "substitution": {
+      "by_dimension": {
+        "business_value": {
+          "dynamic_survived": 1,
+          "fixed_survived": 1
+        },
+        "counterfactual": {
+          "dynamic_survived": 3,
+          "fixed_survived": 3
+        },
+        "outcome_quality": {
+          "dynamic_survived": 2,
+          "fixed_survived": 2
+        },
+        "runtime_caps": {
+          "dynamic_survived": 8,
+          "fixed_survived": 8
+        },
+        "tail_risk": {
+          "dynamic_survived": 8,
+          "fixed_survived": 8
+        },
+        "unit_economics": {
+          "dynamic_survived": 1,
+          "fixed_survived": 1
+        }
+      },
+      "contract_digest_changed": 588,
+      "detected_by_coverage_contract_by_construction": false,
+      "dynamic_coverage_killed": 487,
+      "dynamic_coverage_score": 0.9549019607843138,
+      "dynamic_coverage_survived": 23,
+      "fixed_contract_killed": 487,
+      "fixed_contract_score": 0.9549019607843138,
+      "fixed_contract_survived": 23,
+      "mutants": 588,
+      "scored_mutants": 510
+    }
+  },
+  "scenarios": 98,
+  "schema_version": 2
+}

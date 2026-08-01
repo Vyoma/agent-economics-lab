@@ -10,7 +10,7 @@
   ],
   "false_scale_transitions": 5,
   "fixed_decision_contract": {
-    "digest": "f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a",
+    "digest": "e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab",
     "enabled_checks": [
       "gate.acceptable-rate@1",
       "gate.unit-economics@1",
@@ -39,6 +39,6 @@
   },
   "operational_refusals": 4,
   "protocol_version": "1",
-  "results_csv_sha256": "85452d5ac51d8f49958130b3128cce5f9af04b68b5337a07c5a245c3e241abf1",
+  "results_csv_sha256": "eeb1bc7ae1a50172a0e1a2e6831febdb9deb15caecbc9441f37dbe43cd6e4bd5",
   "schema_version": 1
 }

@@ -27,7 +27,7 @@ from .models import (
     TraceEvent,
 )
 
-DECISION_CONTRACT_SCHEMA = "assurance.decision-contract@1"
+DECISION_CONTRACT_SCHEMA = "assurance.decision-contract@2"
 ASSURANCE_ENGINE_IMPLEMENTATION = "agent-economics.assurance-engine@1"
 ROUTING_SEMANTICS = "missing-coverage>stop>assist>scale@1"
 
@@ -36,7 +36,14 @@ def decision_contract_manifest(
     checks: Sequence[CheckSpec],
     required_coverage: frozenset[Coverage],
 ) -> dict[str, object]:
-    """Return the canonical configuration that gives a green decision meaning."""
+    """Return the canonical configuration that gives a green decision meaning.
+
+    Each entry records an `implementation_digest` alongside the declared
+    identity. Without it, a gate that keeps its ID, version, and coverage while
+    silently ceasing to enforce anything produces a byte-identical contract
+    digest. With it, substituting a permissive implementation is visible even
+    though required coverage still appears satisfied.
+    """
     return {
         "schema": DECISION_CONTRACT_SCHEMA,
         "implementation": ASSURANCE_ENGINE_IMPLEMENTATION,
@@ -52,6 +59,7 @@ def decision_contract_manifest(
                     if check.failure_route is not None
                     else ("dynamic" if check.mode is CheckMode.GATE else None)
                 ),
+                "implementation_digest": check.implementation_digest,
             }
             for check in checks
         ],
@@ -72,9 +80,34 @@ def decision_contract_digest(
 def percentile(values: list[float], probability: float) -> float:
     if not values:
         raise ValueError("Cannot calculate a percentile of an empty list")
+    if not 0.0 <= probability <= 1.0:
+        raise ValueError(f"probability must be in [0, 1], got {probability}")
     ordered = sorted(values)
     rank = max(1, math.ceil(probability * len(ordered)))
     return ordered[rank - 1]
+
+
+def _checked_sum(values: Sequence[float], label: str) -> float:
+    """Sum with a typed refusal instead of a bare OverflowError.
+
+    Each input can be individually finite and in range while the total is not
+    representable. `math.fsum` raises `OverflowError` in that case, which would
+    escape before the engine's non-finite guard runs, so a fail-closed
+    architecture would emit a stdlib traceback rather than an explained refusal.
+    """
+    try:
+        total = math.fsum(values)
+    except OverflowError as error:
+        raise ValueError(
+            f"{label} overflows a float even though every input is finite. "
+            "Check the cost units and the rate card."
+        ) from error
+    if not math.isfinite(total):
+        raise ValueError(
+            f"{label} is not finite even though every input is finite. "
+            "Check the cost units and the rate card."
+        )
+    return total
 
 
 def reconstruct_tasks(
@@ -98,15 +131,19 @@ def reconstruct_tasks(
     for task_id in sorted(by_task):
         task_events = by_task[task_id]
         outcome = outcomes[task_id]
-        trace_cost = math.fsum(event.cost(rates) for event in task_events)
+        trace_cost = _checked_sum(
+            [event.cost(rates) for event in task_events],
+            f"trace cost for task {task_id!r}",
+        )
         human_cost = outcome.human_minutes * policy.human_hourly_cost_usd / 60
-        effective_cost = math.fsum(
+        effective_cost = _checked_sum(
             (
                 trace_cost,
                 human_cost,
                 outcome.remediation_cost_usd,
                 outcome.incident_loss_usd,
-            )
+            ),
+            f"effective cost for task {task_id!r}",
         )
         tasks.append(
             TaskEconomics(
@@ -204,11 +241,15 @@ class AssuranceEngine:
 
         accepted = sum(task.acceptable for task in tasks)
         acceptable_rate = accepted / len(tasks)
-        total_cost = math.fsum(task.effective_cost_usd for task in tasks)
+        total_cost = _checked_sum(
+            [task.effective_cost_usd for task in tasks], "total effective cost"
+        )
         cost_per_acceptable = total_cost / accepted if accepted else math.inf
         p95_cost = percentile([task.effective_cost_usd for task in tasks], 0.95)
         max_cost = max(task.effective_cost_usd for task in tasks)
-        realized_value = math.fsum(task.business_value_usd for task in tasks)
+        realized_value = _checked_sum(
+            [task.business_value_usd for task in tasks], "total realized value"
+        )
         expected_net = (realized_value - total_cost) / len(tasks)
         incremental_net = (
             expected_net - evidence.baseline.expected_net_value_per_attempt_usd

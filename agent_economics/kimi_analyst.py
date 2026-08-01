@@ -38,19 +38,25 @@ import argparse
 import json
 import logging
 import math
-import os
-import urllib.error
-import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from . import kimi_client
+
 logger = logging.getLogger(__name__)
 
-_API_URL = "https://api.moonshot.ai/v1/chat/completions"
-_DEFAULT_MODEL = "kimi-k3"
-_TIMEOUT_S = 90
 _EARLY_WARNING_PCT = 0.20  # flag metrics within 20% of threshold
+
+# The request contract, retry policy, and provider live in kimi_client, the
+# package's single inference egress.
+_DEFAULT_MODEL = kimi_client.DEFAULT_MODEL
+_DEFAULT_REASONING_EFFORT = kimi_client.DEFAULT_REASONING_EFFORT
+_REASONING_EFFORTS = kimi_client.REASONING_EFFORTS
+# Shared with reasoning tokens at `max` effort. See kimi_judge for the rationale;
+# the analyst also emits a longer structured answer than the judge.
+_MAX_COMPLETION_TOKENS = 65536
+_TIMEOUT_S = None  # follows reasoning_effort, see kimi_client
 
 
 # ── result types ─────────────────────────────────────────────────────────────
@@ -431,36 +437,24 @@ def _call_kimi_analyst(
     *,
     api_key: str,
     model: str,
+    reasoning_effort: str = _DEFAULT_REASONING_EFFORT,
 ) -> dict[str, Any]:
-    payload = {
-        "model": model,
-        "max_tokens": 2048,
-        "reasoning_effort": "high",   # analyst needs real economic reasoning
-        "response_format": {"type": "json_object"},
-        "messages": [
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": context},
-        ],
-    }
-    req = urllib.request.Request(
-        _API_URL,
-        data=json.dumps(payload).encode(),
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
+    """Ask for recommendations against an already-decided case.
+
+    `_SYSTEM_PROMPT` is a module constant sent first, so automatic context
+    caching can reuse it across calls. K3 fixes sampling server-side, so no
+    temperature or top_p is sent, and output length uses
+    `max_completion_tokens`.
+    """
+    return kimi_client.call_kimi_json(
+        _SYSTEM_PROMPT,
+        context,
+        api_key=api_key,
+        model=model,
+        reasoning_effort=reasoning_effort,
+        max_completion_tokens=_MAX_COMPLETION_TOKENS,
+        timeout_s=_TIMEOUT_S,
     )
-    with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as resp:
-        body = json.loads(resp.read())
-    content = body["choices"][0]["message"]["content"]
-    if not content or not content.strip():
-        raise RuntimeError(
-            f"Kimi returned empty content. "
-            f"Tokens used: {body.get('usage', {}).get('completion_tokens', '?')}. "
-            "Try increasing max_tokens."
-        )
-    return json.loads(content)
 
 
 def _parse_result(kimi_resp: dict[str, Any], model_id: str) -> AnalysisResult:
@@ -489,13 +483,7 @@ def _parse_result(kimi_resp: dict[str, Any], model_id: str) -> AnalysisResult:
 
 
 def _get_api_key() -> str:
-    key = os.environ.get("MOONSHOT_API_KEY")
-    if not key:
-        raise RuntimeError(
-            "MOONSHOT_API_KEY not set. "
-            "Get a key at https://platform.kimi.ai and export it."
-        )
-    return key
+    return kimi_client.require_api_key()
 
 
 # ── public API ────────────────────────────────────────────────────────────────

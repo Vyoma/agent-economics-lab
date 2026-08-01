@@ -20,15 +20,23 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from agent_economics import kimi_client
 from agent_economics.kimi_judge import (
+    _DEFAULT_MODEL,
+    _DEFAULT_REASONING_EFFORT,
     _build_outcome_row,
     _build_system_prompt,
     _build_user_message,
     _error_outcome_row,
     _validate_rubric,
+    _verdict_schema,
     judge,
     _main,
 )
+
+# Shaped like a real key. The client rejects short or templated values
+# locally, so a fixture key must look plausible.
+_FAKE_KEY = "sk-K3nQ7wZ2pR8sT1vY4bM6jL9cX0dF5gH2aN7eU3iO8kP1rW6z"
 
 _RUBRIC = {
     "rubric_id": "test-v1",
@@ -195,7 +203,7 @@ class JudgePipelineTests(unittest.TestCase):
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
 
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}):
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
                 judge(tasks_path, rubric_path, out_path, rate_limit=0)
 
             with open(out_path, newline="") as f:
@@ -220,7 +228,7 @@ class JudgePipelineTests(unittest.TestCase):
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
 
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}):
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
                 judge(tasks_path, rubric_path, out_path, rate_limit=0)
 
             audit_path = tmp_dir / "outcomes.audit.json"
@@ -229,6 +237,7 @@ class JudgePipelineTests(unittest.TestCase):
             self.assertEqual(len(audit), 1)
             self.assertEqual(audit[0]["task_id"], "t-001")
 
+    @patch("agent_economics.kimi_client.BACKOFF_BASE_S", 0.0)
     @patch("agent_economics.kimi_judge._call_kimi")
     def test_judge_fallback_on_api_error(self, mock_call: MagicMock) -> None:
         import urllib.error
@@ -243,7 +252,7 @@ class JudgePipelineTests(unittest.TestCase):
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
 
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}):
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
                 judge(tasks_path, rubric_path, out_path, rate_limit=0)
 
             with open(out_path, newline="") as f:
@@ -270,7 +279,7 @@ class JudgePipelineTests(unittest.TestCase):
             tasks_path.write_text("task_id,output\n")
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}):
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
                 with self.assertRaises(ValueError):
                     judge(tasks_path, rubric_path, out_path)
 
@@ -286,7 +295,7 @@ class JudgePipelineTests(unittest.TestCase):
                 w.writerow({"task_id": "t-001", "output": "OK."})
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}):
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
                 buf = io.StringIO()
                 with redirect_stdout(buf):
                     code = _main([
@@ -322,7 +331,7 @@ class OutcomeCsvCompatibilityTests(unittest.TestCase):
             rubric_path.write_text(json.dumps(_RUBRIC))
             out_path = tmp_dir / "outcomes.csv"
 
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}):
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
                 judge(tasks_path, rubric_path, out_path, rate_limit=0)
 
             outcomes = load_outcomes(out_path)
@@ -332,6 +341,360 @@ class OutcomeCsvCompatibilityTests(unittest.TestCase):
         self.assertTrue(outcomes["t-001"].acceptable)
         self.assertFalse(outcomes["t-002"].acceptable)
         self.assertAlmostEqual(outcomes["t-001"].business_value_usd, 8.0)
+
+
+class KimiRequestContractTests(unittest.TestCase):
+    """The K3 request contract, per platform.kimi.ai/docs/api/chat."""
+
+    def test_verdict_schema_is_strict_and_covers_every_criterion(self) -> None:
+        response_format = _verdict_schema(_RUBRIC)
+        self.assertEqual(response_format["type"], "json_schema")
+        schema_wrapper = response_format["json_schema"]
+        self.assertTrue(schema_wrapper["strict"])
+        schema = schema_wrapper["schema"]
+        self.assertFalse(schema["additionalProperties"])
+        scores = schema["properties"]["criterion_scores"]
+        self.assertEqual(
+            sorted(scores["required"]),
+            sorted(criterion["id"] for criterion in _RUBRIC["criteria"]),
+        )
+        self.assertFalse(scores["additionalProperties"])
+        for name, spec in scores["properties"].items():
+            with self.subTest(field=name):
+                self.assertEqual(spec["type"], "number")
+
+    def test_verdict_schema_carries_no_mfjs_rejected_keyword(self) -> None:
+        """A range keyword here is a 400, not a constraint.
+
+        Moonshot Flavored JSON Schema accepts only `type`, `enum`, and
+        `required` for validation. Sending `minimum`/`maximum` returns HTTP 400,
+        and because the judge falls back to an unacceptable label on error, that
+        rejection would silently relabel every task.
+        """
+        kimi_client.assert_mfjs_compatible(_verdict_schema(_RUBRIC))
+        blob = json.dumps(_verdict_schema(_RUBRIC))
+        for keyword in kimi_client.MFJS_REJECTED_KEYWORDS:
+            with self.subTest(keyword=keyword):
+                self.assertNotIn(f'"{keyword}"', blob)
+
+    def test_mfjs_guard_rejects_a_range_constrained_schema(self) -> None:
+        """The guard must actually fire, and name the offending path."""
+        bad = {
+            "type": "json_schema",
+            "json_schema": {
+                "name": "v",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "overall_score": {"type": "number", "minimum": 0.0}
+                    },
+                },
+            },
+        }
+        with self.assertRaises(ValueError) as caught:
+            kimi_client.assert_mfjs_compatible(bad)
+        self.assertIn("minimum", str(caught.exception))
+        self.assertIn("overall_score", str(caught.exception))
+
+    def test_out_of_range_score_is_rejected_after_parsing(self) -> None:
+        """Bounds the schema cannot express are enforced in code."""
+        from agent_economics.kimi_judge import _validate_verdict
+
+        criteria = [criterion["id"] for criterion in _RUBRIC["criteria"]]
+        valid = {
+            "task_id": "t-001",
+            "criterion_scores": {name: 0.9 for name in criteria},
+            "overall_score": 0.9,
+            "acceptable": True,
+            "rationale": "ok",
+        }
+        _validate_verdict(valid, _RUBRIC)
+
+        out_of_range = dict(valid["criterion_scores"])
+        out_of_range[criteria[0]] = 2.0
+        for field, mutated in (
+            ("overall_score", {**valid, "overall_score": 1.4}),
+            ("overall_score", {**valid, "overall_score": -0.1}),
+            ("criterion_scores", {**valid, "criterion_scores": out_of_range}),
+            (
+                "criterion_scores",
+                {**valid, "criterion_scores": {criteria[0]: 0.9}},
+            ),
+            (
+                "criterion_scores",
+                {
+                    **valid,
+                    "criterion_scores": {**valid["criterion_scores"], "extra": 0.5},
+                },
+            ),
+            ("acceptable", {**valid, "acceptable": "yes"}),
+            ("overall_score", {**valid, "overall_score": "high"}),
+        ):
+            with self.subTest(field=field, value=mutated.get(field)):
+                with self.assertRaises(ValueError):
+                    _validate_verdict(mutated, _RUBRIC)
+
+    def test_token_budget_leaves_room_for_max_effort_reasoning(self) -> None:
+        """K3 always reasons, and reasoning shares this budget."""
+        from agent_economics import kimi_analyst
+        from agent_economics.kimi_judge import _MAX_COMPLETION_TOKENS
+
+        self.assertEqual(_DEFAULT_REASONING_EFFORT, "max")
+        self.assertGreaterEqual(_MAX_COMPLETION_TOKENS, 16384)
+        self.assertGreaterEqual(kimi_analyst._MAX_COMPLETION_TOKENS, 16384)
+
+    @patch("agent_economics.kimi_client.urllib.request.urlopen")
+    def test_payload_matches_the_k3_request_schema(self, mock_open: MagicMock) -> None:
+        """K3 fixes sampling and renames the output-length field."""
+        body = json.dumps(
+            {"choices": [{"message": {"content": json.dumps({"acceptable": True})}}]}
+        ).encode()
+        mock_open.return_value.__enter__.return_value.read.return_value = body
+
+        from agent_economics.kimi_judge import _call_kimi
+
+        _call_kimi(
+            "system",
+            "user",
+            api_key="k",
+            model=_DEFAULT_MODEL,
+            response_format=_verdict_schema(_RUBRIC),
+        )
+        request = mock_open.call_args[0][0]
+        payload = json.loads(request.data)
+
+        self.assertEqual(request.full_url, kimi_client.API_URL)
+        self.assertEqual(payload["model"], "kimi-k3")
+        self.assertEqual(payload["reasoning_effort"], _DEFAULT_REASONING_EFFORT)
+        self.assertEqual(payload["response_format"]["type"], "json_schema")
+        self.assertIn("max_completion_tokens", payload)
+        self.assertNotIn("max_tokens", payload)
+        for fixed_server_side in ("temperature", "top_p", "presence_penalty",
+                                  "frequency_penalty"):
+            with self.subTest(field=fixed_server_side):
+                self.assertNotIn(fixed_server_side, payload)
+
+    def test_system_prompt_carries_no_per_task_content(self) -> None:
+        """Context caching needs a stable prefix, so tasks stay in the user turn."""
+        prompt = _build_system_prompt(_RUBRIC)
+        user_message = _build_user_message("t-001", "the agent output", "ctx")
+        self.assertNotIn("t-001", prompt)
+        self.assertNotIn("the agent output", prompt)
+        self.assertIn("t-001", user_message)
+        self.assertIn("the agent output", user_message)
+
+    @patch("agent_economics.kimi_client.BACKOFF_BASE_S", 0.0)
+    @patch("agent_economics.kimi_client._post")
+    def test_retryable_status_is_retried_then_succeeds(
+        self, mock_post: MagicMock
+    ) -> None:
+        import urllib.error
+
+        rate_limited = urllib.error.HTTPError(
+            kimi_client.API_URL, 429, "Too Many Requests", {}, None
+        )
+        ok = {"choices": [{"message": {"content": '{"acceptable": true}'}}]}
+        mock_post.side_effect = [rate_limited, rate_limited, ok]
+        result = kimi_client.call_kimi_json(
+            "system", "user", api_key="k", model=_DEFAULT_MODEL
+        )
+        self.assertEqual(result, {"acceptable": True})
+        self.assertEqual(mock_post.call_count, 3)
+
+    @patch("agent_economics.kimi_client.BACKOFF_BASE_S", 0.0)
+    @patch("agent_economics.kimi_client._post")
+    def test_non_retryable_status_fails_immediately(
+        self, mock_post: MagicMock
+    ) -> None:
+        """A bad key must not be retried into a rate limit."""
+        import urllib.error
+
+        mock_post.side_effect = urllib.error.HTTPError(
+            kimi_client.API_URL, 401, "Unauthorized", {}, None
+        )
+        with self.assertRaises(kimi_client.KimiRequestError) as caught:
+            kimi_client.call_kimi("system", "user", api_key="k")
+        self.assertEqual(caught.exception.status, 401)
+        self.assertEqual(mock_post.call_count, 1)
+
+    @patch("agent_economics.kimi_client._post")
+    def test_rejected_request_aborts_instead_of_labelling(
+        self, mock_post: MagicMock
+    ) -> None:
+        """The bug this guards: a 400 must not become 100% unacceptable.
+
+        A rejected schema or bad key is a defect in the request, not a verdict.
+        If judge() swallowed it, every task would be labeled unacceptable and the
+        run would report a 0% acceptable_rate indistinguishable from real data.
+        """
+        import urllib.error
+
+        mock_post.side_effect = urllib.error.HTTPError(
+            kimi_client.API_URL, 400, "Bad Request", {}, None
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            tasks_path = tmp_dir / "tasks.csv"
+            with open(tasks_path, "w", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=["task_id", "output"])
+                writer.writeheader()
+                writer.writerow({"task_id": "t-001", "output": "a"})
+                writer.writerow({"task_id": "t-002", "output": "b"})
+            rubric_path = tmp_dir / "rubric.json"
+            rubric_path.write_text(json.dumps(_RUBRIC))
+            out_path = tmp_dir / "outcomes.csv"
+
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
+                with self.assertRaises(kimi_client.KimiRequestError):
+                    judge(tasks_path, rubric_path, out_path, rate_limit=0)
+
+            self.assertFalse(
+                out_path.exists(),
+                "a rejected request must not produce an outcomes file",
+            )
+
+    def _run_judge_against_post(self, mock_post: MagicMock, verdict: dict) -> list[dict]:
+        """Drive judge() through the real client with only the socket mocked."""
+        mock_post.return_value = {
+            "choices": [{"message": {"content": json.dumps(verdict)}}],
+            "usage": {"completion_tokens": 40},
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            tasks_path = tmp_dir / "tasks.csv"
+            with open(tasks_path, "w", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=["task_id", "output"])
+                writer.writeheader()
+                writer.writerow({"task_id": "t-001", "output": "a"})
+            rubric_path = tmp_dir / "rubric.json"
+            rubric_path.write_text(json.dumps(_RUBRIC))
+            out_path = tmp_dir / "outcomes.csv"
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
+                judge(tasks_path, rubric_path, out_path, rate_limit=0)
+            with open(out_path, newline="") as handle:
+                return list(csv.DictReader(handle))
+
+    @patch("agent_economics.kimi_client._post")
+    def test_end_to_end_accepts_a_valid_verdict(self, mock_post: MagicMock) -> None:
+        criteria = [criterion["id"] for criterion in _RUBRIC["criteria"]]
+        rows = self._run_judge_against_post(
+            mock_post,
+            {
+                "task_id": "t-001",
+                "criterion_scores": {name: 0.95 for name in criteria},
+                "overall_score": 0.95,
+                "acceptable": True,
+                "rationale": "ok",
+            },
+        )
+        self.assertEqual(rows[0]["acceptable"], "true")
+
+    @patch("agent_economics.kimi_client._post")
+    def test_end_to_end_rejects_an_out_of_range_verdict(
+        self, mock_post: MagicMock
+    ) -> None:
+        """An impossible score must fail the judgment, not enter the economics."""
+        criteria = [criterion["id"] for criterion in _RUBRIC["criteria"]]
+        rows = self._run_judge_against_post(
+            mock_post,
+            {
+                "task_id": "t-001",
+                "criterion_scores": {name: 7.0 for name in criteria},
+                "overall_score": 7.0,
+                "acceptable": True,
+                "rationale": "impossible score",
+            },
+        )
+        self.assertEqual(rows[0]["acceptable"], "false")
+
+    @patch("agent_economics.kimi_client._post")
+    def test_provider_error_message_is_surfaced(
+        self, mock_post: MagicMock
+    ) -> None:
+        """The provider names the offending field; keep that in the message."""
+        import io
+        import urllib.error
+
+        body = json.dumps(
+            {"error": {"message": "invalid response_format: minimum not allowed"}}
+        ).encode()
+        mock_post.side_effect = urllib.error.HTTPError(
+            kimi_client.API_URL, 400, "Bad Request", {}, io.BytesIO(body)
+        )
+        with self.assertRaises(kimi_client.KimiRequestError) as caught:
+            kimi_client.call_kimi("system", "user", api_key="k")
+        self.assertIn("minimum not allowed", str(caught.exception))
+
+    @patch("agent_economics.kimi_client.BACKOFF_BASE_S", 0.0)
+    @patch("agent_economics.kimi_client._post")
+    def test_retries_are_bounded(self, mock_post: MagicMock) -> None:
+        import urllib.error
+
+        mock_post.side_effect = urllib.error.URLError("refused")
+        with self.assertRaises(urllib.error.URLError):
+            kimi_client.call_kimi("system", "user", api_key="k")
+        self.assertEqual(mock_post.call_count, kimi_client.MAX_ATTEMPTS)
+
+    @patch("agent_economics.kimi_client._post")
+    def test_empty_content_is_an_error_not_a_verdict(
+        self, mock_post: MagicMock
+    ) -> None:
+        mock_post.return_value = {
+            "choices": [{"message": {"content": "  "}}],
+            "usage": {"completion_tokens": 8192},
+        }
+        with self.assertRaises(RuntimeError):
+            kimi_client.call_kimi("system", "user", api_key="k")
+
+    def test_unknown_reasoning_effort_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            rubric_path = tmp_dir / "rubric.json"
+            rubric_path.write_text(json.dumps(_RUBRIC))
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
+                with self.assertRaises(ValueError):
+                    judge(
+                        tmp_dir / "tasks.csv",
+                        rubric_path,
+                        tmp_dir / "outcomes.csv",
+                        reasoning_effort="medium",
+                    )
+
+    @patch("agent_economics.kimi_judge._call_kimi")
+    def test_audit_records_the_label_provenance(self, mock_call: MagicMock) -> None:
+        """An assurance case needs to know how the label was produced."""
+        mock_call.return_value = {
+            "task_id": "t-001",
+            "criterion_scores": {"accuracy": 1.0, "policy": 1.0, "tone": 1.0},
+            "overall_score": 1.0,
+            "acceptable": True,
+            "rationale": "ok",
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_dir = Path(tmp)
+            tasks_path = tmp_dir / "tasks.csv"
+            with open(tasks_path, "w", newline="") as handle:
+                writer = csv.DictWriter(handle, fieldnames=["task_id", "output"])
+                writer.writeheader()
+                writer.writerow({"task_id": "t-001", "output": "Good."})
+            rubric_path = tmp_dir / "rubric.json"
+            rubric_path.write_text(json.dumps(_RUBRIC))
+            out_path = tmp_dir / "outcomes.csv"
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
+                judge(
+                    tasks_path,
+                    rubric_path,
+                    out_path,
+                    rate_limit=0,
+                    reasoning_effort="high",
+                )
+            audit = json.loads(
+                (out_path.with_name("outcomes.audit.json")).read_text()
+            )
+
+        self.assertEqual(audit[0]["reasoning_effort"], "high")
+        self.assertEqual(audit[0]["output_contract"], "json_schema/strict")
+        self.assertEqual(audit[0]["model_id"], _DEFAULT_MODEL)
 
 
 if __name__ == "__main__":

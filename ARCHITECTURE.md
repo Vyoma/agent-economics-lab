@@ -66,8 +66,12 @@ single-arm case and paired frontier use the same unchanged kernel.
 The assurance engine reconstructs task-level full cost, then evaluates an explicit
 ordered tuple of typed checks. Diagnostics can emit findings but cannot route.
 Gates can preserve or restrict a decision. The decision-contract digest binds the
-ordered check IDs and versions, declared coverage, static failure routes, required
-coverage, engine implementation, and reducer semantics. The evidence digest
+ordered check IDs and versions, declared coverage, static failure routes, an
+implementation fingerprint per check, required coverage, engine implementation, and
+reducer semantics. The fingerprint matters because declared identity alone cannot
+distinguish an enforcing gate from a same-named, same-coverage gate that stopped
+enforcing anything: removing a gate is caught by the coverage contract, whereas
+substituting a permissive one is caught only here. The evidence digest
 separately binds policy thresholds, the rate card, baseline, events, outcomes, and
 task manifest. A verdict is reproducible only with both digests. Disabling a
 sole-provider gate while the fixed contract still requires its dimension returns

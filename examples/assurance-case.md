@@ -8,7 +8,7 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
 
 - Source adapter: `source.csv@1`
 - Evidence digest: `485f97ae54ca71c84116036e1d987fd249a3e5c4e10f734b2fcf9c4878428fc4`
-- Decision-contract digest: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
+- Decision-contract digest: `e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab`
 - Report renderer: `renderer.markdown@1`
 - Enabled checks:
   - `gate.acceptable-rate@1`

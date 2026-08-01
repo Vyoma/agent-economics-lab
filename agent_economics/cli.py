@@ -9,6 +9,7 @@ from typing import Sequence
 from .adapters import load_normalized_json_bundle, render_normalized_json
 from .assurance import evaluate_bundle
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+from . import kimi_client
 from .kimi_analyst import analyse_report
 from .kimi_judge import judge as kimi_judge
 from .claude_code import (
@@ -109,6 +110,9 @@ def build_parser() -> argparse.ArgumentParser:
     judge_parser.add_argument("--model", default="kimi-k3")
     judge_parser.add_argument("--rate-limit", type=int, default=5,
                               help="Max Kimi API calls per second (0 = unlimited)")
+    judge_parser.add_argument("--reasoning-effort",
+                              choices=("low", "high", "max"), default="max",
+                              help="Kimi K3 reasoning depth (default: max)")
 
     analyse_parser = subparsers.add_parser(
         "analyse",
@@ -152,9 +156,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("renderer.frontier-svg@1")
         print("\nEXPERIMENTS")
         print("experiment.paired-budget-frontier@1")
-        print("\nKIMI INTEGRATIONS")
-        print("kimi-judge@1  (MOONSHOT_API_KEY required)")
-        print("kimi-analyst@1  (MOONSHOT_API_KEY required)")
+        print("\nINFERENCE")
+        print(
+            f"provider  {kimi_client.PROVIDER}  "
+            f"({kimi_client.API_KEY_ENV_VAR} required)"
+        )
+        print(
+            f"model     {kimi_client.DEFAULT_MODEL}  "
+            f"reasoning_effort={kimi_client.DEFAULT_REASONING_EFFORT}"
+        )
+        print("egress    agent_economics.kimi_client  (single call path)")
+        print("kimi-judge@1    label outcomes against a frozen rubric")
+        print("kimi-analyst@1  recommend fixes from a decided case")
+        print("The decision kernel performs no inference and stays deterministic.")
         return 0
     if args.command == "convert":
         parser = build_parser()
@@ -327,6 +341,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             kimi_judge(
                 args.task_results, args.rubric, args.out,
                 model=args.model, rate_limit=args.rate_limit,
+                reasoning_effort=args.reasoning_effort,
             )
             return 0
         except (RuntimeError, ValueError, OSError) as e:

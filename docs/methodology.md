@@ -172,7 +172,7 @@ An assurance case should pin:
 - policy version;
 - evidence digest;
 - decision-contract digest, including check order, versions, required coverage,
-  failure routes, and reducer semantics;
+  failure routes, per-check implementation fingerprints, and reducer semantics;
 - code commit; and
 - observation window.
 

@@ -1,249 +1,297 @@
 """
 Decision robustness analysis and baseline fragility index.
 
-Every SCALE/ASSIST/STOP verdict is a function of economic assumptions
-(incident_loss_usd, remediation_cost, baseline acceptable_rate). If those
-assumptions are wrong, the verdict is wrong. This script measures:
+Every SCALE/ASSIST/STOP verdict is a function of economic assumptions. If those
+assumptions are wrong, the verdict is wrong. Two questions are measured here:
 
-  1. DECISION ROBUSTNESS — how many verdicts flip across a grid of economic
-     assumptions (incident_loss × remediation_cost). A verdict that changes
-     under plausible assumptions is a measurement artifact, not a fact.
+  1. DECISION ROBUSTNESS. How many verdicts flip across a grid of incident-loss
+     and remediation-cost assumptions. A verdict that changes under plausible
+     assumptions is a measurement artifact, not a fact.
 
-  2. BASELINE FRAGILITY INDEX — how many counterfactual gates flip when the
-     baseline acceptable_rate is perturbed by ±10%, ±25%, ±50%. If your
-     baseline is a rough estimate (it always is), how confident can you be
-     in counterfactual verdicts?
+  2. BASELINE FRAGILITY INDEX. How many counterfactual gates flip when the
+     baseline acceptable rate is perturbed by 10%, 25%, and 50% in each
+     direction. A baseline is always an estimate, so this is its error bar.
 
-Uses the same 98-scenario synthetic matrix as false_green.py.
+Both parts reuse the 98-scenario matrix and the single fixture builder in
+false_green.py, so the identity cell of the grid reproduces the unperturbed
+verdict exactly rather than comparing two different constructions.
+
+This is a synthetic conformance fixture. The flip counts characterize the
+sensitivity of this matrix under this policy, not a production prevalence.
 
 Run:
     python3 sensitivity_sweep.py
 """
 from __future__ import annotations
 
-import math
-from dataclasses import replace
+import argparse
+import json
 from itertools import product
+from pathlib import Path
+from typing import Sequence
 
-from false_green import build_evidence, scenario_matrix, GATE_DISABLEMENTS
-from agent_economics import (
-    Decision, EconomicPolicy, Baseline, make_evidence_bundle,
-    ModelRate, Outcome, TraceEvent, evaluate_bundle,
+from agent_economics import CheckStatus, Decision, evaluate_bundle
+from false_green import Scenario, build_evidence, scenario_matrix
+
+SOURCE_ID = "source.synthetic-sensitivity-sweep"
+
+INCIDENT_LOSS_GRID = (0.0, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0)
+REMEDIATION_COST_GRID = (0.0, 0.25, 0.5, 1.0, 2.0, 5.0)
+BASELINE_PERTURBATIONS = (
+    (0.50, "-50%"),
+    (0.75, "-25%"),
+    (0.90, "-10%"),
+    (1.10, "+10%"),
+    (1.25, "+25%"),
+    (1.50, "+50%"),
 )
-from agent_economics.models import CheckStatus
+
+FRAGILE_FLIP_THRESHOLD = 1
+BRITTLE_FLIP_THRESHOLD = 3
+CRITICAL_FRAGILITY_RATE = 0.25
 
 
-# ── Sweep grids ────────────────────────────────────────────────────────────
-
-# incident_loss_usd: from 0 (no tail risk) to 50× remediation (catastrophic)
-INCIDENT_LOSS_GRID = [0.0, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
-# remediation_cost_usd: from 0 to 5× trace cost
-REMEDIATION_COST_GRID = [0.0, 0.25, 0.5, 1.0, 2.0, 5.0]
-# baseline perturbations (multiplicative on acceptable_rate)
-BASELINE_PERTURBATIONS = [0.50, 0.75, 0.90, 1.10, 1.25, 1.50]
-BASELINE_LABELS = ["−50%", "−25%", "−10%", "+10%", "+25%", "+50%"]
+def _bar(value: int, total: int, width: int = 24) -> str:
+    filled = round(width * value / total) if total else 0
+    return "#" * filled + "." * (width - filled)
 
 
-def _bar(n: int, total: int, width: int = 24) -> str:
-    filled = round(width * n / total) if total else 0
-    return "█" * filled + "░" * (width - filled)
-
-
-def _evaluate_with_overrides(
-    scenario,
-    incident_loss_override: float,
-    remediation_override: float,
+def _decision(
+    scenario: Scenario,
+    *,
+    incident_loss_usd: float | None = None,
+    remediation_cost_usd: float | None = None,
+    baseline_acceptable_rate: float | None = None,
 ) -> Decision:
-    """Build evidence with overridden economic params and return the decision."""
-    events = []
-    outcomes = {}
-    for index in range(10):
-        task_id = f"task-{index:02d}"
-        acceptable = index < scenario.acceptable_tasks
-        events.append(TraceEvent(
-            task_id=task_id,
-            event_id=f"event-{index:02d}",
-            timestamp=f"2026-01-01T00:00:{index:02d}Z",
-            event_type="model",
-            name="complete_task",
-            direct_cost_usd=scenario.trace_cost_usd,
-        ))
-        outcomes[task_id] = Outcome(
-            task_id=task_id,
-            acceptable=acceptable,
-            business_value_usd=scenario.business_value_usd,
-            human_minutes=(
-                0.0 + (scenario.failure_human_minutes if not acceptable else 0.0)
-            ),
-            remediation_cost_usd=remediation_override if not acceptable else 0.0,
-            incident_loss_usd=(incident_loss_override if index == 0 else 0.0),
-        )
-
-    policy = EconomicPolicy(
-        human_hourly_cost_usd=60.0,
-        min_acceptable_rate=0.80,
-        max_cost_per_acceptable_outcome_usd=2.0,
-        max_p95_task_cost_usd=8.0,
-        max_trace_cost_per_task_usd=1.0,
-        max_calls_per_task=3,
-        min_expected_net_value_per_attempt_usd=0.0,
-        min_incremental_net_value_vs_baseline_usd=0.0,
-    )
-    evidence = make_evidence_bundle(
-        events=events,
-        outcomes=outcomes,
-        rates={"unused": ModelRate(0.0, 0.0)},
-        baseline=Baseline(
-            name="controlled baseline",
-            cost_per_attempt_usd=scenario.baseline_cost_usd,
-            acceptable_rate=scenario.baseline_acceptable_rate,
-            value_per_acceptable_outcome_usd=scenario.business_value_usd,
-        ),
-        policy=policy,
-        source_id="source.sensitivity-sweep",
-        source_version="1",
+    evidence = build_evidence(
+        scenario,
+        incident_loss_usd=incident_loss_usd,
+        remediation_cost_usd=remediation_cost_usd,
+        baseline_acceptable_rate=baseline_acceptable_rate,
+        source_id=SOURCE_ID,
     )
     return evaluate_bundle(evidence).decision
 
 
-def _evaluate_with_baseline_perturb(scenario, multiplier: float) -> bool:
-    """Return True if counterfactual gate flips vs baseline multiplier=1.0."""
-    def _run(mult: float) -> Decision:
-        events = []
-        outcomes = {}
-        for index in range(10):
-            task_id = f"task-{index:02d}"
-            acceptable = index < scenario.acceptable_tasks
-            events.append(TraceEvent(
-                task_id=task_id,
-                event_id=f"event-{index:02d}",
-                timestamp=f"2026-01-01T00:00:{index:02d}Z",
-                event_type="model",
-                name="complete_task",
-                direct_cost_usd=scenario.trace_cost_usd,
-            ))
-            outcomes[task_id] = Outcome(
-                task_id=task_id,
-                acceptable=acceptable,
-                business_value_usd=scenario.business_value_usd,
-                human_minutes=(scenario.failure_human_minutes if not acceptable else 0.0),
-                incident_loss_usd=(scenario.tail_loss_usd if index == 0 else 0.0),
-            )
-        perturbed_rate = min(0.9999, max(0.0001, scenario.baseline_acceptable_rate * mult))
-        policy = EconomicPolicy(
-            human_hourly_cost_usd=60.0,
-            min_acceptable_rate=0.80,
-            max_cost_per_acceptable_outcome_usd=2.0,
-            max_p95_task_cost_usd=8.0,
-            max_trace_cost_per_task_usd=1.0,
-            max_calls_per_task=3,
-            min_expected_net_value_per_attempt_usd=0.0,
-            min_incremental_net_value_vs_baseline_usd=0.0,
-        )
-        evidence = make_evidence_bundle(
-            events=events,
-            outcomes=outcomes,
-            rates={"unused": ModelRate(0.0, 0.0)},
-            baseline=Baseline(
-                name="controlled baseline",
-                cost_per_attempt_usd=scenario.baseline_cost_usd,
-                acceptable_rate=perturbed_rate,
-                value_per_acceptable_outcome_usd=scenario.business_value_usd,
-            ),
-            policy=policy,
-            source_id="source.sensitivity-sweep",
-            source_version="1",
-        )
-        case = evaluate_bundle(evidence)
-        # Check if counterfactual gate flipped specifically
-        for r in case.check_results:
-            if "counterfactual" in r.check_id:
-                return r.status is CheckStatus.FAIL
-        return False
-
-    baseline_cf_fail = _run(1.0)
-    perturbed_cf_fail = _run(multiplier)
-    return baseline_cf_fail != perturbed_cf_fail
-
-
-def main() -> int:
-    scenarios = scenario_matrix()
-    n = len(scenarios)
-    grid_size = len(INCIDENT_LOSS_GRID) * len(REMEDIATION_COST_GRID)
-
-    W = 64
-    print("═" * W)
-    print("  SENSITIVITY SWEEP — decision robustness analysis")
-    print("═" * W)
-    print(f"  {n} scenarios  ×  {grid_size}-cell economic grid ({len(INCIDENT_LOSS_GRID)} incident × {len(REMEDIATION_COST_GRID)} remediation)")
-    print(f"  Sweeping incident_loss ∈ [{INCIDENT_LOSS_GRID[0]}..{INCIDENT_LOSS_GRID[-1]}]  ×")
-    print(f"          remediation    ∈ [{REMEDIATION_COST_GRID[0]}..{REMEDIATION_COST_GRID[-1]}]")
-    print()
-    print("  Computing... (this takes ~5s)", flush=True)
-
-    # ── Part 1: decision flip counts ───────────────────────────────────────
-    from false_green import build_evidence
-    flip_counts: list[int] = []
-    for scenario in scenarios:
-        # Get baseline decision
-        base_evidence = build_evidence(scenario)
-        base_decision = evaluate_bundle(base_evidence).decision
-
-        flips = 0
-        for inc, rem in product(INCIDENT_LOSS_GRID, REMEDIATION_COST_GRID):
-            d = _evaluate_with_overrides(scenario, inc, rem)
-            if d != base_decision:
-                flips += 1
-        flip_counts.append(flips)
-
-    robust = sum(1 for f in flip_counts if f == 0)
-    fragile = sum(1 for f in flip_counts if 1 <= f < 3)
-    brittle = sum(1 for f in flip_counts if f >= 3)
-    max_flips = max(flip_counts, default=0)
-
-    print()
-    print("  DECISION ROBUSTNESS across economic assumption grid")
-    print("  " + "─" * 56)
-    print(f"  {'ROBUST  (0 flips)':<22} {robust:>4}/{n}  {_bar(robust,n)}  {robust/n:.1%}")
-    print(f"  {'FRAGILE (1-2 flips)':<22} {fragile:>4}/{n}  {_bar(fragile,n)}  {fragile/n:.1%}")
-    print(f"  {'BRITTLE (≥3 flips)':<22} {brittle:>4}/{n}  {_bar(brittle,n)}  {brittle/n:.1%}")
-    print()
-    print(f"  Max flips for a single scenario: {max_flips}/{grid_size}")
-    if brittle:
-        print(f"  ⚠  {brittle} scenarios produce a verdict that is an economic")
-        print("     assumption artifact, not a stable empirical result.")
-        print("     Never surface a SCALE verdict with flip_count ≥ 3 without")
-        print("     a sensitivity report alongside it.")
-
-    # ── Part 2: baseline fragility ─────────────────────────────────────────
-    print()
-    print("  BASELINE FRAGILITY INDEX  (perturb baseline acceptable_rate)")
-    print("  " + "─" * 56)
-
-    for mult, label in zip(BASELINE_PERTURBATIONS, BASELINE_LABELS):
-        flips = sum(
-            1 for s in scenarios
-            if _evaluate_with_baseline_perturb(s, mult)
-        )
-        pct = flips / n
-        warn = "  ← critical" if pct > 0.25 else ""
-        print(f"  {label:>4} baseline error  →  {flips:>3}/{n} counterfactual gate flips  {_bar(flips,n,18)}  {pct:.1%}{warn}")
-
-    print()
-    most_fragile = max(
-        zip(BASELINE_PERTURBATIONS, BASELINE_LABELS),
-        key=lambda x: abs(x[0] - 1.0)
+def _counterfactual_fails(
+    scenario: Scenario, baseline_acceptable_rate: float | None
+) -> bool:
+    evidence = build_evidence(
+        scenario,
+        baseline_acceptable_rate=baseline_acceptable_rate,
+        source_id=SOURCE_ID,
     )
-    bf_50 = sum(1 for s in scenarios if _evaluate_with_baseline_perturb(s, 0.5))
-    bf_25 = sum(1 for s in scenarios if _evaluate_with_baseline_perturb(s, 0.75))
-    if bf_25 > 0:
-        print(f"  ⚠  A 25% error in your baseline flips {bf_25}/{n} counterfactual gates ({bf_25/n:.1%}).")
-    if bf_50 > 0:
-        print(f"     A 50% error in your baseline flips {bf_50}/{n} counterfactual gates ({bf_50/n:.1%}).")
-    print()
-    print("  Your baseline is always an estimate. These are its error bars.")
-    print("  Report the fragility index alongside every SCALE verdict.")
-    print("═" * W)
+    case = evaluate_bundle(evidence)
+    return any(
+        result.check_id == "gate.counterfactual"
+        and result.status is CheckStatus.FAIL
+        for result in case.check_results
+    )
+
+
+def _clamped_rate(scenario: Scenario, multiplier: float) -> float:
+    return min(0.9999, max(0.0001, scenario.baseline_acceptable_rate * multiplier))
+
+
+def flip_counts() -> tuple[int, ...]:
+    """Return, per scenario, how many grid cells change the verdict."""
+    counts: list[int] = []
+    for scenario in scenario_matrix():
+        unperturbed = _decision(scenario)
+        counts.append(
+            sum(
+                _decision(
+                    scenario,
+                    incident_loss_usd=incident_loss,
+                    remediation_cost_usd=remediation,
+                )
+                is not unperturbed
+                for incident_loss, remediation in product(
+                    INCIDENT_LOSS_GRID, REMEDIATION_COST_GRID
+                )
+            )
+        )
+    return tuple(counts)
+
+
+def baseline_fragility() -> dict[str, int]:
+    """Return, per perturbation label, how many counterfactual gates flip."""
+    scenarios = scenario_matrix()
+    unperturbed = {
+        scenario.id: _counterfactual_fails(scenario, None) for scenario in scenarios
+    }
+    fragility: dict[str, int] = {}
+    for multiplier, label in BASELINE_PERTURBATIONS:
+        fragility[label] = sum(
+            _counterfactual_fails(scenario, _clamped_rate(scenario, multiplier))
+            is not unperturbed[scenario.id]
+            for scenario in scenarios
+        )
+    return fragility
+
+
+def summarize() -> dict[str, object]:
+    counts = flip_counts()
+    scenarios = len(counts)
+    grid_cells = len(INCIDENT_LOSS_GRID) * len(REMEDIATION_COST_GRID)
+    robust = sum(count == 0 for count in counts)
+    fragile = sum(
+        FRAGILE_FLIP_THRESHOLD <= count < BRITTLE_FLIP_THRESHOLD for count in counts
+    )
+    brittle = sum(count >= BRITTLE_FLIP_THRESHOLD for count in counts)
+    fragility = baseline_fragility()
+    return {
+        "schema_version": 1,
+        "experiment_id": "decision-sensitivity-sweep",
+        "experiment_version": "1",
+        "scenarios": scenarios,
+        "grid_cells": grid_cells,
+        "incident_loss_grid": list(INCIDENT_LOSS_GRID),
+        "remediation_cost_grid": list(REMEDIATION_COST_GRID),
+        "robust_scenarios": robust,
+        "fragile_scenarios": fragile,
+        "brittle_scenarios": brittle,
+        "brittle_rate": brittle / scenarios if scenarios else 0.0,
+        "max_flips_for_one_scenario": max(counts, default=0),
+        "baseline_fragility": fragility,
+        "claim_boundary": (
+            "Synthetic conformance fixture. Flip counts characterize this "
+            "matrix under this policy; they are not a production prevalence "
+            "estimate."
+        ),
+    }
+
+
+def render_summary(summary: dict[str, object]) -> str:
+    scenarios = summary["scenarios"]
+    grid_cells = summary["grid_cells"]
+    fragility = summary["baseline_fragility"]
+    assert isinstance(scenarios, int)
+    assert isinstance(grid_cells, int)
+    assert isinstance(fragility, dict)
+    width = 66
+    lines = [
+        "=" * width,
+        "  SENSITIVITY SWEEP  decision robustness analysis",
+        "=" * width,
+        (
+            f"  {scenarios} scenarios x {grid_cells}-cell economic grid "
+            f"({len(INCIDENT_LOSS_GRID)} incident x "
+            f"{len(REMEDIATION_COST_GRID)} remediation)"
+        ),
+        (
+            f"  incident_loss ${INCIDENT_LOSS_GRID[0]:g} to "
+            f"${INCIDENT_LOSS_GRID[-1]:g}, "
+            f"remediation ${REMEDIATION_COST_GRID[0]:g} to "
+            f"${REMEDIATION_COST_GRID[-1]:g}"
+        ),
+        "",
+        "  DECISION ROBUSTNESS across the economic assumption grid",
+        "  " + "-" * 58,
+    ]
+    for label, key in (
+        ("ROBUST  (0 flips)", "robust_scenarios"),
+        (f"FRAGILE (1-{BRITTLE_FLIP_THRESHOLD - 1} flips)", "fragile_scenarios"),
+        (f"BRITTLE ({BRITTLE_FLIP_THRESHOLD}+ flips)", "brittle_scenarios"),
+    ):
+        count = summary[key]
+        assert isinstance(count, int)
+        lines.append(
+            f"  {label:<22} {count:>4}/{scenarios}  "
+            f"{_bar(count, scenarios)}  {count / scenarios:.1%}"
+        )
+    lines.extend(
+        [
+            "",
+            (
+                "  Max flips for a single scenario: "
+                f"{summary['max_flips_for_one_scenario']}/{grid_cells}"
+            ),
+        ]
+    )
+    brittle = summary["brittle_scenarios"]
+    assert isinstance(brittle, int)
+    if brittle:
+        lines.extend(
+            [
+                (
+                    f"  {brittle} scenarios produce a verdict that is an economic "
+                    "assumption"
+                ),
+                "  artifact rather than a stable result. Do not publish a SCALE",
+                (
+                    f"  verdict from a scenario with {BRITTLE_FLIP_THRESHOLD}+ "
+                    "flips without this report beside it."
+                ),
+            ]
+        )
+    lines.extend(
+        [
+            "",
+            "  BASELINE FRAGILITY INDEX  (perturb baseline acceptable rate)",
+            "  " + "-" * 58,
+        ]
+    )
+    for _, label in BASELINE_PERTURBATIONS:
+        flips = fragility[label]
+        rate = flips / scenarios if scenarios else 0.0
+        marker = "  <- critical" if rate > CRITICAL_FRAGILITY_RATE else ""
+        lines.append(
+            f"  {label:>5} baseline error  {flips:>3}/{scenarios} "
+            f"counterfactual flips  {_bar(flips, scenarios, 18)}  "
+            f"{rate:.1%}{marker}"
+        )
+    lines.extend(
+        [
+            "",
+            "  A baseline is always an estimate. These are its error bars.",
+            "  Report the fragility index alongside every SCALE verdict.",
+            "=" * width,
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def render_summary_json(summary: dict[str, object]) -> str:
+    return json.dumps(summary, indent=2, sort_keys=True) + "\n"
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--summary-output", type=Path)
+    parser.add_argument("--summary-verify", type=Path)
+    parser.add_argument("--json-output", type=Path)
+    parser.add_argument("--json-verify", type=Path)
+    return parser
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    summary = summarize()
+    summary_text = render_summary(summary)
+    summary_json = render_summary_json(summary)
+    if args.summary_verify:
+        if (
+            not args.summary_verify.exists()
+            or args.summary_verify.read_text(encoding="utf-8") != summary_text
+        ):
+            print(f"Generated summary differs from {args.summary_verify}")
+            return 1
+    if args.json_verify:
+        if (
+            not args.json_verify.exists()
+            or args.json_verify.read_text(encoding="utf-8") != summary_json
+        ):
+            print(f"Generated JSON summary differs from {args.json_verify}")
+            return 1
+    if args.summary_output:
+        args.summary_output.parent.mkdir(parents=True, exist_ok=True)
+        args.summary_output.write_text(summary_text, encoding="utf-8")
+    if args.json_output:
+        args.json_output.parent.mkdir(parents=True, exist_ok=True)
+        args.json_output.write_text(summary_json, encoding="utf-8")
+    print(summary_text, end="")
     return 0
 
 

@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark reproduce lessons test
+.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -25,6 +25,61 @@ benchmark:
 evidence-ablation:
 	@python3 evidence_ablation.py \
 		--verify-dir research/results/evidence-ablation
+
+mutation-score:
+	@python3 mutation_score.py \
+		--summary-verify research/results/mutation-score/summary.md \
+		--json-verify research/results/mutation-score/summary.json
+
+sensitivity:
+	@python3 sensitivity_sweep.py \
+		--summary-verify research/results/sensitivity/summary.md \
+		--json-verify research/results/sensitivity/summary.json
+
+completion-vs-verdict:
+	@python3 completion_vs_verdict.py \
+		--verify research/results/completion-vs-verdict/report.txt
+
+# Diagnose a Kimi auth failure. Prints key shape and per-region HTTP status,
+# never the key. Makes live calls, so it is excluded from `make reproduce`.
+kimi-doctor:
+	@python3 check_kimi_auth.py
+
+# Live judge eval: scores Kimi labels against the hand-authored eval set.
+# Requires MOONSHOT_API_KEY, so it is excluded from `make reproduce`. The scoring
+# math and eval-set integrity are covered hermetically by `make test`.
+kimi-eval:
+	@if [ -z "$$MOONSHOT_API_KEY" ]; then \
+		echo "Cannot run the live judge eval: MOONSHOT_API_KEY is not set."; \
+		echo "The scoring math and eval set are tested without a key: make test"; \
+		exit 1; \
+	fi
+	@python3 kimi_eval.py \
+		--save-predictions /tmp/agent-economics-judge-predictions.json \
+		--save-verdicts /tmp/agent-economics-judge-verdicts.json \
+		--output /tmp/agent-economics-judge-eval.txt
+
+# Live Kimi call. Opt-in: requires MOONSHOT_API_KEY and is excluded from
+# `make reproduce` so the offline suite stays hermetic.
+kimi-judge:
+	@if [ -z "$$MOONSHOT_API_KEY" ]; then \
+		echo "Cannot run the live Kimi judge: MOONSHOT_API_KEY is not set."; \
+		echo "This is a missing prerequisite, not a build failure."; \
+		echo ""; \
+		echo "  export MOONSHOT_API_KEY=...   # https://platform.kimi.ai"; \
+		echo "  make kimi-judge"; \
+		echo ""; \
+		echo "Everything else runs without a key:"; \
+		echo "  make test        rubric, schema, retry, and fallback conformance"; \
+		echo "  make reproduce   the full offline suite"; \
+		echo ""; \
+		echo "Already set a key and getting 401? Run: make kimi-doctor"; \
+		exit 1; \
+	fi
+	@python3 -m agent_economics judge \
+		--task-results examples/kimi-judge/task_results.csv \
+		--rubric examples/kimi-judge/rubric.json \
+		--out /tmp/agent-economics-kimi-outcomes.csv
 
 frontier:
 	@python3 -m agent_economics frontier \
@@ -85,7 +140,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
+reproduce: test modularity lessons benchmark mutation-score sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done

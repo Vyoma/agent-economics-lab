@@ -1,9 +1,17 @@
 """One-file proof of decision-coverage drift under required-gate disablement.
 
 Run `python3 false_green.py`. The frozen v1 matrix produces 23 false SCALE
-transitions for a dynamic-coverage engine. The fixed-contract engine returns
-INCOMPLETE for all 588 gate disablements. This synthetic conformance test changes
-engine configuration, not evidence, and does not estimate production prevalence.
+transitions for a dynamic-coverage engine: the 23 cases where the disabled gate
+was the only one failing. The fixed-contract engine returns INCOMPLETE for all
+588 disablements, which is structural rather than empirical, because the
+coverage-to-gate map is one-to-one and removing any gate necessarily leaves a
+required dimension unprovided.
+
+This test changes engine configuration, not evidence, and does not estimate
+production prevalence. It also does not measure how hard the harness is to fool:
+gate removal is the operator a fixed coverage contract detects by construction.
+For the operator that discriminates, a permissive gate that keeps its declared
+identity, see mutation_score.py.
 """
 
 from __future__ import annotations
@@ -89,7 +97,31 @@ def scenario_matrix() -> tuple[Scenario, ...]:
     return factorial + boundary_cases
 
 
-def build_evidence(scenario: Scenario):
+def build_evidence(
+    scenario: Scenario,
+    *,
+    incident_loss_usd: float | None = None,
+    remediation_cost_usd: float | None = None,
+    baseline_acceptable_rate: float | None = None,
+    source_id: str = "source.synthetic-decision-coverage-drift",
+    source_version: str = "1",
+):
+    """Build the fixture bundle for one scenario.
+
+    The keyword overrides exist so a sensitivity analysis can perturb one
+    economic assumption at a time against the identical construction. Leaving
+    them unset reproduces the frozen v1 matrix exactly, which is what keeps the
+    published coverage-drift artifacts byte-reproducible.
+    """
+    tail_loss = (
+        scenario.tail_loss_usd if incident_loss_usd is None else incident_loss_usd
+    )
+    remediation = 0.0 if remediation_cost_usd is None else remediation_cost_usd
+    baseline_rate = (
+        scenario.baseline_acceptable_rate
+        if baseline_acceptable_rate is None
+        else baseline_acceptable_rate
+    )
     events = []
     outcomes = {}
     for index in range(10):
@@ -113,7 +145,8 @@ def build_evidence(scenario: Scenario):
                 scenario.all_task_human_minutes
                 + (scenario.failure_human_minutes if not acceptable else 0.0)
             ),
-            incident_loss_usd=(scenario.tail_loss_usd if index == 0 else 0.0),
+            remediation_cost_usd=(0.0 if acceptable else remediation),
+            incident_loss_usd=(tail_loss if index == 0 else 0.0),
         )
 
     policy = EconomicPolicy(
@@ -133,12 +166,12 @@ def build_evidence(scenario: Scenario):
         baseline=Baseline(
             name="controlled baseline",
             cost_per_attempt_usd=scenario.baseline_cost_usd,
-            acceptable_rate=scenario.baseline_acceptable_rate,
+            acceptable_rate=baseline_rate,
             value_per_acceptable_outcome_usd=scenario.business_value_usd,
         ),
         policy=policy,
-        source_id="source.synthetic-decision-coverage-drift",
-        source_version="1",
+        source_id=source_id,
+        source_version=source_version,
     )
 
 

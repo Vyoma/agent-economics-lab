@@ -47,18 +47,27 @@ import argparse
 import csv
 import json
 import logging
-import os
 import time
 import urllib.error
-import urllib.request
 from pathlib import Path
 from typing import Any
 
+from . import kimi_client
+
 logger = logging.getLogger(__name__)
 
-_API_URL = "https://api.moonshot.ai/v1/chat/completions"
-_DEFAULT_MODEL = "kimi-k3"
-_TIMEOUT_S = 45
+# The request contract, retry policy, and provider live in kimi_client, the
+# package's single inference egress. Re-exported here for callers and tests.
+_DEFAULT_MODEL = kimi_client.DEFAULT_MODEL
+_DEFAULT_REASONING_EFFORT = kimi_client.DEFAULT_REASONING_EFFORT
+_REASONING_EFFORTS = kimi_client.REASONING_EFFORTS
+_MAX_ATTEMPTS = kimi_client.MAX_ATTEMPTS
+# The verdict JSON is tiny; the reasoning is what consumes this budget. K3 always
+# reasons, and at `max` effort a budget sized for a short answer gets spent before
+# any content is emitted, which surfaces as an empty-content error. K3's own
+# default is 131072, so this stays well inside it while still bounding cost.
+_MAX_COMPLETION_TOKENS = 32768
+_TIMEOUT_S = None  # follows reasoning_effort, see kimi_client
 
 _REQUIRED_RUBRIC_FIELDS = {
     "rubric_id",
@@ -140,36 +149,143 @@ def _build_user_message(task_id: str, output: str, context: str) -> str:
 
 # ── Kimi API call ─────────────────────────────────────────────────────────────
 
+def _verdict_schema(rubric: dict) -> dict[str, Any]:
+    """Return a strict JSON schema for one task verdict.
+
+    Structured output is the forcing function. Asking for JSON in the prompt and
+    hoping makes a parse failure indistinguishable from a genuine rejection,
+    because both land in the unacceptable fallback. A schema the server enforces
+    removes that failure mode from the label pipeline.
+
+    Shape and type only. Moonshot Flavored JSON Schema accepts `type`, `enum`,
+    and `required` as its validation keywords, so numeric range constraints
+    cannot be expressed here: a schema carrying `minimum` or `maximum` is
+    rejected with HTTP 400 and never reaches the model. The `[0.0, 1.0]` bounds
+    are stated in the description for the model and enforced by
+    `_validate_verdict` after parsing.
+    """
+    criterion_ids = [criterion["id"] for criterion in rubric["criteria"]]
+    score_property = {
+        "type": "number",
+        "description": "Score from 0.0 to 1.0 inclusive.",
+    }
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "task_verdict",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "task_id",
+                    "criterion_scores",
+                    "overall_score",
+                    "acceptable",
+                    "rationale",
+                ],
+                "properties": {
+                    "task_id": {
+                        "type": "string",
+                        "description": "Echoed from the input.",
+                    },
+                    "criterion_scores": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": criterion_ids,
+                        "properties": {
+                            criterion_id: dict(score_property)
+                            for criterion_id in criterion_ids
+                        },
+                    },
+                    "overall_score": {
+                        "type": "number",
+                        "description": (
+                            "Weighted sum of criterion scores, 0.0 to 1.0 "
+                            "inclusive."
+                        ),
+                    },
+                    "acceptable": {
+                        "type": "boolean",
+                        "description": (
+                            "True when overall_score meets the acceptable "
+                            "threshold."
+                        ),
+                    },
+                    "rationale": {
+                        "type": "string",
+                        "description": "One sentence naming the deciding factor.",
+                    },
+                },
+            },
+        },
+    }
+
+
+def _validate_verdict(verdict: dict[str, Any], rubric: dict) -> None:
+    """Enforce the bounds the schema cannot express.
+
+    MFJS has no numeric range keyword, so an out-of-range score would otherwise
+    flow into the economics unchallenged. A violation raises ValueError, which
+    the caller treats as a failed judgment for that task rather than as data.
+    """
+    for field in ("criterion_scores", "overall_score", "acceptable"):
+        if field not in verdict:
+            raise ValueError(f"verdict is missing required field {field!r}")
+    if not isinstance(verdict["acceptable"], bool):
+        raise ValueError("verdict field 'acceptable' must be a boolean")
+
+    scores = verdict["criterion_scores"]
+    if not isinstance(scores, dict):
+        raise ValueError("verdict field 'criterion_scores' must be an object")
+    expected = {criterion["id"] for criterion in rubric["criteria"]}
+    if set(scores) != expected:
+        raise ValueError(
+            "verdict criterion_scores keys "
+            f"{sorted(scores)} do not match rubric criteria {sorted(expected)}"
+        )
+
+    for label, value in list(scores.items()) + [
+        ("overall_score", verdict["overall_score"])
+    ]:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f"verdict score {label!r} must be a number")
+        if not 0.0 <= float(value) <= 1.0:
+            raise ValueError(
+                f"verdict score {label!r} is {value}, outside [0.0, 1.0]"
+            )
+
+
 def _call_kimi(
     system_prompt: str,
     user_message: str,
     *,
     api_key: str,
     model: str,
+    response_format: dict[str, Any] | None = None,
+    reasoning_effort: str = _DEFAULT_REASONING_EFFORT,
+    rubric: dict | None = None,
 ) -> dict[str, Any]:
-    payload = {
-        "model": model,
-        "max_tokens": 512,
-        "reasoning_effort": "low",  # labeling; deep reasoning adds no value
-        "response_format": {"type": "json_object"},
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message},
-        ],
-    }
-    req = urllib.request.Request(
-        _API_URL,
-        data=json.dumps(payload).encode(),
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
+    """Score one task through the package's single inference egress.
+
+    The system prompt is identical for every task in a run and is sent first, so
+    Moonshot's automatic context caching can reuse it across the batch. Keep
+    per-task content in the user message; do not interpolate it into the system
+    prompt, or the cacheable prefix changes on every call.
+    """
+    verdict = kimi_client.call_kimi_json(
+        system_prompt,
+        user_message,
+        api_key=api_key,
+        model=model,
+        response_format=response_format,
+        reasoning_effort=reasoning_effort,
+        max_completion_tokens=_MAX_COMPLETION_TOKENS,
+        timeout_s=_TIMEOUT_S,
     )
-    with urllib.request.urlopen(req, timeout=_TIMEOUT_S) as resp:
-        body = json.loads(resp.read())
-    content = body["choices"][0]["message"]["content"]
-    return json.loads(content)
+    if rubric is not None:
+        _validate_verdict(verdict, rubric)
+    return verdict
 
 
 # ── outcome row builder ───────────────────────────────────────────────────────
@@ -179,6 +295,7 @@ def _build_outcome_row(
     kimi_resp: dict,
     rubric: dict,
     model_id: str,
+    reasoning_effort: str = _DEFAULT_REASONING_EFFORT,
 ) -> tuple[dict, dict]:
     """Returns (outcomes_row, audit_row)."""
     acceptable = bool(kimi_resp.get("acceptable", False))
@@ -206,6 +323,8 @@ def _build_outcome_row(
     audit_row = {
         "task_id": task_id,
         "model_id": model_id,
+        "reasoning_effort": reasoning_effort,
+        "output_contract": "json_schema/strict",
         "rubric_id": rubric["rubric_id"],
         "overall_score": kimi_resp.get("overall_score"),
         "criterion_scores": kimi_resp.get("criterion_scores", {}),
@@ -248,6 +367,7 @@ def judge(
     *,
     model: str = _DEFAULT_MODEL,
     rate_limit: int = 5,
+    reasoning_effort: str = _DEFAULT_REASONING_EFFORT,
 ) -> None:
     """
     Label agent task outcomes using Kimi.
@@ -257,15 +377,15 @@ def judge(
     writes outcomes CSV to out_path (compatible with agent_economics evaluate).
     Writes audit sidecar to out_path.with_suffix('.audit.json').
 
+    Verdicts are forced through a strict JSON schema derived from the rubric, so
+    a malformed response is a server-side error rather than a silent
+    unacceptable label. Transient HTTP failures are retried before falling back.
+
     Raises RuntimeError if MOONSHOT_API_KEY is not set.
-    Raises ValueError if rubric is malformed.
+    Raises ValueError if rubric is malformed or reasoning_effort is unknown.
     """
-    api_key = os.environ.get("MOONSHOT_API_KEY")
-    if not api_key:
-        raise RuntimeError(
-            "MOONSHOT_API_KEY not set. "
-            "Get a key at https://platform.kimi.ai and export it."
-        )
+    kimi_client.validate_reasoning_effort(reasoning_effort)
+    api_key = kimi_client.require_api_key()
 
     rubric = json.loads(Path(rubric_path).read_text())
     _validate_rubric(rubric)
@@ -283,6 +403,7 @@ def judge(
         raise ValueError(f"No tasks found in {task_results_path}")
 
     system_prompt = _build_system_prompt(rubric)
+    response_format = _verdict_schema(rubric)
     sleep_s = (1.0 / rate_limit) if rate_limit > 0 else 0.0
 
     outcome_rows: list[dict] = []
@@ -296,9 +417,17 @@ def judge(
         try:
             user_msg = _build_user_message(task_id, task["output"], task["context"])
             kimi_resp = _call_kimi(
-                system_prompt, user_msg, api_key=api_key, model=model
+                system_prompt,
+                user_msg,
+                api_key=api_key,
+                model=model,
+                response_format=response_format,
+                reasoning_effort=reasoning_effort,
+                rubric=rubric,
             )
-            out_row, audit_row = _build_outcome_row(task_id, kimi_resp, rubric, model)
+            out_row, audit_row = _build_outcome_row(
+                task_id, kimi_resp, rubric, model, reasoning_effort
+            )
             verdict = "✓" if out_row["acceptable"] == "true" else "✗"
             logger.info(
                 "judge %s/%s  %s  %s  score=%.2f  %s",
@@ -306,8 +435,22 @@ def judge(
                 kimi_resp.get("overall_score", 0),
                 kimi_resp.get("rationale", "")[:60],
             )
-        except (urllib.error.URLError, json.JSONDecodeError, KeyError, ValueError) as e:
-            logger.warning("judge failed for %s: %s — marking unacceptable", task_id, e)
+        # KimiRequestError is deliberately not caught. A rejected schema, a bad
+        # key, or an unknown model is a defect in the request, not a verdict
+        # about the task. Swallowing it would relabel every task unacceptable and
+        # report a 0% acceptable_rate that looks like real data.
+        except (
+            urllib.error.URLError,
+            TimeoutError,
+            json.JSONDecodeError,
+            KeyError,
+            ValueError,
+        ) as e:
+            logger.warning(
+                "judge failed for %s after retries: %s. Marking unacceptable.",
+                task_id,
+                e,
+            )
             out_row, audit_row = _error_outcome_row(task_id, rubric, str(e))
 
         outcome_rows.append(out_row)
@@ -347,12 +490,16 @@ def _main(argv: list[str] | None = None) -> int:
     p.add_argument("--model", default=_DEFAULT_MODEL)
     p.add_argument("--rate-limit", type=int, default=5,
                    help="Max Kimi API calls per second (0 = unlimited)")
+    p.add_argument("--reasoning-effort", choices=_REASONING_EFFORTS,
+                   default=_DEFAULT_REASONING_EFFORT,
+                   help="Kimi K3 reasoning depth (default: max)")
     args = p.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     try:
         judge(args.task_results, args.rubric, args.out,
-              model=args.model, rate_limit=args.rate_limit)
+              model=args.model, rate_limit=args.rate_limit,
+              reasoning_effort=args.reasoning_effort)
         return 0
     except (RuntimeError, ValueError, OSError) as e:
         print(f"Error: {e}")

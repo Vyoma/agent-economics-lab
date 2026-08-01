@@ -31,12 +31,66 @@ digits for cross-runtime reproducibility. This numeric precision is not addition
 statistical certainty. Neither method repairs biased labels, correlated duplicates,
 missing failed runs, or an unrepresentative population.
 
+## Most verdicts in the synthetic matrix are assumption artifacts
+
+`make sensitivity` sweeps a 48-cell grid of incident-loss and remediation-cost
+assumptions across the 98-scenario matrix and counts how many cells change the
+verdict:
+
+```text
+ROBUST  (0 flips)   43/98   43.9%
+BRITTLE (3+ flips)  55/98   56.1%
+```
+
+Fifty-five of ninety-eight scenarios produce a verdict that moves under
+plausible economic assumptions. A 50% error in the baseline acceptable rate
+flips the counterfactual gate in 25 of 98 scenarios. These are properties of a
+synthetic fixture rather than a prevalence estimate, but the direction
+generalizes: a decision built on an estimated incident loss, an estimated
+remediation cost, and an estimated baseline inherits the error bars of all
+three.
+
+Report the fragility index beside the verdict. A `SCALE` from a scenario with
+three or more flips is a statement about the assumptions, not about the agent.
+
 ## Outcome labels can dominate the result
 
 “Acceptable” must be operationalized before analysis. Human labels require a rubric
 and agreement checks. Automated graders require validation against the decision the
 enterprise actually cares about. A convenient proxy can make the economics precise
 and wrong.
+
+This is not a theoretical worry. Changing only the label source, on identical
+traces, rates, baseline, policy, and decision contract, moved the verdict a full
+decision class and flipped the sign of net value:
+
+| | hand-authored labels | `kimi-k3` labels |
+|---|---|---|
+| decision | `ASSIST` | `STOP` |
+| acceptable rate | 75.0% | 37.5% |
+| cost per acceptable outcome | $3.50 | $14.76 |
+| expected net value per attempt | $3.37 | $-2.53 |
+| incremental vs baseline | $2.77 | $-3.13 |
+| failing gates | 4 of 6 | 6 of 6 |
+
+The decision-contract digest is identical in both runs. Every input except the
+outcome column is byte-identical. The judge was stricter about unverifiable
+specifics: its rationales flagged fabricated rate limits, an incorrect claim about
+feature availability, and a mishandled error code that the hand labels accepted.
+
+**Neither label set is validated ground truth**, and that is the point. This does
+not show the judge is right and the hand labels wrong; it shows that the most
+subjective input in the pipeline is also the one with the most leverage over the
+output. Cost per acceptable outcome moved 4.2x on the same spend, because the
+denominator is a judgment call.
+
+Before trusting economics built on any label source, measure inter-rater agreement
+against human labels on a sample, and report which source produced the labels
+alongside the verdict. The judge writes that provenance into an audit sidecar for
+this reason.
+
+This comparison came from one live run. Judge output is not deterministic, so it is
+not byte-pinned in `make reproduce`, unlike every other published number here.
 
 ## Cost attribution is a model
 
@@ -93,10 +147,23 @@ the cost of false acceptance versus false rejection.
 ## Modularity does not establish trust in a module
 
 The engine rejects diagnostics that attempt to route and returns `INCOMPLETE` when
-declared required coverage is missing. It cannot prove that a third-party gate
-correctly implements the coverage it claims. Review module code, pin its ID/version,
-test counterexamples, and treat the evidence digest as reproducibility metadata, not
-as a signature or security attestation.
+declared required coverage is missing.
+
+Two mutation classes must be distinguished, because the architecture treats them
+differently. *Removing* a required gate is detected by construction: the fixed
+contract still demands the dimension, so `INCOMPLETE` is the only legal answer.
+*Substituting* a permissive gate that keeps the same ID, version, coverage, and
+failure route is not detected by the coverage contract at all, because coverage
+still appears satisfied and the gate simply stops failing. The per-check
+implementation fingerprint in the decision-contract digest exists for that second
+class, and it changes when the substitution happens.
+
+What the fingerprint does not do: it cannot prove that a third-party gate correctly
+implements the coverage it claims, and it is not a signature. A reviewer who never
+compares the digest against a known-good value learns nothing from it. Review module
+code, pin its ID/version, record the expected contract digest, test counterexamples,
+and treat both digests as reproducibility metadata rather than as a security
+attestation.
 
 ## One OpenTelemetry contract is not every vendor export
 

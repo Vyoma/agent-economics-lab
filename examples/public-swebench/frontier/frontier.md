@@ -56,9 +56,9 @@ The governing breakage estimand is the absolute paired-population rate of tasks 
 ## Evidence and decision manifests
 
 - `candidate-opus` evidence: `2d063279479ebeff05654482a77ad53eb6076441315e462b1881e0c56e5a4394`
-  - decision contract: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
+  - decision contract: `e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab`
 - `reference-haiku` evidence: `c88375512518ad44a03ff98b4eb44b8184825aaaeacdcd02eb0e9ce0f8497a4d`
-  - decision contract: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
+  - decision contract: `e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab`
 
 ## Claim boundary
 

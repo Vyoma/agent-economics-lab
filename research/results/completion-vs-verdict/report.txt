@@ -1,0 +1,46 @@
+==================================================================
+  COMPLETION RATE VS ECONOMIC VERDICT
+  fixture: claude-code/bundle.json  (6 events, 2 tasks, redacted)
+==================================================================
+
+  WHAT A TRANSCRIPT READER SEES
+  ----------------------------------------------------------
+    [not ] cc-task-7c8f7376b6418b72b583b8a2f0fe8f61 not acceptable
+    [ok  ] cc-task-bd59bb1f5dea500f618ce4374917b187 acceptable
+
+    completion rate: 50% (1/2 tasks)
+
+  WHAT THE DECISION CONTRACT SAYS
+  ----------------------------------------------------------
+    decision: ASSIST
+
+  Gate results:
+    [FAIL] gate.acceptable-rate: acceptable_rate 50.0% < 75.0%  -> ASSIST
+    [pass] gate.unit-economics: cost_per_acceptable_outcome $3.01 <= $4.00
+    [pass] gate.tail-cost: p95_task_cost $2.51 <= $6.00
+    [pass] gate.net-value: expected_net_value_per_attempt $3.49 >= $0.00
+    [pass] gate.counterfactual: incremental_net_value_vs_baseline $4.49 >= $0.00
+    [pass] gate.runtime-caps: all tasks remain within call and trace-cost caps
+
+  Economics:
+    metric                                      agent    baseline
+    ------------------------------------------------------------
+    acceptable rate                            50.0%      50.0%
+    cost per acceptable outcome            $  3.0141 $  12.0000
+    expected net value per attempt         $  3.4929 $  -1.0000
+    incremental net vs baseline            $  4.4929        n/a
+    total trace cost, all tasks            $  0.0141        n/a
+
+  Why the completion rate was not the whole story:
+    - gate.acceptable-rate: acceptable_rate 50.0% < 75.0%
+
+    reaching the quality gate needs 1 more acceptable task(s):
+    50% observed against a 75% threshold (-25.0pp)
+
+    completion rate 50% but decision ASSIST, 1 gate(s) blocking
+
+  evidence digest:  e09586e95397d55d87535ebe14d51e1dfd3aaeb594f72fa8d8a8ab9ad281e238
+  contract digest:  e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab
+
+  Synthetic conformance fixture. Not a prevalence or ROI estimate.
+==================================================================
