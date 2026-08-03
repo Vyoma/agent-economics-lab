@@ -12,7 +12,14 @@ It compares:
 
 The source is the MIT-licensed
 [public trajectory dataset](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories/tree/b55979d6b24850b72ae4d80f912526280cd6058a)
-at revision `b55979d6b24850b72ae4d80f912526280cd6058a`.
+at revision `b55979d6b24850b72ae4d80f912526280cd6058a`, which credits
+[Docent](https://docent.transluce.org) for the trajectories.
+
+Upstream of that: [SWE-bench](https://github.com/SWE-bench/SWE-bench) and
+SWE-bench Verified supply the task instances and the hidden-test outcome used as
+ground truth, and [mini-SWE-agent](https://github.com/SWE-agent/mini-swe-agent) is
+the harness that produced the trajectories. Both are MIT-licensed. Full attribution
+is in [THIRD_PARTY_NOTICES.md](../../THIRD_PARTY_NOTICES.md).
 
 ## Result
 

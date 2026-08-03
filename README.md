@@ -594,4 +594,7 @@ observed benchmark trajectories but is not enterprise ROI evidence. Production u
 requires representative tasks, label validation, assignment controls, subgroup
 analysis, complete cost attribution, policy ownership, and ongoing monitoring.
 
-Apache-2.0 licensed.
+Apache-2.0 licensed. No third-party runtime dependencies. Derived data,
+implemented specifications, and services called at runtime are credited in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Participation is governed by
+the [Code of Conduct](CODE_OF_CONDUCT.md).

@@ -53,3 +53,17 @@ Do not submit customer data, secrets, personal information, proprietary prompts,
 real customer identifiers, internal model names, or contract pricing. Aggregate,
 redact, or synthesize evidence before opening an issue or pull request. Contributors
 are responsible for having permission to share their material.
+
+## Licensing and attribution
+
+By contributing you agree that your contribution is licensed under Apache-2.0, the
+same licence as the project.
+
+If your contribution derives from third-party data, code, or a specification, add
+it to [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) in the same pull request,
+naming the source, its licence, its pinned revision, and the extent of use. A
+fixture without provenance cannot be merged.
+
+Do not submit customer data, secrets, proprietary prompts, or contract pricing.
+
+Participation is governed by the [Code of Conduct](CODE_OF_CONDUCT.md).
