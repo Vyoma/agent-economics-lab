@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test
+.PHONY: label-error demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -30,6 +30,9 @@ mutation-score:
 	@python3 mutation_score.py \
 		--summary-verify research/results/mutation-score/summary.md \
 		--json-verify research/results/mutation-score/summary.json
+
+label-error:
+	@python3 -m agent_economics.label_error
 
 sensitivity:
 	@python3 sensitivity_sweep.py \
@@ -140,7 +143,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: test modularity lessons benchmark mutation-score sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
+reproduce: test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done

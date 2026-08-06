@@ -180,6 +180,21 @@ digest records which check functions produced a verdict; it is not an integrity
 guarantee for the engine, and a recipient of an `AssuranceCase` from an untrusted
 producer should not read it as one.
 
+**Is your judge good enough?** If an LLM judge supplies the acceptable label and
+you gate on cost per acceptable outcome, the label sits in a denominator and its
+error is amplified by `1 / acceptable_rate`. The largest error a gate can absorb is
+`r*s/(1+s)`, so at a 70% acceptable rate with 10% slack you need **93.6% agreement,
+not the 85% commonly treated as sufficient**. Across fifteen combinations, 85%
+suffices in one.
+
+```bash
+python3 -m agent_economics.label_error
+```
+
+There is a cheaper remedy than a better judge: difference-form metrics such as net
+value per attempt do not amplify, so the requirement is a property of the metric you
+gate on. [Read the derivation](docs/label-error.md).
+
 **Is a verdict stable?** `make sensitivity` sweeps a 48-cell grid of
 incident-loss and remediation-cost assumptions per scenario:
 
