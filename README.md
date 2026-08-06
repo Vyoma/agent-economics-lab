@@ -155,10 +155,14 @@ two operators and excludes equivalent mutants from the denominator:
 REMOVAL       fixed 510/510 killed (100.0%)   forced by construction, not evidence
               dynamic 487/510 killed (95.5%)
 
-SUBSTITUTION  fixed 487/510 killed (95.5%)
-              dynamic 487/510 killed (95.5%)   fixed contract is no better here
+SUBSTITUTION  fixed 487/510 not SCALE (95.5%)
+              dynamic 487/510 not SCALE (95.5%)  fixed contract is no better
               contract digest changed 588/588
 ```
+
+Read the substitution row carefully: a non-SCALE result there is **not detection**.
+It means other gates were failing too and masked the swap. Neither engine's routing
+sees a permissive gate at all.
 
 Removing a gate is caught because required coverage loses its only provider.
 Replacing a gate with one that keeps the same ID, version, coverage, and failure
@@ -166,8 +170,15 @@ route while enforcing nothing is not caught by coverage at all, and it is the
 mutation that actually happens: a threshold loosened during an incident, an
 evaluator stubbed out in a migration. Against it the fixed contract scores
 exactly what a dynamic one scores. The per-check implementation fingerprint in
-the decision-contract digest is the only thing that surfaces it, which is why
-every check's source is hashed into the contract.
+the decision-contract digest is what surfaces that case.
+
+**Its scope is narrow and worth stating plainly.** The fingerprint hashes each
+check's own source, not the helpers a check calls. It is not transitive. Editing a
+shared helper that all six gates route through changes the verdict while leaving
+the contract digest byte-identical, which we verified rather than assumed. So the
+digest records which check functions produced a verdict; it is not an integrity
+guarantee for the engine, and a recipient of an `AssuranceCase` from an untrusted
+producer should not read it as one.
 
 **Is a verdict stable?** `make sensitivity` sweeps a 48-cell grid of
 incident-loss and remediation-cost assumptions per scenario:
@@ -329,10 +340,25 @@ make public-case
 ```
 
 Opus resolves `14/20` tasks versus Haiku's `11/20`, while costing 56.9% more
-per attempt and 23.3% more per resolved task. The evidence engine returns `STOP`;
-the paired uncertainty-aware frontier returns `HOLD`. Prompts, reasoning, patches,
-and tool output are excluded, while each complete public trajectory remains
-verifiable by its upstream path and SHA-256 digest.
+per attempt and 23.3% more per resolved task.
+
+**The useful result is the frontier's `HOLD`, not the engine's `STOP`.** One
+harmful transition in 20 pairs gives an exact one-sided upper bound of 24.9% on
+the harmful-regression rate, against a predeclared 5% limit. Twenty paired tasks
+cannot detect the regression rate the decision depends on, so the honest answer is
+that the comparison is undecided. Teams approve model downgrades on evaluations
+this size routinely.
+
+**Read the `STOP` with care: it is forced, not earned.** A benchmark resolution is
+credited $0 of business value, because the public source publishes no defensible
+value for one, and the net-value gate requires a non-negative result. Total cost is
+positive, so `expected_net_value` is negative for *any* set of outcome labels and
+the routing cannot be anything but `STOP`. That is arithmetic, not a finding about
+either model. It demonstrates the refusal path and the audit trail; it says nothing
+about whether Opus is worth its price.
+
+Prompts, reasoning, patches, and tool output are excluded, while each complete
+public trajectory remains verifiable by its upstream path and SHA-256 digest.
 
 [Inspect the public case](examples/public-swebench/) ·
 [Read the AssuranceCase](examples/public-swebench/assurance-case.md) ·
@@ -480,13 +506,13 @@ labels on a sample before trusting the economics built on top.
 
 ```bash
 make kimi-judge      # live call, requires MOONSHOT_API_KEY
-make kimi-eval       # score the judge against 24 labelled cases
+make kimi-eval       # score the judge against 25 labelled cases
 make kimi-doctor     # diagnose a 401 without printing the key
 make test            # rubric, schema, retry, and fallback conformance, mocked
 ```
 
-The judge is measured, not just mocked. `make kimi-eval` scores it against 24
-constructed cases across seven failure categories and reports a **false-accept
+The judge is measured, not just mocked. `make kimi-eval` scores it against 25
+constructed cases across eight categories and reports a **false-accept
 rate**: unacceptable work labelled acceptable inflates `acceptable_rate` and can
 turn a `STOP` into a `SCALE`. Expected labels follow from the rubric's own weights,
 and a test checks that arithmetic against the rubric file.

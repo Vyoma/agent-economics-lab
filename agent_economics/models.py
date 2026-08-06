@@ -167,8 +167,16 @@ def implementation_fingerprint(run: CheckFn) -> str:
     """Return a SHA-256 fingerprint of a check implementation's source text.
 
     Declared metadata alone cannot distinguish an enforcing gate from a
-    same-named, same-coverage gate that stopped enforcing anything. The
-    fingerprint binds the decision contract to the code that produced it.
+    same-named, same-coverage gate whose own body stopped enforcing anything.
+
+    Scope, and it is narrow: this hashes the source of `run` itself and nothing
+    that `run` calls. It is NOT transitive. Editing a shared helper the gates
+    delegate to, such as `checks._result` or `assurance.percentile`, changes
+    behaviour while leaving every fingerprint and the contract digest
+    byte-identical. The digest therefore detects substitution of a check
+    function, not tampering with the engine as a whole. Treat it as a
+    reproducibility record for the checks, not as an integrity guarantee for the
+    package.
 
     Normalization strips the common indent and per-line trailing whitespace so
     the value depends on source text rather than on nesting depth. It is

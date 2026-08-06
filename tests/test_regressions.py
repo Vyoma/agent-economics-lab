@@ -87,6 +87,92 @@ class ContractDigestBindsImplementation(unittest.TestCase):
         )
 
 
+class FingerprintScopeIsDocumentedHonestly(unittest.TestCase):
+    """The fingerprint is not transitive, and the docs must keep saying so.
+
+    It hashes each check's own `run` source, not the helpers `run` calls. All six
+    gates route through `checks._result`, so editing that helper changes the
+    verdict while leaving the contract digest byte-identical. This was verified by
+    executing it. The claim was previously stated as "every check's source is
+    hashed into the contract", which is false, so this test guards the corrected
+    wording rather than an unstated assumption.
+    """
+
+    def test_fingerprint_does_not_cover_called_helpers(self) -> None:
+        """Demonstrate the hole directly, so nobody has to trust the prose."""
+        from agent_economics import checks as checks_module
+        from agent_economics.models import implementation_fingerprint
+
+        gates = [c for c in default_checks() if c.mode is CheckMode.GATE]
+        before = {g.id: implementation_fingerprint(g.run) for g in gates}
+        baseline = decision_contract_digest(
+            default_checks(), DEFAULT_REQUIRED_COVERAGE
+        )
+
+        # Swap the shared helper every gate delegates to. No check body changes.
+        original = checks_module._result
+        try:
+            checks_module._result = lambda *a, **k: CheckOutput(results=())
+            after = {g.id: implementation_fingerprint(g.run) for g in gates}
+            digest = decision_contract_digest(
+                default_checks(), DEFAULT_REQUIRED_COVERAGE
+            )
+        finally:
+            checks_module._result = original
+
+        self.assertEqual(before, after, "helper edits leave fingerprints unchanged")
+        self.assertEqual(digest, baseline, "and leave the contract digest unchanged")
+
+    def test_the_limitation_is_disclosed_where_it_matters(self) -> None:
+        """Every place that describes the fingerprint must state the scope."""
+        for name, needle in (
+            ("docs/limitations.md", "not transitive"),
+            ("README.md", "not transitive"),
+            ("docs/landscape.md", "not transitive"),
+            ("agent_economics/models.py", "NOT transitive"),
+        ):
+            with self.subTest(doc=name):
+                self.assertIn(needle, (ROOT / name).read_text(encoding="utf-8"))
+
+    def test_no_document_claims_every_source_is_hashed(self) -> None:
+        """The specific false sentence must not come back."""
+        for name in ("README.md", "docs/limitations.md", "docs/landscape.md",
+                     "docs/modularity.md"):
+            with self.subTest(doc=name):
+                self.assertNotIn(
+                    "every check's source is hashed",
+                    (ROOT / name).read_text(encoding="utf-8"),
+                )
+
+
+class PercentileIsHonestOnSmallSamples(unittest.TestCase):
+    """p95 equals the maximum for any n < 20, which the docs must not obscure.
+
+    `rank = ceil(0.95n)` equals `n` whenever n <= 19, so on the eight-task demo
+    fixture the p95 and maximum columns are the same statistic printed twice. That
+    is not a coincidence to be read as agreement between two measures.
+    """
+
+    def test_p95_equals_max_below_twenty_samples(self) -> None:
+        from agent_economics.assurance import percentile
+
+        for n in range(1, 20):
+            values = [float(i) for i in range(1, n + 1)]
+            with self.subTest(n=n):
+                self.assertEqual(percentile(values, 0.95), max(values))
+
+    def test_p95_separates_from_max_at_twenty(self) -> None:
+        from agent_economics.assurance import percentile
+
+        values = [float(i) for i in range(1, 21)]
+        self.assertNotEqual(percentile(values, 0.95), max(values))
+
+    def test_small_sample_caveat_is_documented(self) -> None:
+        text = (ROOT / "docs/limitations.md").read_text(encoding="utf-8")
+        self.assertIn("p95", text)
+        self.assertIn("fewer than 20", text)
+
+
 class MutationScoreCanVary(unittest.TestCase):
     """A mutation score must be able to report a failure.
 

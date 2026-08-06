@@ -244,14 +244,16 @@ def render_summary(summary: dict[str, object]) -> str:
         assert isinstance(stats, dict)
         scored = stats["scored_mutants"]
         lines.append(f"  {operator.upper()}  ({scored} scored mutants)")
+        verb = "killed" if stats[
+            "detected_by_coverage_contract_by_construction"] else "not SCALE"
         lines.append(
             f"    fixed-contract engine    "
-            f"{stats['fixed_contract_killed']:>3}/{scored} killed  "
+            f"{stats['fixed_contract_killed']:>3}/{scored} {verb}  "
             f"({stats['fixed_contract_score']:.1%})"
         )
         lines.append(
             f"    dynamic-coverage engine  "
-            f"{stats['dynamic_coverage_killed']:>3}/{scored} killed  "
+            f"{stats['dynamic_coverage_killed']:>3}/{scored} {verb}  "
             f"({stats['dynamic_coverage_score']:.1%})"
         )
         if stats["detected_by_coverage_contract_by_construction"]:
@@ -271,11 +273,18 @@ def render_summary(summary: dict[str, object]) -> str:
             )
             lines.append(
                 "    note: coverage still looks satisfied, so neither engine's "
-                "routing detects"
+                "routing DETECTS this."
             )
             lines.append(
-                "          this. The changed digest is what surfaces it to a "
-                "reviewer."
+                "          A non-SCALE result here means other gates were also "
+                "failing and masked"
+            )
+            lines.append(
+                "          the substitution. It is not detection. Only the "
+                "changed digest surfaces it,"
+            )
+            lines.append(
+                "          and only when the check body itself was substituted."
             )
         lines.append("")
 

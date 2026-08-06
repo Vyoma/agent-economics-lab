@@ -143,7 +143,9 @@ Fixed required coverage detects a *removed* gate by construction. It does not
 detect a *substituted* gate that keeps its declared ID, version, and coverage
 while ceasing to enforce anything, and against that operator a fixed contract
 scores no better than a dynamic one. The per-check implementation fingerprint in
-the decision-contract digest exists for that case. `make mutation-score` reports
+the decision-contract digest exists for that case, and covers only a check's own
+body: it is not transitive through shared helpers, as
+[limitations.md](limitations.md) records. `make mutation-score` reports
 both operators side by side, and
 [docs/limitations.md](limitations.md) states the residual gap.
 

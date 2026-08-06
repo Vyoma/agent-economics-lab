@@ -11,11 +11,13 @@
           sole provider, so INCOMPLETE is the only reachable answer. Not evidence.
 
   SUBSTITUTION  (510 scored mutants)
-    fixed-contract engine    487/510 killed  (95.5%)
-    dynamic-coverage engine  487/510 killed  (95.5%)
+    fixed-contract engine    487/510 not SCALE  (95.5%)
+    dynamic-coverage engine  487/510 not SCALE  (95.5%)
     contract digest changed  588/588 mutants (implementation fingerprint)
-    note: coverage still looks satisfied, so neither engine's routing detects
-          this. The changed digest is what surfaces it to a reviewer.
+    note: coverage still looks satisfied, so neither engine's routing DETECTS this.
+          A non-SCALE result here means other gates were also failing and masked
+          the substitution. It is not detection. Only the changed digest surfaces it,
+          and only when the check body itself was substituted.
 
   Surviving mutants by dimension (fixed contract)
   dimension             removal   substitution

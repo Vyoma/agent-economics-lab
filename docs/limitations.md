@@ -53,6 +53,15 @@ three.
 Report the fragility index beside the verdict. A `SCALE` from a scenario with
 three or more flips is a statement about the assumptions, not about the agent.
 
+## p95 is the maximum on small samples
+
+`percentile` uses `rank = ceil(0.95 n)`, which equals `n` for any workload of
+fewer than 20 tasks. On the eight-task demo fixture the reported p95 effective task
+cost and the maximum effective task cost are therefore the same number by
+construction, not two measures that happen to agree. Tail risk is one of the six
+required coverage dimensions, so read it as "the worst task" until the workload
+exceeds 20 tasks.
+
 ## Outcome labels can dominate the result
 
 “Acceptable” must be operationalized before analysis. Human labels require a rubric
@@ -156,7 +165,22 @@ contract still demands the dimension, so `INCOMPLETE` is the only legal answer.
 failure route is not detected by the coverage contract at all, because coverage
 still appears satisfied and the gate simply stops failing. The per-check
 implementation fingerprint in the decision-contract digest exists for that second
-class, and it changes when the substitution happens.
+class, and it changes when a check's own body is substituted.
+
+**The fingerprint is not transitive, and that limit is load-bearing.** It hashes
+the source of each check's `run` function and nothing `run` calls. All six gates
+route through one shared helper, `checks._result`. Editing that helper so it never
+reports a failure moves the demo fixture from `ASSIST` to `SCALE` while leaving the
+contract digest byte-identical. The same holds for `assurance.percentile`, which
+`gate.tail-cost` depends on, and for the diagnostic helpers in `controls.py`. Both
+were verified by executing them, not reasoned about.
+
+The practical consequence: the digest is a reproducibility record for *which check
+functions* ran, not an integrity guarantee for the engine. A reviewer who receives
+an `AssuranceCase` from a producer they do not trust learns from the digest that
+the declared checks and their bodies match a known-good value, and learns nothing
+about the code beneath them. Detecting that requires pinning the package itself,
+by version and artifact hash, which this project does not do for you.
 
 What the fingerprint does not do: it cannot prove that a third-party gate correctly
 implements the coverage it claims, and it is not a signature. A reviewer who never

@@ -8,6 +8,8 @@ about the harness must be asserted rather than printed.
 from __future__ import annotations
 
 import json
+import os
+import sys
 import unittest
 from pathlib import Path
 
@@ -267,6 +269,68 @@ class ReadmeAccuracyTests(unittest.TestCase):
         for pattern in ("demo.gif", "assets/demo", ".mp4", ".webm", ".mov"):
             with self.subTest(pattern=pattern):
                 self.assertNotIn(pattern, self.readme)
+
+    def test_readme_eval_counts_match_the_eval_set(self) -> None:
+        """The README must not quote a case count the eval set has outgrown.
+
+        This drifted once: splitting a case took the set from 24 cases and seven
+        categories to 25 and eight, and the README kept the old figures. The
+        earlier README test only covered the demo output, so it passed while the
+        page was wrong. Any number quoted from a generated artifact needs a
+        binding assertion, not a nearby one.
+        """
+        document = json.loads(
+            (ROOT / "research/eval/judge-eval-set.json").read_text(encoding="utf-8")
+        )
+        cases = document["case_count"]
+        categories = len({case["category"] for case in document["cases"]})
+        self.assertEqual(cases, len(document["cases"]))
+        spelled = {7: "seven", 8: "eight", 9: "nine"}[categories]
+
+        self.assertIn(f"{cases} labelled cases", self.readme)
+        self.assertIn(f"{cases}\nconstructed cases across {spelled} categories",
+                      self.readme)
+        # And the superseded figures must be gone.
+        for stale in (f"{cases - 1} labelled cases", f"{cases + 1} labelled cases"):
+            with self.subTest(stale=stale):
+                self.assertNotIn(stale, self.readme)
+
+    def test_forced_stop_is_disclosed_as_forced(self) -> None:
+        """A verdict no evidence could have avoided must not read as a finding.
+
+        Every public SWE-bench outcome is credited zero business value while the
+        net-value gate requires a non-negative result, so the routing is STOP for
+        any labels at all. Presenting that as a comparison result would invite a
+        reader to conclude the engine is rigged.
+        """
+        for name in ("README.md", "examples/public-swebench/README.md"):
+            text = (ROOT / name).read_text(encoding="utf-8")
+            with self.subTest(doc=name):
+                self.assertIn("forced", text.lower())
+                self.assertIn("HOLD", text)
+
+    def test_zero_value_really_does_force_the_stop(self) -> None:
+        """Assert the arithmetic the disclosure describes, not just the prose."""
+        import subprocess, tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            subprocess.run(
+                [sys.executable, "examples/public-swebench/build_case.py",
+                 "--source", "examples/public-swebench/runs.json",
+                 "--output-dir", tmp],
+                cwd=ROOT, check=True, capture_output=True,
+                env={**os.environ, "PYTHONPATH": str(ROOT)},
+            )
+            bundle = json.loads(
+                (Path(tmp) / "arms/candidate-opus.json").read_text(encoding="utf-8")
+            )
+        outcomes = bundle["outcomes"]
+        rows = outcomes if isinstance(outcomes, list) else list(outcomes.values())
+        self.assertEqual({row.get("business_value_usd", 0.0) for row in rows}, {0.0})
+        self.assertGreaterEqual(
+            bundle["policy"]["min_expected_net_value_per_attempt_usd"], 0.0,
+            "with zero value credited, a non-negative threshold forces the STOP",
+        )
 
     def test_headline_decision_matches_the_engine(self) -> None:
         self.assertIn("**Decision: ASSIST**", self.demo_report)

@@ -37,6 +37,13 @@ points while increasing mean spend by 56.9%.
 
 The AssuranceCase says `STOP`. The paired frontier says `HOLD`.
 
+**The `STOP` is forced by construction and is not evidence about either model.**
+Business value is credited as $0 (see the table below), and the net-value gate
+requires a non-negative expected net value. Since total cost is positive,
+`expected_net_value` is negative for every possible assignment of outcome labels,
+so no quality result could have produced any other routing. The case demonstrates
+the refusal path; the informative result is the frontier's `HOLD`.
+
 That is not a contradiction. The public run shows better observed quality and fewer
 calls, but not cheaper acceptable outcomes. With one observed harmful transition
 in 20 pairs, the exact one-sided upper bound is 24.9%, above the predeclared 5%
