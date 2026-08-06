@@ -1,4 +1,4 @@
-.PHONY: label-error demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test
+.PHONY: label-error demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -147,6 +147,9 @@ reproduce: test modularity lessons benchmark mutation-score label-error sensitiv
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done
+
+video:
+	@python3 render_video.py
 
 test:
 	python3 -m unittest discover -s tests -v

@@ -1,0 +1,23 @@
+{
+  "breaches_shown": [
+    "acceptable_rate 75.0% < 80.0%",
+    "cost_per_acceptable_outcome $3.50 > $2.00",
+    "p95_task_cost $14.25 > $8.00"
+  ],
+  "disabled_gate": "gate.acceptable-rate",
+  "drift": {
+    "claim_boundary": "Synthetic conformance fixture; not a production prevalence estimate.",
+    "comparisons": 588,
+    "dynamic_false_scale_transitions": 23,
+    "fixed_contract_incomplete": 588
+  },
+  "frames": 41,
+  "height": 900,
+  "missing_coverage": [
+    "outcome_quality"
+  ],
+  "n_checks": 8,
+  "reduced_verdict": "INCOMPLETE",
+  "verdict": "ASSIST",
+  "width": 900
+}
