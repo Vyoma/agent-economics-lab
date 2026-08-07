@@ -3,6 +3,9 @@ name: test
 on:
   push:
   pull_request:
+  # Lets a maintainer re-run the full matrix against any ref on demand, without
+  # pushing a commit to do it.
+  workflow_dispatch:
 
 permissions:
   contents: read
