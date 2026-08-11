@@ -17,8 +17,13 @@ Which requires deciding what counts as usable. At volume that means an LLM judge
 raises the question this piece is about: how accurate does the judge have to be before
 the number you compute is safe to act on?
 
-The common answer is that ~85% agreement with human labellers is good enough. That is the
-wrong test, and not because the bar is too low. It is the wrong *quantity*.
+The common answer is that around 80 to 85% agreement with human labellers is good
+enough. That figure traces to Zheng et al., *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*, NeurIPS 2023 ([arXiv:2306.05685](https://arxiv.org/abs/2306.05685)), which found strong judges achieving "over 80%
+agreement, the same level of agreement between humans." Read it again: that is a claim
+about **parity** with human consistency, not a safety threshold for a budget decision.
+It has been repurposed into one.
+
+Which would be a minor sin if agreement were the right quantity. It isn't.
 
 ## Ten tasks, on paper
 

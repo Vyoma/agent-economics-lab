@@ -29,8 +29,13 @@ condition robust to unknown error composition, not a necessary property of a jud
 Report your false-accept and false-reject rates separately; an agreement figure alone
 does not determine whether a gated decision is safe.
 
-Practitioner guidance commonly treats 75 to 90% agreement as sufficient to act on. How
-often that clears `e*` depends entirely on the slack range considered, so the command
+The agreement figure in circulation traces to Zheng et al., *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*, NeurIPS 2023 ([arXiv:2306.05685](https://arxiv.org/abs/2306.05685)), which reported that strong
+judges "match both controlled and crowdsourced human preferences well, achieving over 80%
+agreement, the same level of agreement between humans." That is a **parity** claim: judges
+are about as consistent as two people are with each other. It was never a sufficiency
+threshold for a gated decision, and the paper does not present it as one. Practitioner
+guidance since has treated 75 to 90% as good enough to act on, which is a different claim.
+How often that clears `e*` depends entirely on the slack range considered, so the command
 reports the count per cap rather than as a headline: 1 of 15 cells with slack up to
 25%, 4 of 20 up to 50%, 8 of 25 up to 100%. Quoting any one of those as a finding would
 be a number that cannot come out differently, which is the failure this project names
