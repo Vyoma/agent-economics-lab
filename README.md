@@ -226,8 +226,10 @@ producer should not read it as one.
 you gate on cost per acceptable outcome, the label sits in a denominator and its
 error is amplified by `1 / acceptable_rate`. The largest error a gate can absorb is
 `r*s/(1+s)`, so at a 70% acceptable rate with 10% slack you need **93.6% agreement,
-not the 85% commonly treated as sufficient**. Across fifteen combinations, 85%
-suffices in one.
+not the 85% commonly treated as sufficient**. How often 85% clears that bar depends on the
+slack range considered: 1 of 15 cells with slack up to 25%, 8 of 25 up to 100%. And
+`e*` bounds net bias, `|false accepts - false rejects|/n`, not disagreement, so a
+balanced judge can disagree 30% of the time and move the metric not at all.
 
 ```bash
 python3 -m agent_economics.label_error

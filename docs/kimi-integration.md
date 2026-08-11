@@ -14,7 +14,7 @@ offline suite stays hermetic.
 ## One egress, enforced
 
 Every model call in the package goes through
-[`agent_economics/kimi_client.py`](../agent_economics/kimi_client.py). Provider,
+[`agent_economics/kimi_client.py`](https://github.com/Vyoma/agent-economics-lab/blob/main/agent_economics/kimi_client.py). Provider,
 model, request contract, and retry policy are declared there once. Both
 integrations delegate to it, and `agent-economics capabilities` prints what is in
 force:
@@ -26,7 +26,7 @@ model     kimi-k3  reasoning_effort=max
 egress    agent_economics.kimi_client  (single call path)
 ```
 
-[`tests/test_inference_routing.py`](../tests/test_inference_routing.py) enforces
+[`tests/test_inference_routing.py`](https://github.com/Vyoma/agent-economics-lab/blob/main/tests/test_inference_routing.py) enforces
 this rather than trusting it. It fails if any module opens its own connection,
 declares a second endpoint, imports another provider's SDK, references another
 provider's host, or reaches the client from an undeclared module. Each of those
@@ -242,7 +242,7 @@ make kimi-judge   # live call, requires MOONSHOT_API_KEY
 make test         # rubric, schema, retry, and fallback conformance, fully mocked
 ```
 
-The rubric schema and a worked fixture are in [examples/kimi-judge/](../examples/kimi-judge/).
+The rubric schema and a worked fixture are in [examples/kimi-judge/](https://github.com/Vyoma/agent-economics-lab/tree/main/examples/kimi-judge/).
 
 ## What the eval revealed about judge calibration
 
@@ -324,7 +324,7 @@ case, not seconds. `--reasoning-effort high` or `low` is much faster if your
 account supports those levels. Progress prints per case with elapsed time, so a
 slow run is distinguishable from a stuck one.
 
-[`research/eval/judge-eval-set.json`](../research/eval/judge-eval-set.json) holds 24
+[`research/eval/judge-eval-set.json`](https://github.com/Vyoma/agent-economics-lab/blob/main/research/eval/judge-eval-set.json) holds 24
 constructed cases, 8 expected-acceptable and 16 expected-unacceptable, across seven
 categories: correct, correct-but-curt, factually-wrong, hallucinated-feature,
 contradicts-context, non-answer, and policy-breach.

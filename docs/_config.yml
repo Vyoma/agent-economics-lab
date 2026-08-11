@@ -1,0 +1,32 @@
+# GitHub Pages configuration. Site is served from the /docs folder on main.
+#
+# Two plugins matter here and both are in the GitHub Pages default set, so no
+# Gemfile is required:
+#   jekyll-relative-links      rewrites [x](y.md) to the built .html permalink,
+#                              so links work identically on github.com and on Pages.
+#   jekyll-optional-front-matter  renders the existing docs/*.md, which have no
+#                              front matter, instead of copying them verbatim.
+
+title: Agent Economics Lab
+description: >-
+  Normalized agent evidence in. A composable, auditable
+  INCOMPLETE / SCALE / ASSIST / STOP decision out.
+
+theme: jekyll-theme-primer
+
+url: https://vyoma.github.io
+baseurl: /agent-economics-lab
+
+plugins:
+  - jekyll-relative-links
+  - jekyll-optional-front-matter
+  - jekyll-titles-from-headings
+
+relative_links:
+  enabled: true
+  collections: false
+
+# Keep the site to prose. Everything else stays browsable on github.com.
+exclude:
+  - "*.json"
+  - "*.txt"

@@ -109,12 +109,66 @@ class DocumentedScopeTests(unittest.TestCase):
                                        places=1)
                 self.assertIn(shown, self.page)
 
-    def test_eighty_five_percent_suffices_in_exactly_one_cell(self) -> None:
-        """The page's central comparison, asserted rather than asserted-in-prose."""
-        cells = [(r, s) for r in (0.9, 0.7, 0.5, 0.3, 0.2)
-                 for s in (0.05, 0.10, 0.25)]
-        sufficient = [(r, s) for r, s in cells if epsilon_star(r, s) >= 0.15]
-        self.assertEqual(len(cells), 15)
-        self.assertEqual(len(sufficient), 1)
-        self.assertEqual(sufficient[0], (0.9, 0.25))
-        self.assertIn("suffices in", self.page)
+    def test_how_often_85_percent_suffices_depends_on_the_slack_grid(self) -> None:
+        """The count is a property of the grid, so no single count may be quoted.
+
+        An earlier version of this test asserted "exactly one of fifteen", which
+        pinned a framing rather than testing a property: the one is an artifact
+        of capping slack at 25%, while `check_proposition_4` sweeps slack to 1.0.
+        Quoting it as a finding is the failure this project names elsewhere, a
+        number that cannot come out differently because of how it was set up.
+        """
+        rates = (0.9, 0.7, 0.5, 0.3, 0.2)
+        counts = {}
+        for cap in (0.25, 0.50, 1.00):
+            slacks = [s for s in (0.05, 0.10, 0.25, 0.50, 1.00) if s <= cap]
+            cells = [(r, s) for r in rates for s in slacks]
+            counts[cap] = (
+                sum(1 for r, s in cells if epsilon_star(r, s) >= 0.15),
+                len(cells),
+            )
+        self.assertEqual(counts[0.25], (1, 15))
+        self.assertEqual(counts[0.50], (4, 20))
+        self.assertEqual(counts[1.00], (8, 25))
+        # Sufficiency is monotone in slack, which is why the cap drives the count.
+        fractions = [c / n for c, n in counts.values()]
+        self.assertEqual(fractions, sorted(fractions))
+
+    def test_proposition_2_is_verified_not_merely_printed(self) -> None:
+        """P2 was printed as a table with no PASS while P1, P3 and P4 were checked."""
+        from agent_economics.label_error import check_proposition_2
+
+        self.assertLess(check_proposition_2(), 1e-9)
+
+    def test_net_bias_not_agreement_governs_the_distortion(self) -> None:
+        """Balanced error cancels exactly, so agreement alone cannot decide safety."""
+        n, a = 100, 70
+        # 30% disagreement, perfectly balanced: the metric does not move at all.
+        self.assertEqual(a / (a + (15 - 15)), 1.0)
+        # 15% disagreement, one-directional: it moves a lot.
+        self.assertGreater(abs(a / (a + 15) - 1), 0.17)
+        self.assertGreater(abs(a / (a - 15) - 1), 0.27)
+        # Agreement cuts both ways against the 85% rule of thumb. A judge at 93%
+        # agreement whose error is one-directional carries 7% net bias, which
+        # exceeds what a 70% / 10% gate tolerates, so it fails a gate that "85%
+        # is sufficient" would have waved through.
+        tolerance = epsilon_star(0.70, 0.10)
+        one_directional = 7 / n
+        self.assertGreater(1 - one_directional, 0.85, "that judge beats the norm")
+        self.assertGreater(one_directional, tolerance, "yet it still fails the gate")
+
+    def test_cli_answers_for_the_callers_own_numbers(self) -> None:
+        """The docs tell readers to check their own r and s, so that must work."""
+        import contextlib
+        import io
+
+        from agent_economics.label_error import main
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = main(["-r", "0.62", "-s", "0.08"])
+        out = buf.getvalue()
+        self.assertEqual(code, 0)
+        self.assertIn("4.59%", out)
+        self.assertIn("95.41%", out)
+        self.assertIn("net bias", out)

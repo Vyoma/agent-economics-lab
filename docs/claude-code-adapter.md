@@ -214,7 +214,7 @@ sessions from observed versions `2.1.156`, `2.1.162`, `2.1.165`, `2.1.198`, and
 those sessions is checked into this repository.
 
 A public non-synthetic benchmark case now exists under
-[`examples/public-swebench`](../examples/public-swebench/). A permissioned
+[`examples/public-swebench`](https://github.com/Vyoma/agent-economics-lab/tree/main/examples/public-swebench/). A permissioned
 enterprise case still requires manual labels under a frozen business rubric, an
 approved price card, and a defensible human or production baseline.
 

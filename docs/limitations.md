@@ -209,7 +209,7 @@ non-model cost returns `INCOMPLETE`; explicitly free or included events must rec
 counts and positive usage. Source adapters must preserve these distinctions.
 
 The checked-in [raw evidence-ablation
-benchmark](../research/EVIDENCE_ABLATION_PROTOCOL.md) makes this boundary
+benchmark](https://github.com/Vyoma/agent-economics-lab/blob/main/research/EVIDENCE_ABLATION_PROTOCOL.md) makes this boundary
 executable. Four of nine constructed omissions are refused at the schema or
 semantic-evidence boundary. Five decision-material omissions change `ASSIST` to
 `SCALE`: incident loss, remediation cost, human review time, a directly priced tool
