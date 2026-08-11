@@ -31,7 +31,7 @@ Ten tasks, $10 each, so $100 spent. Seven genuinely produced something usable.
 
 True cost per success: $100 / 7 = **$14.29**.
 
-Now let a judge label them, and let it make one mistake — it calls one of your seven real
+Now let a judge label them, and let it make one mistake. It calls one of your seven real
 successes a failure. One error in ten.
 
 Measured cost per success: $100 / 6 = **$16.67**.
@@ -39,7 +39,7 @@ Measured cost per success: $100 / 6 = **$16.67**.
 A 10% labelling error produced a **16.7%** error in the number. It grew on the way
 through, and the reason is structural: your $100 is already spent. Tokens burned, cleanup
 done, refund issued. **Total cost does not depend on the labels.** The judge can only move
-the denominator, and the denominator is the smaller number — seven, not ten.
+the denominator, and the denominator is the smaller number: seven, not ten.
 
 So label error doesn't add to your metric. It divides into it. Exactly:
 
@@ -65,7 +65,7 @@ Across success rates, for a fixed 5% label error:
 | 10% | 100.0% |
 
 Amplification tends to `1/r`. On a workload that succeeds 10% of the time, 5% label error
-is a 100% error in your unit economics — and low-yield workloads are the ones where
+is a 100% error in your unit economics, and low-yield workloads are the ones where
 someone is already arguing about the budget.
 
 ## Two mistakes can be better than one
@@ -111,7 +111,7 @@ e* = r · s / (1 + s)
 ```
 
 At `r = 0.70`, `s = 0.10`: **6.36%**. If you know nothing about how your judge's errors
-compose, you need agreement around 93.6% to guarantee that — but that's the worst case,
+compose, you need agreement around 93.6% to guarantee that, but that's the worst case,
 not a requirement. The balanced judge above cleared the same gate at 70%.
 
 Two caveats before you use it. `e*` is a bound on **net bias**, so compare it against
@@ -125,9 +125,7 @@ This is the part that makes the rest usable, so here it is concretely.
 
 Take a random sample of `m` tasks, get human labels, and count false accepts and false
 rejects in the sample. Your estimate is `b̂ = (fp − fn)/m`. Because those are disjoint
-outcomes,
-
-```
+outcomes, ```
 SE(b̂) = sqrt( (d − b²) / m )
 ```
 
@@ -147,8 +145,8 @@ Three things fall out of that table.
 **A few hundred labels is usually enough**, which is a smaller ask than most teams assume
 and is the reason to do this rather than argue about it.
 
-**Tight gates are expensive to certify.** A gate with 1.8% tolerance — you're close to
-your limit — needs about 7,000 human labels. If you can't afford that, you cannot
+**Tight gates are expensive to certify.** A gate with 1.8% tolerance, meaning you sit close to your
+limit, needs about 7,000 human labels. If you can't afford that, you cannot
 honestly claim the gate is safe, and the right move is to widen the slack or change the
 metric rather than to proceed.
 
@@ -196,7 +194,7 @@ a function of the success rate, which you do not.
 There's a cheaper route if the sampling is out of reach. The amplification came from the
 label sitting in a denominator, so use a metric where it doesn't. **Net value per
 attempt**, `N = (Σ value − Σ cost) / n`, puts the label in a sum, and `n` is the whole
-workload — a number the judge can't touch. Error propagates linearly.
+workload, a number the judge can't touch. Error propagates linearly.
 
 Two honest limits, because the first version of this write-up called it free and
 that was overselling.
@@ -251,8 +249,8 @@ shape worth recognising in your own dashboards.
 A fault-injection harness reported that the design caught **510 of 510** injected faults.
 It could not have reported less. The architecture pins six required checks, each supplied
 by exactly one gate; remove a gate and a requirement has no provider, so refusing is the
-only reachable state. Under the fault that actually happens in production — replacing a
-check with one that keeps its name and stops enforcing — it scored 487/510, and so did the
+only reachable state. Under the fault that actually happens in production, replacing a
+check with one that keeps its name and stops enforcing, it scored 487/510, and so did the
 naive alternative it was supposed to beat.
 
 The same system reports p95 task cost. On the bundled demo it prints a p95 of $14.25 and a
@@ -270,7 +268,7 @@ have caught both takes seconds:
 
 The threshold is **conditional**: given a judge with net bias `e`, the decision behaves as
 derived. What net bias real judges carry on real workloads, against real ground truth, is
-not something I've measured — which is why the procedure above matters more than the
+not something I've measured, which is why the procedure above matters more than the
 formula does.
 
 And when the demo's own cost assumptions are varied within plausible ranges, **55 of its 98
@@ -284,8 +282,7 @@ Three further limits worth stating plainly:
   project's own judge evaluation states its labels are
   [not validated ground truth](kimi-integration.md).
 - **The agreement column assumes the worst case**, all error running one direction.
-- **How often 85% suffices is grid-dependent.** 1 of 15 cells with slack capped at 25%,
-  4 of 20 at 50%, 8 of 25 at 100%. The command reports the count per cap rather than one
+- **How often 85% suffices is grid-dependent.** 1 of 15 cells with slack capped at 25%, 4 of 20 at 50%, 8 of 25 at 100%. The command reports the count per cap rather than one
   headline, for the reason in the previous section.
 
 Everything else the project knows it gets wrong is in

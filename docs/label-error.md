@@ -55,9 +55,7 @@ Total cost does not depend on the labels. Model spend, human review, remediation
 incident loss were incurred whether or not the outcome is later called acceptable.
 Only the denominator moves.
 
-**Proposition 1.** For net label bias `D = false accepts - false rejects`,
-
-```
+**Proposition 1.** For net label bias `D = false accepts - false rejects`, ```
 u_hat / u = a / (a + D)
 ```
 
@@ -84,9 +82,7 @@ Amplification is worst at low acceptable rates, which are exactly the workloads
 where a scale-up decision is contested.
 
 **Proposition 3, the one with a free remedy.** Difference-form metrics do not
-amplify. For net value per attempt,
-
-```
+amplify. For net value per attempt, ```
 | N_hat - N |  <=  v_max * epsilon
 ```
 
@@ -117,8 +113,7 @@ the integer-quantised truth to within one task in every cell.
 - **It does not measure any judge.** The result is conditional: *given* a judge that
   errs at `epsilon`, the decision behaves as derived. What rate a particular model
   attains on a particular workload is an empirical question this does not answer.
-- **Real judge error is not uniformly random.** It correlates with task difficulty,
-  which correlates with genuine failure. That correlation could raise or lower the
+- **Real judge error is not uniformly random.** It correlates with task difficulty, which correlates with genuine failure. That correlation could raise or lower the
   flip rate and is not resolved here.
 - **Proposition 4 is a worst case.** It assumes one-directional error, which is the
   behaviour of a systematically biased judge. Symmetric error is more forgiving.
