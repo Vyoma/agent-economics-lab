@@ -8,6 +8,10 @@ We ran that argument against the repository that makes it. Three review agents,
 one pass, roughly forty minutes. They found three places where this repository
 did the exact thing it tells other people not to do.
 
+Then we ran the same auditor against this page, three more times, and it found a
+fourth. That one is in the document you are reading, and it is the finding that
+generalizes furthest.
+
 All three passed CI. One had been in the repository since its first commit. The
 other two became checks in a commit we wrote minutes earlier, the one meant to fix
 this exact class of problem; one of those two was dormant code that had sat on
@@ -141,7 +145,7 @@ the published artifact, plus a byte-comparison that catches upstream drift. Both
 run in CI. The test suite alone does not catch it. We rewrote the README sentence
 to say that, rather than to claim a guarantee we had not built.
 
-## All three are the same bug
+## The first three are the same bug
 
 Different mechanisms. Identical failure:
 
@@ -157,6 +161,9 @@ is invisible precisely because everything looks fine. The reason it is worth
 writing down is that a repository built specifically to detect it still contained
 three instances of it, one of them on `main` since its first commit.
 
+There is a fourth finding, and we only have it because we audited this page before
+publishing it. It is in the next section.
+
 We also found something adjacent and worth naming: four README blocks presented
 hand-cut ASCII summaries directly beneath the command that supposedly produced
 them. The numbers were correct, but a reader running `python3 false_green.py` got
@@ -169,6 +176,67 @@ summaries, and are now labelled as summaries rather than presented as output. We
 flag this because the first version of this document claimed all of them had been
 converted, which was false, and it was caught by the same audit that produced the
 rest of this page.
+
+## Finding 4: this document
+
+Before publishing, we ran the same auditor against this page. It came back
+do-not-publish three times.
+
+**Round 1** found four statements that did not hold. The worst was the paragraph
+claiming we had converted the stylized README blocks to real output: one of four
+was converted. That was the one paragraph saying "we fixed the credibility
+problem," and it was disprovable in thirty seconds by running the README's own
+commands. The round also caught that the sentence we had written to replace the
+overclaim was itself an overclaim of the same shape.
+
+**Round 2** found seven more. Two of them were introduced by round 1's fixes. One
+was a new line in the README describing a "per-scenario table" in the false-green
+output. No such table exists; the report ends with a per-gate bar chart. We wrote a
+false statement about program output in the commit whose purpose was to stop making
+false statements about program output. Round 2 also found "five executable lessons"
+in the README, guarded by nothing: a live counterexample to the meta-claim two
+paragraphs below it.
+
+**Round 3** found four blocking items. Two were introduced by round 2's fixes,
+including a section heading contradicting its own paragraph two lines down. The
+sharpest was this sentence, in the section above about the frontier table:
+
+> ...gives **210 tests, OK**, while `make frontier` correctly exits 2.
+
+That number was **accurate when written**. The next commit in the same correction
+sequence added `tests/test_lessons.py`, three tests, and did not update the
+sentence. Its own commit message said 213. A published number, inside the section
+about published numbers going unguarded, silently falsified by the diff that was
+supposed to be fixing exactly that.
+
+We re-ran the experiment and pasted the literal output rather than editing the
+number by hand, which is the only version of this that does not recur.
+
+### What the correction rounds are actually evidence of
+
+Every round's fix introduced the next round's defect. That happened three times
+consecutively, in a document written by people who at that moment were paying more
+attention to this failure mode than they ever had.
+
+Two things generalize:
+
+**Corrections are where defects concentrate.** They are written in the belief that
+the problem is now understood, which is exactly when scrutiny drops. A correction
+gets less review than the thing it corrects, and it is edited in prose that has
+already been rewritten once, so contradictions accumulate between paragraphs that
+were never re-read together.
+
+**A claim that is true when written, and guarded by nothing, will drift.** The 210
+was not an error. It was a correct measurement with no mechanism attaching it to
+the thing it measured. Three tests were added four minutes later and it became
+false with no signal anywhere. That is the same failure as the three findings above,
+arriving by a different route: not a check that cannot fail, but a number that
+nothing checks.
+
+If you take one thing from this page, take this: findings 1 through 3 came from one
+audit. Everything in this section came from auditing that audit, three more times.
+Each round is a separate commit, so the count is checkable rather than asserted.
+One pass is not a process. It is the first sample.
 
 ## How to check your own
 
@@ -184,8 +252,14 @@ None of this required special tooling. Four questions, each answerable in minute
 4. **Does your documented output match the real output?** Run the command in your
    README and diff it against what you published.
 
-Question 2 is the one that caught us. It is also the one nobody runs, because the
-full pipeline is green and that feels like the same thing.
+5. **Which of your published numbers were correct when written and have nothing
+   attaching them to what they measure?** Those do not fail. They drift. Grep your
+   docs for figures, and for each one ask what would have to break for anything to
+   notice.
+
+Question 2 is the one that caught the repository. Question 5 is the one that caught
+this document, twice. Neither gets run, because the full pipeline is green and that
+feels like the same thing.
 
 ## Limits
 
@@ -226,6 +300,12 @@ caught three ways a wrong result would not have been noticed.
 **The headline experiment is synthetic.** The 98-scenario fixture measures a
 property of a specific eval design, not a production prevalence rate. That
 distinction is stated throughout the repository and applies to this document.
+
+**This document needed three rounds of correction.** Every round's fix introduced
+at least one defect that the next round caught, and the specific errors are in the
+commit history rather than summarized here. A reader is entitled to treat that as
+evidence about our care as much as evidence about the failure mode. We think it is
+both, and we would rather publish the sequence than a clean draft that hid it.
 
 **Some claims here are not checkable from the repository.** The timing, the
 concurrency, and the AST methodology attributed to the invariant review are
