@@ -4,9 +4,12 @@ This repository argues one thing: **a missing check is not a passing check.** If
 gate that a decision depends on is absent, disabled, or unsatisfied, the only
 honest verdict is `INCOMPLETE`, never a pass.
 
-We ran that argument against the repository that makes it. Three review agents,
-one pass, roughly forty minutes. They found three places where this repository
-did the exact thing it tells other people not to do.
+We ran that argument against the repository that makes it: three review agents,
+one pass, run concurrently. They found three places where this repository did the
+exact thing it tells other people not to do. From the first commit of the reviewed
+change set to the last fix was ten minutes, which is checkable from the commit
+timestamps; the agents began before that commit and no start time is recoverable
+from the repository.
 
 Then we ran the same auditor against this page, three more times, and it found a
 fourth. That one is in the document you are reading, and it is the finding that
@@ -137,8 +140,12 @@ checked. `tests/test_published_frontier_figures.py` locks the frontier table.
 committed artifact `research/results/frontier/frontier.json`. It catches an edit
 to that file. It does not catch drift originating upstream of it. Applying the
 same cost perturbation at current HEAD and running the repository's own question 2
-below — change a number, run only the test suite — gives **213 tests, OK**, while
-`make frontier` correctly exits 2.
+below — change a number, run only the test suite — leaves the full suite green,
+while `make frontier` correctly exits 2.
+
+This sentence used to publish the exact test count. It broke three times in a row
+as later commits added tests, so the count is gone rather than corrected a fourth
+time. That decision is Finding 4 in miniature.
 
 So the honest status is: the frontier table is guarded by a literal test against
 the published artifact, plus a byte-comparison that catches upstream drift. Both
@@ -228,19 +235,25 @@ were never re-read together.
 
 **A claim that is true when written, and guarded by nothing, will drift.** The 210
 was not an error. It was a correct measurement with no mechanism attaching it to
-the thing it measured. Three tests were added four minutes later and it became
+the thing it measured. Three tests were added fifteen minutes later and it became
 false with no signal anywhere. That is the same failure as the three findings above,
 arriving by a different route: not a check that cannot fail, but a number that
 nothing checks.
 
 If you take one thing from this page, take this: findings 1 through 3 came from one
 audit. Everything in this section came from auditing that audit, three more times.
-Each round is a separate commit, so the count is checkable rather than asserted.
+
+Each round is a separate commit, so the number of rounds is checkable. The
+per-round finding counts above are reported from the reviews and are not checkable
+from this repository, which is precisely the property this finding is about. We are
+leaving them in and labelled rather than dropping them, because a reader deserves
+the shape of the thing even when we cannot hand them the mechanism.
+
 One pass is not a process. It is the first sample.
 
 ## How to check your own
 
-None of this required special tooling. Four questions, each answerable in minutes:
+None of this required special tooling. Five questions, each answerable in minutes:
 
 1. **Can each CI step actually fail?** Force one to fail and confirm the build goes
    red. Shell loops, `|| true`, and functions returning a constant are the usual
@@ -251,7 +264,6 @@ None of this required special tooling. Four questions, each answerable in minute
    constant your docs quote cannot fail when the constant changes.
 4. **Does your documented output match the real output?** Run the command in your
    README and diff it against what you published.
-
 5. **Which of your published numbers were correct when written and have nothing
    attaching them to what they measure?** Those do not fail. They drift. Grep your
    docs for figures, and for each one ask what would have to break for anything to
@@ -269,7 +281,7 @@ target. Several things a hostile reader would reach for, stated before they have
 **Only one of the three reached `main` as a check that could not fail.** Finding 1
 dates to the repository's first commit and is genuine long-standing state.
 
-Finding 2 is mixed: the unconditional `return 0` shipped on `main` four weeks
+Finding 2 is mixed: the unconditional `return 0` shipped on `main` 26 days
 earlier, but it was harmless prose until the commit under audit *promoted the
 script to a gate* by adding `make mutation` and wiring it into `make reproduce`.
 Finding 3 was introduced outright by that same commit. Both were fixed ten
@@ -293,19 +305,23 @@ published sentence and the assertion guarding it is convention, enforced by revi
 For a project whose thesis is about claims and their guards, that is the largest
 remaining gap, and it is not fixed.
 
-**Severity was low.** All five lessons passed, the kill rate was intact, and every
-published number happened to be correct. Nothing here caught a wrong result. It
-caught three ways a wrong result would not have been noticed.
+**Findings 1 through 3 were low severity.** All five lessons passed, the kill rate
+was intact, and every number the repository published was correct. Those three
+caught no wrong result; they caught three ways a wrong result would not have been
+noticed. Finding 4 is different in kind: it caught published numbers that were
+wrong on the page and shipped that way.
 
 **The headline experiment is synthetic.** The 98-scenario fixture measures a
 property of a specific eval design, not a production prevalence rate. That
 distinction is stated throughout the repository and applies to this document.
 
-**This document needed three rounds of correction.** Every round's fix introduced
-at least one defect that the next round caught, and the specific errors are in the
-commit history rather than summarized here. A reader is entitled to treat that as
-evidence about our care as much as evidence about the failure mode. We think it is
-both, and we would rather publish the sequence than a clean draft that hid it.
+**This document needed four rounds of correction.** Every round's fix introduced at
+least one defect that the next round caught, including the round that added Finding
+4 itself: it left a stale test count and introduced a five-item list under a
+four-item heading. The specific errors are in Finding 4 and in the commit history.
+A reader is entitled to treat that as evidence about our care as much as evidence
+about the failure mode. We think it is both, and we would rather publish the
+sequence than a clean draft that hid it.
 
 **Some claims here are not checkable from the repository.** The timing, the
 concurrency, and the AST methodology attributed to the invariant review are

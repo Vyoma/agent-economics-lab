@@ -93,9 +93,10 @@ claim boundary.
 > All enabled checks passed is not the same claim as all required checks passed.
 
 We ran that argument against this repository. Three review agents found three CI
-checks that were structurally incapable of failing. One had been on `main` since
-the first commit; two we introduced ourselves while fixing this exact class of
-problem, and caught in pre-merge review: [the self-audit](research/SELF_AUDIT.md).
+checks that were structurally incapable of failing. Two were already on `main`,
+one of them since the first commit; the third we introduced ourselves while fixing
+this exact class of problem, and caught in pre-merge review:
+[the self-audit](research/SELF_AUDIT.md).
 
 ![`make demo` returns ASSIST](assets/demo.gif)
 
@@ -389,8 +390,8 @@ make reproduce
 
 `make reproduce` runs the full test suite, the module-deletion proof, five
 executable lessons, both ablation benchmarks, the mutation score, the real-trace
-verdict, the sensitivity sweep, the Claude Code conversion, and byte-for-byte
-frontier and both adapter artifact verifications.
+verdict, the sensitivity sweep, the Claude Code conversion, the public SWE-bench
+case, and byte-for-byte frontier and both adapter artifact verifications.
 
 Every measured result this README publishes is guarded by at least one of two
 mechanisms, and some by both: a literal assertion in `tests/`, or a byte-comparison
