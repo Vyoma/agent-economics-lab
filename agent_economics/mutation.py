@@ -53,7 +53,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from .assurance import AssuranceEngine, evaluate_bundle
+from .assurance import AssuranceEngine
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .models import CheckSpec, Coverage, Decision, EvidenceBundle
 
@@ -196,7 +196,14 @@ def mutate(
     required = (
         required_coverage if required_coverage is not None else DEFAULT_REQUIRED_COVERAGE
     )
-    baseline = evaluate_bundle(bundle, checks).decision
+    # Must use the caller's contract, not the shipped one. Evaluating a custom
+    # required-coverage set against DEFAULT_REQUIRED_COVERAGE reported INCOMPLETE
+    # for every custom harness, which made the whole custom path useless.
+    baseline = (
+        AssuranceEngine(checks=checks, required_coverage=required)
+        .evaluate(bundle)
+        .decision
+    )
 
     by_coverage = providers(checks, required)
     mutations: list[Mutation] = []

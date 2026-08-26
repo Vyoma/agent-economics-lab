@@ -16,6 +16,7 @@ from .models import (
     CheckResult,
     CheckSpec,
     CheckStatus,
+    ControlFinding,
     Coverage,
     Decision,
     EconomicPolicy,
@@ -25,6 +26,7 @@ from .models import (
     Outcome,
     TaskEconomics,
     TraceEvent,
+    Unsupplied,
 )
 
 DECISION_CONTRACT_SCHEMA = "assurance.decision-contract@1"
@@ -80,6 +82,79 @@ def percentile(values: list[float], probability: float) -> float:
     ordered = sorted(values)
     rank = max(1, math.ceil(probability * len(ordered)))
     return ordered[rank - 1]
+
+
+def _economics_unsupplied(evidence: EvidenceBundle) -> bool:
+    """True when the operator declared the economic inputs absent."""
+    return any(
+        isinstance(value, Unsupplied)
+        for value in (evidence.rates, evidence.policy, evidence.baseline)
+    )
+
+
+class _UnsuppliedMetric:
+    """
+    A derived economic metric that could not be computed.
+
+    This deliberately does NOT subclass float. A float subclass leaks: `abs()`,
+    `round()`, unary minus, `%`, `//`, `**`, `float()` and `math.fsum` all bypass
+    the overridden comparisons and yield a real number or a quiet `nan`. An audit
+    demonstrated a custom gate totalling $3000 of genuine spend with
+    `math.fsum` -- the idiom this very module uses -- getting `nan`, comparing
+    `nan > 100` as False, and passing.
+
+    Every operation raises. A check that touches a metric it was never given
+    evidence for fails closed, which is the entire point.
+    """
+
+    __slots__ = ()
+
+    def _refuse(self, *_args: object, **_kwargs: object) -> float:
+        raise LookupError(
+            "economic metrics were not computed because rates, policy or baseline "
+            "were declared unsupplied; a check that reads them cannot run"
+        )
+
+    # Comparison, including the reflected forms a `threshold > metric` hits.
+    __lt__ = __le__ = __gt__ = __ge__ = __eq__ = __ne__ = _refuse
+    # Arithmetic, both directions.
+    __add__ = __sub__ = __mul__ = __truediv__ = __floordiv__ = _refuse
+    __mod__ = __pow__ = __divmod__ = _refuse
+    __radd__ = __rsub__ = __rmul__ = __rtruediv__ = __rfloordiv__ = _refuse
+    __rmod__ = __rpow__ = __rdivmod__ = _refuse
+    # Coercion and the numeric protocol, which is how the leaks above happened.
+    __float__ = __int__ = __index__ = __round__ = __trunc__ = _refuse
+    __floor__ = __ceil__ = __abs__ = __neg__ = __pos__ = _refuse
+    __bool__ = __hash__ = __format__ = _refuse
+
+    def __repr__(self) -> str:
+        return "<unsupplied metric>"
+
+
+def reconstruct_tasks_without_economics(
+    events: Sequence[TraceEvent],
+    outcomes: dict[str, Outcome],
+) -> tuple[TaskEconomics, ...]:
+    """Task records for a bundle carrying no economics. Costs refuse to be read."""
+    by_task: dict[str, list[TraceEvent]] = defaultdict(list)
+    for event in events:
+        by_task[event.task_id].append(event)
+    unsupplied = _UnsuppliedMetric()
+    return tuple(
+        TaskEconomics(
+            task_id=task_id,
+            call_count=len(rows),
+            trace_cost_usd=unsupplied,
+            human_cost_usd=unsupplied,
+            remediation_cost_usd=unsupplied,
+            incident_loss_usd=unsupplied,
+            effective_cost_usd=unsupplied,
+            acceptable=outcomes[task_id].acceptable,
+            business_value_usd=unsupplied,
+        )
+        for task_id, rows in sorted(by_task.items())
+        if task_id in outcomes
+    )
 
 
 def reconstruct_tasks(
@@ -201,6 +276,48 @@ class AssuranceEngine:
         contract_digest = decision_contract_digest(
             self.checks, self.required_coverage
         )
+        # Economics may be declared absent (agent_economics.unsupplied). A bundle
+        # of traces and labels is a legitimate input when the required coverage is
+        # supplied entirely by non-economic checks: a PII gate, a jailbreak gate,
+        # a regression eval. Deriving the economic view is therefore conditional.
+        # Nothing is defaulted to zero; every derived metric becomes a value that
+        # raises when read, so an economic gate added later fails closed rather
+        # than pricing the traffic at nothing.
+        if _economics_unsupplied(evidence):
+            tasks = reconstruct_tasks_without_economics(
+                evidence.events, evidence.outcomes
+            )
+            if not tasks:
+                raise ValueError("At least one task is required")
+            unsupplied = _UnsuppliedMetric()
+            accepted = sum(task.acceptable for task in tasks)
+            acceptable_rate = accepted / len(tasks)
+            total_cost = unsupplied
+            cost_per_acceptable = unsupplied
+            p95_cost = unsupplied
+            max_cost = unsupplied
+            expected_net = unsupplied
+            incremental_net = unsupplied
+            return self._issue(
+                evidence,
+                contract_digest,
+                EvaluationView(
+                    events=evidence.events,
+                    dependency_edges=evidence.dependency_edges,
+                    rates=evidence.rates,
+                    policy=evidence.policy,
+                    baseline=evidence.baseline,
+                    tasks=tasks,
+                    acceptable_rate=acceptable_rate,
+                    total_effective_cost_usd=total_cost,
+                    cost_per_acceptable_outcome_usd=cost_per_acceptable,
+                    p95_task_cost_usd=p95_cost,
+                    max_task_cost_usd=max_cost,
+                    expected_net_value_per_attempt_usd=expected_net,
+                    incremental_net_value_vs_baseline_usd=incremental_net,
+                ),
+            )
+
         tasks = reconstruct_tasks(
             evidence.events, evidence.outcomes, evidence.rates, evidence.policy
         )
@@ -253,6 +370,15 @@ class AssuranceEngine:
             incremental_net_value_vs_baseline_usd=incremental_net,
         )
 
+        return self._issue(evidence, contract_digest, view)
+
+    def _issue(
+        self,
+        evidence: EvidenceBundle,
+        contract_digest: str,
+        view: EvaluationView,
+    ) -> AssuranceCase:
+        """Run the checks against a view and route the verdict."""
         enabled_coverage = frozenset(
             coverage
             for check in self.checks
@@ -263,22 +389,78 @@ class AssuranceEngine:
 
         results: list[CheckResult] = []
         findings = []
+        unrunnable_checks: set[str] = set()
         if not missing_coverage:
             for check in self.checks:
                 try:
                     output = check.run(view)
                 except Exception as error:
-                    raise RuntimeError(f"Check {check.manifest_id!r} failed") from error
+                    # A check that cannot complete has not supplied its evidence.
+                    # Raising hands the caller an exception instead of a verdict,
+                    # and a caller may swallow it. The contract promises that
+                    # absent evidence yields INCOMPLETE, so that is what an
+                    # unrunnable check produces.
+                    unrunnable_checks.add(check.id)
+                    if check.mode is CheckMode.GATE:
+                        # A crash is not a pass. Route it the way this gate's
+                        # failure routes, defaulting to STOP, so a gate that
+                        # cannot run is never weaker than one that ran and
+                        # failed. A diagnostic gets no result at all: the
+                        # engine's own validator rejects a FAIL from one.
+                        results.append(
+                            CheckResult(
+                                check_id=check.id,
+                                status=CheckStatus.FAIL,
+                                message=(
+                                    "check could not run: "
+                                    f"{type(error).__name__}: {error}"
+                                ),
+                                on_failure=check.failure_route or Decision.STOP,
+                            )
+                        )
+                    else:
+                        findings.append(
+                            ControlFinding(
+                                task_id="",
+                                control=check.id,
+                                severity="error",
+                                evidence=f"{type(error).__name__}: {error}",
+                                interpretation=(
+                                    "diagnostic could not run; it supplies no "
+                                    "required coverage, so the verdict is unaffected"
+                                ),
+                            )
+                        )
+                    continue
                 _validate_check_output(check, output.results)
                 results.extend(output.results)
                 findings.extend(output.findings)
+
+        # Required coverage whose providers ALL failed to run. A dimension with a
+        # surviving provider is still covered: one broken check does not make the
+        # verdict incomplete when another supplies the same evidence.
+        unmet_coverage = {
+            coverage
+            for coverage in self.required_coverage
+            if any(
+                coverage in check.covers
+                for check in self.checks
+                if check.mode is CheckMode.GATE and check.id in unrunnable_checks
+            )
+            and not any(
+                coverage in check.covers
+                for check in self.checks
+                if check.mode is CheckMode.GATE
+                and check.id not in unrunnable_checks
+            )
+        }
 
         failed_gates = [
             result
             for result in results
             if result.status is CheckStatus.FAIL and result.on_failure is not None
         ]
-        if missing_coverage:
+        if missing_coverage or unmet_coverage:
             decision = Decision.INCOMPLETE
         elif any(result.on_failure is Decision.STOP for result in failed_gates):
             decision = Decision.STOP
@@ -289,14 +471,14 @@ class AssuranceEngine:
 
         return AssuranceCase(
             decision=decision,
-            tasks=tasks,
-            acceptable_rate=acceptable_rate,
-            total_effective_cost_usd=total_cost,
-            cost_per_acceptable_outcome_usd=cost_per_acceptable,
-            p95_task_cost_usd=p95_cost,
-            max_task_cost_usd=max_cost,
-            expected_net_value_per_attempt_usd=expected_net,
-            incremental_net_value_vs_baseline_usd=incremental_net,
+            tasks=view.tasks,
+            acceptable_rate=view.acceptable_rate,
+            total_effective_cost_usd=view.total_effective_cost_usd,
+            cost_per_acceptable_outcome_usd=view.cost_per_acceptable_outcome_usd,
+            p95_task_cost_usd=view.p95_task_cost_usd,
+            max_task_cost_usd=view.max_task_cost_usd,
+            expected_net_value_per_attempt_usd=view.expected_net_value_per_attempt_usd,
+            incremental_net_value_vs_baseline_usd=view.incremental_net_value_vs_baseline_usd,
             baseline=evidence.baseline,
             breaches=tuple(result.message for result in failed_gates),
             findings=tuple(findings),
