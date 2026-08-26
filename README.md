@@ -87,13 +87,15 @@ python3 false_green.py
 | `runtime_caps` | 8 |
 ```
 
-Verbatim, truncated. The full report continues with the per-scenario table.
+Verbatim, truncated. The full report continues with a per-gate bar chart and the
+claim boundary.
 
 > All enabled checks passed is not the same claim as all required checks passed.
 
-We ran that argument against this repository. Three review agents found three
-CI checks that were structurally incapable of failing, all green at the time:
-[the self-audit](research/SELF_AUDIT.md).
+We ran that argument against this repository. Three review agents found three CI
+checks that were structurally incapable of failing. One had been on `main` since
+the first commit; two we introduced ourselves while fixing this exact class of
+problem, and caught in pre-merge review: [the self-audit](research/SELF_AUDIT.md).
 
 ![`make demo` returns ASSIST](assets/demo.gif)
 

@@ -96,7 +96,8 @@ previously-unrun scripts into CI, and added this line to the README:
 It was not true, though the gap was narrower than we first wrote. `test_frontier.py`
 already asserted part of the published table from a live run: the 171 reference-
 acceptable count, two of the three conditional harmful-regression rates, the
-`ADOPT` decision, and the selected arm.
+eligibility of `balanced-4-step` and `cheap-2-step` (two of the three cells in the
+Result column), the `ADOPT` decision, and the selected arm.
 
 What no test asserted: **the three absolute upper bounds (3.7% / 12.5% / 2.6%),
 the three cost lower bounds (32.0% / 29.9% / -38.9%), `premium-12-step`'s
@@ -147,8 +148,8 @@ evidence.
 
 This is not an exotic failure. It is the ordinary shape of eval and CI rot, and it
 is invisible precisely because everything looks fine. The reason it is worth
-writing down is that a repository built specifically to detect it still shipped
-three instances of it.
+writing down is that a repository built specifically to detect it still contained
+three instances of it, one of them on `main` since its first commit.
 
 We also found something adjacent and worth naming: four README blocks presented
 hand-cut ASCII summaries directly beneath the command that supposedly produced
@@ -185,22 +186,29 @@ full pipeline is green and that feels like the same thing.
 This is a self-audit, not an independent one. We wrote both the method and the
 target. Several things a hostile reader would reach for, stated before they have to:
 
-**Two of the three defects were self-inflicted, minutes earlier.** Finding 1 dates
-to the repository's first commit and is genuine long-standing state. Findings 2 and
-3 were both introduced by the same commit that was meant to close this class of
-gap, and were fixed four and ten minutes later in an unmerged branch. Exactly one
-green CI run contains them. They were caught in pre-merge review, which is where
-review is supposed to catch things. Read them as evidence that the failure mode is
-easy to introduce while actively looking for it, not as evidence of years of rot.
+**Only one of the three defects reached `main`.** Finding 1 dates to the
+repository's first commit and is genuine long-standing state.
+
+Finding 2 is mixed: the unconditional `return 0` shipped on `main` four weeks
+earlier, but it was harmless prose until the commit under audit *promoted the
+script to a gate* by adding `make mutation` and wiring it into `make reproduce`.
+Finding 3 was introduced outright by that same commit. Both were fixed ten
+minutes later, in one commit, on an unmerged branch. **Two green CI runs contain
+them.** They were caught in pre-merge review, which is where review is supposed to
+catch things.
+
+Read findings 2 and 3 as evidence that this failure mode is easy to introduce
+while actively looking for it, not as evidence of years of rot.
 
 **The repository's own question 2 does not pass for the frontier table.** Changing
 a published bound upstream of the committed artifact still leaves the test suite
 green; only `make frontier` catches it. We fixed the claim rather than the
 underlying coupling.
 
-**No test parses this README, or any document.** Every "published number" test
-hardcodes the value in a docstring and asserts against a computed or committed
-value. Edit a number in the prose by hand and nothing fails. The link between a
+**No test parses this README.** (`test_packaging.py` does parse `CHANGELOG.md` and
+`CITATION.cff` for version strings; the README is the gap.) Every "published
+number" test hardcodes the value in its assertion and names the README claim in a
+docstring. Edit a number in the prose by hand and nothing fails. The link between a
 published sentence and the assertion guarding it is convention, enforced by review.
 For a project whose thesis is about claims and their guards, that is the largest
 remaining gap, and it is not fixed.
