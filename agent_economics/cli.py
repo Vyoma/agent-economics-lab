@@ -34,6 +34,7 @@ from .io import load_csv_bundle
 from .kimi_analyst import analyse_report
 from .kimi_judge import judge as kimi_judge
 from .models import Decision
+from .mutation import mutate, render_markdown as render_mutation_markdown
 from .otel_genai import (
     SOURCE_ID as OTEL_GENAI_SOURCE_ID,
     SOURCE_VERSION as OTEL_GENAI_SOURCE_VERSION,
@@ -102,6 +103,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Completed conversion contract with outcomes, prices, baseline, and policy.",
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
+    mutate_parser = subparsers.add_parser(
+        "mutate",
+        help="Mutation-test the harness: remove each required gate and report "
+             "which removals the engine fails to notice.",
+    )
+    mutate_parser.add_argument("--bundle", required=True)
+    mutate_parser.add_argument(
+        "--format", choices=("markdown", "json"), default="markdown"
+    )
+    mutate_parser.add_argument("--output")
+    mutate_parser.add_argument(
+        "--ci",
+        action="store_true",
+        help="Exit 1 unless every required gate is load-bearing.",
+    )
+
     subparsers.add_parser("capabilities")
 
     judge_parser = subparsers.add_parser(
@@ -338,6 +355,31 @@ def main(argv: Sequence[str] | None = None) -> int:
         except (RuntimeError, ValueError, OSError) as e:
             print(f"Error: {e}", file=sys.stderr)
             return 2
+    if args.command == "mutate":
+        try:
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        report = mutate(bundle)
+        rendered = (
+            json.dumps(report.to_dict(), indent=2, sort_keys=True)
+            if args.format == "json"
+            else render_mutation_markdown(report)
+        )
+        if args.output:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        print(rendered)
+        # Gate on the fixed contract, not on the dynamic-coverage comparison.
+        # When the baseline is SCALE every removal trivially still reads SCALE
+        # under dynamic coverage; that is the comparison being illustrated, not
+        # a defect in this harness. What must hold is that the fixed contract
+        # refuses every removal, and that every requirement has a provider.
+        if args.ci and (
+            report.fixed_contract_score < 1.0 or report.unprovided_coverage
+        ):
+            return 1
+        return 0
     if args.command == "analyse":
         import logging
         logging.basicConfig(level=logging.INFO, format="%(message)s")

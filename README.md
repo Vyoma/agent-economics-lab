@@ -110,6 +110,65 @@ Neither is a production prevalence estimate. Read the
 [588 rows](research/results/decision-coverage-drift/results.csv), or copy the
 [one-page decision contract](templates/agent-scale-decision-contract.md).
 
+## Mutation-test your own harness
+
+The 588-mutation result above is this repository grading itself on a synthetic
+fixture. The same primitive runs on any evidence bundle, including one converted
+from your own traces, and answers a question no evaluation framework currently
+reports: **how load-bearing is each check in your eval?**
+
+```bash
+agent-economics mutate --bundle examples/claude-code/bundle.json
+```
+
+```text
+# Harness Mutation Score
+
+- Baseline decision: **ASSIST**
+- Gate removals injected: **6**
+- Killed by the fixed contract: **6 / 6** (100.0%)
+- Survived under dynamic coverage: **1**
+- False SCALE transitions: **1**
+
+The kill rate is the score for *this* harness. The dynamic-coverage column
+shows what an engine that derives its requirements from whichever checks
+happen to be enabled would have returned instead.
+
+| Removed coverage | Checks removed | Fixed contract | Dynamic coverage |
+|---|---|---|---|
+| `business_value` | `gate.net-value` | INCOMPLETE | ASSIST |
+| `counterfactual` | `gate.counterfactual` | INCOMPLETE | ASSIST |
+| `outcome_quality` | `gate.acceptable-rate` | INCOMPLETE | SCALE  ← survives |
+| `runtime_caps` | `gate.runtime-caps` | INCOMPLETE | ASSIST |
+| `tail_risk` | `gate.tail-cost` | INCOMPLETE | ASSIST |
+| `unit_economics` | `gate.unit-economics` | INCOMPLETE | ASSIST |
+
+A gate whose removal still yields SCALE is not load-bearing: the harness
+cannot tell whether that evidence was ever collected. A missing gate is not
+a passing gate.
+```
+
+That is a real Claude Code session. Its honest verdict is `ASSIST`. Disable the
+one gate carrying that verdict and an engine that derives its requirements from
+whichever checks are enabled returns `SCALE` instead. The fixed contract refuses
+all six removals.
+
+Nothing here is specific to the six gates this package ships. Required coverage
+is read from the contract and each dimension's providers are derived from
+`CheckSpec.covers`, so `mutate()` works on checks you wrote:
+
+```python
+from agent_economics.mutation import mutate
+report = mutate(my_bundle, my_checks, my_required_coverage)
+report.fixed_contract_score        # 1.0 means every gate is load-bearing
+report.survivors                   # the gates that can vanish unnoticed
+report.unprovided_coverage         # requirements nothing supplies at all
+```
+
+Add `--ci` to fail the build unless every required gate is load-bearing and
+every requirement has a provider. Every eval reports a score; this reports
+whether that score could have survived one evaluator being switched off.
+
 ## Delete actual evidence
 
 Gate disablement and evidence deletion are different experiments. The second

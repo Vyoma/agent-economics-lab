@@ -79,6 +79,7 @@ from .models import (
     TaskIdentity,
     TraceEvent,
 )
+from .mutation import Mutation, MutationReport, mutate
 from .otel_genai import (
     OtelGenAISession,
     conversion_contract_template as otel_genai_conversion_contract_template,
@@ -112,6 +113,8 @@ __all__ = [
     "FrontierCase",
     "FrontierDecision",
     "ModelRate",
+    "Mutation",
+    "MutationReport",
     "OtelGenAISession",
     "Outcome",
     "PairedComparison",
@@ -147,6 +150,7 @@ __all__ = [
     "load_rates",
     "load_traces",
     "make_evidence_bundle",
+    "mutate",
     "normalized_json_bundle",
     "normalized_json_document",
     "otel_genai_bundle",

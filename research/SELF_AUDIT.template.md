@@ -9,7 +9,7 @@ one pass, run concurrently. They found three places where this repository did th
 exact thing it tells other people not to do.
 
 On timing: the agents reviewed an uncommitted working tree, which was committed
-while they ran. From that commit to the last fix was ten minutes,
+while they ran. From that commit to the last fix was {{fix_minutes}} minutes,
 checkable from the commit timestamps. When the agents actually started is not
 recoverable from the repository at all, so no figure for the full exercise appears
 here.
@@ -36,8 +36,8 @@ Three agents, non-overlapping scopes, run concurrently:
 
 The invariant review came back clean, and it earned that verdict: rather than
 reading diff hunks, it parsed every changed module before and after, stripped the
-import nodes, and compared the ASTs. Eleven of the sixteen changed
-engine files were AST-identical modulo imports; the other five were read
+import nodes, and compared the ASTs. {{ast_identical}} of the {{ast_total}} changed
+engine files were AST-identical modulo imports; the other {{ast_differing}} were read
 individually and are benign.
 The decision-contract digest and all four example evidence digests were unchanged.
 The gate-removal kill rate held at 588/588.
@@ -123,8 +123,8 @@ guarded only by a byte-comparison inside `make frontier`.
 
 We verified the gap rather than asserting it: scaling `premium-12-step` costs by
 1.4 moved the published cost lower bound from -38.9% to **-93.2%**, and the full
-test suite still reported 202 tests, OK, on the audited tree
-`77a563b`.
+test suite still reported {{tests_at_fix_lessons}} tests, OK, on the audited tree
+`{{fix_lessons}}`.
 
 That comparison does run in CI, so "fails CI" survived. "Asserted by the test
 suite" did not. `python -m unittest discover -s tests` passed with those published
@@ -220,9 +220,9 @@ paragraphs below it.
 including a section heading contradicting its own paragraph two lines down. The
 sharpest was this sentence, in the section above about the frontier table:
 
-> ...gives **210 tests, OK**, while `make frontier` correctly exits 2.
+> ...gives **{{tests_at_stale_from}} tests, OK**, while `make frontier` correctly exits 2.
 
-That number was **accurate when written** at `4164192`. The next commit in
+That number was **accurate when written** at `{{stale_from}}`. The next commit in
 the same correction sequence added `tests/test_lessons.py`, three tests, and did not
 update the sentence. Its own commit message said 213. A published number, inside the section
 about published numbers going unguarded, silently falsified by the diff that was
@@ -249,7 +249,7 @@ were never re-read together.
 
 **A claim that is true when written, and guarded by nothing, will drift.** The 210
 was not an error. It was a correct measurement with no mechanism attaching it to
-the thing it measured. Three tests were added sixteen minutes later and it became
+the thing it measured. Three tests were added {{stale_minutes}} minutes later and it became
 false with no signal anywhere. That is the same failure as the three findings above,
 arriving by a different route: not a check that cannot fail, but a number that
 nothing checks.
@@ -294,12 +294,12 @@ target. Several things a hostile reader would reach for, stated before they have
 **Only one of the three reached `main` as a check that could not fail.** Finding 1
 dates to the repository's first commit and is genuine long-standing state.
 
-Finding 2 is mixed: the unconditional `return 0` shipped on `main` 26 days
+Finding 2 is mixed: the unconditional `return 0` shipped on `main` {{dormant_days}} days
 earlier, but it was harmless prose until the commit under audit *promoted the
 script to a gate* by adding `make mutation` and wiring it into `make reproduce`.
 Finding 3 was introduced outright by that same commit. Both were fixed ten
 minutes later, in one commit, on an unmerged branch. They are carried by
-**three commits**, and CI built that branch green; how many of those
+**{{carrying_commits}} commits**, and CI built that branch green; how many of those
 commits got their own run is not recoverable from git. They were caught in pre-merge
 review, which is where review is supposed to catch things.
 
