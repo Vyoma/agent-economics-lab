@@ -89,6 +89,10 @@ python3 false_green.py
 
 > All enabled checks passed is not the same claim as all required checks passed.
 
+We ran that argument against this repository. Three review agents found three
+CI checks that were structurally incapable of failing, all green at the time:
+[the self-audit](research/SELF_AUDIT.md).
+
 ![`make demo` returns ASSIST](assets/demo.gif)
 
 The evidence does not change in this experiment. Each intervention disables one
