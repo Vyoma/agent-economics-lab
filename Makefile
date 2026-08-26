@@ -112,7 +112,10 @@ reproduce: check-python test modularity lessons benchmark mutation real-trace \
 	public-case
 
 lessons:
-	@for lesson in lessons/*.py; do PYTHONPATH=. $(PYTHON) "$$lesson"; done
+# Without set -e the loop reports only the LAST lesson's exit status, so a
+# failing lesson 00-03 is masked whenever 04 succeeds. A check that can
+# silently not run is the exact failure this repository exists to refuse.
+	@set -e; for lesson in lessons/*.py; do PYTHONPATH=. $(PYTHON) "$$lesson"; done
 
 test: check-python
 	$(PYTHON) -m unittest discover -s tests -v
