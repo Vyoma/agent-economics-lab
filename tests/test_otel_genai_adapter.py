@@ -67,6 +67,17 @@ class OtelGenAIAdapterTests(unittest.TestCase):
             SEMCONV_GENAI_COMMIT,
         )
 
+    def test_published_semconv_pin_matches_the_readme(self) -> None:
+        """
+        README and docs/otel-genai-adapter.md quote these exact strings. Asserting
+        the template against the constant is tautological; a literal cannot drift
+        silently.
+        """
+        self.assertEqual(SEMCONV_VERSION, "1.43.0")
+        self.assertEqual(
+            SEMCONV_GENAI_COMMIT, "799e014b68f0e786dc44d9117c30758c5f864510"
+        )
+
     def test_content_firewall_discards_messages_and_tool_arguments(self) -> None:
         session = inspect_otel_genai_json(LANGFUSE)
         contract = load_conversion_contract(LANGFUSE_CONTRACT)

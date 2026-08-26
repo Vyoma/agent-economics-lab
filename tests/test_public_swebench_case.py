@@ -122,5 +122,23 @@ class PublicSwebenchCaseTests(unittest.TestCase):
             )
 
 
+
+class PublishedCostRatioTest(unittest.TestCase):
+    """README states Opus costs 23.3% more per resolved task than Haiku."""
+
+    def test_cost_per_resolved_task_ratio(self) -> None:
+        payload = json.loads(
+            (ROOT / "examples" / "public-swebench" / "frontier" / "frontier.json")
+            .read_text(encoding="utf-8")
+        )
+        cost = {
+            a["arm_id"]: a["cost_per_acceptable_outcome_usd"] for a in payload["arms"]
+        }
+        self.assertAlmostEqual(cost["candidate-opus"], 0.602557339286, places=9)
+        self.assertAlmostEqual(cost["reference-haiku"], 0.488630590909, places=9)
+        ratio = cost["candidate-opus"] / cost["reference-haiku"] - 1.0
+        self.assertAlmostEqual(ratio, 0.233, places=3)
+
+
 if __name__ == "__main__":
     unittest.main()

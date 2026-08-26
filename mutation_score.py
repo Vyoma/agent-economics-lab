@@ -126,7 +126,10 @@ def main() -> int:
     print("  A mutation score < 100% names your exact blind spot.")
     print("  'All enabled checks passed' ≠ 'all required checks passed.'")
     print("═" * W)
-    return 0
+    # This target runs inside `make reproduce`. A display step that always
+    # exits 0 is a check that cannot fail, which is the failure this repo
+    # exists to refuse. Only a perfect kill rate is a green result.
+    return 0 if fixed_score == 1.0 else 1
 
 
 if __name__ == "__main__":

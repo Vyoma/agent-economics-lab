@@ -66,18 +66,25 @@ python3 false_green.py
 ```
 
 ```text
-98 scenarios x 6 required-gate disablements 588 comparisons
-dynamic-coverage engine                       23 false SCALE transitions
-fixed-contract engine                          0 false SCALE transitions
-fixed-contract refusals                  588/588 INCOMPLETE
+# Decision-Coverage Drift Conformance Results
 
-disabled requirement  false SCALE
-outcome_quality      #####                2
-unit_economics       ##                   1
-tail_risk            #################### 8
-business_value       ##                   1
-counterfactual       ########             3
-runtime_caps         #################### 8
+- Synthetic scenarios: **98**
+- Single required-gate disablements: **588**
+- Disablements whose complete result was not SCALE: **510**
+- False SCALE transitions under dynamic coverage: **23**
+- Dynamic-coverage transition rate among non-SCALE comparisons: **4.5%**
+- Dynamic-coverage transition rate across all disablements: **3.9%**
+- Fixed-contract decisions returning INCOMPLETE: **588 / 588**
+- False SCALE transitions under the fixed contract: **0**
+
+| Disabled gate coverage | Dynamic-coverage false SCALE transitions |
+|---|---:|
+| `outcome_quality` | 2 |
+| `unit_economics` | 1 |
+| `tail_risk` | 8 |
+| `business_value` | 1 |
+| `counterfactual` | 3 |
+| `runtime_caps` | 8 |
 ```
 
 > All enabled checks passed is not the same claim as all required checks passed.
@@ -366,8 +373,12 @@ make reproduce
 `make reproduce` runs the full test suite, the module-deletion proof, five
 executable lessons, both ablation benchmarks, the mutation score, the real-trace
 verdict, the sensitivity sweep, the Claude Code conversion, and byte-for-byte
-frontier and both adapter artifact verifications. Every number this README
-publishes is asserted by the test suite, so a change that moves one fails CI.
+frontier and both adapter artifact verifications.
+
+Every number this README publishes is guarded two ways: asserted directly by a
+test in `tests/`, and byte-verified against a committed artifact by a `make`
+target. Both run in CI, so a change that moves a published number fails the
+build. `make coverage` reproduces the coverage figures in the changelog.
 
 Python 3.10 or newer is required. If your default `python3` is older, pass the
 interpreter explicitly:
@@ -383,6 +394,7 @@ make mutation      # 588 gate-removal mutations, per-gate kill and survival rate
 make real-trace    # naive transcript reading vs the gated verdict, on a real session
 make sensitivity   # verdict robustness and the baseline fragility index
 make lint          # ruff, matching the CI lint job
+make coverage      # reproduces the coverage figures in the changelog
 ```
 
 ## Contribute evidence, not integrations on a slide

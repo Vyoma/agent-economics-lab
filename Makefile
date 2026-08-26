@@ -2,7 +2,7 @@ PYTHON ?= python3
 
 .PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity \
 	claude-code claude-code-tree otel-genai public-case benchmark reproduce \
-	lessons test lint check-python mutation real-trace sensitivity
+	lessons test lint coverage check-python mutation real-trace sensitivity
 
 # The package declares requires-python >= 3.10, but `make` cannot enforce that the
 # way pip does. Without this guard a contributor whose default python3 is older
@@ -43,6 +43,11 @@ sensitivity:
 
 lint:
 	@$(PYTHON) -m ruff check .
+
+# The CHANGELOG cites coverage figures; this is what reproduces them.
+coverage:
+	@$(PYTHON) -m coverage run --source=agent_economics -m unittest discover -s tests
+	@$(PYTHON) -m coverage report
 
 evidence-ablation:
 	@$(PYTHON) evidence_ablation.py \

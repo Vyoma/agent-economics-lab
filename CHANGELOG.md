@@ -19,6 +19,17 @@
   from `make reproduce`; they previously ran nowhere in CI.
 - Extract `mutation_stats()`, `verdict_stats()`, and `sweep_stats()` so the
   published numbers are computed by testable functions rather than print blocks.
+- Add `make coverage` and a pinned coverage dependency, so the percentages
+  cited above are reproducible rather than asserted in prose.
+- Lock the README frontier table, the OpenTelemetry semconv pin, and the
+  public-case cost ratio in `tests/`; they were previously guarded only by
+  byte-comparison inside a `make` target, so `unittest discover` passed with
+  those published numbers arbitrarily wrong.
+- Make `mutation_score.py` exit non-zero below a perfect kill rate. It runs
+  inside `make reproduce`, where a step that always exits 0 is a check that
+  cannot fail.
+- Replace the stylized `false_green.py` output block in the README with the
+  program's verbatim output.
 - Add a ruff configuration, a `make lint` target, and a CI lint job; clear every
   finding, including dead imports, an unused local re-import that shadowed
   `build_evidence`, and deprecated `typing` aliases.
