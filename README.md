@@ -364,8 +364,26 @@ make reproduce
 ```
 
 `make reproduce` runs the full test suite, the module-deletion proof, five
-executable lessons, both ablation benchmarks, the Claude Code conversion, and
-byte-for-byte frontier and both adapter artifact verifications.
+executable lessons, both ablation benchmarks, the mutation score, the real-trace
+verdict, the sensitivity sweep, the Claude Code conversion, and byte-for-byte
+frontier and both adapter artifact verifications. Every number this README
+publishes is asserted by the test suite, so a change that moves one fails CI.
+
+Python 3.10 or newer is required. If your default `python3` is older, pass the
+interpreter explicitly:
+
+```bash
+make reproduce PYTHON=python3.12
+```
+
+### Inspect a single claim
+
+```bash
+make mutation      # 588 gate-removal mutations, per-gate kill and survival rates
+make real-trace    # naive transcript reading vs the gated verdict, on a real session
+make sensitivity   # verdict robustness and the baseline fragility index
+make lint          # ruff, matching the CI lint job
+```
 
 ## Contribute evidence, not integrations on a slide
 

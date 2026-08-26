@@ -21,17 +21,20 @@ Run:
 """
 from __future__ import annotations
 
-import math
-from dataclasses import replace
 from itertools import product
 
-from false_green import build_evidence, scenario_matrix, GATE_DISABLEMENTS
 from agent_economics import (
-    Decision, EconomicPolicy, Baseline, make_evidence_bundle,
-    ModelRate, Outcome, TraceEvent, evaluate_bundle,
+    Baseline,
+    Decision,
+    EconomicPolicy,
+    ModelRate,
+    Outcome,
+    TraceEvent,
+    evaluate_bundle,
+    make_evidence_bundle,
 )
 from agent_economics.models import CheckStatus
-
+from false_green import build_evidence, scenario_matrix
 
 # ── Sweep grids ────────────────────────────────────────────────────────────
 
@@ -166,41 +169,71 @@ def _evaluate_with_baseline_perturb(scenario, multiplier: float) -> bool:
     return baseline_cf_fail != perturbed_cf_fail
 
 
-def main() -> int:
+def sweep_stats() -> dict:
+    """
+    Run both sweeps and return the counts.
+
+    Separated from main() so the robustness and fragility numbers are
+    regression-locked by the test suite rather than only existing in terminal
+    output. The baseline fragility map is computed once and reused, rather than
+    recomputing the -25% and -50% columns for the summary lines.
+    """
     scenarios = scenario_matrix()
     n = len(scenarios)
+
+    flip_counts: list[int] = []
+    for scenario in scenarios:
+        base_decision = evaluate_bundle(build_evidence(scenario)).decision
+        flip_counts.append(
+            sum(
+                1
+                for inc, rem in product(INCIDENT_LOSS_GRID, REMEDIATION_COST_GRID)
+                if _evaluate_with_overrides(scenario, inc, rem) != base_decision
+            )
+        )
+
+    fragility = {
+        mult: sum(1 for s in scenarios if _evaluate_with_baseline_perturb(s, mult))
+        for mult in BASELINE_PERTURBATIONS
+    }
+
+    return {
+        "n": n,
+        "grid_size": len(INCIDENT_LOSS_GRID) * len(REMEDIATION_COST_GRID),
+        "flip_counts": flip_counts,
+        "robust": sum(1 for f in flip_counts if f == 0),
+        "fragile": sum(1 for f in flip_counts if 1 <= f < 3),
+        "brittle": sum(1 for f in flip_counts if f >= 3),
+        "max_flips": max(flip_counts, default=0),
+        "fragility": fragility,
+    }
+
+
+def main() -> int:
+    n = len(scenario_matrix())
     grid_size = len(INCIDENT_LOSS_GRID) * len(REMEDIATION_COST_GRID)
 
     W = 64
     print("═" * W)
     print("  SENSITIVITY SWEEP — decision robustness analysis")
     print("═" * W)
-    print(f"  {n} scenarios  ×  {grid_size}-cell economic grid ({len(INCIDENT_LOSS_GRID)} incident × {len(REMEDIATION_COST_GRID)} remediation)")
+    print(
+        f"  {n} scenarios  ×  {grid_size}-cell economic grid "
+        f"({len(INCIDENT_LOSS_GRID)} incident × {len(REMEDIATION_COST_GRID)} remediation)"
+    )
     print(f"  Sweeping incident_loss ∈ [{INCIDENT_LOSS_GRID[0]}..{INCIDENT_LOSS_GRID[-1]}]  ×")
     print(f"          remediation    ∈ [{REMEDIATION_COST_GRID[0]}..{REMEDIATION_COST_GRID[-1]}]")
     print()
-    print("  Computing... (this takes ~5s)", flush=True)
+    print("  Computing... (this takes a few seconds)", flush=True)
+
+    stats = sweep_stats()
+    robust = stats["robust"]
+    fragile = stats["fragile"]
+    brittle = stats["brittle"]
+    max_flips = stats["max_flips"]
+    fragility = stats["fragility"]
 
     # ── Part 1: decision flip counts ───────────────────────────────────────
-    from false_green import build_evidence
-    flip_counts: list[int] = []
-    for scenario in scenarios:
-        # Get baseline decision
-        base_evidence = build_evidence(scenario)
-        base_decision = evaluate_bundle(base_evidence).decision
-
-        flips = 0
-        for inc, rem in product(INCIDENT_LOSS_GRID, REMEDIATION_COST_GRID):
-            d = _evaluate_with_overrides(scenario, inc, rem)
-            if d != base_decision:
-                flips += 1
-        flip_counts.append(flips)
-
-    robust = sum(1 for f in flip_counts if f == 0)
-    fragile = sum(1 for f in flip_counts if 1 <= f < 3)
-    brittle = sum(1 for f in flip_counts if f >= 3)
-    max_flips = max(flip_counts, default=0)
-
     print()
     print("  DECISION ROBUSTNESS across economic assumption grid")
     print("  " + "─" * 56)
@@ -220,26 +253,21 @@ def main() -> int:
     print("  BASELINE FRAGILITY INDEX  (perturb baseline acceptable_rate)")
     print("  " + "─" * 56)
 
-    for mult, label in zip(BASELINE_PERTURBATIONS, BASELINE_LABELS):
-        flips = sum(
-            1 for s in scenarios
-            if _evaluate_with_baseline_perturb(s, mult)
-        )
+    for mult, label in zip(BASELINE_PERTURBATIONS, BASELINE_LABELS, strict=True):
+        flips = fragility[mult]
         pct = flips / n
         warn = "  ← critical" if pct > 0.25 else ""
-        print(f"  {label:>4} baseline error  →  {flips:>3}/{n} counterfactual gate flips  {_bar(flips,n,18)}  {pct:.1%}{warn}")
+        print(
+            f"  {label:>4} baseline error  →  {flips:>3}/{n} counterfactual gate flips  "
+            f"{_bar(flips,n,18)}  {pct:.1%}{warn}"
+        )
 
     print()
-    most_fragile = max(
-        zip(BASELINE_PERTURBATIONS, BASELINE_LABELS),
-        key=lambda x: abs(x[0] - 1.0)
-    )
-    bf_50 = sum(1 for s in scenarios if _evaluate_with_baseline_perturb(s, 0.5))
-    bf_25 = sum(1 for s in scenarios if _evaluate_with_baseline_perturb(s, 0.75))
+    bf_50, bf_25 = fragility[0.50], fragility[0.75]
     if bf_25 > 0:
-        print(f"  ⚠  A 25% error in your baseline flips {bf_25}/{n} counterfactual gates ({bf_25/n:.1%}).")
+        print(f"  ⚠  A 25% error in your baseline flips {bf_25}/{n} gates ({bf_25/n:.1%}).")
     if bf_50 > 0:
-        print(f"     A 50% error in your baseline flips {bf_50}/{n} counterfactual gates ({bf_50/n:.1%}).")
+        print(f"     A 50% error in your baseline flips {bf_50}/{n} gates ({bf_50/n:.1%}).")
     print()
     print("  Your baseline is always an estimate. These are its error bars.")
     print("  Report the fragility index alongside every SCALE verdict.")

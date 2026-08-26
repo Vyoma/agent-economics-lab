@@ -18,9 +18,8 @@ Run:
 """
 from __future__ import annotations
 
-import sys
-from false_green import GATE_DISABLEMENTS, build_evidence, run_benchmark, scenario_matrix
 from agent_economics import Decision
+from false_green import GATE_DISABLEMENTS, run_benchmark, scenario_matrix
 
 
 def _bar(n: int, total: int, width: int = 20) -> str:
@@ -28,49 +27,66 @@ def _bar(n: int, total: int, width: int = 20) -> str:
     return "█" * filled + "░" * (width - filled)
 
 
-def main() -> int:
-    print("Running 588 gate-removal mutations...", flush=True)
-    rows = run_benchmark()
-    scenarios = scenario_matrix()
-    n_scenarios = len(scenarios)
-    n_total = len(rows)
-
-    # --- Fixed-contract mutation score ---
-    # KILLED = fixed engine detects the mutation (returns non-SCALE when full was non-SCALE)
-    # SURVIVED = fixed engine misses (returns SCALE after gate removal)
-    fixed_killed = sum(
+def _killed(rows: list[dict]) -> int:
+    """A mutation is killed unless it turns a non-SCALE case into SCALE."""
+    return sum(
         1 for r in rows
         if not (
             r["full_decision"] != Decision.SCALE.value
             and r["fixed_contract_decision"] == Decision.SCALE.value
         )
     )
-    fixed_score = fixed_killed / n_total
 
-    # --- Dynamic-coverage engine: how many mutations it lets through ---
+
+def mutation_stats() -> dict:
+    """
+    Run every gate-removal mutation and return the scores.
+
+    Separated from main() so the published numbers are regression-locked by the
+    test suite rather than only existing in terminal output.
+    """
+    rows = run_benchmark()
+    n_total = len(rows)
+
+    # KILLED = fixed engine detects the mutation (returns non-SCALE when full was non-SCALE)
+    # SURVIVED = fixed engine misses (returns SCALE after gate removal)
+    fixed_killed = _killed(rows)
     dynamic_survived = sum(1 for r in rows if r["false_scale_transition"] == "true")
-    dynamic_killed = n_total - dynamic_survived
-    dynamic_score = dynamic_killed / n_total
 
-    # --- Per-gate breakdown ---
     gate_stats: dict[str, dict] = {}
-    for dim, check_id in GATE_DISABLEMENTS.items():
+    for dim in GATE_DISABLEMENTS:
         dim_rows = [r for r in rows if r["disabled_coverage_dimension"] == dim]
-        fixed_k = sum(
-            1 for r in dim_rows
-            if not (
-                r["full_decision"] != Decision.SCALE.value
-                and r["fixed_contract_decision"] == Decision.SCALE.value
-            )
-        )
-        dyn_survived = sum(1 for r in dim_rows if r["false_scale_transition"] == "true")
         gate_stats[dim] = {
             "total": len(dim_rows),
-            "fixed_killed": fixed_k,
-            "dyn_survived": dyn_survived,
+            "fixed_killed": _killed(dim_rows),
+            "dyn_survived": sum(1 for r in dim_rows if r["false_scale_transition"] == "true"),
         }
 
-    # --- Print results ---
+    return {
+        "n_scenarios": len(scenario_matrix()),
+        "n_gates": len(GATE_DISABLEMENTS),
+        "n_total": n_total,
+        "fixed_killed": fixed_killed,
+        "fixed_score": fixed_killed / n_total,
+        "dynamic_survived": dynamic_survived,
+        "dynamic_killed": n_total - dynamic_survived,
+        "dynamic_score": (n_total - dynamic_survived) / n_total,
+        "gate_stats": gate_stats,
+    }
+
+
+def main() -> int:
+    print("Running 588 gate-removal mutations...", flush=True)
+    stats = mutation_stats()
+    n_scenarios = stats["n_scenarios"]
+    n_total = stats["n_total"]
+    fixed_killed = stats["fixed_killed"]
+    fixed_score = stats["fixed_score"]
+    dynamic_survived = stats["dynamic_survived"]
+    dynamic_killed = stats["dynamic_killed"]
+    dynamic_score = stats["dynamic_score"]
+    gate_stats = stats["gate_stats"]
+
     W = 60
     print("═" * W)
     print("  MUTATION SCORE — agent-economics-lab harness hardness")
@@ -100,12 +116,12 @@ def main() -> int:
         print(f"  {dim:<25}  {s:>3}/{t:<3}   {s/t:>5.1%}  {bar}{marker}")
 
     print()
-    verdict = "✓ PERFECT" if fixed_score == 1.0 else f"✗ GAPS FOUND"
+    verdict = "✓ PERFECT" if fixed_score == 1.0 else "✗ GAPS FOUND"
     print(f"  HARNESS MUTATION SCORE: {fixed_score:.1%}  {verdict}")
     print()
     if dynamic_survived:
         print(f"  The dynamic-coverage engine lets {dynamic_survived} mutations survive.")
-        print(f"  Those are real deployments that would receive a false SCALE verdict.")
+        print("  Those are real deployments that would receive a false SCALE verdict.")
     print()
     print("  A mutation score < 100% names your exact blind spot.")
     print("  'All enabled checks passed' ≠ 'all required checks passed.'")

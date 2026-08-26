@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import copy
+import io
 import json
 import shutil
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from agent_economics import (
@@ -18,10 +20,9 @@ from agent_economics import (
     load_conversion_contract,
     render_normalized_json,
 )
-from agent_economics.cli import main
 from agent_economics.claude_code_tree import _event_boundaries
+from agent_economics.cli import main
 from agent_economics.report import render_markdown
-
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples" / "claude-code-tree"
@@ -47,7 +48,24 @@ def _write_jsonl(path: Path, rows: list[dict[str, object]]) -> None:
     )
 
 
-class ClaudeCodeTreeAdapterTests(unittest.TestCase):
+class _QuietStdout(unittest.TestCase):
+    """
+    Base case that captures stdout for the duration of each test.
+
+    The CLI and judge pipelines print their reports by design. Letting that
+    reach the terminal buries the unittest summary under hundreds of lines, so
+    the output is captured and left available on ``self.stdout`` for assertions.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.stdout = io.StringIO()
+        redirect = redirect_stdout(self.stdout)
+        redirect.__enter__()
+        self.addCleanup(redirect.__exit__, None, None, None)
+
+
+class ClaudeCodeTreeAdapterTests(_QuietStdout):
     def test_tree_expands_delegated_calls_into_the_root_task(self) -> None:
         parent = inspect_claude_code_jsonl(SESSION)
         tree = inspect_claude_code_session_tree(SESSION)

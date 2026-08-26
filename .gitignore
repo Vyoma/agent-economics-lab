@@ -6,4 +6,7 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+.coverage
+htmlcov/
 /assurance-case.md
+/tasks/

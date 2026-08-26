@@ -3,14 +3,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
+from . import __version__
 from .adapters import load_normalized_json_bundle, render_normalized_json
 from .assurance import evaluate_bundle
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
-from .kimi_analyst import analyse_report
-from .kimi_judge import judge as kimi_judge
 from .claude_code import (
     SOURCE_ID as CLAUDE_CODE_SOURCE_ID,
     SOURCE_VERSION as CLAUDE_CODE_SOURCE_VERSION,
@@ -26,6 +25,15 @@ from .claude_code_tree import (
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
 )
+from .frontier import FrontierDecision, run_frontier
+from .frontier_report import (
+    render_frontier_json,
+    render_frontier_markdown,
+)
+from .io import load_csv_bundle
+from .kimi_analyst import analyse_report
+from .kimi_judge import judge as kimi_judge
+from .models import Decision
 from .otel_genai import (
     SOURCE_ID as OTEL_GENAI_SOURCE_ID,
     SOURCE_VERSION as OTEL_GENAI_SOURCE_VERSION,
@@ -34,13 +42,6 @@ from .otel_genai import (
     inspect_otel_genai_json,
     otel_genai_bundle_from_session,
 )
-from .frontier import FrontierDecision, run_frontier
-from .frontier_report import (
-    render_frontier_json,
-    render_frontier_markdown,
-)
-from .io import load_csv_bundle
-from .models import Decision
 from .report import render_json, render_markdown
 
 
@@ -48,6 +49,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agent-economics",
         description="Issue an economic assurance case from agent traces and outcomes.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"agent-economics {__version__}",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     evaluate_parser = subparsers.add_parser("evaluate")

@@ -1,7 +1,17 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark reproduce lessons test
+PYTHON ?= python3
+
+.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity \
+	claude-code claude-code-tree otel-genai public-case benchmark reproduce \
+	lessons test lint check-python mutation real-trace sensitivity
+
+# The package declares requires-python >= 3.10, but `make` cannot enforce that the
+# way pip does. Without this guard a contributor whose default python3 is older
+# gets obscure syntax and zip(strict=) errors instead of a usable message.
+check-python:
+	@$(PYTHON) -c 'import sys; sys.version_info >= (3, 10) or sys.exit("agent-economics-lab requires Python 3.10 or newer; %d.%d found. Retry with: make PYTHON=python3.12 <target>" % sys.version_info[:2])'
 
 demo:
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--traces examples/support_trace.csv \
 		--outcomes examples/outcomes.csv \
 		--rates examples/rates.json \
@@ -9,86 +19,100 @@ demo:
 		--policy examples/policy.json
 
 modularity:
-	PYTHONPATH=. python3 examples/modularity_demo.py
+	PYTHONPATH=. $(PYTHON) examples/modularity_demo.py
 
 coverage-drift:
-	@python3 false_green.py
+	@$(PYTHON) false_green.py
 
 falsegreen: coverage-drift
 
 benchmark:
-	python3 false_green.py \
+	$(PYTHON) false_green.py \
 		--verify research/results/decision-coverage-drift/results.csv \
 		--summary-verify research/results/SUMMARY.md \
 		--json-verify research/results/decision-coverage-drift/summary.json
 
+mutation:
+	@$(PYTHON) mutation_score.py
+
+real-trace:
+	@$(PYTHON) real_trace_verdict.py
+
+sensitivity:
+	@$(PYTHON) sensitivity_sweep.py
+
+lint:
+	@$(PYTHON) -m ruff check .
+
 evidence-ablation:
-	@python3 evidence_ablation.py \
+	@$(PYTHON) evidence_ablation.py \
 		--verify-dir research/results/evidence-ablation
 
 frontier:
-	@python3 -m agent_economics frontier \
+	@$(PYTHON) -m agent_economics frontier \
 		examples/compute-frontier/manifest.json \
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
 claude-code:
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from claude-code \
 		--in examples/claude-code/session.jsonl \
 		--contract examples/claude-code/conversion-contract.json \
 		--out /tmp/agent-economics-claude-code.json
 	@cmp /tmp/agent-economics-claude-code.json examples/claude-code/bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code.json
 
 claude-code-tree:
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from claude-code-tree \
 		--in examples/claude-code-tree/session.jsonl \
 		--contract examples/claude-code-tree/conversion-contract.json \
 		--out /tmp/agent-economics-claude-code-tree.json
 	@cmp /tmp/agent-economics-claude-code-tree.json examples/claude-code-tree/bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code-tree.json \
 		--ci
 
 otel-genai:
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from otel-genai \
 		--in examples/otel-genai/langfuse-otlp.json \
 		--contract examples/otel-genai/langfuse-conversion-contract.json \
 		--out /tmp/agent-economics-otel-langfuse.json
 	@cmp /tmp/agent-economics-otel-langfuse.json examples/otel-genai/langfuse-bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-otel-langfuse.json \
 		--ci
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from otel-genai \
 		--in examples/otel-genai/arize-openinference-otlp.json \
 		--contract examples/otel-genai/arize-openinference-conversion-contract.json \
 		--out /tmp/agent-economics-otel-arize.json
 	@cmp /tmp/agent-economics-otel-arize.json examples/otel-genai/arize-openinference-bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-otel-arize.json \
 		--ci
 
 public-case:
-	@PYTHONPATH=. python3 examples/public-swebench/build_case.py \
+	@PYTHONPATH=. $(PYTHON) examples/public-swebench/build_case.py \
 		--source examples/public-swebench/runs.json \
 		--output-dir /tmp/agent-economics-public-swebench
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-public-swebench/arms/candidate-opus.json
-	@python3 -m agent_economics frontier \
+	@$(PYTHON) -m agent_economics frontier \
 		/tmp/agent-economics-public-swebench/manifest.json \
 		--output-dir /tmp/agent-economics-public-swebench-rendered \
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
+reproduce: check-python test modularity lessons benchmark mutation real-trace \
+	sensitivity evidence-ablation frontier claude-code claude-code-tree otel-genai \
+	public-case
 
 lessons:
-	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done
+	@for lesson in lessons/*.py; do PYTHONPATH=. $(PYTHON) "$$lesson"; done
 
-test:
-	python3 -m unittest discover -s tests -v
+test: check-python
+	$(PYTHON) -m unittest discover -s tests -v

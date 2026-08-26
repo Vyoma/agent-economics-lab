@@ -26,9 +26,7 @@ from evidence_ablation import (
     evaluate_raw,
     main,
     run_benchmark,
-    summarize,
 )
-
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "research" / "results" / "evidence-ablation"

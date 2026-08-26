@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased
+
+- Fix unresolvable annotations on the public `kimi_analyst` API. `analyse`,
+  `analyse_report`, and the context builder annotated `AssuranceCase`,
+  `EconomicPolicy`, and `Baseline` as string literals with no module-level
+  import, so `typing.get_type_hints()` raised `NameError` for any consumer that
+  introspects them.
+- Add `tests/test_kimi_analyst.py`, covering the previously untested `analyse`
+  CLI subcommand end to end with the network call mocked (23% to 84% coverage).
+- Add `tests/test_research_scripts.py`, asserting the mutation score, real-trace
+  verdict, and sensitivity numbers the README publishes.
+- Add `tests/test_packaging.py`, pinning the version across the package,
+  `pyproject.toml`, `CITATION.cff`, and `CHANGELOG.md`.
+- Expose `agent_economics.__version__` as the single source of truth, read
+  dynamically by `pyproject.toml`, and add `agent-economics --version`.
+- Run `mutation_score.py`, `real_trace_verdict.py`, and `sensitivity_sweep.py`
+  from `make reproduce`; they previously ran nowhere in CI.
+- Extract `mutation_stats()`, `verdict_stats()`, and `sweep_stats()` so the
+  published numbers are computed by testable functions rather than print blocks.
+- Add a ruff configuration, a `make lint` target, and a CI lint job; clear every
+  finding, including dead imports, an unused local re-import that shadowed
+  `build_evidence`, and deprecated `typing` aliases.
+- Refuse to run `make` on Python older than the declared 3.10 floor, with a
+  message naming the `PYTHON=` override.
+- Capture stdout in the CLI and judge pipeline tests so the unittest summary is
+  no longer buried under generated reports.
+
 ## 0.7.0 - 2026-07-29
 
 - Add a separate `claude-code-tree` converter for parent plus persisted subagent

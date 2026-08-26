@@ -4,8 +4,8 @@ import hashlib
 import json
 import math
 from collections import Counter, defaultdict
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .evidence import make_evidence_bundle, validate_evidence_bundle

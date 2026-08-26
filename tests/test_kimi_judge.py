@@ -14,6 +14,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -25,9 +26,9 @@ from agent_economics.kimi_judge import (
     _build_system_prompt,
     _build_user_message,
     _error_outcome_row,
+    _main,
     _validate_rubric,
     judge,
-    _main,
 )
 
 _RUBRIC = {
@@ -123,7 +124,7 @@ class PromptBuildingTests(unittest.TestCase):
 
 class OutcomeRowTests(unittest.TestCase):
     def test_acceptable_row(self) -> None:
-        out, audit = _build_outcome_row("t-001", _KIMI_ACCEPT, _RUBRIC, "kimi-k3")
+        out, _audit = _build_outcome_row("t-001", _KIMI_ACCEPT, _RUBRIC, "kimi-k3")
         self.assertEqual(out["acceptable"], "true")
         self.assertEqual(out["business_value_usd"], "8.0")
         self.assertEqual(out["human_minutes"], "0")
@@ -131,7 +132,7 @@ class OutcomeRowTests(unittest.TestCase):
         self.assertEqual(out["incident_loss_usd"], "0")
 
     def test_not_acceptable_row(self) -> None:
-        out, audit = _build_outcome_row("t-002", _KIMI_REJECT, _RUBRIC, "kimi-k3")
+        out, _audit = _build_outcome_row("t-002", _KIMI_REJECT, _RUBRIC, "kimi-k3")
         self.assertEqual(out["acceptable"], "false")
         self.assertEqual(out["business_value_usd"], "0")
         self.assertEqual(out["human_minutes"], "8.0")
@@ -168,7 +169,24 @@ class ErrorRowTests(unittest.TestCase):
         self.assertEqual(out["incident_loss_usd"], "0")
 
 
-class JudgePipelineTests(unittest.TestCase):
+class _QuietStdout(unittest.TestCase):
+    """
+    Base case that captures stdout for the duration of each test.
+
+    The CLI and judge pipelines print their reports by design. Letting that
+    reach the terminal buries the unittest summary under hundreds of lines, so
+    the output is captured and left available on ``self.stdout`` for assertions.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.stdout = io.StringIO()
+        redirect = redirect_stdout(self.stdout)
+        redirect.__enter__()
+        self.addCleanup(redirect.__exit__, None, None, None)
+
+
+class JudgePipelineTests(_QuietStdout):
     def _write_tasks(self, tmp_dir: Path) -> Path:
         tasks_path = tmp_dir / "tasks.csv"
         with open(tasks_path, "w", newline="") as f:
@@ -257,11 +275,14 @@ class JudgePipelineTests(unittest.TestCase):
             tasks_path = self._write_tasks(tmp_dir)
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
-            env_without_key = {k: v for k, v in __import__("os").environ.items()
-                               if k != "MOONSHOT_API_KEY"}
-            with patch.dict("os.environ", env_without_key, clear=True):
-                with self.assertRaises(RuntimeError, msg="MOONSHOT_API_KEY"):
-                    judge(tasks_path, rubric_path, out_path)
+            env_without_key = {
+                k: v for k, v in os.environ.items() if k != "MOONSHOT_API_KEY"
+            }
+            with (
+                patch.dict("os.environ", env_without_key, clear=True),
+                self.assertRaises(RuntimeError, msg="MOONSHOT_API_KEY"),
+            ):
+                judge(tasks_path, rubric_path, out_path)
 
     def test_judge_raises_on_empty_task_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -270,9 +291,11 @@ class JudgePipelineTests(unittest.TestCase):
             tasks_path.write_text("task_id,output\n")
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}):
-                with self.assertRaises(ValueError):
-                    judge(tasks_path, rubric_path, out_path)
+            with (
+                patch.dict("os.environ", {"MOONSHOT_API_KEY": "test-key"}),
+                self.assertRaises(ValueError),
+            ):
+                judge(tasks_path, rubric_path, out_path)
 
     @patch("agent_economics.kimi_judge._call_kimi")
     def test_cli_main_returns_zero(self, mock_call: MagicMock) -> None:
@@ -299,7 +322,7 @@ class JudgePipelineTests(unittest.TestCase):
         self.assertIn("1 acceptable", buf.getvalue())
 
 
-class OutcomeCsvCompatibilityTests(unittest.TestCase):
+class OutcomeCsvCompatibilityTests(_QuietStdout):
     """Ensure judge output is compatible with load_outcomes() from the framework."""
 
     @patch("agent_economics.kimi_judge._call_kimi")

@@ -4,9 +4,10 @@ import hashlib
 import json
 import math
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from numbers import Integral, Real
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from .models import (
     Baseline,

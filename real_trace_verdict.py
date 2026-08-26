@@ -13,58 +13,66 @@ Run:
 """
 from __future__ import annotations
 
-import json
 import math
 from pathlib import Path
 
-from agent_economics import default_checks, evaluate_bundle
+from agent_economics import evaluate_bundle
 from agent_economics.adapters import load_normalized_json_bundle
-from agent_economics.models import Decision
+from agent_economics.models import CheckStatus, Decision
 
 ROOT = Path(__file__).resolve().parent
 BUNDLE_PATH = ROOT / "examples" / "claude-code" / "bundle.json"
 
 
-def _bar_h(value: float, max_value: float, width: int = 20, fill: str = "█") -> str:
-    n = round(width * min(value, max_value) / max_value) if max_value else 0
-    return fill * n + "░" * (width - n)
+def verdict_stats() -> dict:
+    """
+    Evaluate the real Claude Code trace and return the naive-vs-gated comparison.
 
-
-def main() -> int:
+    Separated from main() so the claim this script makes is regression-locked by
+    the test suite rather than only existing in terminal output.
+    """
     bundle = load_normalized_json_bundle(BUNDLE_PATH)
     case = evaluate_bundle(bundle)
-    checks = default_checks()
 
     # Naive reading: just look at outcome flags
     outcomes = list(bundle.outcomes.values())
     n = len(outcomes)
     n_acceptable = sum(o.acceptable for o in outcomes)
-    naive_rate = n_acceptable / n if n else 0.0
 
-    # Economic metrics from the gated evaluation
+    return {
+        "bundle": bundle,
+        "case": case,
+        "outcomes": outcomes,
+        "n": n,
+        "n_acceptable": n_acceptable,
+        "naive_rate": n_acceptable / n if n else 0.0,
+        "total_trace_cost": sum(e.direct_cost_usd or 0.0 for e in bundle.events),
+        "failed_gates": [
+            r for r in case.check_results
+            if r.status is CheckStatus.FAIL and r.on_failure is not None
+        ],
+    }
+
+
+def main() -> int:
+    stats = verdict_stats()
+    bundle = stats["bundle"]
+    case = stats["case"]
+    outcomes = stats["outcomes"]
+    n = stats["n"]
+    n_acceptable = stats["n_acceptable"]
+    naive_rate = stats["naive_rate"]
+    total_trace_cost = stats["total_trace_cost"]
+    failed_gates = stats["failed_gates"]
+
     policy = bundle.policy
     baseline = bundle.baseline
-
-    total_trace_cost = sum(
-        e.direct_cost_usd or 0.0 for e in bundle.events
-    )
     agent_cost_per_acceptable = (
         case.cost_per_acceptable_outcome_usd
         if math.isfinite(case.cost_per_acceptable_outcome_usd)
         else float("inf")
     )
     baseline_cost_per_acceptable = baseline.cost_per_acceptable_outcome_usd
-
-    # Identify failing gates
-    from agent_economics.models import CheckStatus
-    failed_gates = [
-        r for r in case.check_results
-        if r.status is CheckStatus.FAIL and r.on_failure is not None
-    ]
-    passing_gates = [
-        r for r in case.check_results
-        if r.status is not CheckStatus.FAIL
-    ]
 
     W = 64
     print("═" * W)

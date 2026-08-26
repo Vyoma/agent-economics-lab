@@ -22,6 +22,7 @@ framework abstraction, or generalized policy language.
 ## Local verification
 
 ```bash
+make lint
 make test
 make demo
 make modularity
@@ -31,9 +32,17 @@ make frontier
 make reproduce
 ```
 
-The project supports Python 3.10+ and keeps the core dependency-free. New runtime
-dependencies require an issue explaining why the assurance claim cannot be made
-without them.
+`make lint` runs ruff and needs the dev extra: `pip install -e '.[dev]'`. CI runs
+the same command, so a clean local run means a clean lint job.
+
+The project supports Python 3.10+ and keeps the core dependency-free. `make`
+refuses to run on an older interpreter; pass `PYTHON=python3.12` if your default
+`python3` predates the floor. New runtime dependencies require an issue explaining
+why the assurance claim cannot be made without them.
+
+Numbers published in the README are asserted in `tests/test_research_scripts.py`.
+A change that legitimately moves one must update that test in the same pull
+request, so the claim and the evidence stay in step.
 
 ## Claim discipline
 

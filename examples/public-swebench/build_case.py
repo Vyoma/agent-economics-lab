@@ -29,7 +29,6 @@ from agent_economics.models import (
 )
 from agent_economics.report import render_markdown
 
-
 ROOT = Path(__file__).resolve().parent
 SOURCE_ID = "source.public-swebench-mini-agent"
 SOURCE_VERSION = "1"
