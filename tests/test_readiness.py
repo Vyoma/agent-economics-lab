@@ -131,3 +131,90 @@ class ContractStatusCliTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ListMatchesTheParserTest(unittest.TestCase):
+    """
+    The field list is hand-maintained and once drifted from the parsers it
+    describes, so `contract-status --ci` passed a contract that `convert`
+    refused: a gate passing on missing required evidence, inside the package
+    built to make that impossible.
+
+    This discovers what the parsers actually demand by deleting each field from
+    a working contract and checking that the parse fails. Operator fields are
+    told apart from adapter-derived ones mechanically: a freshly generated
+    template leaves operator fields null and pre-fills everything it can read
+    off the trace. Anything the parsers require and the operator must supply has
+    to appear in REQUIRED_FIELDS, or this test fails instead of a user's build
+    passing on an unusable contract.
+    """
+
+    CONTRACT = ROOT / "examples" / "claude-code" / "conversion-contract.json"
+    TEMPLATE = ROOT / "examples" / "claude-code" / "contract-template.json"
+
+    def _document(self) -> dict:
+        return json.loads(self.CONTRACT.read_text(encoding="utf-8"))
+
+    def _operator_task_fields(self) -> set[str]:
+        template = json.loads(self.TEMPLATE.read_text(encoding="utf-8"))
+        return {k for k, v in template["tasks"][0].items() if v is None}
+
+    def _parses(self, doc: dict) -> bool:
+        from agent_economics.conversion_contract import (
+            parse_baseline,
+            parse_outcomes_and_manifest,
+            parse_policy,
+        )
+
+        expected = {
+            row["task_id"]: {
+                "input_digest": row.get("input_digest"),
+                "started_at": row.get("started_at"),
+            }
+            for row in json.loads(self.CONTRACT.read_text(encoding="utf-8"))["tasks"]
+        }
+        try:
+            parse_policy(doc.get("policy"))
+            parse_baseline(doc.get("baseline"))
+            parse_outcomes_and_manifest(
+                raw_tasks=doc.get("tasks"),
+                outcome_contract_raw=doc.get("outcome_contract"),
+                expected_tasks=expected,
+            )
+        except (ValueError, TypeError, KeyError):
+            return False
+        return True
+
+    def test_the_reference_contract_parses(self) -> None:
+        self.assertTrue(self._parses(self._document()))
+
+    def test_every_operator_field_the_parsers_require_is_declared(self) -> None:
+        declared = {req.path for req in REQUIRED_FIELDS}
+        undeclared: list[str] = []
+
+        for section in ("policy", "baseline", "outcome_contract"):
+            for key in self._document().get(section, {}):
+                doc = self._document()
+                doc[section].pop(key)
+                if not self._parses(doc) and f"{section}.{key}" not in declared:
+                    undeclared.append(f"{section}.{key}")
+
+        for key in self._operator_task_fields():
+            doc = self._document()
+            for row in doc["tasks"]:
+                row.pop(key, None)
+            if not self._parses(doc) and f"tasks[].{key}" not in declared:
+                undeclared.append(f"tasks[].{key}")
+
+        self.assertEqual(
+            undeclared,
+            [],
+            f"parsers require these but readiness never checks them: {undeclared}",
+        )
+
+    def test_a_contract_missing_a_declared_field_is_reported_not_ready(self) -> None:
+        """The converse: what we declare must actually block readiness."""
+        doc = self._document()
+        doc["policy"].pop("repetition_warning_threshold")
+        self.assertFalse(assess(doc).ready)
+        self.assertFalse(self._parses(doc))

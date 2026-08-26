@@ -33,6 +33,16 @@ from .assurance import AssuranceEngine, evaluate_bundle
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .models import CheckSpec, Coverage, Decision, EvidenceBundle
 
+# A coverage dimension is either one this package ships or a plain string you
+# defined. The six economic dimensions are what the default gates happen to
+# cover; the primitive itself has no opinion about them. A PII gate, a jailbreak
+# gate or a regression eval is a dimension like any other.
+CoverageLike = Coverage | str
+
+
+def _name(coverage: CoverageLike) -> str:
+    return coverage.value if isinstance(coverage, Coverage) else str(coverage)
+
 
 @dataclass(frozen=True)
 class Mutation:
@@ -116,8 +126,8 @@ class MutationReport:
 
 def providers(
     checks: tuple[CheckSpec, ...],
-    required_coverage: frozenset[Coverage],
-) -> dict[Coverage, tuple[str, ...]]:
+    required_coverage: frozenset[CoverageLike],
+) -> dict[CoverageLike, tuple[str, ...]]:
     """Which checks supply each required coverage dimension."""
     return {
         coverage: tuple(
@@ -127,14 +137,14 @@ def providers(
     }
 
 
-def _enabled_coverage(checks: tuple[CheckSpec, ...]) -> frozenset[Coverage]:
+def _enabled_coverage(checks: tuple[CheckSpec, ...]) -> frozenset[CoverageLike]:
     return frozenset(coverage for check in checks for coverage in check.covers)
 
 
 def mutate(
     bundle: EvidenceBundle,
     checks: tuple[CheckSpec, ...] | None = None,
-    required_coverage: frozenset[Coverage] | None = None,
+    required_coverage: frozenset[CoverageLike] | None = None,
 ) -> MutationReport:
     """
     Remove each required gate in turn and record what the engine does.
@@ -160,12 +170,12 @@ def mutate(
     mutations: list[Mutation] = []
     unprovided: list[str] = []
 
-    for coverage in sorted(required, key=lambda c: c.value):
+    for coverage in sorted(required, key=_name):
         removed = by_coverage[coverage]
         if not removed:
             # Nothing supplies this requirement, so there is no gate to remove.
             # That is not a passing mutation; it is a contract already unmet.
-            unprovided.append(coverage.value)
+            unprovided.append(_name(coverage))
             continue
         reduced = tuple(check for check in checks if check.id not in removed)
         fixed = AssuranceEngine(checks=reduced, required_coverage=required).evaluate(bundle)
@@ -174,7 +184,7 @@ def mutate(
         ).evaluate(bundle)
         mutations.append(
             Mutation(
-                coverage=coverage.value,
+                coverage=_name(coverage),
                 removed_check_ids=removed,
                 baseline_decision=baseline.value,
                 fixed_contract_decision=fixed.decision.value,
@@ -234,6 +244,7 @@ def render_markdown(report: MutationReport) -> str:
 
 
 __all__ = [
+    "CoverageLike",
     "Mutation",
     "MutationReport",
     "mutate",

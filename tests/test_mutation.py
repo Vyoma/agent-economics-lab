@@ -144,3 +144,107 @@ class MutateCliTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CustomCoverageDimensionTest(unittest.TestCase):
+    """
+    The README claims mutate() works on checks you wrote. It did not: Coverage
+    is a closed enum of six economic dimensions and a plain string crashed with
+    AttributeError deep in the contract digest. An adversarial audit caught the
+    claim being false. These tests are what make it true.
+
+    This is the adoption path. A team with a PII gate, a jailbreak gate, or a
+    regression eval must be able to ask which of their checks are load-bearing
+    without adopting an economic contract first.
+    """
+
+    @staticmethod
+    def _gate(check_id: str, coverage: str):
+        from agent_economics.models import (
+            CheckMode,
+            CheckOutput,
+            CheckResult,
+            CheckSpec,
+            CheckStatus,
+        )
+
+        def run(_view):
+            return CheckOutput(
+                results=(
+                    CheckResult(
+                        check_id=check_id, status=CheckStatus.PASS, message="ok"
+                    ),
+                )
+            )
+
+        return CheckSpec(
+            id=check_id,
+            version="1",
+            mode=CheckMode.GATE,
+            covers=frozenset({coverage}),
+            run=run,
+            failure_route=Decision.STOP,
+        )
+
+    def test_a_string_dimension_is_mutation_tested(self) -> None:
+        custom = self._gate("gate.pii", "pii_safety")
+        report = mutate(
+            _bundle(ASSIST_BUNDLE),
+            tuple(default_checks()) + (custom,),
+            frozenset({"pii_safety"}),
+        )
+        self.assertEqual(report.total, 1)
+        self.assertEqual(report.mutations[0].coverage, "pii_safety")
+        self.assertEqual(report.mutations[0].removed_check_ids, ("gate.pii",))
+        self.assertEqual(report.fixed_contract_score, 1.0)
+
+    def test_custom_and_builtin_dimensions_mix(self) -> None:
+        from agent_economics.models import Coverage
+
+        custom = self._gate("gate.jailbreak", "jailbreak_safety")
+        report = mutate(
+            _bundle(ASSIST_BUNDLE),
+            tuple(default_checks()) + (custom,),
+            frozenset({"jailbreak_safety", Coverage.OUTCOME_QUALITY}),
+        )
+        self.assertEqual(
+            {m.coverage for m in report.mutations},
+            {"jailbreak_safety", "outcome_quality"},
+        )
+        self.assertEqual(report.fixed_contract_score, 1.0)
+
+    def test_a_custom_dimension_with_no_provider_is_reported(self) -> None:
+        report = mutate(
+            _bundle(ASSIST_BUNDLE), tuple(default_checks()), frozenset({"pii_safety"})
+        )
+        self.assertEqual(report.unprovided_coverage, ("pii_safety",))
+        self.assertEqual(report.total, 0)
+
+    def test_two_checks_covering_one_dimension_are_removed_together(self) -> None:
+        """Neither is a sole provider, so removing one proves nothing."""
+        a = self._gate("gate.pii-a", "pii_safety")
+        b = self._gate("gate.pii-b", "pii_safety")
+        report = mutate(
+            _bundle(ASSIST_BUNDLE),
+            tuple(default_checks()) + (a, b),
+            frozenset({"pii_safety"}),
+        )
+        self.assertEqual(
+            report.mutations[0].removed_check_ids, ("gate.pii-a", "gate.pii-b")
+        )
+
+
+class ContractDigestStabilityTest(unittest.TestCase):
+    """Opening Coverage to strings must not move any committed digest."""
+
+    def test_default_contract_digest_is_unchanged(self) -> None:
+        from agent_economics import decision_contract_digest
+        from agent_economics.checks import DEFAULT_REQUIRED_COVERAGE
+
+        digest = decision_contract_digest(
+            tuple(default_checks()), DEFAULT_REQUIRED_COVERAGE
+        )
+        self.assertEqual(
+            digest,
+            "f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a",
+        )

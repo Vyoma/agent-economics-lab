@@ -32,6 +32,11 @@ ASSURANCE_ENGINE_IMPLEMENTATION = "agent-economics.assurance-engine@1"
 ROUTING_SEMANTICS = "missing-coverage>stop>assist>scale@1"
 
 
+def _coverage_name(coverage: object) -> str:
+    """Name a coverage dimension, whether it is a Coverage or a plain string."""
+    return coverage.value if isinstance(coverage, Coverage) else str(coverage)
+
+
 def decision_contract_manifest(
     checks: Sequence[CheckSpec],
     required_coverage: frozenset[Coverage],
@@ -41,12 +46,12 @@ def decision_contract_manifest(
         "schema": DECISION_CONTRACT_SCHEMA,
         "implementation": ASSURANCE_ENGINE_IMPLEMENTATION,
         "routing_semantics": ROUTING_SEMANTICS,
-        "required_coverage": sorted(item.value for item in required_coverage),
+        "required_coverage": sorted(_coverage_name(i) for i in required_coverage),
         "checks": [
             {
                 "manifest_id": check.manifest_id,
                 "mode": check.mode.value,
-                "covers": sorted(item.value for item in check.covers),
+                "covers": sorted(_coverage_name(i) for i in check.covers),
                 "failure_route": (
                     check.failure_route.value
                     if check.failure_route is not None
@@ -298,10 +303,10 @@ class AssuranceEngine:
             check_results=tuple(results),
             enabled_checks=tuple(check.manifest_id for check in self.checks),
             required_coverage=tuple(
-                sorted(coverage.value for coverage in self.required_coverage)
+                sorted(_coverage_name(c) for c in self.required_coverage)
             ),
             missing_coverage=tuple(
-                sorted(coverage.value for coverage in missing_coverage)
+                sorted(_coverage_name(c) for c in missing_coverage)
             ),
             source_manifest_id=evidence.source_manifest_id,
             evidence_digest=evidence.digest,

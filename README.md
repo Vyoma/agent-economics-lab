@@ -174,17 +174,27 @@ one gate carrying that verdict and an engine that derives its requirements from
 whichever checks are enabled returns `SCALE` instead. The fixed contract refuses
 all six removals.
 
-Nothing here is specific to the six gates this package ships. Required coverage
-is read from the contract and each dimension's providers are derived from
-`CheckSpec.covers`, so `mutate()` works on checks you wrote:
+Nothing here is specific to the six gates this package ships. A coverage
+dimension is either one of those or a plain string you defined, so a PII gate, a
+jailbreak gate, or a regression eval is a dimension like any other:
 
 ```python
 from agent_economics.mutation import mutate
-report = mutate(my_bundle, my_checks, my_required_coverage)
+
+pii = CheckSpec(id="gate.pii", version="1", mode=CheckMode.GATE,
+                covers=frozenset({"pii_safety"}), run=my_pii_check,
+                failure_route=Decision.STOP)
+
+report = mutate(my_bundle, my_checks + (pii,), frozenset({"pii_safety"}))
 report.fixed_contract_score        # 1.0 means every gate is load-bearing
 report.survivors                   # the gates that can vanish unnoticed
 report.unprovided_coverage         # requirements nothing supplies at all
 ```
+
+This claim was false when first written: `Coverage` was a closed enum and a
+custom dimension crashed. An adversarial audit caught it. `tests/test_mutation.py`
+now asserts it, and the shipped contract digest is unchanged, so every committed
+artifact still verifies.
 
 Add `--ci` to fail the build unless every required gate is load-bearing and
 every requirement has a provider. Every eval reports a score; this reports
