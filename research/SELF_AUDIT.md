@@ -6,14 +6,16 @@ honest verdict is `INCOMPLETE`, never a pass.
 
 We ran that argument against the repository that makes it: three review agents,
 one pass, run concurrently. They found three places where this repository did the
-exact thing it tells other people not to do. From the first commit of the reviewed
-change set to the last fix was ten minutes, which is checkable from the commit
-timestamps; the agents began before that commit and no start time is recoverable
-from the repository.
+exact thing it tells other people not to do.
 
-Then we ran the same auditor against this page, three more times, and it found a
-fourth. That one is in the document you are reading, and it is the finding that
-generalizes furthest.
+On timing: the agents reviewed an uncommitted working tree, which was committed
+while they ran. From that commit to the last fix was ten minutes, checkable from
+the commit timestamps. When the agents actually started is not recoverable from the
+repository at all, so no figure for the full exercise appears here.
+
+Then we ran the same auditor against this page, repeatedly, and it found a fourth.
+That one is in the document you are reading, and it is the finding that generalizes
+furthest.
 
 All three passed CI. One had been in the repository since its first commit. The
 other two became checks in a commit we wrote minutes earlier, the one meant to fix
@@ -119,7 +121,7 @@ guarded only by a byte-comparison inside `make frontier`.
 
 We verified the gap rather than asserting it: scaling `premium-12-step` costs by
 1.4 moved the published cost lower bound from -38.9% to **-93.2%**, and the full
-test suite still reported 202 tests, OK.
+test suite still reported 202 tests, OK, on the audited tree `77a563b`.
 
 That comparison does run in CI, so "fails CI" survived. "Asserted by the test
 suite" did not. `python -m unittest discover -s tests` passed with those published
@@ -143,9 +145,10 @@ same cost perturbation at current HEAD and running the repository's own question
 below — change a number, run only the test suite — leaves the full suite green,
 while `make frontier` correctly exits 2.
 
-This sentence used to publish the exact test count. It broke three times in a row
-as later commits added tests, so the count is gone rather than corrected a fourth
-time. That decision is Finding 4 in miniature.
+This sentence used to publish the exact test count. It went stale every time a
+later commit added a test, including the commit that corrected it, so the count is
+gone rather than corrected again. That decision is Finding 4 in miniature, and the
+number of times it broke is deliberately not stated here for the same reason.
 
 So the honest status is: the frontier table is guarded by a literal test against
 the published artifact, plus a byte-comparison that catches upstream drift. Both
@@ -169,7 +172,7 @@ writing down is that a repository built specifically to detect it still containe
 three instances of it, one of them on `main` since its first commit.
 
 There is a fourth finding, and we only have it because we audited this page before
-publishing it. It is in the next section.
+publishing it. It is below, under "Finding 4: this document".
 
 We also found something adjacent and worth naming: four README blocks presented
 hand-cut ASCII summaries directly beneath the command that supposedly produced
@@ -186,8 +189,14 @@ rest of this page.
 
 ## Finding 4: this document
 
-Before publishing, we ran the same auditor against this page. It came back
-do-not-publish three times.
+Before publishing, we ran the same auditor against this page. Every round came back
+do-not-publish. The rounds below are the first three; the sequence did not stop
+there, and it had not stopped when this paragraph was written.
+
+There is no total in this section, deliberately. Any count of correction rounds is a
+number describing a process that is still running, so it is false as soon as the
+next round lands. Each round is a commit whose message begins "correction pass";
+count them in the history rather than trusting a figure here.
 
 **Round 1** found four statements that did not hold. The worst was the paragraph
 claiming we had converted the stylized README blocks to real output: one of four
@@ -217,7 +226,9 @@ about published numbers going unguarded, silently falsified by the diff that was
 supposed to be fixing exactly that.
 
 We re-ran the experiment and pasted the literal output rather than editing the
-number by hand, which is the only version of this that does not recur.
+number by hand. That did not work either: the commit which pasted the fresh count
+added two more tests in the same diff, and its own commit message recorded the
+higher figure. Pasting a measured number is still publishing an unguarded one.
 
 ### What the correction rounds are actually evidence of
 
@@ -241,13 +252,12 @@ arriving by a different route: not a check that cannot fail, but a number that
 nothing checks.
 
 If you take one thing from this page, take this: findings 1 through 3 came from one
-audit. Everything in this section came from auditing that audit, three more times.
+audit. Everything in this section came from auditing that audit, repeatedly.
 
-Each round is a separate commit, so the number of rounds is checkable. The
-per-round finding counts above are reported from the reviews and are not checkable
-from this repository, which is precisely the property this finding is about. We are
-leaving them in and labelled rather than dropping them, because a reader deserves
-the shape of the thing even when we cannot hand them the mechanism.
+The per-round finding counts above are reported from the reviews and are not
+checkable from this repository, which is precisely the property this finding is
+about. They are labelled rather than dropped, because a reader deserves the shape
+of the thing even when we cannot hand them the mechanism.
 
 One pass is not a process. It is the first sample.
 
@@ -315,10 +325,13 @@ wrong on the page and shipped that way.
 property of a specific eval design, not a production prevalence rate. That
 distinction is stated throughout the repository and applies to this document.
 
-**This document needed four rounds of correction.** Every round's fix introduced at
-least one defect that the next round caught, including the round that added Finding
-4 itself: it left a stale test count and introduced a five-item list under a
-four-item heading. The specific errors are in Finding 4 and in the commit history.
+**This document needed repeated correction, and had not converged when it was
+published.** Every round's fix introduced at least one defect that the next round
+caught, including the round that added Finding 4 itself: it left a stale test count
+and introduced a five-item list under a four-item heading. The round after that one
+weakened an admission in the README while strengthening the same admission here, so
+the two documents disagreed about how much was our fault. The specific errors are in
+Finding 4 and in the commit history, which is also where the round count lives.
 A reader is entitled to treat that as evidence about our care as much as evidence
 about the failure mode. We think it is both, and we would rather publish the
 sequence than a clean draft that hid it.
