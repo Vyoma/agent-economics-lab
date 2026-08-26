@@ -84,6 +84,22 @@ jobs:
           --source examples/public-swebench/runs.json
           --output-dir /tmp/agent-economics-public-swebench
 
+      - name: Mutation-test the harness on a real converted trace
+        run: >-
+          python -m agent_economics mutate
+          --bundle examples/claude-code/bundle.json
+          --ci
+
+      - name: Confirm the shipped conversion contracts are complete
+        run: |
+          for contract in \
+            examples/claude-code/conversion-contract.json \
+            examples/claude-code-tree/conversion-contract.json \
+            examples/otel-genai/langfuse-conversion-contract.json \
+            examples/otel-genai/arize-openinference-conversion-contract.json; do
+            python -m agent_economics contract-status --contract "$contract" --ci >/dev/null
+          done
+
       - name: Dogfood CSV mode
         id: csv
         continue-on-error: true

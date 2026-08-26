@@ -43,6 +43,7 @@ from .otel_genai import (
     inspect_otel_genai_json,
     otel_genai_bundle_from_session,
 )
+from .readiness import assess_path, render_markdown as render_readiness_markdown
 from .report import render_json, render_markdown
 
 
@@ -103,6 +104,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Completed conversion contract with outcomes, prices, baseline, and policy.",
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
+    status_parser = subparsers.add_parser(
+        "contract-status",
+        help="Report which operator fields a conversion contract is still "
+             "missing, and which coverage each one blocks.",
+    )
+    status_parser.add_argument("--contract", required=True)
+    status_parser.add_argument(
+        "--format", choices=("markdown", "json"), default="markdown"
+    )
+    status_parser.add_argument(
+        "--ci", action="store_true", help="Exit 1 unless the contract is complete."
+    )
+
     mutate_parser = subparsers.add_parser(
         "mutate",
         help="Mutation-test the harness: remove each required gate and report "
@@ -355,6 +369,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         except (RuntimeError, ValueError, OSError) as e:
             print(f"Error: {e}", file=sys.stderr)
             return 2
+    if args.command == "contract-status":
+        try:
+            report = assess_path(Path(args.contract))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid contract: {error}", file=sys.stderr)
+            return 2
+        print(
+            json.dumps(report.to_dict(), indent=2, sort_keys=True)
+            if args.format == "json"
+            else render_readiness_markdown(report)
+        )
+        return 1 if args.ci and not report.ready else 0
     if args.command == "mutate":
         try:
             bundle = load_normalized_json_bundle(Path(args.bundle))

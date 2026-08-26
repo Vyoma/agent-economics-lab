@@ -110,6 +110,27 @@ Neither is a production prevalence estimate. Read the
 [588 rows](research/results/decision-coverage-drift/results.csv), or copy the
 [one-page decision contract](templates/agent-scale-decision-contract.md).
 
+## Point it at your own traces
+
+The adapters refuse to invent economics. A trace records what the agent did; it
+cannot tell you whether the outcome was acceptable, what the tokens cost you, or
+what the alternative was worth. So a conversion contract arrives with those
+fields blank and you fill them in, and that is the whole onboarding cost.
+
+`contract-status` makes the cost legible. For every unfilled field it names the
+coverage dimension that field feeds, and therefore the gate that cannot run
+without it:
+
+```bash
+agent-economics convert --from otel-genai --in traces.json --template contract.json
+agent-economics contract-status --contract contract.json
+```
+
+An unfilled contract is not a malformed file. It is missing required coverage,
+and the engine treats that exactly as it treats a disabled gate: `INCOMPLETE` is
+the only legal verdict until the fields are supplied. Add `--ci` to fail a build
+on an incomplete contract.
+
 ## Mutation-test your own harness
 
 The 588-mutation result above is this repository grading itself on a synthetic

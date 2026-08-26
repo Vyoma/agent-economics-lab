@@ -3,7 +3,7 @@ PYTHON ?= python3
 .PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity \
 	claude-code claude-code-tree otel-genai public-case benchmark reproduce \
 	lessons test lint coverage check-python mutation real-trace sensitivity \
-	self-audit self-audit-verify
+	self-audit self-audit-verify harness-mutation
 
 # The package declares requires-python >= 3.10, but `make` cannot enforce that the
 # way pip does. Without this guard a contributor whose default python3 is older
@@ -47,6 +47,21 @@ lint:
 
 # The self-audit's derived numbers are generated, then byte-verified, exactly as
 # SUMMARY.md and frontier.md are. Hand-typed copies of computed values drift.
+# Dogfood the mutation primitive on a real converted trace, not a synthetic
+# fixture, and byte-verify the report. --ci fails unless every required gate is
+# load-bearing and every requirement has a provider.
+harness-mutation:
+	@$(PYTHON) -m agent_economics mutate \
+		--bundle examples/claude-code/bundle.json \
+		--format json --output /tmp/agent-economics-harness-mutation.json --ci >/dev/null
+	@cmp /tmp/agent-economics-harness-mutation.json research/results/harness-mutation/claude-code.json
+	@$(PYTHON) -m agent_economics mutate \
+		--bundle examples/claude-code/bundle.json \
+		--output /tmp/agent-economics-harness-mutation.md --ci >/dev/null
+	@cmp /tmp/agent-economics-harness-mutation.md research/results/harness-mutation/claude-code.md
+	@$(PYTHON) -m agent_economics contract-status \
+		--contract examples/claude-code/conversion-contract.json --ci >/dev/null
+
 self-audit:
 	@$(PYTHON) research/self_audit.py
 
@@ -122,6 +137,7 @@ public-case:
 		|| [ $$? -eq 3 ]
 
 reproduce: check-python test modularity lessons benchmark self-audit-verify \
+	harness-mutation \
 	mutation real-trace \
 	sensitivity evidence-ablation frontier claude-code claude-code-tree otel-genai \
 	public-case

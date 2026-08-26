@@ -1,0 +1,83 @@
+{
+  "baseline_decision": "ASSIST",
+  "dynamic_coverage_survivors": 1,
+  "false_scale_transitions": 1,
+  "fixed_contract_killed": 6,
+  "fixed_contract_score": 1.0,
+  "mutations": [
+    {
+      "baseline_decision": "ASSIST",
+      "coverage": "business_value",
+      "dynamic_coverage_decision": "ASSIST",
+      "false_scale_transition": false,
+      "fixed_contract_decision": "INCOMPLETE",
+      "killed_by_fixed_contract": true,
+      "removed_check_ids": [
+        "gate.net-value"
+      ],
+      "survived_dynamic_coverage": false
+    },
+    {
+      "baseline_decision": "ASSIST",
+      "coverage": "counterfactual",
+      "dynamic_coverage_decision": "ASSIST",
+      "false_scale_transition": false,
+      "fixed_contract_decision": "INCOMPLETE",
+      "killed_by_fixed_contract": true,
+      "removed_check_ids": [
+        "gate.counterfactual"
+      ],
+      "survived_dynamic_coverage": false
+    },
+    {
+      "baseline_decision": "ASSIST",
+      "coverage": "outcome_quality",
+      "dynamic_coverage_decision": "SCALE",
+      "false_scale_transition": true,
+      "fixed_contract_decision": "INCOMPLETE",
+      "killed_by_fixed_contract": true,
+      "removed_check_ids": [
+        "gate.acceptable-rate"
+      ],
+      "survived_dynamic_coverage": true
+    },
+    {
+      "baseline_decision": "ASSIST",
+      "coverage": "runtime_caps",
+      "dynamic_coverage_decision": "ASSIST",
+      "false_scale_transition": false,
+      "fixed_contract_decision": "INCOMPLETE",
+      "killed_by_fixed_contract": true,
+      "removed_check_ids": [
+        "gate.runtime-caps"
+      ],
+      "survived_dynamic_coverage": false
+    },
+    {
+      "baseline_decision": "ASSIST",
+      "coverage": "tail_risk",
+      "dynamic_coverage_decision": "ASSIST",
+      "false_scale_transition": false,
+      "fixed_contract_decision": "INCOMPLETE",
+      "killed_by_fixed_contract": true,
+      "removed_check_ids": [
+        "gate.tail-cost"
+      ],
+      "survived_dynamic_coverage": false
+    },
+    {
+      "baseline_decision": "ASSIST",
+      "coverage": "unit_economics",
+      "dynamic_coverage_decision": "ASSIST",
+      "false_scale_transition": false,
+      "fixed_contract_decision": "INCOMPLETE",
+      "killed_by_fixed_contract": true,
+      "removed_check_ids": [
+        "gate.unit-economics"
+      ],
+      "survived_dynamic_coverage": false
+    }
+  ],
+  "mutations_injected": 6,
+  "unprovided_required_coverage": []
+}
