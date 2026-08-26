@@ -16,6 +16,7 @@ from io import StringIO
 from pathlib import Path
 
 from agent_economics.cli import main
+from agent_economics.delegation import DELEGATION_CLOSURE
 from agent_economics.models import Coverage
 from agent_economics.readiness import REQUIRED_FIELDS, assess, assess_path, render_markdown
 
@@ -26,7 +27,8 @@ CLAUDE_COMPLETE = ROOT / "examples" / "claude-code" / "conversion-contract.json"
 
 class FieldInventoryTest(unittest.TestCase):
     def test_every_required_field_names_a_real_coverage_dimension(self) -> None:
-        valid = {c for c in Coverage}
+        """A dimension is a shipped Coverage member or a declared string one."""
+        valid = {c for c in Coverage} | {DELEGATION_CLOSURE}
         for req in REQUIRED_FIELDS:
             with self.subTest(field=req.path):
                 self.assertIn(req.coverage, valid)
@@ -35,16 +37,26 @@ class FieldInventoryTest(unittest.TestCase):
     def test_every_coverage_dimension_has_at_least_one_field(self) -> None:
         """A dimension no field feeds would be unreachable by any operator."""
         covered = {req.coverage for req in REQUIRED_FIELDS}
-        self.assertEqual(covered, set(Coverage))
+        self.assertEqual(covered, set(Coverage) | {DELEGATION_CLOSURE})
 
 
 class CompletedContractsTest(unittest.TestCase):
     """A contract that really converts must satisfy every field claimed here."""
 
     def test_langfuse_contract_is_complete(self) -> None:
+        """
+        Filled is compared against the APPLICABLE requirements, not all of them.
+        Tool prices and delegation declarations are conditional on what the run
+        contained, so a total-count assertion was fragile before and wrong once
+        delegation was added.
+        """
+        import json
+
+        document = json.loads(COMPLETE.read_text(encoding="utf-8"))
         report = assess_path(COMPLETE)
         self.assertTrue(report.ready, [g.field for g in report.gaps])
-        self.assertEqual(len(report.filled), len(REQUIRED_FIELDS))
+        applicable = [r for r in REQUIRED_FIELDS if r.applies(document)]
+        self.assertEqual(len(report.filled), len(applicable))
 
     def test_claude_code_contract_is_complete(self) -> None:
         report = assess_path(CLAUDE_COMPLETE)

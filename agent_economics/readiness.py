@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .delegation import DELEGATION_CLOSURE
 from .models import Coverage
 
 
@@ -38,7 +39,7 @@ class Requirement:
     """
 
     path: str
-    coverage: Coverage
+    coverage: Coverage | str
     why: str
     applies_when: Callable[[dict[str, Any]], bool] | None = None
 
@@ -48,6 +49,16 @@ class Requirement:
 
 def _has_tool_calls(document: dict[str, Any]) -> bool:
     return bool(document.get("source_inventory", {}).get("tool_call_count"))
+
+
+def _has_delegation(document: dict[str, Any]) -> bool:
+    """Did the run spawn subagents? Only then must delegation be declared."""
+    inventory = document.get("source_inventory", {})
+    return bool(
+        inventory.get("expanded_delegation_count")
+        or inventory.get("subagent_count")
+        or (document.get("delegation") or {}).get("declared")
+    )
 
 
 REQUIRED_FIELDS: tuple[Requirement, ...] = tuple(
@@ -98,6 +109,13 @@ REQUIRED_FIELDS: tuple[Requirement, ...] = tuple(
      "the baseline's cost per attempt"),
     ("baseline.value_per_acceptable_outcome_usd", Coverage.COUNTERFACTUAL,
      "the baseline's value per acceptable outcome"),
+    ("delegation.declared", DELEGATION_CLOSURE,
+     "the delegating calls you undertake to assess; the template pre-fills the "
+     "ones this run actually made",
+     _has_delegation),
+    ("delegation.approved_by", DELEGATION_CLOSURE,
+     "who signed off that this delegated work is in scope",
+     _has_delegation),
 ))
 
 
@@ -196,7 +214,9 @@ def assess(document: dict[str, Any]) -> ReadinessReport:
             gaps.append(
                 Gap(
                     field=requirement.path,
-                    coverage=requirement.coverage.value,
+                    coverage=getattr(
+                        requirement.coverage, "value", requirement.coverage
+                    ),
                     why=requirement.why,
                 )
             )

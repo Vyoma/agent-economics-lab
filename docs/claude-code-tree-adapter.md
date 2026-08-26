@@ -161,3 +161,38 @@ observed `2.1.156` and `2.1.212` sessions. The observed `2.1.162` tree remains
 intentionally refused because it contains root external-prompt boundaries with no
 execution events. The adapter does not silently turn those ambiguous boundaries
 into zero-cost attempts.
+
+## Declaring delegation
+
+A session that spawned subagents must declare each delegating call. The contract
+carries a `delegation` block:
+
+```json
+"delegation": {
+  "approved_by": "who signed this off",
+  "declared": ["cc-tool-01538cb955..."]
+}
+```
+
+`convert --template` pre-fills `declared` with the delegating calls the session
+actually made and leaves `approved_by` blank, the same division as everywhere
+else here: the adapter supplies what it can read off the trace, the operator
+supplies the judgement.
+
+Four things are refused at conversion time, before an incomplete bundle can exist:
+
+| Contract | Result |
+|---|---|
+| No `delegation` block, but the session delegated | Refused, naming each undeclared call |
+| A delegating call missing from `declared` | Refused as undeclared delegation |
+| `declared` naming a call the session never made | Refused; a manifest is not a wish list |
+| `approved_by` left blank | Refused |
+
+A session that delegated nothing needs no block, and one written before this
+existed stays valid. That is why `declared_delegations` only enters the evidence
+digest when it is non-empty: every bundle without delegation hashes exactly as it
+did before.
+
+The declaration is what `agent-economics closure` measures against, so closure
+reflects what an operator actually signed off rather than an argument supplied at
+the call site.

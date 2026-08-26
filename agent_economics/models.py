@@ -246,6 +246,10 @@ class EvidenceBundle:
     digest: str
     task_manifest: dict[str, TaskIdentity] = field(default_factory=dict)
     dependency_edges: tuple[tuple[str, str], ...] = ()
+    # Delegating calls the operator declared in the conversion contract. Empty
+    # for a run that delegated nothing, and for adapters that do not detect
+    # delegation, so it does not disturb the digest of an existing bundle.
+    declared_delegations: tuple[str, ...] = ()
 
     @property
     def source_manifest_id(self) -> str:

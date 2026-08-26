@@ -7,7 +7,7 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
 ## Assurance manifest
 
 - Source adapter: `source.claude-code-session-tree@1`
-- Evidence digest: `ce14291c0a500e227bcc2282cd9147f6f3188f3e94ae7754bff65ea7cd1dcebf`
+- Evidence digest: `1629688354167486ffc7657e778311f0c1916d112e9db6d547655daa228fd6bc`
 - Decision-contract digest: `f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a`
 - Report renderer: `renderer.markdown@1`
 - Enabled checks:

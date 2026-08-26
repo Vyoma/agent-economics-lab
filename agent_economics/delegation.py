@@ -335,14 +335,21 @@ def assess_bundle_closure(
     bundle: EvidenceBundle,
     *,
     delegation_tools: Sequence[str] = ("Task", "Agent"),
-    declared: Sequence[str] = (),
+    declared: Sequence[str] | None = None,
 ) -> ClosureReport:
-    """Convenience wrapper for a whole evidence bundle."""
+    """
+    Closure for a whole evidence bundle.
+
+    Defaults to the bundle's own `declared_delegations`, which the adapters
+    populate from the conversion contract, so closure reflects what the operator
+    actually signed off rather than a parameter supplied at the call site. Pass
+    `declared` explicitly to ask a what-if.
+    """
     return assess_closure(
         bundle.events,
         bundle.dependency_edges,
         delegation_tools=delegation_tools,
-        declared=declared,
+        declared=bundle.declared_delegations if declared is None else declared,
     )
 
 

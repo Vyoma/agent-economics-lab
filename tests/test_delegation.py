@@ -51,24 +51,24 @@ class ShippedTreeFixtureTest(unittest.TestCase):
         self.assertEqual(report.total, 1)
         self.assertEqual(report.delegations[0].name, "Agent")
 
-    def test_undeclared_delegation_is_unaccounted(self) -> None:
+    def test_the_fixture_declares_its_delegation_in_the_contract(self) -> None:
+        """Closure defaults to what the conversion contract actually signed off."""
+        self.assertEqual(len(self.bundle.declared_delegations), 1)
         report = assess_bundle_closure(self.bundle)
+        self.assertEqual(report.unaccounted, ())
+        self.assertEqual(report.closure, 1.0)
+
+    def test_withdrawing_the_declaration_leaves_it_unaccounted(self) -> None:
+        report = assess_bundle_closure(self.bundle, declared=())
         self.assertEqual(len(report.unaccounted), 1)
         self.assertEqual(report.closure, 0.0)
         self.assertGreater(report.unaccounted_cost_usd, 0.0)
 
-    def test_declaring_it_closes_the_contract(self) -> None:
-        ids = tuple(d.event_id for d in assess_bundle_closure(self.bundle).delegations)
-        report = assess_bundle_closure(self.bundle, declared=ids)
-        self.assertEqual(report.unaccounted, ())
-        self.assertEqual(report.closure, 1.0)
-
     def test_closure_varies_and_is_not_an_invariant(self) -> None:
         """Unlike the conformance line, this number moves with the evidence."""
-        ids = tuple(d.event_id for d in assess_bundle_closure(self.bundle).delegations)
         self.assertNotEqual(
+            assess_bundle_closure(self.bundle, declared=()).closure,
             assess_bundle_closure(self.bundle).closure,
-            assess_bundle_closure(self.bundle, declared=ids).closure,
         )
 
 
@@ -154,9 +154,7 @@ class DelegationGateTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.bundle = load_normalized_json_bundle(TREE)
-        cls.declared = tuple(
-            d.event_id for d in assess_bundle_closure(cls.bundle).delegations
-        )
+        cls.declared = tuple(cls.bundle.declared_delegations)
 
     def _decide(self, declared) -> Decision:
         return AssuranceEngine(
@@ -177,3 +175,104 @@ class DelegationGateTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ContractManifestTest(unittest.TestCase):
+    """
+    The declaration comes from the conversion contract, not a call-site argument.
+
+    An adapter that silently converted a session containing undeclared subagents
+    would put unassessed spend inside a bundle that then reads as complete, which
+    is the failure this package exists to refuse. So the refusal happens at
+    conversion, where the operator can still do something about it.
+    """
+
+    SESSION = ROOT / "examples" / "claude-code-tree" / "session.jsonl"
+    CONTRACT = ROOT / "examples" / "claude-code-tree" / "conversion-contract.json"
+    FLAT_SESSION = ROOT / "examples" / "claude-code" / "session.jsonl"
+    FLAT_CONTRACT = ROOT / "examples" / "claude-code" / "conversion-contract.json"
+
+    def _contract(self, path=None) -> dict:
+        import json
+
+        return json.loads((path or self.CONTRACT).read_text(encoding="utf-8"))
+
+    def _convert(self, contract, session=None):
+        from agent_economics.claude_code_tree import claude_code_tree_bundle
+
+        return claude_code_tree_bundle(session or self.SESSION, contract)
+
+    def test_the_shipped_contract_declares_its_delegation(self) -> None:
+        bundle = self._convert(self._contract())
+        self.assertEqual(len(bundle.declared_delegations), 1)
+        self.assertEqual(assess_bundle_closure(bundle).closure, 1.0)
+
+    def test_a_missing_delegation_block_is_refused(self) -> None:
+        contract = self._contract()
+        contract.pop("delegation")
+        with self.assertRaises(ValueError) as ctx:
+            self._convert(contract)
+        self.assertIn("must carry a delegation block", str(ctx.exception))
+
+    def test_an_undeclared_delegation_is_refused(self) -> None:
+        contract = self._contract()
+        contract["delegation"]["declared"] = []
+        with self.assertRaises(ValueError) as ctx:
+            self._convert(contract)
+        self.assertIn("Undeclared delegation", str(ctx.exception))
+
+    def test_declaring_a_call_the_run_never_made_is_refused(self) -> None:
+        """A manifest is not a wish list."""
+        contract = self._contract()
+        contract["delegation"]["declared"].append("cc-tool-invented")
+        with self.assertRaises(ValueError) as ctx:
+            self._convert(contract)
+        self.assertIn("did not make", str(ctx.exception))
+
+    def test_approval_must_be_named(self) -> None:
+        contract = self._contract()
+        contract["delegation"]["approved_by"] = None
+        with self.assertRaises(ValueError) as ctx:
+            self._convert(contract)
+        self.assertIn("approved_by", str(ctx.exception))
+
+    def test_a_non_delegating_session_needs_no_block(self) -> None:
+        """Every contract written before this existed stays valid."""
+        from agent_economics.claude_code import claude_code_bundle
+
+        contract = self._contract(self.FLAT_CONTRACT)
+        self.assertNotIn("delegation", contract)
+        bundle = claude_code_bundle(self.FLAT_SESSION, contract)
+        self.assertEqual(bundle.declared_delegations, ())
+
+    def test_a_non_delegating_session_may_not_claim_one(self) -> None:
+        from agent_economics.claude_code import claude_code_bundle
+
+        contract = self._contract(self.FLAT_CONTRACT)
+        contract["delegation"] = {"approved_by": "x", "declared": ["cc-tool-invented"]}
+        with self.assertRaises(ValueError) as ctx:
+            claude_code_bundle(self.FLAT_SESSION, contract)
+        self.assertIn("did not make", str(ctx.exception))
+
+    def test_the_template_prefills_what_the_run_delegated(self) -> None:
+        """The adapter supplies what it can read; the operator supplies approval."""
+        from agent_economics.claude_code import conversion_contract_template
+        from agent_economics.claude_code_tree import inspect_claude_code_session_tree
+
+        template = conversion_contract_template(
+            inspect_claude_code_session_tree(self.SESSION)
+        )
+        self.assertIsNone(template["delegation"]["approved_by"])
+        self.assertEqual(len(template["delegation"]["declared"]), 1)
+
+    def test_a_non_delegating_template_has_no_delegation_key(self) -> None:
+        """Emitting a null key would change every non-delegating template."""
+        from agent_economics.claude_code import (
+            conversion_contract_template,
+            inspect_claude_code_jsonl,
+        )
+
+        template = conversion_contract_template(
+            inspect_claude_code_jsonl(self.FLAT_SESSION)
+        )
+        self.assertNotIn("delegation", template)

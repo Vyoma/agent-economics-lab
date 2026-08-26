@@ -26,6 +26,8 @@ from .models import (
     TraceEvent,
 )
 
+DELEGATION_TOOL_NAMES = frozenset({"Agent", "Task"})
+
 SOURCE_ID = "source.claude-code-jsonl"
 SOURCE_VERSION = "1"
 CONTRACT_SCHEMA_VERSION = 1
@@ -772,6 +774,13 @@ def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
 def conversion_contract_template(
     session: ClaudeCodeSession,
 ) -> dict[str, Any]:
+    """
+    A contract skeleton for this session.
+
+    A `delegation` block appears only when the session actually delegated. A run
+    that spawned nothing has no delegation to declare, and emitting a null key
+    would change the template of every non-delegating run for no reason.
+    """
     models = sorted({call.model for call in session.model_calls})
     cache_buckets_by_model: dict[str, set[str]] = defaultdict(set)
     billing_contexts_by_model: dict[str, set[str]] = defaultdict(set)
@@ -789,7 +798,8 @@ def conversion_contract_template(
             if count
         }
     )
-    return {
+    delegations = _template_delegations(session)
+    template: dict[str, Any] = {
         "schema_version": CONTRACT_SCHEMA_VERSION,
         "adapter": {
             "source_id": session.source_id,
@@ -883,6 +893,12 @@ def conversion_contract_template(
             "repetition_warning_threshold": None,
         },
     }
+    if delegations:
+        template["delegation"] = {
+            "approved_by": None,
+            "declared": list(delegations),
+        }
+    return template
 
 
 def inspect_to_contract_template(path: str | Path) -> dict[str, Any]:
@@ -1090,6 +1106,85 @@ def _select_tier(
     )
 
 
+def _template_delegations(session: ClaudeCodeSession) -> tuple[str, ...]:
+    """Delegating tool calls in this session, for pre-filling a contract template."""
+    spawning = {parent for parent, _ in session.dependency_edges}
+    return tuple(
+        sorted(
+            call.event_id
+            for call in session.tool_calls
+            if call.name in DELEGATION_TOOL_NAMES and call.event_id in spawning
+        )
+    )
+
+
+def detected_delegations(
+    events: Sequence[TraceEvent],
+    dependency_edges: Sequence[tuple[str, str]],
+) -> tuple[str, ...]:
+    """Event IDs of calls that spawned further agent work, by tool name."""
+    spawning = {parent for parent, _ in dependency_edges}
+    return tuple(
+        sorted(
+            event.event_id
+            for event in events
+            if event.name in DELEGATION_TOOL_NAMES and event.event_id in spawning
+        )
+    )
+
+
+def _parse_delegation_contract(
+    session: ClaudeCodeSession,
+    events: Sequence[TraceEvent],
+    raw: Any,
+) -> tuple[str, ...]:
+    """
+    Read the operator's delegation declaration and refuse anything unaccounted.
+
+    A run that delegated nothing needs no `delegation` block, which keeps every
+    existing contract valid. A run that did delegate must declare each delegating
+    call: an undeclared subagent is work nobody undertook to assess, and letting
+    it convert silently would put unassessed spend inside a bundle that then
+    reads as complete.
+    """
+    detected = detected_delegations(events, session.dependency_edges)
+    if not detected:
+        if raw is not None:
+            declared = _required_mapping(raw, label="delegation").get("declared") or []
+            if declared:
+                raise ValueError(
+                    "delegation.declared names calls this session did not make: "
+                    + ", ".join(sorted(str(d) for d in declared))
+                )
+        return ()
+
+    if raw is None:
+        raise ValueError(
+            "This session delegated to subagents, so the contract must carry a "
+            "delegation block declaring each delegating call: "
+            + ", ".join(detected)
+        )
+    block = _required_mapping(raw, label="delegation")
+    _required_string(block.get("approved_by"), label="delegation.approved_by")
+    declared = tuple(
+        _required_string(value, label="delegation.declared[]")
+        for value in (block.get("declared") or ())
+    )
+    missing = [d for d in detected if d not in set(declared)]
+    if missing:
+        raise ValueError(
+            "Undeclared delegation; these calls spawned agent work no contract "
+            "undertook to assess: " + ", ".join(missing)
+        )
+    unknown = [d for d in declared if d not in set(detected)]
+    if unknown:
+        raise ValueError(
+            "delegation.declared names calls this session did not make: "
+            + ", ".join(sorted(unknown))
+        )
+    return tuple(sorted(declared))
+
+
 def claude_code_bundle_from_session(
     session: ClaudeCodeSession,
     contract: Mapping[str, Any],
@@ -1240,6 +1335,9 @@ def claude_code_bundle_from_session(
             )
         )
 
+    declared_delegations = _parse_delegation_contract(
+        session, events, contract.get("delegation")
+    )
     bundle = make_evidence_bundle(
         events=events,
         outcomes=outcomes,
@@ -1250,6 +1348,7 @@ def claude_code_bundle_from_session(
         source_version=session.source_version,
         task_manifest=task_manifest,
         dependency_edges=session.dependency_edges,
+        declared_delegations=declared_delegations,
     )
     strict_problems = validate_evidence_bundle(
         bundle,
