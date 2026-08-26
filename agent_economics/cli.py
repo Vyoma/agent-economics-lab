@@ -25,6 +25,7 @@ from .claude_code_tree import (
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
 )
+from .delegation import assess_bundle_closure
 from .frontier import FrontierDecision, run_frontier
 from .frontier_report import (
     render_frontier_json,
@@ -104,6 +105,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Completed conversion contract with outcomes, prices, baseline, and policy.",
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
+    closure_parser = subparsers.add_parser(
+        "closure",
+        help="Report how much delegated agent work the contract accounts for.",
+    )
+    closure_parser.add_argument("--bundle", required=True)
+    closure_parser.add_argument(
+        "--declared", nargs="*", default=(),
+        help="Event IDs of delegating calls the contract anticipated.",
+    )
+    closure_parser.add_argument(
+        "--ci", action="store_true",
+        help="Exit 1 if any delegated work is unaccounted for.",
+    )
+
     status_parser = subparsers.add_parser(
         "contract-status",
         help="Report which operator fields a conversion contract is still "
@@ -370,6 +385,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         except (RuntimeError, ValueError, OSError) as e:
             print(f"Error: {e}", file=sys.stderr)
             return 2
+    if args.command == "closure":
+        try:
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        report = assess_bundle_closure(bundle, declared=tuple(args.declared))
+        print(json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return 1 if args.ci and report.unaccounted else 0
     if args.command == "contract-status":
         try:
             report = assess_path(Path(args.contract))

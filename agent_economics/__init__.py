@@ -35,6 +35,12 @@ from .claude_code_tree import (
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
 )
+from .delegation import (
+    DELEGATION_CLOSURE,
+    ClosureReport,
+    assess_bundle_closure,
+    delegation_closure_gate,
+)
 from .evidence import make_evidence_bundle
 from .frontier import (
     ArmSummary,
@@ -93,6 +99,7 @@ __all__ = [
     "ASSURANCE_ENGINE_IMPLEMENTATION",
     "DECISION_CONTRACT_SCHEMA",
     "DEFAULT_REQUIRED_COVERAGE",
+    "DELEGATION_CLOSURE",
     "ROUTING_SEMANTICS",
     "ArmSummary",
     "AssuranceCase",
@@ -104,6 +111,7 @@ __all__ = [
     "CheckSpec",
     "CheckStatus",
     "ClaudeCodeSession",
+    "ClosureReport",
     "Coverage",
     "Decision",
     "EconomicPolicy",
@@ -121,6 +129,7 @@ __all__ = [
     "TaskIdentity",
     "TraceEvent",
     "__version__",
+    "assess_bundle_closure",
     "claude_code_bundle",
     "claude_code_bundle_from_session",
     "claude_code_tree_bundle",
@@ -132,6 +141,7 @@ __all__ = [
     "decision_contract_manifest",
     "default_checks",
     "default_engine",
+    "delegation_closure_gate",
     "evaluate",
     "evaluate_bundle",
     "evaluate_frontier",

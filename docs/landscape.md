@@ -230,3 +230,44 @@ verdict-level ablation as a feature. Inspect, LangSmith, Phoenix, Weave,
 Promptfoo, Ragas, DeepEval, HELM and lm-evaluation-harness have nothing here,
 and several actively manufacture silent passes. That is a gap in tooling, not a
 gap in the literature, and it is the honest form of the claim.
+
+## Coverage closure over dynamic delegation
+
+The fixed-contract argument assumes required evidence can be enumerated before
+the run. That holds for an agent calling a model in a loop. It stops holding when
+the agent spawns subagents at runtime, because the shape of what it did is not
+known until it has done it. A subagent can call tools nobody wrote a gate for, and
+its cost rolls into the parent's totals as ordinary compute.
+
+Read literally, this package's own logic makes such a run unassessable: evidence
+exists that no gate covers, so INCOMPLETE is the only honest verdict. Read
+naively, that makes every dynamic agent permanently incomplete. `delegation.py`
+takes the third option: require closure rather than enumeration. A contract need
+not anticipate each delegation; it must require that each one is accounted for.
+
+| Prior art | What it establishes |
+|---|---|
+| Modular and compositional assurance cases; contract-based design (Sangiovanni-Vincentelli et al.) | One argument discharging obligations onto another, with interface contracts between components. The composition idea is not new. |
+| Dynamic and through-life safety cases (Denney, Pai and others) | Assurance arguments that are updated as a system operates rather than fixed at certification. The temporal idea is not new either. |
+| GSN "away goals" and module interfaces | An argument explicitly deferring a claim to another argument, which is what a declared delegation does. |
+| Distributed tracing (OpenTelemetry span parentage) | The graph walked here. Tracing records the structure; it does not gate on whether the structure was anticipated. |
+
+**What appears to be absent**: any of this applied to structure discovered at
+runtime, in an agent delegation tree, as a shipped check that refuses. Tracing
+tools show the tree. Assurance frameworks compose arguments over an architecture
+known in advance. Nothing observed measures the share of delegated compute that
+falls under a contract, or fails a build when it does not.
+
+The number is `closure`: accounted delegated spend over total delegated spend. It
+is weighted by cost rather than count, because one undeclared subagent that burns
+the run matters more than five that return immediately. Unlike the conformance
+line elsewhere in this package, it is not an invariant. It varies with the run and
+it degrades as an agent becomes more dynamic, which is the direction the field is
+moving. On the shipped session-tree fixture it is 0% undeclared and 100% declared.
+
+Two honest limits. It measures declaration, not quality: a declared subagent is
+accounted for even if nobody looked at what it did. And detection is authoritative
+on tool name rather than graph shape, because inferring delegation from structure
+conflated sequencing with delegation and reported a file read as a subagent. Tool
+calls that spawned model work under some other name are surfaced as suspected, and
+never counted as closed.
