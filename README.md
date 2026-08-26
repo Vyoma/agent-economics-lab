@@ -392,12 +392,12 @@ executable lessons, both ablation benchmarks, the mutation score, the real-trace
 verdict, the sensitivity sweep, the Claude Code conversion, and byte-for-byte
 frontier and both adapter artifact verifications.
 
-Every number this README publishes is guarded by at least one of two mechanisms,
-and some by both: a literal assertion in `tests/`, or a byte-comparison against
-a committed artifact inside a `make` target. Both run in CI. No test parses this
+Every measured result this README publishes is guarded by at least one of two
+mechanisms, and some by both: a literal assertion in `tests/`, or a byte-comparison
+against a committed artifact, run either from a test or from a `make` target. Both
+run in CI. `make coverage` is not part of `make reproduce` and does not run in CI. No test parses this
 README, so the link between a sentence here and the assertion that guards it is
-convention, not mechanism. `make coverage` reproduces the changelog's coverage
-figures. The audit that established this, including where it is still weak, is
+convention, not mechanism. The audit that established this, including where it is still weak, is
 in [the self-audit](research/SELF_AUDIT.md).
 
 Python 3.10 or newer is required. If your default `python3` is older, pass the

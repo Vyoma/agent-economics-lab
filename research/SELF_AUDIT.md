@@ -9,9 +9,10 @@ one pass, roughly forty minutes. They found three places where this repository
 did the exact thing it tells other people not to do.
 
 All three passed CI. One had been in the repository since its first commit. The
-other two we introduced ourselves, minutes earlier, in the commit meant to fix
-this exact class of problem. That is disclosed in full below, because it changes
-what the finding is evidence of.
+other two became checks in a commit we wrote minutes earlier, the one meant to fix
+this exact class of problem; one of those two was dormant code that had sat on
+`main` for weeks until that commit made it load-bearing. That is disclosed in full
+below, because it changes what the findings are evidence of.
 
 ## What we pointed at it
 
@@ -25,9 +26,10 @@ Three agents, non-overlapping scopes, run concurrently:
 
 The invariant review came back clean, and it earned that verdict: rather than
 reading diff hunks, it parsed every changed module before and after, stripped the
-import nodes, and compared the ASTs. Eleven of the sixteen changed engine files were AST-identical
-modulo imports; the other five were read individually and are benign. The decision-contract digest and all four example evidence digests were
-unchanged. The gate-removal kill rate held at 588/588.
+import nodes, and compared the ASTs. Eleven of the sixteen changed engine files were
+AST-identical modulo imports; the other five were read individually and are benign.
+The decision-contract digest and all four example evidence digests were unchanged.
+The gate-removal kill rate held at 588/588.
 
 The other two found the following.
 
@@ -52,6 +54,10 @@ The fix is two tokens:
 ```make
 	@set -e; for lesson in lessons/*.py; do PYTHONPATH=. $(PYTHON) "$$lesson"; done
 ```
+
+Since first publishing this, `tests/test_lessons.py` also asserts the lesson count
+and runs all five from the test suite, so the target no longer has to be written
+correctly for a broken lesson to be caught.
 
 Verified by breaking lesson `00` in place and confirming the target now fails, then
 restoring and confirming it passes. All five lessons pass today, so this was
@@ -127,7 +133,7 @@ checked. `tests/test_published_frontier_figures.py` locks the frontier table.
 committed artifact `research/results/frontier/frontier.json`. It catches an edit
 to that file. It does not catch drift originating upstream of it. Applying the
 same cost perturbation at current HEAD and running the repository's own question 2
-below — change a number, run only the test suite — gives **210 tests, OK**, while
+below — change a number, run only the test suite — gives **213 tests, OK**, while
 `make frontier` correctly exits 2.
 
 So the honest status is: the frontier table is guarded by a literal test against
@@ -186,8 +192,8 @@ full pipeline is green and that feels like the same thing.
 This is a self-audit, not an independent one. We wrote both the method and the
 target. Several things a hostile reader would reach for, stated before they have to:
 
-**Only one of the three defects reached `main`.** Finding 1 dates to the
-repository's first commit and is genuine long-standing state.
+**Only one of the three reached `main` as a check that could not fail.** Finding 1
+dates to the repository's first commit and is genuine long-standing state.
 
 Finding 2 is mixed: the unconditional `return 0` shipped on `main` four weeks
 earlier, but it was harmless prose until the commit under audit *promoted the

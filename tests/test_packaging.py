@@ -71,7 +71,31 @@ class RequiresPythonTest(unittest.TestCase):
         pyproject = (ROOT / "pyproject.toml").read_text()
         match = re.search(r'requires-python\s*=\s*">=(\d+)\.(\d+)"', pyproject)
         self.assertIsNotNone(match, "pyproject.toml has no requires-python floor")
-        self.assertGreaterEqual((int(match.group(1)), int(match.group(2))), (3, 10))
+        floor = (int(match.group(1)), int(match.group(2)))
+        self.assertGreaterEqual(floor, (3, 10))
+        # One-sided is not enough: README and CONTRIBUTING both publish "3.10+",
+        # so raising the floor must fail here rather than silently falsifying them.
+        self.assertEqual(floor, (3, 10))
+
+
+
+class ReviewAgentInventoryTest(unittest.TestCase):
+    """README says "three review agents". Nothing asserted the count."""
+
+    def test_three_agent_definitions_are_checked_in(self) -> None:
+        agents = sorted((ROOT / ".claude" / "agents").glob("*.md"))
+        self.assertEqual(
+            [p.stem for p in agents],
+            ["claims-auditor", "contract-invariant-guard", "repro-drift-check"],
+        )
+
+    def test_every_agent_definition_declares_name_and_description(self) -> None:
+        """A definition missing either field never loads, silently."""
+        for path in sorted((ROOT / ".claude" / "agents").glob("*.md")):
+            with self.subTest(agent=path.stem):
+                head = path.read_text(encoding="utf-8").split("---")[1]
+                self.assertIn("name:", head)
+                self.assertIn("description:", head)
 
 
 if __name__ == "__main__":
