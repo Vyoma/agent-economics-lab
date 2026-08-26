@@ -54,7 +54,7 @@ class MutationOnRealTraceTest(unittest.TestCase):
         self.assertEqual(self.report.unprovided_coverage, ())
 
     def test_fixed_contract_kills_every_mutation(self) -> None:
-        self.assertEqual(self.report.fixed_contract_score, 1.0)
+        self.assertTrue(self.report.fail_closed_conformance)
         for m in self.report.mutations:
             with self.subTest(coverage=m.coverage):
                 self.assertEqual(m.fixed_contract_decision, Decision.INCOMPLETE.value)
@@ -85,7 +85,7 @@ class MutationOnPassingBundleTest(unittest.TestCase):
         self.assertEqual(self.report.flips, ())
 
     def test_fixed_contract_still_refuses_every_removal(self) -> None:
-        self.assertEqual(self.report.fixed_contract_score, 1.0)
+        self.assertTrue(self.report.fail_closed_conformance)
 
 
 class CustomCheckSetTest(unittest.TestCase):
@@ -119,7 +119,8 @@ class MutateCliTest(unittest.TestCase):
     def test_markdown_output(self) -> None:
         code, text = self._run(["mutate", "--bundle", str(ASSIST_BUNDLE)])
         self.assertEqual(code, 0)
-        self.assertIn("Harness Mutation Score", text)
+        self.assertIn("Gate Removal Conformance", text)
+        self.assertNotIn("Score", text)  # it is a conformance test, not a score
 
     def test_json_output_is_machine_readable(self) -> None:
         code, text = self._run(
@@ -127,7 +128,7 @@ class MutateCliTest(unittest.TestCase):
         )
         self.assertEqual(code, 0)
         payload = json.loads(text)
-        self.assertEqual(payload["fixed_contract_score"], 1.0)
+        self.assertTrue(payload["fail_closed_conformance"])
         self.assertEqual(payload["mutations_injected"], len(DEFAULT_REQUIRED_COVERAGE))
 
     def test_ci_passes_when_every_gate_is_load_bearing(self) -> None:
@@ -196,7 +197,7 @@ class CustomCoverageDimensionTest(unittest.TestCase):
         self.assertEqual(report.total, 1)
         self.assertEqual(report.mutations[0].coverage, "pii_safety")
         self.assertEqual(report.mutations[0].removed_check_ids, ("gate.pii",))
-        self.assertEqual(report.fixed_contract_score, 1.0)
+        self.assertTrue(report.fail_closed_conformance)
 
     def test_custom_and_builtin_dimensions_mix(self) -> None:
         from agent_economics.models import Coverage
@@ -211,7 +212,7 @@ class CustomCoverageDimensionTest(unittest.TestCase):
             {m.coverage for m in report.mutations},
             {"jailbreak_safety", "outcome_quality"},
         )
-        self.assertEqual(report.fixed_contract_score, 1.0)
+        self.assertTrue(report.fail_closed_conformance)
 
     def test_a_custom_dimension_with_no_provider_is_reported(self) -> None:
         report = mutate(
@@ -248,3 +249,66 @@ class ContractDigestStabilityTest(unittest.TestCase):
             digest,
             "f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a",
         )
+
+
+class ConformanceIsAnInvariantNotAScoreTest(unittest.TestCase):
+    """
+    A prior-art audit found the headline score analytically constant: removing a
+    dimension's only providers puts it in `required - enabled`, so the fixed
+    contract returns INCOMPLETE unconditionally. Publishing that as "100% of
+    gates are load-bearing" was reporting a tautology as a finding.
+
+    These tests pin the honest behaviour: conformance always holds, so it is a
+    regression test rather than a measurement, and the varying numbers describe
+    the bundle rather than the harness.
+    """
+
+    def test_conformance_holds_for_every_subset_of_the_shipped_checks(self) -> None:
+        from itertools import combinations
+
+        bundle = _bundle(ASSIST_BUNDLE)
+        checks = tuple(default_checks())
+        seen = 0
+        for size in range(1, len(checks) + 1):
+            for subset in combinations(checks, size):
+                coverage = frozenset(c for chk in subset for c in chk.covers)
+                if not coverage:
+                    continue
+                with self.subTest(checks=[c.id for c in subset]):
+                    self.assertTrue(mutate(bundle, subset, coverage).fail_closed_conformance)
+                seen += 1
+        self.assertGreater(seen, 200, "sweep did not exercise the subset space")
+
+    def test_pivotal_count_describes_the_bundle_not_the_harness(self) -> None:
+        """Same checks, looser policy: every dimension stops being pivotal."""
+        from dataclasses import replace
+
+        bundle = _bundle(ASSIST_BUNDLE)
+        strict = mutate(bundle)
+        loose = mutate(
+            replace(
+                bundle,
+                policy=replace(
+                    bundle.policy,
+                    min_acceptable_rate=0.0,
+                    max_cost_per_acceptable_outcome_usd=1e9,
+                    max_p95_task_cost_usd=1e9,
+                    min_expected_net_value_per_attempt_usd=-1e9,
+                    min_incremental_net_value_vs_baseline_usd=-1e9,
+                    max_trace_cost_per_task_usd=1e9,
+                    max_calls_per_task=10**6,
+                ),
+            )
+        )
+        self.assertEqual(strict.baseline_decision, Decision.ASSIST.value)
+        self.assertEqual(loose.baseline_decision, Decision.SCALE.value)
+        self.assertEqual(len(strict.flips), 1)
+        self.assertEqual(len(loose.flips), 0)
+
+    def test_ci_gates_on_unprovided_coverage(self) -> None:
+        """The one harness property worth failing a build on."""
+        report = mutate(
+            _bundle(ASSIST_BUNDLE), tuple(default_checks()), frozenset({"never_supplied"})
+        )
+        self.assertEqual(report.unprovided_coverage, ("never_supplied",))
+        self.assertTrue(report.fail_closed_conformance)

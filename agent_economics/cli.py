@@ -130,7 +130,8 @@ def build_parser() -> argparse.ArgumentParser:
     mutate_parser.add_argument(
         "--ci",
         action="store_true",
-        help="Exit 1 unless every required gate is load-bearing.",
+        help="Exit 1 if any required coverage dimension has no enabled provider, "
+             "or if the fail-closed invariant is broken.",
     )
 
     subparsers.add_parser("capabilities")
@@ -396,13 +397,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.output:
             Path(args.output).write_text(rendered, encoding="utf-8")
         print(rendered)
-        # Gate on the fixed contract, not on the dynamic-coverage comparison.
-        # When the baseline is SCALE every removal trivially still reads SCALE
-        # under dynamic coverage; that is the comparison being illustrated, not
-        # a defect in this harness. What must hold is that the fixed contract
-        # refuses every removal, and that every requirement has a provider.
+        # Gate on the two things that are properties of the harness.
+        #
+        # unprovided_coverage is the real one: a required dimension no enabled
+        # check supplies is a contract that cannot be met.
+        #
+        # fail_closed_conformance is an invariant, so this disjunct cannot fire
+        # against the shipped engine. It is kept deliberately, as a regression
+        # test that would catch the invariant being broken by a future change,
+        # and the help text no longer claims it measures anything else.
+        #
+        # Deliberately NOT gated on: survivors and flips. Those describe this
+        # bundle under this policy, not the check set, and loosening thresholds
+        # until everything passes would make every dimension "survive".
         if args.ci and (
-            report.fixed_contract_score < 1.0 or report.unprovided_coverage
+            report.unprovided_coverage or not report.fail_closed_conformance
         ):
             return 1
         return 0

@@ -1,14 +1,15 @@
-# Harness Mutation Score
+# Gate Removal Conformance
 
 - Baseline decision: **ASSIST**
 - Gate removals injected: **6**
-- Killed by the fixed contract: **6 / 6** (100.0%)
-- Survived under dynamic coverage: **1**
-- False SCALE transitions: **1**
+- Fail-closed conformance: **held** (6 / 6 removals refused)
+- Pivotal for this bundle under dynamic coverage: **1**
 
-The kill rate is the score for *this* harness. The dynamic-coverage column
-shows what an engine that derives its requirements from whichever checks
-happen to be enabled would have returned instead.
+Conformance is an invariant, not a score: a fixed contract refuses every
+removal by construction, so this line is a regression test and reads `held`
+for any harness. The pivotal count is a sensitivity analysis of *this bundle
+under this policy*, not a property of the check set: loosen the thresholds
+until nothing fails and every dimension becomes non-pivotal.
 
 | Removed coverage | Checks removed | Fixed contract | Dynamic coverage |
 |---|---|---|---|
@@ -19,6 +20,6 @@ happen to be enabled would have returned instead.
 | `tail_risk` | `gate.tail-cost` | INCOMPLETE | ASSIST |
 | `unit_economics` | `gate.unit-economics` | INCOMPLETE | ASSIST |
 
-A gate whose removal still yields SCALE is not load-bearing: the harness
-cannot tell whether that evidence was ever collected. A missing gate is not
-a passing gate.
+The actionable line is unprovided coverage, if any: a required dimension no
+enabled check supplies is a contract that cannot be met, and it is the one
+result here that is a property of the harness rather than of this bundle.

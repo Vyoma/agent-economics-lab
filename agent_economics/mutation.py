@@ -1,15 +1,39 @@
 """
 Mutation testing for the evaluation harness itself.
 
-Standard mutation testing injects faults into your source and asks whether the
-tests catch them. This injects *gate removals* into the decision harness and
-asks whether the engine still refuses to return a verdict.
+What this is, stated precisely, because a vaguer claim did not survive review.
 
-The question it answers is one no evaluation framework currently reports: how
-load-bearing is each check in your eval? A score reported without it is
-unfalsifiable about its own construction. "All enabled checks passed" and "all
-required checks passed" are different claims, and only the second one is a
-decision.
+It removes every provider of one required coverage dimension, re-evaluates, and
+records what two engines do about it. It is two different things at once, and
+conflating them was the error:
+
+1. **A conformance test for the fail-closed invariant.** Under a fixed contract
+   the answer is INCOMPLETE by construction: removing a dimension's only
+   providers puts it in `required - enabled`, and the engine refuses. That
+   verdict is analytically constant, not a measurement. It is worth running in
+   CI as a regression test on the invariant, and it is worth nothing as a score.
+   A sweep of all 252 non-empty subsets of the shipped checks returns 1.0 every
+   time. Reporting it as "100% of gates are load-bearing" would be reporting a
+   tautology as a finding.
+
+2. **A per-bundle sensitivity analysis.** Under an engine that derives its
+   requirements from whichever checks are currently enabled, removing a gate can
+   turn a non-green verdict green. That number does vary, and it is genuinely
+   informative, but it describes *this bundle under this policy*, not the check
+   set. Loosen the thresholds until everything passes and every dimension
+   "survives", because no gate is pivotal when nothing is failing. Code coverage
+   does not behave this way, so the analogy to it does not hold.
+
+The statically useful output is `unprovided_coverage`: required dimensions that
+no enabled check supplies at all. That is a real defect, computable without
+evaluating anything, and it is what `--ci` should fail on.
+
+Prior art, because this is a narrower contribution than it first looked: mutating
+the checker rather than the design goes back to Di Guglielmo et al. (DATE 2010);
+"is this check load-bearing" is Schuler and Zeller's checked coverage; coverage
+metrics over a specification by mutation are Chockler, Kupferman and Vardi; and
+leave-one-out gate ablation for LLM release decisions was published in
+arXiv:2603.15676 months before this package existed. See docs/landscape.md.
 
 This works on any EvidenceBundle and any check set, including checks you wrote.
 The required coverage is read from the contract and the providers of each
@@ -20,9 +44,9 @@ the six gates this package ships.
     from agent_economics.mutation import mutate
 
     report = mutate(load_normalized_json_bundle("bundle.json"))
-    print(report.fixed_contract_score)      # 1.0 means every gate is load-bearing
-    for m in report.survivors:
-        print(m.coverage, "can be removed without the harness noticing")
+    report.unprovided_coverage      # required dimensions nothing supplies: a defect
+    report.fail_closed_conformance  # invariant held; constant, not a score
+    report.flips                    # gates pivotal for THIS bundle under THIS policy
 """
 from __future__ import annotations
 
@@ -88,8 +112,16 @@ class MutationReport:
         return sum(1 for m in self.mutations if m.killed_by_fixed_contract)
 
     @property
-    def fixed_contract_score(self) -> float:
-        return self.fixed_contract_killed / self.total if self.total else 1.0
+    def fail_closed_conformance(self) -> bool:
+        """
+        Did the fixed contract refuse every removal?
+
+        This is an invariant, not a score. It is True for every input the engine
+        can be given, so it earns its place as a regression test that would catch
+        the invariant being broken, and nothing more. Do not publish it as a
+        measurement of a harness.
+        """
+        return self.fixed_contract_killed == self.total
 
     @property
     def survivors(self) -> tuple[Mutation, ...]:
@@ -104,7 +136,7 @@ class MutationReport:
             "baseline_decision": self.baseline_decision,
             "mutations_injected": self.total,
             "fixed_contract_killed": self.fixed_contract_killed,
-            "fixed_contract_score": self.fixed_contract_score,
+            "fail_closed_conformance": self.fail_closed_conformance,
             "dynamic_coverage_survivors": len(self.survivors),
             "false_scale_transitions": len(self.flips),
             "unprovided_required_coverage": list(self.unprovided_coverage),
@@ -201,18 +233,19 @@ def mutate(
 
 def render_markdown(report: MutationReport) -> str:
     lines = [
-        "# Harness Mutation Score",
+        "# Gate Removal Conformance",
         "",
         f"- Baseline decision: **{report.baseline_decision}**",
         f"- Gate removals injected: **{report.total}**",
-        f"- Killed by the fixed contract: **{report.fixed_contract_killed} / "
-        f"{report.total}** ({report.fixed_contract_score:.1%})",
-        f"- Survived under dynamic coverage: **{len(report.survivors)}**",
-        f"- False SCALE transitions: **{len(report.flips)}**",
+        f"- Fail-closed conformance: **{'held' if report.fail_closed_conformance else 'BROKEN'}** "
+        f"({report.fixed_contract_killed} / {report.total} removals refused)",
+        f"- Pivotal for this bundle under dynamic coverage: **{len(report.flips)}**",
         "",
-        "The kill rate is the score for *this* harness. The dynamic-coverage column\n"
-        "shows what an engine that derives its requirements from whichever checks\n"
-        "happen to be enabled would have returned instead.",
+        "Conformance is an invariant, not a score: a fixed contract refuses every",
+        "removal by construction, so this line is a regression test and reads `held`",
+        "for any harness. The pivotal count is a sensitivity analysis of *this bundle",
+        "under this policy*, not a property of the check set: loosen the thresholds",
+        "until nothing fails and every dimension becomes non-pivotal.",
         "",
     ]
     if report.unprovided_coverage:
@@ -235,9 +268,9 @@ def render_markdown(report: MutationReport) -> str:
         )
     lines += [
         "",
-        "A gate whose removal still yields SCALE is not load-bearing: the harness",
-        "cannot tell whether that evidence was ever collected. A missing gate is not",
-        "a passing gate.",
+        "The actionable line is unprovided coverage, if any: a required dimension no",
+        "enabled check supplies is a contract that cannot be met, and it is the one",
+        "result here that is a property of the harness rather than of this bundle.",
         "",
     ]
     return "\n".join(lines)

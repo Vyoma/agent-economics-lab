@@ -131,29 +131,25 @@ and the engine treats that exactly as it treats a disabled gate: `INCOMPLETE` is
 the only legal verdict until the fields are supplied. Add `--ci` to fail a build
 on an incomplete contract.
 
-## Mutation-test your own harness
-
-The 588-mutation result above is this repository grading itself on a synthetic
-fixture. The same primitive runs on any evidence bundle, including one converted
-from your own traces, and answers a question no evaluation framework currently
-reports: **how load-bearing is each check in your eval?**
+## Check that a required gate cannot silently vanish
 
 ```bash
-agent-economics mutate --bundle examples/claude-code/bundle.json
+agent-economics mutate --bundle examples/claude-code/bundle.json --ci
 ```
 
 ```text
-# Harness Mutation Score
+# Gate Removal Conformance
 
 - Baseline decision: **ASSIST**
 - Gate removals injected: **6**
-- Killed by the fixed contract: **6 / 6** (100.0%)
-- Survived under dynamic coverage: **1**
-- False SCALE transitions: **1**
+- Fail-closed conformance: **held** (6 / 6 removals refused)
+- Pivotal for this bundle under dynamic coverage: **1**
 
-The kill rate is the score for *this* harness. The dynamic-coverage column
-shows what an engine that derives its requirements from whichever checks
-happen to be enabled would have returned instead.
+Conformance is an invariant, not a score: a fixed contract refuses every
+removal by construction, so this line is a regression test and reads `held`
+for any harness. The pivotal count is a sensitivity analysis of *this bundle
+under this policy*, not a property of the check set: loosen the thresholds
+until nothing fails and every dimension becomes non-pivotal.
 
 | Removed coverage | Checks removed | Fixed contract | Dynamic coverage |
 |---|---|---|---|
@@ -164,19 +160,35 @@ happen to be enabled would have returned instead.
 | `tail_risk` | `gate.tail-cost` | INCOMPLETE | ASSIST |
 | `unit_economics` | `gate.unit-economics` | INCOMPLETE | ASSIST |
 
-A gate whose removal still yields SCALE is not load-bearing: the harness
-cannot tell whether that evidence was ever collected. A missing gate is not
-a passing gate.
+The actionable line is unprovided coverage, if any: a required dimension no
+enabled check supplies is a contract that cannot be met, and it is the one
+result here that is a property of the harness rather than of this bundle.
 ```
 
-That is a real Claude Code session. Its honest verdict is `ASSIST`. Disable the
-one gate carrying that verdict and an engine that derives its requirements from
-whichever checks are enabled returns `SCALE` instead. The fixed contract refuses
-all six removals.
+Two different things are reported here, and it is worth being precise about
+which is which, because a first version of this section was not.
 
-Nothing here is specific to the six gates this package ships. A coverage
-dimension is either one of those or a plain string you defined, so a PII gate, a
-jailbreak gate, or a regression eval is a dimension like any other:
+**Conformance is an invariant, not a score.** Under a fixed contract, removing a
+dimension's only providers puts it in `required - enabled`, so the engine returns
+`INCOMPLETE` by construction. Sweeping all 252 non-empty subsets of the shipped
+checks returns `held` every time. That makes it a useful CI regression test on
+the invariant and a worthless measurement of a harness. It is not evidence that
+your gates are load-bearing.
+
+**The pivotal count is a sensitivity analysis of one bundle.** Under an engine
+that derives its requirements from whichever checks happen to be enabled,
+removing a gate can turn a non-green verdict green. That number varies and is
+informative, but it describes this bundle under this policy. Loosen the
+thresholds until nothing fails and every dimension stops being pivotal, because
+no gate is pivotal when nothing is failing.
+
+**The actionable output is `unprovided_coverage`**: a required dimension no
+enabled check supplies at all. That is a property of the harness, computable
+without evaluating anything, and it is what `--ci` fails on.
+
+A coverage dimension is either one of the six this package ships or a plain
+string you defined, so a PII gate, a jailbreak gate, or a regression eval is a
+dimension like any other:
 
 ```python
 from agent_economics.mutation import mutate
@@ -186,19 +198,17 @@ pii = CheckSpec(id="gate.pii", version="1", mode=CheckMode.GATE,
                 failure_route=Decision.STOP)
 
 report = mutate(my_bundle, my_checks + (pii,), frozenset({"pii_safety"}))
-report.fixed_contract_score        # 1.0 means every gate is load-bearing
-report.survivors                   # the gates that can vanish unnoticed
-report.unprovided_coverage         # requirements nothing supplies at all
+report.unprovided_coverage      # dimensions nothing supplies: a real defect
+report.fail_closed_conformance  # invariant held; constant, not a score
+report.flips                    # pivotal for THIS bundle under THIS policy
 ```
 
-This claim was false when first written: `Coverage` was a closed enum and a
-custom dimension crashed. An adversarial audit caught it. `tests/test_mutation.py`
-now asserts it, and the shipped contract digest is unchanged, so every committed
-artifact still verifies.
-
-Add `--ci` to fail the build unless every required gate is load-bearing and
-every requirement has a provider. Every eval reports a score; this reports
-whether that score could have survived one evaluator being switched off.
+This is a narrower contribution than an earlier draft of this section claimed.
+Mutating the checker rather than the design dates to 2010, "is this check
+load-bearing" is Schuler and Zeller's checked coverage, and leave-one-out gate
+ablation for LLM release decisions was published before this package existed.
+[The landscape](docs/landscape.md#mutating-the-checker-rather-than-the-code)
+has the citations and what is left over.
 
 ## Delete actual evidence
 

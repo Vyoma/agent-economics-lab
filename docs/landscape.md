@@ -170,3 +170,63 @@ Do not build yet:
 Offline source mappers are a contribution lane; live SDK clients and runtime
 instrumentation are not. Extensions beyond this boundary should be pulled by real
 case-study contributions, not guessed in advance.
+
+## Mutating the checker rather than the code
+
+An earlier draft of the README claimed this package reports "a question no
+evaluation framework currently reports". An adversarial prior-art sweep
+falsified that. The idea of mutating the checking artifact instead of the thing
+under test is an established sub-genre, and leave-one-out gate ablation has
+already been published for LLM release decisions. The citations belong here
+because every other claim in this repository has a landscape entry and this one
+did not, which was itself a tell.
+
+| Prior art | What it establishes |
+|---|---|
+| Di Guglielmo, Fummi, Pravadelli, *Vacuity analysis for property qualification by mutation of checkers*, DATE 2010 | Mutating the **checkers** rather than the design, to find properties that pass vacuously. The mechanism, sixteen years earlier. |
+| Schuler and Zeller, *Checked coverage*, ICST 2011 / STVR 2013 | "Which executed code actually influences what the oracle checks." The load-bearing question, for test suites. |
+| Chockler, Kupferman, Vardi, *Coverage metrics for formal verification* | A coverage metric over a specification, built by mutation. The claimed analogy already exists. |
+| Jahangirova, Clark, Harman, Tonella, *Test oracle assessment and improvement*, ISSTA 2016; OASIs, ISSTA 2018 | Grading the oracle by mutation. |
+| Vera-Pérez, Monperrus, Baudry, extreme mutation / pseudo-tested methods (Descartes) | Delete a whole unit; if nothing notices, it was pseudo-tested. |
+| Black, Okun, Yesha, *Specification mutation*, ASE 2000 | Mutating specifications rather than code. |
+| Synopsys Certitude, functional qualification | Commercial tooling that measures a verification environment's ability to detect faults. |
+| Adebayo et al., *Sanity Checks for Saliency Maps*, NeurIPS 2018 | Destroy what a method claims to depend on and confirm its output changes. The cleanest ML ancestor. |
+| Maiorano, *Automated Self-Testing as a Quality Gate*, arXiv:2603.15676, March 2026 | **The strongest citation against novelty.** Five quality gates over an LLM system, promote/hold/rollback verdicts, and gate ablation reported in the abstract: removing evidence coverage from the decision logic would have promoted both severe failures. Same domain, same mechanism, predating this package. |
+| Bloomfield and Rushby, *Confidence in Assurance 2.0 Cases*, arXiv:2409.10665 | "Excising any subtree will increase probabilistic confidence at the top node." The ablation phenomenon, published as a known pathology. |
+| SPADE, VLDB 2024 (deployed in LangSmith) | Selects a minimal assertion set meeting coverage constraints. Deciding which assertions can be dropped is a load-bearingness computation, shipped commercially. |
+
+### Refusing to answer when evidence is absent
+
+Also not novel, and established in three literatures:
+
+| Prior art | What it establishes |
+|---|---|
+| Assurance 2.0 / Clarissa (SRI, Adelard), arXiv:2409.10665 | Evaluates over true / false / **unsupported**, propagating: an unsupported antecedent makes the parent unsupported. The required semantics, exactly. |
+| OMG SACM 2.1; GSN Community Standard | `needsSupport` as a machine-readable state for a claim with no evidence; the undeveloped-goal diamond. `unprovided_coverage` is `needsSupport`, restated. |
+| Three-valued model checking; runtime verification | `inconclusive` verdicts by design. |
+| Fail-closed design | The ordinary security-engineering name for the property. |
+| *Evidence-Driven Release Gates for LLM Sales Agents* (June 2026) | Ships promote/hold/rollback with a coverage metric and states "incomplete evidence is not a pass" and "a judge outage that leaves a level unscored is a coverage hole rather than a silent pass" — this repository's thesis sentence, in its domain, before its first commit. |
+
+### What is left
+
+Narrow, and worth stating without inflation: an offline, contract-bound
+primitive over a portable evidence bundle that enumerates required coverage
+dimensions with no enabled provider, and reports whether removing a sole
+provider would flip *this* bundle's verdict green under a
+requirements-derived-from-enabled-checks engine. Shipped as a CLI and a library
+function.
+
+The one defensible distinction from arXiv:2603.15676 is directional. That paper
+ablates gates analytically, after the fact, to explain which dimension
+discriminated regressions in a case study, and has no abstain verdict: a gate
+that fails to run is simply absent from its decision logic. Here the ablation is
+not the finding, it is the test of a shipped architectural invariant — fixed,
+versioned required coverage — that makes a missing gate return `INCOMPLETE`
+instead of disappearing. That is one paragraph's worth of difference, not a
+headline.
+
+What no eval product ships, as of this sweep: an automated, per-check,
+verdict-level ablation as a feature. Inspect, LangSmith, Phoenix, Weave,
+Promptfoo, Ragas, DeepEval, HELM and lm-evaluation-harness have nothing here,
+and several actively manufacture silent passes. That is a gap in tooling, not a
+gap in the literature, and it is the honest form of the claim.

@@ -1,9 +1,9 @@
 {
   "baseline_decision": "ASSIST",
   "dynamic_coverage_survivors": 1,
+  "fail_closed_conformance": true,
   "false_scale_transitions": 1,
   "fixed_contract_killed": 6,
-  "fixed_contract_score": 1.0,
   "mutations": [
     {
       "baseline_decision": "ASSIST",
