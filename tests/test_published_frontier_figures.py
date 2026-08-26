@@ -1,12 +1,15 @@
 """
 Regression locks for the frontier table published in README.md.
 
-These figures were previously guarded only by `make frontier --verify-dir`,
-which byte-compares the rendered artifacts. That runs in CI, but it means
-`python -m unittest discover -s tests` passed with the published numbers
-arbitrarily wrong. The README states that every number it publishes is
-asserted by the test suite; these tests are what make that true for the
-frontier block.
+The absolute upper bounds, the cost lower bounds, `premium-12-step`'s
+zero-count, and the 180 paired-task figure were previously guarded only by the
+byte-comparison inside `make frontier`. That runs in CI, but it meant
+`python -m unittest discover -s tests` passed with those published numbers
+arbitrarily wrong.
+
+Scope, stated honestly: these tests read the committed artifact, so they lock
+the published file against edits. Drift originating upstream of the artifact is
+still caught only by `make frontier`. See research/SELF_AUDIT.md.
 """
 from __future__ import annotations
 

@@ -8,7 +8,10 @@ We ran that argument against the repository that makes it. Three review agents,
 one pass, roughly forty minutes. They found three places where this repository
 did the exact thing it tells other people not to do.
 
-All three had been green in CI the whole time.
+All three passed CI. One had been in the repository since its first commit. The
+other two we introduced ourselves, minutes earlier, in the commit meant to fix
+this exact class of problem. That is disclosed in full below, because it changes
+what the finding is evidence of.
 
 ## What we pointed at it
 
@@ -22,8 +25,8 @@ Three agents, non-overlapping scopes, run concurrently:
 
 The invariant review came back clean, and it earned that verdict: rather than
 reading diff hunks, it parsed every changed module before and after, stripped the
-import nodes, and compared the ASTs. Eleven engine files were AST-identical modulo
-imports. The decision-contract digest and all four example evidence digests were
+import nodes, and compared the ASTs. Eleven of the sixteen changed engine files were AST-identical
+modulo imports; the other five were read individually and are benign. The decision-contract digest and all four example evidence digests were
 unchanged. The gate-removal kill rate held at 588/588.
 
 The other two found the following.
@@ -44,7 +47,7 @@ returned 0 with a broken lesson in the chain.
 Nothing in `tests/` referenced `lessons/`, so `make reproduce` was the only thing
 exercising them, and it under-reported.
 
-The fix is one word:
+The fix is two tokens:
 
 ```make
 	@set -e; for lesson in lessons/*.py; do PYTHONPATH=. $(PYTHON) "$$lesson"; done
@@ -90,10 +93,19 @@ previously-unrun scripts into CI, and added this line to the README:
 > Every number this README publishes is asserted by the test suite, so a change
 > that moves one fails CI.
 
-It was not true. The frontier comparison table — three upper bounds, three cost
-lower bounds, the harmful-regression counts, the 180 paired-task count — was
-asserted by **nothing** in `tests/`. Its only guard was a byte-comparison inside
-`make frontier`.
+It was not true, though the gap was narrower than we first wrote. `test_frontier.py`
+already asserted part of the published table from a live run: the 171 reference-
+acceptable count, two of the three conditional harmful-regression rates, the
+`ADOPT` decision, and the selected arm.
+
+What no test asserted: **the three absolute upper bounds (3.7% / 12.5% / 2.6%),
+the three cost lower bounds (32.0% / 29.9% / -38.9%), `premium-12-step`'s
+zero-count and its ineligibility, and the 180 paired-task figure.** Those were
+guarded only by a byte-comparison inside `make frontier`.
+
+We verified the gap rather than asserting it: scaling `premium-12-step` costs by
+1.4 moved the published cost lower bound from -38.9% to **-93.2%**, and the full
+test suite still reported 202 tests, OK.
 
 That comparison does run in CI, so "fails CI" survived. "Asserted by the test
 suite" did not. `python -m unittest discover -s tests` passed with those published
@@ -107,11 +119,20 @@ Two smaller versions of the same thing, from the same audit:
 - A published cost ratio had its numerator asserted and its denominator living
   only inside a byte-compared artifact.
 
-The fix was to make the claim true rather than soften it:
-`tests/test_published_frontier_figures.py` now asserts the table, the semconv pin
-is asserted as a literal, and both sides of the ratio are checked. The README
-sentence was also rewritten to name both guard mechanisms precisely instead of
-claiming one that did not exist.
+The semconv pin is now asserted as a literal and both sides of the ratio are
+checked. `tests/test_published_frontier_figures.py` locks the frontier table.
+
+**But that fix is partial, and the partialness matters.** The new test reads the
+committed artifact `research/results/frontier/frontier.json`. It catches an edit
+to that file. It does not catch drift originating upstream of it. Applying the
+same cost perturbation at current HEAD and running the repository's own question 2
+below — change a number, run only the test suite — gives **210 tests, OK**, while
+`make frontier` correctly exits 2.
+
+So the honest status is: the frontier table is guarded by a literal test against
+the published artifact, plus a byte-comparison that catches upstream drift. Both
+run in CI. The test suite alone does not catch it. We rewrote the README sentence
+to say that, rather than to claim a guarantee we had not built.
 
 ## All three are the same bug
 
@@ -129,11 +150,18 @@ is invisible precisely because everything looks fine. The reason it is worth
 writing down is that a repository built specifically to detect it still shipped
 three instances of it.
 
-We also found something adjacent and worth naming: three README blocks presented
-stylized ASCII summaries as program output. The numbers were correct, but a reader
-running `python3 false_green.py` got a different-looking Markdown report. For a
-project whose entire pitch is "run this one file," that gap is a credibility
-problem independent of whether the numbers are right. They are now verbatim output.
+We also found something adjacent and worth naming: four README blocks presented
+hand-cut ASCII summaries directly beneath the command that supposedly produced
+them. The numbers were correct, but a reader running `python3 false_green.py` got
+a differently-shaped Markdown report. For a project whose pitch is "run this one
+file," that gap is a credibility problem independent of whether the numbers are
+right.
+
+One block is now verbatim output, marked as truncated. The other three are still
+summaries, and are now labelled as summaries rather than presented as output. We
+flag this because the first version of this document claimed all of them had been
+converted, which was false, and it was caught by the same audit that produced the
+rest of this page.
 
 ## How to check your own
 
@@ -155,15 +183,40 @@ full pipeline is green and that feels like the same thing.
 ## Limits
 
 This is a self-audit, not an independent one. We wrote both the method and the
-target. The three findings are real and reproducible from the commit history, but
-their severity was low: all five lessons passed, the kill rate was intact, and
-every published number happened to be correct. Nothing here caught a wrong result.
-It caught three ways a wrong result would not have been noticed.
+target. Several things a hostile reader would reach for, stated before they have to:
 
-The repository's headline experiment runs on a synthetic 98-scenario fixture. It
-measures a property of a specific eval design, not a production prevalence rate.
-That distinction is stated throughout the repository and it applies to this
-document too.
+**Two of the three defects were self-inflicted, minutes earlier.** Finding 1 dates
+to the repository's first commit and is genuine long-standing state. Findings 2 and
+3 were both introduced by the same commit that was meant to close this class of
+gap, and were fixed four and ten minutes later in an unmerged branch. Exactly one
+green CI run contains them. They were caught in pre-merge review, which is where
+review is supposed to catch things. Read them as evidence that the failure mode is
+easy to introduce while actively looking for it, not as evidence of years of rot.
+
+**The repository's own question 2 does not pass for the frontier table.** Changing
+a published bound upstream of the committed artifact still leaves the test suite
+green; only `make frontier` catches it. We fixed the claim rather than the
+underlying coupling.
+
+**No test parses this README, or any document.** Every "published number" test
+hardcodes the value in a docstring and asserts against a computed or committed
+value. Edit a number in the prose by hand and nothing fails. The link between a
+published sentence and the assertion guarding it is convention, enforced by review.
+For a project whose thesis is about claims and their guards, that is the largest
+remaining gap, and it is not fixed.
+
+**Severity was low.** All five lessons passed, the kill rate was intact, and every
+published number happened to be correct. Nothing here caught a wrong result. It
+caught three ways a wrong result would not have been noticed.
+
+**The headline experiment is synthetic.** The 98-scenario fixture measures a
+property of a specific eval design, not a production prevalence rate. That
+distinction is stated throughout the repository and applies to this document.
+
+**Some claims here are not checkable from the repository.** The timing, the
+concurrency, and the AST methodology attributed to the invariant review are
+reported from the run, not reconstructible from a checked-in transcript. The AST
+result itself was independently reproduced; the process claim was not.
 
 ## Reproduce it
 

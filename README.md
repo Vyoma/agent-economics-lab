@@ -87,6 +87,8 @@ python3 false_green.py
 | `runtime_caps` | 8 |
 ```
 
+Verbatim, truncated. The full report continues with the per-scenario table.
+
 > All enabled checks passed is not the same claim as all required checks passed.
 
 We ran that argument against this repository. Three review agents found three
@@ -115,6 +117,9 @@ the decision-contract digest fixed:
 python3 evidence_ablation.py
 ```
 
+Summary of the run, not verbatim output. `python3 evidence_ablation.py` prints a
+full `# Raw Evidence-Ablation Results` report:
+
 ```text
 ablations                  9
 operational refusals       4
@@ -142,6 +147,9 @@ alternative, but the result is still `ASSIST`: outcome quality, unit cost, tail 
 and runtime caps fail policy. A profitable agent is not automatically a scalable
 agent.
 
+Summary of the run, not verbatim output. `make demo` prints the full Markdown
+assurance case:
+
 ```text
 Decision                         ASSIST
 Acceptable outcomes              6 / 8
@@ -161,6 +169,9 @@ make frontier
 
 The paired frontier runs four configurations on the same 180 synthetic task input
 digests and frozen rubric:
+
+Summary of the run, not verbatim output. `make frontier` prints the full Markdown
+report, including both wide comparison tables:
 
 ```text
 Decision                         ADOPT balanced-4-step
@@ -379,10 +390,13 @@ executable lessons, both ablation benchmarks, the mutation score, the real-trace
 verdict, the sensitivity sweep, the Claude Code conversion, and byte-for-byte
 frontier and both adapter artifact verifications.
 
-Every number this README publishes is guarded two ways: asserted directly by a
-test in `tests/`, and byte-verified against a committed artifact by a `make`
-target. Both run in CI, so a change that moves a published number fails the
-build. `make coverage` reproduces the coverage figures in the changelog.
+Every number this README publishes is guarded by at least one of two mechanisms,
+and some by both: a literal assertion in `tests/`, or a byte-comparison against
+a committed artifact inside a `make` target. Both run in CI. No test parses this
+README, so the link between a sentence here and the assertion that guards it is
+convention, not mechanism. `make coverage` reproduces the changelog's coverage
+figures. The audit that established this, including where it is still weak, is
+in [the self-audit](research/SELF_AUDIT.md).
 
 Python 3.10 or newer is required. If your default `python3` is older, pass the
 interpreter explicitly:
