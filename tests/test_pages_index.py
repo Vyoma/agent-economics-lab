@@ -21,14 +21,13 @@ from __future__ import annotations
 
 import math
 import pathlib
-import random
 import re
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PAGE = ROOT / "docs" / "index.md"
 
-import sys
+import sys  # noqa: E402 - must run before the local imports below
 
 sys.path.insert(0, str(ROOT))
 
@@ -38,7 +37,6 @@ from agent_economics.label_error import (  # noqa: E402
     check_proposition_2,
     epsilon_star,
 )
-
 
 # --------------------------------------------------------------------- recompute
 
@@ -219,7 +217,7 @@ STATED_INPUTS: dict[str, str] = {
     "1": "counts in prose",
     "4": "counts in prose",
     "7": "acceptable tasks in the fixture",
-    "6": "judged-acceptable count after one false reject",
+    "6": "judged-acceptable count after one false reject, and the 6x tighter factor",
     "15": "false accepts / rejects in the net-bias table",
     "0": "false rejects in the net-bias table",
     "20": "the sample-size threshold for p95",
@@ -227,7 +225,7 @@ STATED_INPUTS: dict[str, str] = {
     "0.90": "sensitivity in the correction table",
     "0.80": "sensitivity and specificity in the correction table",
     "0.85": "sensitivity in the correction table",
-    "0.95": "specificity and sensitivity in the correction table",
+    "0.95": "specificity and sensitivity in the correction table, and the p95 rank multiplier",
     "0.70": "specificity in the correction table",
     "1.00": "net value in the net-value table",
     "0.10": "net value in the net-value table, and slack",
@@ -239,16 +237,12 @@ STATED_INPUTS: dict[str, str] = {
     "1,139": "labels needed at 30% disagreement",
     "1,116": "labels needed for a 4.55% tolerance",
     "6,973": "labels needed for a 1.82% tolerance",
-    "3": "counts in prose",
-    "6": "judged-acceptable count, and the 6x tighter factor",
     "8": "the 8 of 25 grid cell count",
     "13": "the 13x tighter factor",
     "55": "brittle scenarios",
     "70": "acceptable tasks in the 100-task net-bias example",
     "95": "confidence level",
     "98": "total sensitivity scenarios",
-    "0.95": "the p95 rank multiplier",
-    "1": "counts in prose",
     "10": "tasks in the hand-worked example",
     "5": "counts in prose",
     "1.8%": "restatement of the 1.82% tolerance in prose",

@@ -18,7 +18,6 @@ from agent_economics import (
     load_csv_bundle,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
 

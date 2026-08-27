@@ -105,9 +105,8 @@ class FailClosedOnHostileEvidenceTests(unittest.TestCase):
             "baseline rate above one": dict(baseline_rate=1.5),
         }
         for label, kwargs in hostile.items():
-            with self.subTest(case=label):
-                with self.assertRaises(ValueError):
-                    build_bundle(**kwargs)
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                build_bundle(**kwargs)
 
     def test_summed_overflow_is_a_typed_refusal_not_an_overflowerror(self) -> None:
         """Individually valid costs whose total overflows must still explain itself.
@@ -302,9 +301,8 @@ class PercentileTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             percentile([], 0.95)
         for probability in (-0.1, 1.1):
-            with self.subTest(probability=probability):
-                with self.assertRaises(ValueError):
-                    percentile([1.0, 2.0], probability)
+            with self.subTest(probability=probability), self.assertRaises(ValueError):
+                percentile([1.0, 2.0], probability)
 
     def test_result_is_always_a_member_of_the_input(self) -> None:
         randomizer = random.Random(SEED)

@@ -11,7 +11,6 @@ from unittest.mock import patch
 
 from agent_economics.github_action import ActionInputs, main, run_action
 
-
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
 

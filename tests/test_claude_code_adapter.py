@@ -17,8 +17,8 @@ from agent_economics import (
     conversion_receipt,
     evaluate_bundle,
     inspect_claude_code_jsonl,
-    load_outcomes,
     load_normalized_json_bundle,
+    load_outcomes,
     load_traces,
     make_evidence_bundle,
     normalized_json_bundle,
@@ -26,7 +26,6 @@ from agent_economics import (
 )
 from agent_economics.cli import main
 from agent_economics.report import render_markdown
-
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples" / "claude-code"
@@ -310,6 +309,8 @@ class ClaudeCodeAdapterTests(unittest.TestCase):
                 source_id="source.csv",
                 task_manifest=bundle.task_manifest,
                 dependency_edges=bundle.dependency_edges,
+                declared_delegations=bundle.declared_delegations,
+                label_source=bundle.label_source,
             )
         self.assertEqual(bundle.digest, csv_bundle.digest)
         self.assertEqual(

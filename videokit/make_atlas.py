@@ -55,7 +55,7 @@ def metrics(size: int) -> tuple[int, int]:
     font = font_for(size)
     advance = font.advancementForGlyph_(font.glyphWithName_("M")).width
     height = font.ascender() - font.descender()
-    return int(math.ceil(advance)), int(math.ceil(height)) + 1
+    return math.ceil(advance), math.ceil(height) + 1
 
 
 def raster(ch: str, size: int, w: int, h: int) -> bytes:

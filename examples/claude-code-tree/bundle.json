@@ -10,7 +10,7 @@
       "2.1.212"
     ],
     "contract_schema_version": 1,
-    "conversion_contract_sha256": "58c8d058f07d6e6eb5782de248a95555187318c3b6aaa1346e5cbd553d2ef5f8",
+    "conversion_contract_sha256": "6816b058dc97cd7e128871fe086bc6a8e023043e731335259310a713c4e7e9a2",
     "counts": {
       "dependency_edges": 6,
       "expanded_delegations": 1,
@@ -22,7 +22,7 @@
       "tasks": 1,
       "tool_calls": 2
     },
-    "evidence_digest": "ce14291c0a500e227bcc2282cd9147f6f3188f3e94ae7754bff65ea7cd1dcebf",
+    "evidence_digest": "06db27d4af08bb30c2505c9bbc11ed422bf76368ecef0edf57adaa2a8f958781",
     "inventory_sha256": "22776e193279ab062d3599831fafc3b6fb39523c44a937358d208c487eb7bbe2",
     "label_source": "fixture.manual-review",
     "price_card_id": "fixture.explicit-rates@2026-07-29",
@@ -33,6 +33,9 @@
     "source_version": "1",
     "task_unit": "root-external-user-prompt"
   },
+  "declared_delegations": [
+    "cc-tool-01538cb95574cd2b9c9729cf41c08e75d374bce86f080779ee1fccceec0c0ac7"
+  ],
   "dependency_edges": [
     [
       "cc-model-52879c01c415f3802e980c960122ecc8520b486aa3230656492ec0049b3ffe11",
@@ -227,6 +230,7 @@
       "timestamp": "2026-07-29T16:00:06.000Z"
     }
   ],
+  "label_source": "fixture.manual-review",
   "outcomes": [
     {
       "acceptable": true,

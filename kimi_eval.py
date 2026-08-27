@@ -22,10 +22,10 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections import Counter
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent
 EVAL_SET = ROOT / "research/eval/judge-eval-set.json"
@@ -242,6 +242,8 @@ def run_live(
     document: Mapping[str, Any], *, model: str, reasoning_effort: str
 ) -> tuple[dict[str, bool | None], dict[str, Any]]:
     """Judge every eval case through the shipping judge path."""
+    import time
+
     from agent_economics import kimi_client
     from agent_economics.kimi_judge import (
         _build_system_prompt,
@@ -250,8 +252,6 @@ def run_live(
         _validate_rubric,
         _verdict_schema,
     )
-
-    import time
 
     api_key = kimi_client.require_api_key()
     kimi_client.validate_reasoning_effort(reasoning_effort)
@@ -305,7 +305,7 @@ def run_live(
                 f"{time.monotonic() - case_started:.0f}s",
                 flush=True,
             )
-        except Exception as error:  # noqa: BLE001 - reported, not swallowed
+        except Exception as error:
             predictions[task_id] = None
             verdicts[task_id] = {"error": str(error)}
             print(
@@ -365,7 +365,7 @@ def _report_stability(
         )
         accepts = sum(1 for value in observed if value is True)
         print(
-            f"  {task_id:<12} {str(case['expected_acceptable']):<9} "
+            f"  {task_id:<12} {case['expected_acceptable']!s:<9} "
             f"{accepts}/{len(observed)} accept  {spread:<28} "
             f"{'yes' if stable else 'NO'}"
         )

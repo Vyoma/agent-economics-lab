@@ -20,7 +20,6 @@ Invariants:
 from __future__ import annotations
 
 import json
-import math
 import unittest
 import urllib.error
 from dataclasses import replace
@@ -29,10 +28,7 @@ from pathlib import Path
 from agent_economics import (
     CheckMode,
     CheckOutput,
-    Coverage,
-    Decision,
     default_checks,
-    default_engine,
     evaluate_bundle,
     kimi_client,
 )
@@ -295,9 +291,8 @@ class RejectedRequestIsNotALabel(unittest.TestCase):
                     side_effect=urllib.error.HTTPError(
                         kimi_client.API_URL, status, "no", {}, None
                     ),
-                ):
-                    with self.assertRaises(kimi_client.KimiRequestError) as caught:
-                        kimi_client.call_kimi("s", "u", api_key="k")
+                ), self.assertRaises(kimi_client.KimiRequestError) as caught:
+                    kimi_client.call_kimi("s", "u", api_key="k")
                 self.assertEqual(caught.exception.status, status)
 
     def test_request_error_is_not_a_urlerror_the_judge_swallows(self) -> None:
@@ -330,9 +325,8 @@ class TokenBudgetFitsDeepReasoning(unittest.TestCase):
                 "choices": [{"message": {"content": ""}}],
                 "usage": {"completion_tokens": 2048},
             },
-        ):
-            with self.assertRaises(RuntimeError):
-                kimi_client.call_kimi("s", "u", api_key="k")
+        ), self.assertRaises(RuntimeError):
+            kimi_client.call_kimi("s", "u", api_key="k")
 
 
 class AllCredentialSystemsReachable(unittest.TestCase):
@@ -353,12 +347,11 @@ class AllCredentialSystemsReachable(unittest.TestCase):
         }
         self.assertEqual(set(expected), set(kimi_client.KIMI_HOSTS))
         for host, url in expected.items():
-            with self.subTest(host=host):
-                with patch.dict(
-                    "os.environ",
-                    {kimi_client.BASE_URL_ENV_VAR: f"https://{host}"},
-                ):
-                    self.assertEqual(kimi_client.resolve_api_url(), url)
+            with self.subTest(host=host), patch.dict(
+                "os.environ",
+                {kimi_client.BASE_URL_ENV_VAR: f"https://{host}"},
+            ):
+                self.assertEqual(kimi_client.resolve_api_url(), url)
 
     def test_override_cannot_leave_kimi(self) -> None:
         from unittest.mock import patch
@@ -368,12 +361,10 @@ class AllCredentialSystemsReachable(unittest.TestCase):
             "http://api.moonshot.ai/v1",
             "https://api.moonshot.ai.evil.example/v1",
         ):
-            with self.subTest(override=hostile):
-                with patch.dict(
-                    "os.environ", {kimi_client.BASE_URL_ENV_VAR: hostile}
-                ):
-                    with self.assertRaises(ValueError):
-                        kimi_client.resolve_api_url()
+            with self.subTest(override=hostile), patch.dict(
+                "os.environ", {kimi_client.BASE_URL_ENV_VAR: hostile}
+            ), self.assertRaises(ValueError):
+                kimi_client.resolve_api_url()
 
 
 class PlaceholderKeyFailsLocally(unittest.TestCase):

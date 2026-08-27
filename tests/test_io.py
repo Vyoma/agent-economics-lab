@@ -5,7 +5,6 @@ from pathlib import Path
 
 from agent_economics import load_rates, load_traces
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 

@@ -11,7 +11,6 @@ from pathlib import Path
 from agent_economics import Decision, evaluate_bundle, load_normalized_json_bundle
 from agent_economics.frontier import FrontierDecision, run_frontier
 
-
 ROOT = Path(__file__).resolve().parents[1]
 CASE = ROOT / "examples" / "public-swebench"
 

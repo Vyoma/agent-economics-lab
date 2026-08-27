@@ -30,7 +30,6 @@ from agent_economics import (
 from agent_economics.assurance import AssuranceEngine, decision_contract_manifest
 from agent_economics.report import render_json, render_markdown
 
-
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
 

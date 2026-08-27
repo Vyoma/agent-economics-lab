@@ -35,9 +35,9 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 from agent_economics import (
     AssuranceEngine,
@@ -357,20 +357,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     summary = summarize(rows)
     summary_text = render_summary(summary)
     summary_json = render_summary_json(summary)
-    if args.summary_verify:
-        if (
-            not args.summary_verify.exists()
-            or args.summary_verify.read_text(encoding="utf-8") != summary_text
-        ):
-            print(f"Generated summary differs from {args.summary_verify}")
-            return 1
-    if args.json_verify:
-        if (
-            not args.json_verify.exists()
-            or args.json_verify.read_text(encoding="utf-8") != summary_json
-        ):
-            print(f"Generated JSON summary differs from {args.json_verify}")
-            return 1
+    if args.summary_verify and (
+        not args.summary_verify.exists()
+        or args.summary_verify.read_text(encoding="utf-8") != summary_text
+    ):
+        print(f"Generated summary differs from {args.summary_verify}")
+        return 1
+    if args.json_verify and (
+        not args.json_verify.exists()
+        or args.json_verify.read_text(encoding="utf-8") != summary_json
+    ):
+        print(f"Generated JSON summary differs from {args.json_verify}")
+        return 1
     if args.summary_output:
         args.summary_output.parent.mkdir(parents=True, exist_ok=True)
         args.summary_output.write_text(summary_text, encoding="utf-8")

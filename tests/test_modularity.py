@@ -13,7 +13,6 @@ from agent_economics import (
 )
 from agent_economics.report import render_markdown
 
-
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
 
@@ -107,17 +106,16 @@ class ModularityTests(unittest.TestCase):
             ((first.event_id, other.event_id), "crosses task boundaries"),
         )
         for edge, message in cases:
-            with self.subTest(edge=edge):
-                with self.assertRaisesRegex(ValueError, message):
-                    make_evidence_bundle(
-                        events=self.csv.events,
-                        outcomes=self.csv.outcomes,
-                        rates=self.csv.rates,
-                        baseline=self.csv.baseline,
-                        policy=self.csv.policy,
-                        source_id="source.test",
-                        dependency_edges=(edge,),
-                    )
+            with self.subTest(edge=edge), self.assertRaisesRegex(ValueError, message):
+                make_evidence_bundle(
+                    events=self.csv.events,
+                    outcomes=self.csv.outcomes,
+                    rates=self.csv.rates,
+                    baseline=self.csv.baseline,
+                    policy=self.csv.policy,
+                    source_id="source.test",
+                    dependency_edges=(edge,),
+                )
 
     def test_duplicate_outcomes_fail_in_normalized_adapter(self) -> None:
         outcome = asdict(next(iter(self.csv.outcomes.values())))

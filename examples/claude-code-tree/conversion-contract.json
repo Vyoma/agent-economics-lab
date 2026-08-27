@@ -11,6 +11,12 @@
     "name": "fixture human-only workflow",
     "value_per_acceptable_outcome_usd": 10.0
   },
+  "delegation": {
+    "approved_by": "fixture-maintainer",
+    "declared": [
+      "cc-tool-01538cb95574cd2b9c9729cf41c08e75d374bce86f080779ee1fccceec0c0ac7"
+    ]
+  },
   "outcome_contract": {
     "label_source": "fixture.manual-review",
     "rubric_version": "fixture.acceptable-task@1"

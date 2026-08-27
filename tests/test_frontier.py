@@ -23,7 +23,6 @@ from agent_economics import (
     run_frontier,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 PLAN_PATH = ROOT / "examples" / "compute-frontier" / "manifest.json"
 

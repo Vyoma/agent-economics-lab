@@ -4,10 +4,11 @@ import base64
 import binascii
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from .conversion_contract import (
     load_conversion_contract,
@@ -21,7 +22,6 @@ from .conversion_contract import (
 )
 from .evidence import make_evidence_bundle, validate_evidence_bundle
 from .models import EvidenceBundle, ModelRate, TraceEvent
-
 
 SOURCE_ID = "source.otel-genai"
 SOURCE_VERSION = "1"
@@ -692,7 +692,7 @@ def otel_genai_bundle_from_session(
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
     _validate_fixed_contract(session, contract)
-    outcomes, task_manifest, _, _ = parse_outcomes_and_manifest(
+    outcomes, task_manifest, _rubric_version, label_source = parse_outcomes_and_manifest(
         raw_tasks=contract.get("tasks"),
         outcome_contract_raw=contract.get("outcome_contract"),
         expected_tasks={
@@ -815,6 +815,7 @@ def otel_genai_bundle_from_session(
         source_version=SOURCE_VERSION,
         task_manifest=task_manifest,
         dependency_edges=session.dependency_edges,
+        label_source=label_source,
     )
     problems = validate_evidence_bundle(
         bundle,

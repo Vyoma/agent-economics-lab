@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-economics-lab"
-version = "0.8.0"
+dynamic = ["version"]
 description = "Paired cost-quality frontiers and economic assurance for AI-agent deployment decisions"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -23,6 +23,9 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+dev = ["ruff==0.16.4", "coverage==7.6.10"]
+
 [project.urls]
 Homepage = "https://github.com/Vyoma/agent-economics-lab"
 Repository = "https://github.com/Vyoma/agent-economics-lab"
@@ -32,5 +35,37 @@ Issues = "https://github.com/Vyoma/agent-economics-lab/issues"
 [project.scripts]
 agent-economics = "agent_economics.cli:main"
 
+[tool.setuptools.dynamic]
+version = {attr = "agent_economics.__version__"}
+
 [tool.setuptools.packages.find]
 include = ["agent_economics*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+# RUF001-003: the terminal reports deliberately use x, minus, and block-drawing
+# characters. RUF005: concatenation is clearer than unpacking at these sites.
+ignore = ["RUF001", "RUF002", "RUF003", "RUF005"]
+
+[tool.ruff.lint.per-file-ignores]
+# These render fixed-width terminal reports and section rules. Their aligned
+# columns and box-drawing dividers are the output format, so a column limit
+# fights the purpose. Every other file is held to 100 columns.
+"agent_economics/frontier_report.py" = ["E501"]
+"agent_economics/kimi_analyst.py" = ["E501"]
+"agent_economics/kimi_judge.py" = ["E501"]
+# Long allowlist justifications read better on one line than wrapped.
+"tests/test_pages_index.py" = ["E501"]
+"tests/test_stress_properties.py" = ["E501"]
+"videokit/raster.py" = ["E501"]
+"videokit/make_atlas.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["agent_economics"]
+# Without this, isort splits every `SOURCE_ID as CLAUDE_CODE_SOURCE_ID` alias
+# into its own `from .claude_code import (...)` statement.
+combine-as-imports = true

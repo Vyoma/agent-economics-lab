@@ -4,9 +4,10 @@ import hashlib
 import json
 import math
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from numbers import Integral, Real
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from .models import (
     Baseline,
@@ -16,6 +17,7 @@ from .models import (
     Outcome,
     TaskIdentity,
     TraceEvent,
+    Unsupplied,
 )
 
 
@@ -46,6 +48,11 @@ def _numeric_issue(
     if maximum is not None and number > maximum:
         return f"{label} must be no more than {maximum}"
     return None
+
+
+def _is_unsupplied(value: object) -> bool:
+    """An input the operator explicitly declared absent, not a default."""
+    return isinstance(value, Unsupplied)
 
 
 def validate_evidence_bundle(
@@ -82,7 +89,7 @@ def validate_evidence_bundle(
             if issue:
                 problems.append(issue)
         if event.direct_cost_usd is None:
-            if event.event_type == "model":
+            if event.event_type == "model" and not _is_unsupplied(bundle.rates):
                 if event.model not in bundle.rates:
                     problems.append(
                         f"{event_label} has unknown model cost; provide "
@@ -152,7 +159,9 @@ def validate_evidence_bundle(
                 f"{edge_label} crosses task boundaries"
             )
 
-    for model, rate in bundle.rates.items():
+    for model, rate in (
+        () if _is_unsupplied(bundle.rates) else bundle.rates.items()
+    ):
         if not isinstance(model, str) or not model:
             problems.append(f"{label}: model-rate IDs must be non-empty strings")
         if not isinstance(rate, ModelRate):
@@ -231,7 +240,9 @@ def validate_evidence_bundle(
             )
 
     baseline = bundle.baseline
-    if not isinstance(baseline, Baseline):
+    if _is_unsupplied(baseline):
+        pass  # declared absent; economic gates fail closed at evaluation
+    elif not isinstance(baseline, Baseline):
         problems.append(f"{label}: baseline is not a Baseline")
     else:
         if not isinstance(baseline.name, str) or not baseline.name:
@@ -260,7 +271,9 @@ def validate_evidence_bundle(
             )
 
     policy = bundle.policy
-    if not isinstance(policy, EconomicPolicy):
+    if _is_unsupplied(policy):
+        pass  # declared absent; economic gates fail closed at evaluation
+    elif not isinstance(policy, EconomicPolicy):
         problems.append(f"{label}: policy is not an EconomicPolicy")
     else:
         for field in (
@@ -312,14 +325,28 @@ def _canonical_digest(
     policy: EconomicPolicy,
     task_manifest: dict[str, TaskIdentity],
     dependency_edges: tuple[tuple[str, str], ...],
+    declared_delegations: tuple[str, ...] = (),
+    label_source: str = "",
 ) -> str:
     payload = {
         "events": [asdict(event) for event in events],
         "outcomes": [asdict(outcomes[task_id]) for task_id in sorted(outcomes)],
-        "rates": {name: asdict(rates[name]) for name in sorted(rates)},
-        "baseline": asdict(baseline),
-        "policy": asdict(policy),
+        "rates": (
+            {"unsupplied": "rates"}
+            if _is_unsupplied(rates)
+            else {name: asdict(rates[name]) for name in sorted(rates)}
+        ),
+        "baseline": (
+            {"unsupplied": "baseline"} if _is_unsupplied(baseline) else asdict(baseline)
+        ),
+        "policy": (
+            {"unsupplied": "policy"} if _is_unsupplied(policy) else asdict(policy)
+        ),
     }
+    if declared_delegations:
+        payload["declared_delegations"] = list(declared_delegations)
+    if label_source:
+        payload["label_source"] = label_source
     if task_manifest:
         payload["task_manifest"] = [
             asdict(task_manifest[task_id]) for task_id in sorted(task_manifest)
@@ -343,6 +370,8 @@ def make_evidence_bundle(
     source_version: str = "1",
     task_manifest: Mapping[str, TaskIdentity] | None = None,
     dependency_edges: Sequence[tuple[str, str]] = (),
+    declared_delegations: Sequence[str] = (),
+    label_source: str = "",
 ) -> EvidenceBundle:
     """Normalize and fingerprint evidence without depending on its source vendor."""
     event_id_counts = Counter(event.event_id for event in events)
@@ -356,7 +385,7 @@ def make_evidence_bundle(
         sorted(events, key=lambda event: (event.task_id, event.timestamp, event.event_id))
     )
     normalized_outcomes = dict(sorted(outcomes.items()))
-    normalized_rates = dict(sorted(rates.items()))
+    normalized_rates = rates if _is_unsupplied(rates) else dict(sorted(rates.items()))
     normalized_task_manifest = dict(sorted((task_manifest or {}).items()))
     normalized_dependency_edges = tuple(
         sorted(tuple(edge) for edge in dependency_edges)
@@ -374,6 +403,8 @@ def make_evidence_bundle(
         policy,
         normalized_task_manifest,
         normalized_dependency_edges,
+        tuple(sorted(declared_delegations)),
+        label_source,
     )
     bundle = EvidenceBundle(
         events=normalized_events,
@@ -386,6 +417,8 @@ def make_evidence_bundle(
         digest=digest,
         task_manifest=normalized_task_manifest,
         dependency_edges=normalized_dependency_edges,
+        declared_delegations=tuple(sorted(declared_delegations)),
+        label_source=label_source,
     )
     problems = validate_evidence_bundle(bundle)
     if problems:

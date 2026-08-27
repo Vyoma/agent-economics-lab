@@ -3,9 +3,10 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import Counter
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from .claude_code import (
     ClaudeCodeSession,
@@ -15,7 +16,6 @@ from .claude_code import (
 )
 from .conversion_contract import loads_strict_json
 from .models import EvidenceBundle
-
 
 SOURCE_ID = "source.claude-code-session-tree"
 SOURCE_VERSION = "1"

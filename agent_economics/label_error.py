@@ -59,14 +59,14 @@ class Workload:
     def net_value(self, labels: tuple[bool, ...] | None = None) -> float:
         """N = (realized value - total cost) / n. A difference metric."""
         use = labels if labels is not None else self.acceptable
-        realized = math.fsum(v for v, ok in zip(self.values, use) if ok)
+        realized = math.fsum(v for v, ok in zip(self.values, use, strict=False) if ok)
         return (realized - self.C) / self.n
 
 
 def confusion(truth: tuple[bool, ...], judged: tuple[bool, ...]) -> tuple[int, int]:
     """Return (false accepts, false rejects)."""
-    fp = sum(1 for t, j in zip(truth, judged) if j and not t)
-    fn = sum(1 for t, j in zip(truth, judged) if t and not j)
+    fp = sum(1 for t, j in zip(truth, judged, strict=False) if j and not t)
+    fn = sum(1 for t, j in zip(truth, judged, strict=False) if t and not j)
     return fp, fn
 
 
