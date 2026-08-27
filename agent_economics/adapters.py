@@ -74,6 +74,7 @@ def normalized_json_bundle(raw: Mapping[str, Any]) -> EvidenceBundle:
         source_version=source_version,
         task_manifest=task_manifest,
         declared_delegations=tuple(raw.get("declared_delegations", ())),
+        label_source=str(raw.get("label_source", "")),
         dependency_edges=tuple(
             tuple(edge) for edge in raw.get("dependency_edges", ())
         ),
@@ -106,6 +107,8 @@ def normalized_json_document(
     }
     if bundle.declared_delegations:
         document["declared_delegations"] = list(bundle.declared_delegations)
+    if bundle.label_source:
+        document["label_source"] = bundle.label_source
     if bundle.task_manifest:
         document["task_manifest"] = [
             asdict(bundle.task_manifest[task_id])

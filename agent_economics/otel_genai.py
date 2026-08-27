@@ -692,7 +692,7 @@ def otel_genai_bundle_from_session(
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
     _validate_fixed_contract(session, contract)
-    outcomes, task_manifest, _, _ = parse_outcomes_and_manifest(
+    outcomes, task_manifest, _rubric_version, label_source = parse_outcomes_and_manifest(
         raw_tasks=contract.get("tasks"),
         outcome_contract_raw=contract.get("outcome_contract"),
         expected_tasks={
@@ -815,6 +815,7 @@ def otel_genai_bundle_from_session(
         source_version=SOURCE_VERSION,
         task_manifest=task_manifest,
         dependency_edges=session.dependency_edges,
+        label_source=label_source,
     )
     problems = validate_evidence_bundle(
         bundle,

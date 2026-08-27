@@ -271,3 +271,41 @@ on tool name rather than graph shape, because inferring delegation from structur
 conflated sequencing with delegation and reported a file read as a subagent. Tool
 calls that spawned model work under some other name are surfaced as suspected, and
 never counted as closed.
+
+## Attestation for the instruments that produced the evidence
+
+Every gate here rests on evidence, and every piece of evidence was produced by
+something: a rubric applied by a human, an LLM judge, a subagent, a metric
+pipeline. The contract records which instrument. Nothing recorded whether it
+works, so `provenance.py` applies the package's own rule one level down: an
+unattested instrument supplying a sole-provider gate forces INCOMPLETE.
+
+The idea is old and the prior art is deep. This is not presented as new.
+
+| Prior art | What it establishes |
+|---|---|
+| Metrology: calibration certificates and their validity periods | An instrument carries a record of what it was checked against, how closely, and when; measurements taken on a lapsed certificate are not accepted. This module is that, restated for eval instruments, including the expiry. |
+| Measurement systems analysis, Gauge R&R | Validating the measurement system before trusting measurements taken with it. A century of manufacturing practice. |
+| Inter-rater reliability; Cohen's and Fleiss' kappa | The agreement statistic itself, and the long-standing insistence that a rater be characterised before their labels are used. |
+| W3C PROV | A vocabulary for recording what produced a piece of data. Provenance as a first-class record is not new. |
+| The current LLM-judge calibration literature | Measuring judge agreement against human labels is established and widely practised. |
+| Assurance 2.0's "confidence in evidence" | Assurance cases already distinguish a claim's structure from confidence in the evidence leaves. |
+
+**What appears absent** is gating a deployment decision on the calibration state
+of the instrument that produced its evidence. Judges are calibrated and the
+number is reported; nothing observed refuses to issue a verdict when that number
+is missing, too low, measured on too small a sample, or too old. The practice
+exists. The enforcement does not.
+
+Two design choices worth stating. `as_of` is a required argument rather than
+defaulting to today, because a verdict that silently changes with the wall clock
+is not a reproducible artifact and everything else here is. And `agreement` is
+deliberately not named as to method: agreement against human adjudication,
+Cohen's kappa and held-out accuracy are different quantities, `method` says
+which, and this does not pretend they are interchangeable. What is enforced is
+that a number exists, measured against something named, on a stated sample, on a
+stated date.
+
+The honest limit: this attests the instrument, not the individual label. A judge
+in calibration can still be wrong about a particular task, and nothing here
+detects that.

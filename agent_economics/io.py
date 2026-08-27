@@ -117,6 +117,7 @@ def load_csv_bundle(
     rates: str | Path,
     baseline: str | Path,
     policy: str | Path,
+    label_source: str = "",
 ) -> EvidenceBundle:
     return make_evidence_bundle(
         events=load_traces(traces),
@@ -126,4 +127,5 @@ def load_csv_bundle(
         policy=load_policy(policy),
         source_id="source.csv",
         source_version="1",
+        label_source=label_source,
     )

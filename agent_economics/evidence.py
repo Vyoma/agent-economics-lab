@@ -331,6 +331,7 @@ def _canonical_digest(
     task_manifest: dict[str, TaskIdentity],
     dependency_edges: tuple[tuple[str, str], ...],
     declared_delegations: tuple[str, ...] = (),
+    label_source: str = "",
 ) -> str:
     payload = {
         "events": [asdict(event) for event in events],
@@ -345,6 +346,8 @@ def _canonical_digest(
     }
     if declared_delegations:
         payload["declared_delegations"] = list(declared_delegations)
+    if label_source:
+        payload["label_source"] = label_source
     if task_manifest:
         payload["task_manifest"] = [
             asdict(task_manifest[task_id]) for task_id in sorted(task_manifest)
@@ -369,6 +372,7 @@ def make_evidence_bundle(
     task_manifest: Mapping[str, TaskIdentity] | None = None,
     dependency_edges: Sequence[tuple[str, str]] = (),
     declared_delegations: Sequence[str] = (),
+    label_source: str = "",
 ) -> EvidenceBundle:
     """Normalize and fingerprint evidence without depending on its source vendor."""
     event_id_counts = Counter(event.event_id for event in events)
@@ -401,6 +405,7 @@ def make_evidence_bundle(
         normalized_task_manifest,
         normalized_dependency_edges,
         tuple(sorted(declared_delegations)),
+        label_source,
     )
     bundle = EvidenceBundle(
         events=normalized_events,
@@ -414,6 +419,7 @@ def make_evidence_bundle(
         task_manifest=normalized_task_manifest,
         dependency_edges=normalized_dependency_edges,
         declared_delegations=tuple(sorted(declared_delegations)),
+        label_source=label_source,
     )
     problems = validate_evidence_bundle(bundle)
     if problems:

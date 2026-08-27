@@ -250,6 +250,9 @@ class EvidenceBundle:
     # for a run that delegated nothing, and for adapters that do not detect
     # delegation, so it does not disturb the digest of an existing bundle.
     declared_delegations: tuple[str, ...] = ()
+    # The instrument that produced the outcome labels, e.g. "kimi-judge@v1".
+    # Recorded so provenance can be assessed; previously parsed and discarded.
+    label_source: str = ""
 
     @property
     def source_manifest_id(self) -> str:

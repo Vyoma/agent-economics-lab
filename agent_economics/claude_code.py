@@ -1195,7 +1195,7 @@ def claude_code_bundle_from_session(
         )
     _validate_adapter_contract(session, contract.get("adapter"))
     _validate_inventory(session, contract.get("source_inventory"))
-    outcomes, task_manifest, _, _ = _parse_task_contract(
+    outcomes, task_manifest, _rubric_version, label_source = _parse_task_contract(
         session,
         contract.get("tasks"),
         contract.get("outcome_contract"),
@@ -1349,6 +1349,7 @@ def claude_code_bundle_from_session(
         task_manifest=task_manifest,
         dependency_edges=session.dependency_edges,
         declared_delegations=declared_delegations,
+        label_source=label_source,
     )
     strict_problems = validate_evidence_bundle(
         bundle,
