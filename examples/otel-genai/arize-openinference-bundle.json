@@ -16,7 +16,7 @@
       "tasks": 1,
       "tool_calls": 0
     },
-    "evidence_digest": "4a485c87a31340312f60327407553d40cf60c5df97d70f93deb796fd2c52e109",
+    "evidence_digest": "0c693ed8582c68ccc34c595a99990874184fdb75af161d6fe2650063dac76f69",
     "inventory_sha256": "7c188d92d662fccd9d130d319bfc919d2f92b18b387d76a0baf35dbdb8b0414d",
     "label_source": "fixture.manual-review",
     "price_card_id": "fixture.otel-rates@2026-07-28",
@@ -55,6 +55,7 @@
       "timestamp": "2025-04-30T15:45:30.686364157Z"
     }
   ],
+  "label_source": "fixture.manual-review",
   "outcomes": [
     {
       "acceptable": true,

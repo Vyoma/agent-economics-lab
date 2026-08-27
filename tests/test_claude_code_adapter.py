@@ -309,6 +309,8 @@ class ClaudeCodeAdapterTests(unittest.TestCase):
                 source_id="source.csv",
                 task_manifest=bundle.task_manifest,
                 dependency_edges=bundle.dependency_edges,
+                declared_delegations=bundle.declared_delegations,
+                label_source=bundle.label_source,
             )
         self.assertEqual(bundle.digest, csv_bundle.digest)
         self.assertEqual(

@@ -43,6 +43,44 @@ class ModelRate:
     output_per_million_usd: float
 
 
+class UnsuppliedEvidence(LookupError):
+    """Raised when a check reads an input the operator never supplied."""
+
+
+class Unsupplied:
+    """An input the operator explicitly declared absent. Every read raises."""
+
+    __slots__ = ("_what",)
+
+    def __init__(self, what: str) -> None:
+        object.__setattr__(self, "_what", what)
+
+    def _refuse(self, detail: str) -> Any:
+        raise UnsuppliedEvidence(
+            f"{self._what} was not supplied, so any check requiring it cannot run "
+            f"(reading {detail}). Supply it, or drop the coverage that needs it "
+            f"from your required contract."
+        )
+
+    def __getattr__(self, name: str) -> Any:
+        return self._refuse(f"{self._what}.{name}")
+
+    def __getitem__(self, key: Any) -> Any:
+        return self._refuse(f"{self._what}[{key!r}]")
+
+    def __iter__(self) -> Any:
+        return self._refuse(f"iter({self._what})")
+
+    def __len__(self) -> int:
+        return self._refuse(f"len({self._what})")
+
+    def __bool__(self) -> bool:
+        return self._refuse(f"bool({self._what})")
+
+    def __repr__(self) -> str:
+        return f"<unsupplied {self._what}>"
+
+
 @dataclass(frozen=True)
 class TraceEvent:
     task_id: str
@@ -255,6 +293,11 @@ class EvidenceBundle:
     digest: str
     task_manifest: dict[str, TaskIdentity] = field(default_factory=dict)
     dependency_edges: tuple[tuple[str, str], ...] = ()
+    # Delegating calls the operator declared in the conversion contract.
+    declared_delegations: tuple[str, ...] = ()
+    # The instrument that produced the outcome labels. Named, never invoked:
+    # the verdict path stays inference-free.
+    label_source: str = ""
 
     @property
     def source_manifest_id(self) -> str:

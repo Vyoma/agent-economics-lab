@@ -25,6 +25,7 @@ from .claude_code_tree import (
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
 )
+from .delegation import assess_bundle_closure
 from .frontier import FrontierDecision, run_frontier
 from .frontier_report import (
     render_frontier_json,
@@ -34,6 +35,7 @@ from .io import load_csv_bundle
 from .kimi_analyst import analyse_report
 from .kimi_judge import judge as kimi_judge
 from .models import Decision
+from .mutation import mutate, render_markdown as render_mutation_markdown
 from .otel_genai import (
     SOURCE_ID as OTEL_GENAI_SOURCE_ID,
     SOURCE_VERSION as OTEL_GENAI_SOURCE_VERSION,
@@ -101,6 +103,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Completed conversion contract with outcomes, prices, baseline, and policy.",
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
+    mutate_parser = subparsers.add_parser(
+        "mutate",
+        help="Remove each required gate in turn and report what the engine does.",
+    )
+    mutate_parser.add_argument("--bundle", required=True)
+    mutate_parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    mutate_parser.add_argument("--output")
+    mutate_parser.add_argument(
+        "--ci", action="store_true",
+        help="Exit 1 if any required coverage dimension has no enabled provider, "
+             "or if the fail-closed invariant is broken.",
+    )
+
+    closure_parser = subparsers.add_parser(
+        "closure",
+        help="Report how much delegated agent work the contract accounts for.",
+    )
+    closure_parser.add_argument("--bundle", required=True)
+    closure_parser.add_argument("--declared", nargs="*", default=None)
+    closure_parser.add_argument(
+        "--ci", action="store_true",
+        help="Exit 1 if any delegated work is unaccounted for.",
+    )
+
     subparsers.add_parser("capabilities")
 
     judge_parser = subparsers.add_parser(
@@ -135,6 +161,32 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command in {"mutate", "closure"}:
+        try:
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        if args.command == "closure":
+            declared = None if args.declared is None else tuple(args.declared)
+            report = assess_bundle_closure(bundle, declared=declared)
+            print(json.dumps(report.to_dict(), indent=2, sort_keys=True))
+            return 1 if args.ci and report.unaccounted else 0
+        report = mutate(bundle)
+        rendered = (
+            json.dumps(report.to_dict(), indent=2, sort_keys=True)
+            if args.format == "json"
+            else render_mutation_markdown(report)
+        )
+        if args.output:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        print(rendered)
+        # Gate on the harness properties, not the dynamic-coverage comparison.
+        if args.ci and (
+            report.unprovided_coverage or not report.fail_closed_conformance
+        ):
+            return 1
+        return 0
     if args.command == "capabilities":
         print("SOURCE ADAPTERS")
         print("source.csv@1")

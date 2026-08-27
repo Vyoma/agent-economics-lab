@@ -18,7 +18,7 @@
       "tasks": 2,
       "tool_calls": 2
     },
-    "evidence_digest": "e09586e95397d55d87535ebe14d51e1dfd3aaeb594f72fa8d8a8ab9ad281e238",
+    "evidence_digest": "4aa4c7373a2b1d84de756c831d358e5935d648c616319989969a4af6ac85c632",
     "inventory_sha256": "d99358abf88090f717d4e361ced9b38a5a9c5dee571e8e8ca854f4c06f73487f",
     "label_source": "fixture.manual-review",
     "price_card_id": "fixture.explicit-rates@2026-07-17",
@@ -233,6 +233,7 @@
       "timestamp": "2026-07-17T16:00:04.000Z"
     }
   ],
+  "label_source": "fixture.manual-review",
   "outcomes": [
     {
       "acceptable": false,
