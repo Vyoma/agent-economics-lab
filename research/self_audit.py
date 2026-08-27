@@ -13,14 +13,26 @@ substituted here. The generated file is committed, and `--verify` byte-compares
 it, matching how false_green.py guards SUMMARY.md and how the frontier guards
 frontier.md. A number that moves now fails CI instead of drifting.
 
+Generation and verification are deliberately separate. Deriving the facts needs
+git history and specific commit SHAs; verifying must not, because CI checks out
+shallow and because a rebase changes every SHA. So the derived facts are frozen
+into a committed JSON artifact, exactly as the frontier and false-green results
+are, and rendering reads that file. Only `--facts` touches git.
+
+This was learned the hard way: the first version called `git diff` during
+`make reproduce`, which passed locally and failed on every CI runner for five
+commits before anyone looked.
+
 Run:
-    python3 research/self_audit.py                 # regenerate
+    python3 research/self_audit.py --facts         # re-derive from git history
+    python3 research/self_audit.py                 # render from the frozen facts
     python3 research/self_audit.py --verify PATH   # byte-compare, exit 1 on drift
 """
 from __future__ import annotations
 
 import argparse
 import ast
+import json
 import re
 import subprocess
 import sys
@@ -124,7 +136,6 @@ def _carrying_commits(introduced: str, fixed: str) -> int:
 def facts() -> dict[str, str]:
     ast_same, ast_total = _ast_identical(BASE, FIX_LESSONS)
     return {
-        "tests_head": str(_test_count()),
         "tests_at_fix_lessons": str(_test_count(FIX_LESSONS)),
         "tests_at_stale_from": str(_test_count(STALE_FROM)),
         "ast_identical": _spell(ast_same).capitalize(),
@@ -141,9 +152,21 @@ def facts() -> dict[str, str]:
     }
 
 
+FACTS = Path(__file__).with_name("self_audit_facts.json")
+
+
+def frozen_facts() -> dict[str, str]:
+    """The derived facts, as committed. Reading these never touches git."""
+    if not FACTS.exists():
+        raise RuntimeError(
+            f"{FACTS.name} is missing. Re-derive it with: make self-audit-facts"
+        )
+    return json.loads(FACTS.read_text(encoding="utf-8"))
+
+
 def render() -> str:
     text = TEMPLATE.read_text(encoding="utf-8")
-    values = facts()
+    values = frozen_facts()
     missing = {m for m in re.findall(r"\{\{(\w+)\}\}", text)} - set(values)
     if missing:
         raise RuntimeError(f"template references unknown facts: {sorted(missing)}")
@@ -156,7 +179,19 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--verify", type=Path, help="byte-compare instead of writing")
     parser.add_argument("--out", type=Path, default=OUTPUT)
+    parser.add_argument(
+        "--facts",
+        action="store_true",
+        help="re-derive the facts from git history and freeze them to JSON",
+    )
     args = parser.parse_args(argv)
+
+    if args.facts:
+        FACTS.write_text(
+            json.dumps(facts(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        print(f"Wrote {FACTS}")
+        return 0
 
     text = render()
     if args.verify:

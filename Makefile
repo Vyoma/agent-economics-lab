@@ -3,7 +3,7 @@ PYTHON ?= python3
 .PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity \
 	claude-code claude-code-tree otel-genai public-case benchmark reproduce \
 	lessons test lint coverage check-python mutation real-trace sensitivity \
-	self-audit self-audit-verify harness-mutation
+	self-audit self-audit-facts self-audit-verify harness-mutation
 
 # The package declares requires-python >= 3.10, but `make` cannot enforce that the
 # way pip does. Without this guard a contributor whose default python3 is older
@@ -61,6 +61,11 @@ harness-mutation:
 	@cmp /tmp/agent-economics-harness-mutation.md research/results/harness-mutation/claude-code.md
 	@$(PYTHON) -m agent_economics contract-status \
 		--contract examples/claude-code/conversion-contract.json --ci >/dev/null
+
+# Re-deriving the facts needs full git history and is run deliberately, never
+# from `reproduce`: CI checks out shallow, and a rebase changes every SHA.
+self-audit-facts:
+	@$(PYTHON) research/self_audit.py --facts
 
 self-audit:
 	@$(PYTHON) research/self_audit.py

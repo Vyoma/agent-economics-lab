@@ -1,0 +1,15 @@
+{
+  "ast_differing": "five",
+  "ast_identical": "Eleven",
+  "ast_total": "sixteen",
+  "carrying_commits": "three",
+  "dormant_days": "26",
+  "first_commit": "73fd32e",
+  "fix_lessons": "77a563b",
+  "fix_minutes": "ten",
+  "stale_by": "d3afc7e",
+  "stale_from": "4164192",
+  "stale_minutes": "sixteen",
+  "tests_at_fix_lessons": "202",
+  "tests_at_stale_from": "210"
+}
