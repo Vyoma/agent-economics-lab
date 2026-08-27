@@ -49,6 +49,7 @@ import json
 import logging
 import time
 import urllib.error
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -337,14 +338,13 @@ def _build_outcome_row(
 
 def _error_outcome_row(task_id: str, rubric: dict, error: str) -> tuple[dict, dict]:
     """Safe fallback when Kimi call fails — counts as unacceptable."""
-    outcomes_row = {
-        "task_id": task_id,
-        "acceptable": "false",
-        "business_value_usd": "0",
-        "human_minutes": "0",
-        "remediation_cost_usd": "0",
-        "incident_loss_usd": "0",
-    }
+    # No outcomes row. A task the judge never evaluated has produced no
+    # evidence about its outcome, and "acceptable: false" is a verdict, not an
+    # absence. Writing one folds a judge outage into the acceptable rate, where
+    # it is indistinguishable from a genuinely bad result. kimi_eval already
+    # refuses this on the evaluation side ("an outage must not be reported as
+    # strictness"); this is the same rule on the labelling side.
+    outcomes_row = None
     audit_row = {
         "task_id": task_id,
         "model_id": "error",
@@ -358,6 +358,29 @@ def _error_outcome_row(task_id: str, rubric: dict, error: str) -> tuple[dict, di
     return outcomes_row, audit_row
 
 
+class UnjudgedTasks(RuntimeError):
+    """
+    Raised when the judge could not evaluate every task.
+
+    The default is to refuse rather than to emit a partial outcomes file,
+    because the file is evidence: once a task is missing from it, whoever builds
+    a bundle downstream cannot tell an outage from a task that was never
+    submitted. Pass `allow_unjudged=True` to write the file anyway, in which
+    case the unjudged tasks are omitted rather than labelled, so the mismatch
+    between traces and outcomes fails closed at bundle validation.
+    """
+
+    def __init__(self, task_ids: Sequence[str], total: int) -> None:
+        self.task_ids = tuple(task_ids)
+        super().__init__(
+            f"{len(self.task_ids)} of {total} task(s) could not be judged after "
+            f"retries: {', '.join(self.task_ids)}. These produced no evidence "
+            "about their outcome and are not labelled unacceptable. Retry, or "
+            "pass allow_unjudged=True to write the remaining labels and omit "
+            "these, which will fail closed when a bundle is built."
+        )
+
+
 # ── public API ────────────────────────────────────────────────────────────────
 
 def judge(
@@ -368,6 +391,7 @@ def judge(
     model: str = _DEFAULT_MODEL,
     rate_limit: int = 5,
     reasoning_effort: str = _DEFAULT_REASONING_EFFORT,
+    allow_unjudged: bool = False,
 ) -> None:
     """
     Label agent task outcomes using Kimi.
@@ -407,6 +431,7 @@ def judge(
     sleep_s = (1.0 / rate_limit) if rate_limit > 0 else 0.0
 
     outcome_rows: list[dict] = []
+    unjudged: list[str] = []
     audit_rows: list[dict] = []
 
     for i, task in enumerate(tasks):
@@ -447,14 +472,21 @@ def judge(
             ValueError,
         ) as e:
             logger.warning(
-                "judge failed for %s after retries: %s. Marking unacceptable.",
+                "judge failed for %s after retries: %s. Not labelled; the task "
+                "produced no evidence about its outcome.",
                 task_id,
                 e,
             )
             out_row, audit_row = _error_outcome_row(task_id, rubric, str(e))
 
-        outcome_rows.append(out_row)
+        if out_row is not None:
+            outcome_rows.append(out_row)
+        else:
+            unjudged.append(task_id)
         audit_rows.append(audit_row)
+
+    if unjudged and not allow_unjudged:
+        raise UnjudgedTasks(unjudged, len(tasks))
 
     # Write outcomes.csv
     out_path = Path(out_path)
@@ -468,14 +500,23 @@ def judge(
     audit_path = out_path.with_name(out_path.stem + ".audit.json")
     audit_path.write_text(json.dumps(audit_rows, indent=2))
 
+    # The rate is over tasks that were actually judged. Dividing by every task
+    # submitted would report an outage as strictness, which is the same error
+    # the outcomes file no longer makes.
+    n_judged = len(outcome_rows)
     n_acceptable = sum(1 for r in outcome_rows if r["acceptable"] == "true")
-    print(
-        f"Judged {len(tasks)} tasks: "
-        f"{n_acceptable} acceptable, {len(tasks) - n_acceptable} not acceptable.  "
-        f"Rate: {n_acceptable/len(tasks):.0%}\n"
-        f"Outcomes → {out_path}\n"
-        f"Audit    → {audit_path}"
+    summary = (
+        f"Judged {n_judged} of {len(tasks)} tasks: "
+        f"{n_acceptable} acceptable, {n_judged - n_acceptable} not acceptable.  "
+        f"Rate: {n_acceptable / n_judged:.0%}" if n_judged else
+        f"Judged 0 of {len(tasks)} tasks."
     )
+    if unjudged:
+        summary += (
+            f"\n{len(unjudged)} task(s) could not be judged and are omitted "
+            "rather than labelled: " + ", ".join(unjudged)
+        )
+    print(f"{summary}\nOutcomes → {out_path}\nAudit    → {audit_path}")
 
 
 # ── CLI entry point ───────────────────────────────────────────────────────────

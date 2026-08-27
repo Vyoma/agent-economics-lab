@@ -153,6 +153,12 @@ def build_parser() -> argparse.ArgumentParser:
     judge_parser.add_argument("--rubric", required=True, help="rubric.json path")
     judge_parser.add_argument("--out", required=True, help="Output outcomes.csv path")
     judge_parser.add_argument("--model", default="kimi-k3")
+    judge_parser.add_argument(
+        "--allow-unjudged", action="store_true",
+        help="Write labels for the tasks that were judged and omit the rest, "
+             "rather than refusing. Omitted tasks are never labelled, so the "
+             "gap fails closed when a bundle is built.",
+    )
     judge_parser.add_argument("--rate-limit", type=int, default=5,
                               help="Max Kimi API calls per second (0 = unlimited)")
     judge_parser.add_argument("--reasoning-effort",
