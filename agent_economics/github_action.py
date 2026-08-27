@@ -5,13 +5,12 @@ import io
 import os
 import sys
 import tempfile
+from collections.abc import Sequence
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 from .cli import main as cli_main
-
 
 CI_DECISIONS = {
     0: "SCALE",

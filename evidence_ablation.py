@@ -17,20 +17,20 @@ import csv
 import hashlib
 import io
 import json
+from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 from agent_economics import (
-    AssuranceEngine,
     DEFAULT_REQUIRED_COVERAGE,
+    AssuranceEngine,
     Decision,
     decision_contract_digest,
     default_checks,
     normalized_json_bundle,
 )
-
 
 SCHEMA_ERROR = "SCHEMA_ERROR"
 EVIDENCE_ERROR = "EVIDENCE_ERROR"

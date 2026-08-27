@@ -18,10 +18,9 @@ from agent_economics import (
     load_conversion_contract,
     render_normalized_json,
 )
-from agent_economics.cli import main
 from agent_economics.claude_code_tree import _event_boundaries
+from agent_economics.cli import main
 from agent_economics.report import render_markdown
-
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples" / "claude-code-tree"

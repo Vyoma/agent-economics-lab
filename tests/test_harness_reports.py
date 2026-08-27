@@ -311,7 +311,8 @@ class ReadmeAccuracyTests(unittest.TestCase):
 
     def test_zero_value_really_does_force_the_stop(self) -> None:
         """Assert the arithmetic the disclosure describes, not just the prose."""
-        import subprocess, tempfile
+        import subprocess
+        import tempfile
 
         with tempfile.TemporaryDirectory() as tmp:
             subprocess.run(

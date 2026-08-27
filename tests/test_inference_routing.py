@@ -167,11 +167,10 @@ class InferenceRoutingTests(unittest.TestCase):
                         alias.name == "kimi_client" for alias in node.names
                     ):
                         importers.add(path.name)
-                elif isinstance(node, ast.Import):
-                    if any(
-                        alias.name.endswith("kimi_client") for alias in node.names
-                    ):
-                        importers.add(path.name)
+                elif isinstance(node, ast.Import) and any(
+                    alias.name.endswith("kimi_client") for alias in node.names
+                ):
+                    importers.add(path.name)
         permitted = INFERENCE_MODULES | METADATA_READERS
         self.assertTrue(
             importers <= permitted,
@@ -249,9 +248,11 @@ class KimiClientContractTests(unittest.TestCase):
         from unittest.mock import patch
 
         env = {k: v for k, v in os.environ.items() if k != "MOONSHOT_API_KEY"}
-        with patch.dict("os.environ", env, clear=True):
-            with self.assertRaises(RuntimeError) as caught:
-                kimi_client.require_api_key()
+        with (
+            patch.dict("os.environ", env, clear=True),
+            self.assertRaises(RuntimeError) as caught,
+        ):
+            kimi_client.require_api_key()
         message = str(caught.exception)
         self.assertIn(kimi_client.API_KEY_ENV_VAR, message)
         self.assertIn(kimi_client.CONSOLE_URL, message)
@@ -269,11 +270,10 @@ class KimiClientContractTests(unittest.TestCase):
                 "https://api.moonshot.cn/v1/chat/completions",
             ),
         ):
-            with self.subTest(override=override):
-                with patch.dict(
-                    "os.environ", {kimi_client.BASE_URL_ENV_VAR: override}
-                ):
-                    self.assertEqual(kimi_client.resolve_api_url(), expected)
+            with self.subTest(override=override), patch.dict(
+                "os.environ", {kimi_client.BASE_URL_ENV_VAR: override}
+            ):
+                self.assertEqual(kimi_client.resolve_api_url(), expected)
 
     def test_no_override_uses_the_international_host(self) -> None:
         import os
@@ -303,12 +303,10 @@ class KimiClientContractTests(unittest.TestCase):
             "http://api.moonshot.ai/v1",
             "https://localhost:11434/v1",
         ):
-            with self.subTest(override=hostile):
-                with patch.dict(
-                    "os.environ", {kimi_client.BASE_URL_ENV_VAR: hostile}
-                ):
-                    with self.assertRaises(ValueError):
-                        kimi_client.resolve_api_url()
+            with self.subTest(override=hostile), patch.dict(
+                "os.environ", {kimi_client.BASE_URL_ENV_VAR: hostile}
+            ), self.assertRaises(ValueError):
+                kimi_client.resolve_api_url()
 
     def test_every_allowed_host_is_a_kimi_host(self) -> None:
         """The allowlist is the invariant. It must stay Kimi-only and complete."""
@@ -333,12 +331,11 @@ class KimiClientContractTests(unittest.TestCase):
         }
         self.assertEqual(set(expected), set(kimi_client.KIMI_HOSTS))
         for host, url in expected.items():
-            with self.subTest(host=host):
-                with patch.dict(
-                    "os.environ",
-                    {kimi_client.BASE_URL_ENV_VAR: f"https://{host}"},
-                ):
-                    self.assertEqual(kimi_client.resolve_api_url(), url)
+            with self.subTest(host=host), patch.dict(
+                "os.environ",
+                {kimi_client.BASE_URL_ENV_VAR: f"https://{host}"},
+            ):
+                self.assertEqual(kimi_client.resolve_api_url(), url)
 
     def test_api_key_whitespace_and_quotes_are_stripped(self) -> None:
         """A trailing newline 401s exactly like a wrong key. Do not make the
@@ -347,22 +344,19 @@ class KimiClientContractTests(unittest.TestCase):
 
         key = _REALISTIC_KEY
         for raw in (f"{key}\n", f"  {key}  ", f"'{key}'", f'"{key}"'):
-            with self.subTest(raw=repr(raw)):
-                with patch.dict(
-                    "os.environ", {kimi_client.API_KEY_ENV_VAR: raw}
-                ):
-                    self.assertEqual(kimi_client.require_api_key(), key)
+            with self.subTest(raw=repr(raw)), patch.dict(
+                "os.environ", {kimi_client.API_KEY_ENV_VAR: raw}
+            ):
+                self.assertEqual(kimi_client.require_api_key(), key)
 
     def test_blank_api_key_is_rejected(self) -> None:
         from unittest.mock import patch
 
         for raw in ("   ", "\n", "''"):
-            with self.subTest(raw=repr(raw)):
-                with patch.dict(
-                    "os.environ", {kimi_client.API_KEY_ENV_VAR: raw}
-                ):
-                    with self.assertRaises(RuntimeError):
-                        kimi_client.require_api_key()
+            with self.subTest(raw=repr(raw)), patch.dict(
+                "os.environ", {kimi_client.API_KEY_ENV_VAR: raw}
+            ), self.assertRaises(RuntimeError):
+                kimi_client.require_api_key()
 
     def test_placeholder_key_is_rejected_before_any_request(self) -> None:
         """The literal placeholder from the docs must fail locally, not remotely.
@@ -401,9 +395,11 @@ class KimiClientContractTests(unittest.TestCase):
     def test_placeholder_rejection_names_the_consoles(self) -> None:
         from unittest.mock import patch
 
-        with patch.dict("os.environ", {kimi_client.API_KEY_ENV_VAR: "sk-..."}):
-            with self.assertRaises(RuntimeError) as caught:
-                kimi_client.require_api_key()
+        with (
+            patch.dict("os.environ", {kimi_client.API_KEY_ENV_VAR: "sk-..."}),
+            self.assertRaises(RuntimeError) as caught,
+        ):
+            kimi_client.require_api_key()
         message = str(caught.exception)
         for host in kimi_client.KIMI_HOSTS:
             with self.subTest(host=host):

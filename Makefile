@@ -1,7 +1,17 @@
-.PHONY: label-error demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
+PYTHON ?= python3
+
+# The package declares requires-python >= 3.10, but `make` cannot enforce that
+# the way pip does. Without this guard a contributor whose default python3 is
+# older gets obscure failures instead of a usable message: on such a machine
+# `make reproduce` fails inside kimi_client with a mock error, six layers from
+# the actual cause.
+check-python:
+	@$(PYTHON) -c 'import sys; sys.version_info >= (3, 10) or sys.exit("agent-economics-lab requires Python 3.10 or newer; %d.%d found. Retry with: make PYTHON=python3.12 <target>" % sys.version_info[:2])'
+
+.PHONY: check-python lint coverage label-error demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
 
 demo:
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--traces examples/support_trace.csv \
 		--outcomes examples/outcomes.csv \
 		--rates examples/rates.json \
@@ -9,44 +19,44 @@ demo:
 		--policy examples/policy.json
 
 modularity:
-	PYTHONPATH=. python3 examples/modularity_demo.py
+	PYTHONPATH=. $(PYTHON) examples/modularity_demo.py
 
 coverage-drift:
-	@python3 false_green.py
+	@$(PYTHON) false_green.py
 
 falsegreen: coverage-drift
 
 benchmark:
-	python3 false_green.py \
+	$(PYTHON) false_green.py \
 		--verify research/results/decision-coverage-drift/results.csv \
 		--summary-verify research/results/SUMMARY.md \
 		--json-verify research/results/decision-coverage-drift/summary.json
 
 evidence-ablation:
-	@python3 evidence_ablation.py \
+	@$(PYTHON) evidence_ablation.py \
 		--verify-dir research/results/evidence-ablation
 
 mutation-score:
-	@python3 mutation_score.py \
+	@$(PYTHON) mutation_score.py \
 		--summary-verify research/results/mutation-score/summary.md \
 		--json-verify research/results/mutation-score/summary.json
 
 label-error:
-	@python3 -m agent_economics.label_error
+	@$(PYTHON) -m agent_economics.label_error
 
 sensitivity:
-	@python3 sensitivity_sweep.py \
+	@$(PYTHON) sensitivity_sweep.py \
 		--summary-verify research/results/sensitivity/summary.md \
 		--json-verify research/results/sensitivity/summary.json
 
 completion-vs-verdict:
-	@python3 completion_vs_verdict.py \
+	@$(PYTHON) completion_vs_verdict.py \
 		--verify research/results/completion-vs-verdict/report.txt
 
 # Diagnose a Kimi auth failure. Prints key shape and per-region HTTP status,
 # never the key. Makes live calls, so it is excluded from `make reproduce`.
 kimi-doctor:
-	@python3 check_kimi_auth.py
+	@$(PYTHON) check_kimi_auth.py
 
 # Live judge eval: scores Kimi labels against the hand-authored eval set.
 # Requires MOONSHOT_API_KEY, so it is excluded from `make reproduce`. The scoring
@@ -57,7 +67,7 @@ kimi-eval:
 		echo "The scoring math and eval set are tested without a key: make test"; \
 		exit 1; \
 	fi
-	@python3 kimi_eval.py \
+	@$(PYTHON) kimi_eval.py \
 		--save-predictions /tmp/agent-economics-judge-predictions.json \
 		--save-verdicts /tmp/agent-economics-judge-verdicts.json \
 		--output /tmp/agent-economics-judge-eval.txt
@@ -79,77 +89,87 @@ kimi-judge:
 		echo "Already set a key and getting 401? Run: make kimi-doctor"; \
 		exit 1; \
 	fi
-	@python3 -m agent_economics judge \
+	@$(PYTHON) -m agent_economics judge \
 		--task-results examples/kimi-judge/task_results.csv \
 		--rubric examples/kimi-judge/rubric.json \
 		--out /tmp/agent-economics-kimi-outcomes.csv
 
 frontier:
-	@python3 -m agent_economics frontier \
+	@$(PYTHON) -m agent_economics frontier \
 		examples/compute-frontier/manifest.json \
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
 claude-code:
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from claude-code \
 		--in examples/claude-code/session.jsonl \
 		--contract examples/claude-code/conversion-contract.json \
 		--out /tmp/agent-economics-claude-code.json
 	@cmp /tmp/agent-economics-claude-code.json examples/claude-code/bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code.json
 
 claude-code-tree:
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from claude-code-tree \
 		--in examples/claude-code-tree/session.jsonl \
 		--contract examples/claude-code-tree/conversion-contract.json \
 		--out /tmp/agent-economics-claude-code-tree.json
 	@cmp /tmp/agent-economics-claude-code-tree.json examples/claude-code-tree/bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code-tree.json \
 		--ci
 
 otel-genai:
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from otel-genai \
 		--in examples/otel-genai/langfuse-otlp.json \
 		--contract examples/otel-genai/langfuse-conversion-contract.json \
 		--out /tmp/agent-economics-otel-langfuse.json
 	@cmp /tmp/agent-economics-otel-langfuse.json examples/otel-genai/langfuse-bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-otel-langfuse.json \
 		--ci
-	@python3 -m agent_economics convert \
+	@$(PYTHON) -m agent_economics convert \
 		--from otel-genai \
 		--in examples/otel-genai/arize-openinference-otlp.json \
 		--contract examples/otel-genai/arize-openinference-conversion-contract.json \
 		--out /tmp/agent-economics-otel-arize.json
 	@cmp /tmp/agent-economics-otel-arize.json examples/otel-genai/arize-openinference-bundle.json
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-otel-arize.json \
 		--ci
 
 public-case:
-	@PYTHONPATH=. python3 examples/public-swebench/build_case.py \
+	@PYTHONPATH=. $(PYTHON) examples/public-swebench/build_case.py \
 		--source examples/public-swebench/runs.json \
 		--output-dir /tmp/agent-economics-public-swebench
-	@python3 -m agent_economics evaluate \
+	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-public-swebench/arms/candidate-opus.json
-	@python3 -m agent_economics frontier \
+	@$(PYTHON) -m agent_economics frontier \
 		/tmp/agent-economics-public-swebench/manifest.json \
 		--output-dir /tmp/agent-economics-public-swebench-rendered \
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
 
 lessons:
-	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done
+# Without set -e the loop reports only the LAST lesson's exit status, so a
+# failing lesson 00-03 is masked whenever 04 succeeds. A check that can
+# silently not run is the exact failure this repository exists to refuse.
+	@set -e; for lesson in lessons/*.py; do PYTHONPATH=. $(PYTHON) "$$lesson"; done
 
 video:
-	@python3 render_video.py
+	@$(PYTHON) render_video.py
 
-test:
-	python3 -m unittest discover -s tests -v
+lint:
+	@$(PYTHON) -m ruff check .
+
+coverage:
+	@$(PYTHON) -m coverage run --source=agent_economics -m unittest discover -s tests
+	@$(PYTHON) -m coverage report
+
+test: check-python
+	$(PYTHON) -m unittest discover -s tests -v

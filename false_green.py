@@ -20,10 +20,10 @@ import argparse
 import csv
 import io
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from itertools import product
 from pathlib import Path
-from typing import Sequence
 
 from agent_economics import (
     AssuranceEngine,
@@ -409,24 +409,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     summary = summarize(rows)
     summary_text = render_summary(summary)
     summary_json = render_summary_json(summary)
-    if args.verify:
-        if not args.verify.exists() or args.verify.read_text(encoding="utf-8") != csv_text:
-            print(f"Generated results differ from {args.verify}")
-            return 1
-    if args.summary_verify:
-        if (
-            not args.summary_verify.exists()
-            or args.summary_verify.read_text(encoding="utf-8") != summary_text
-        ):
-            print(f"Generated summary differs from {args.summary_verify}")
-            return 1
-    if args.json_verify:
-        if (
-            not args.json_verify.exists()
-            or args.json_verify.read_text(encoding="utf-8") != summary_json
-        ):
-            print(f"Generated JSON summary differs from {args.json_verify}")
-            return 1
+    if args.verify and (
+        not args.verify.exists()
+        or args.verify.read_text(encoding="utf-8") != csv_text
+    ):
+        print(f"Generated results differ from {args.verify}")
+        return 1
+    if args.summary_verify and (
+        not args.summary_verify.exists()
+        or args.summary_verify.read_text(encoding="utf-8") != summary_text
+    ):
+        print(f"Generated summary differs from {args.summary_verify}")
+        return 1
+    if args.json_verify and (
+        not args.json_verify.exists()
+        or args.json_verify.read_text(encoding="utf-8") != summary_json
+    ):
+        print(f"Generated JSON summary differs from {args.json_verify}")
+        return 1
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(csv_text, encoding="utf-8")

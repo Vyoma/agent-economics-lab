@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import unittest
 from pathlib import Path
+from typing import ClassVar
 
 import kimi_eval
 
@@ -120,7 +121,7 @@ class EvalSetIntegrityTests(unittest.TestCase):
 
 
 class ScoringTests(unittest.TestCase):
-    CASES = [
+    CASES: ClassVar[list[dict]] = [
         {"task_id": "a", "category": "correct", "expected_acceptable": True},
         {"task_id": "b", "category": "correct", "expected_acceptable": True},
         {"task_id": "c", "category": "wrong", "expected_acceptable": False},

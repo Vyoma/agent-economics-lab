@@ -19,8 +19,8 @@ from __future__ import annotations
 
 import argparse
 import math
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from agent_economics import CheckStatus, Decision, evaluate_bundle
 from agent_economics.adapters import load_normalized_json_bundle
@@ -196,13 +196,12 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     report = render_report(args.bundle)
-    if args.verify:
-        if (
-            not args.verify.exists()
-            or args.verify.read_text(encoding="utf-8") != report
-        ):
-            print(f"Generated report differs from {args.verify}")
-            return 1
+    if args.verify and (
+        not args.verify.exists()
+        or args.verify.read_text(encoding="utf-8") != report
+    ):
+        print(f"Generated report differs from {args.verify}")
+        return 1
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(report, encoding="utf-8")

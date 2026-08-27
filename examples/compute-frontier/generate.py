@@ -10,7 +10,6 @@ import hashlib
 import json
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent
 TASK_COUNT = 180
 REFERENCE_FAILURES = {0, 20, 40, 60, 80, 100, 120, 140, 160}
@@ -67,7 +66,7 @@ TASK_MANIFEST = [
     {
         "task_id": f"case-{index:03d}",
         "input_digest": hashlib.sha256(
-            f"synthetic-support-input-{index:03d}".encode("utf-8")
+            f"synthetic-support-input-{index:03d}".encode()
         ).hexdigest(),
         "rubric_version": "support-rubric-v1",
     }

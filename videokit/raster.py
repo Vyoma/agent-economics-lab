@@ -113,7 +113,7 @@ class Canvas:
         self.font = font
         self.px = bytearray(width * height)
 
-    def clone(self) -> "Canvas":
+    def clone(self) -> Canvas:
         other = Canvas(self.width, self.height, self.font)
         other.px[:] = self.px
         return other
@@ -298,7 +298,7 @@ def write_gif(
     out += PALETTE
     out += b"\x21\xff\x0bNETSCAPE2.0\x03\x01" + struct.pack("<H", loop) + b"\x00"
 
-    for canvas, delay in zip(frames, delays_cs):
+    for canvas, delay in zip(frames, delays_cs, strict=False):
         if canvas.width != w or canvas.height != h:
             raise ValueError("all frames must share dimensions")
         out += b"\x21\xf9\x04\x04" + struct.pack("<H", delay) + b"\x00\x00"

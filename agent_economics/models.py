@@ -4,9 +4,10 @@ import functools
 import hashlib
 import inspect
 import textwrap
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 
 class Decision(str, Enum):
@@ -162,7 +163,7 @@ class CheckOutput:
 CheckFn = Callable[["EvaluationView"], CheckOutput]
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def implementation_fingerprint(run: CheckFn) -> str:
     """Return a SHA-256 fingerprint of a check implementation's source text.
 

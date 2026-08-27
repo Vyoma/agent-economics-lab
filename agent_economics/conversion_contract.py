@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import json
 import math
+from collections.abc import Mapping, Sequence
 from numbers import Real
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from .models import Baseline, EconomicPolicy, Outcome, TaskIdentity
 

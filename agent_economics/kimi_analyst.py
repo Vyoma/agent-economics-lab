@@ -43,6 +43,7 @@ from pathlib import Path
 from typing import Any
 
 from . import kimi_client
+from .models import AssuranceCase, Baseline, EconomicPolicy
 
 logger = logging.getLogger(__name__)
 
@@ -208,11 +209,10 @@ Respond with valid JSON ONLY — no markdown fences, no commentary:
 
 
 def _build_context_from_case(
-    case: "AssuranceCase",
-    policy: "EconomicPolicy | None",
-    baseline: "Baseline | None",
+    case: AssuranceCase,
+    policy: EconomicPolicy | None,
+    baseline: Baseline | None,
 ) -> str:
-    from .models import AssuranceCase, EconomicPolicy, Baseline
 
     lines: list[str] = []
     accepted = sum(t.acceptable for t in case.tasks)
@@ -324,7 +324,7 @@ def _build_context_from_case(
         lines += [
             f"COUNTERFACTUAL (baseline: {baseline.name})",
             "----------------------------------------------",
-            f"                              Agent       Baseline",
+            "                              Agent       Baseline",
             f"  cost_per_acceptable:        ${case.cost_per_acceptable_outcome_usd:.2f}     ${baseline.cost_per_acceptable_outcome_usd:.2f}",
             f"  expected_net_per_attempt:   ${case.expected_net_value_per_attempt_usd:.2f}      ${baseline.expected_net_value_per_attempt_usd:.2f}",
             f"  incremental_net:            ${case.incremental_net_value_vs_baseline_usd:.2f}      N/A",
@@ -489,9 +489,9 @@ def _get_api_key() -> str:
 # ── public API ────────────────────────────────────────────────────────────────
 
 def analyse(
-    case: "AssuranceCase",
-    policy: "EconomicPolicy | None" = None,
-    baseline: "Baseline | None" = None,
+    case: AssuranceCase,
+    policy: EconomicPolicy | None = None,
+    baseline: Baseline | None = None,
     *,
     model: str = _DEFAULT_MODEL,
 ) -> AnalysisResult:

@@ -13,11 +13,12 @@ import hashlib
 import json
 import math
 import random
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from enum import Enum
 from numbers import Integral, Real
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from .adapters import normalized_json_bundle
 from .assurance import evaluate_bundle
@@ -29,7 +30,6 @@ from .models import (
     TaskEconomics,
     TaskIdentity,
 )
-
 
 CANONICAL_SIGNIFICANT_DIGITS = 12
 SELECTION_RULE = "minimum_observed_mean_cost_among_eligible"
@@ -754,7 +754,7 @@ def evaluate_frontier(
             )
             / len(ordered_tasks)
         )
-        seed_material = f"{plan.seed}:{candidate_id}".encode("utf-8")
+        seed_material = f"{plan.seed}:{candidate_id}".encode()
         candidate_seed = int.from_bytes(
             hashlib.sha256(seed_material).digest()[:8], "big"
         )

@@ -82,9 +82,8 @@ class ClopperPearsonTests(unittest.TestCase):
     def test_inputs_are_validated(self) -> None:
         for args in ((0, 0, 0.025), (-1, 10, 0.025), (11, 10, 0.025),
                      (0, 10, 0.0), (0, 10, 1.0), (0, 10, -0.1), (0, 10, 1.1)):
-            with self.subTest(args=args):
-                with self.assertRaises(ValueError):
-                    clopper_pearson_upper(*args)
+            with self.subTest(args=args), self.assertRaises(ValueError):
+                clopper_pearson_upper(*args)
 
     def test_binomial_cdf_is_a_distribution(self) -> None:
         for trials in (1, 5, 20):

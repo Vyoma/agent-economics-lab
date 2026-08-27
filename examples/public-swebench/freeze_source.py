@@ -14,7 +14,6 @@ import math
 from pathlib import Path
 from typing import Any
 
-
 ROOT = Path(__file__).resolve().parent
 UPSTREAM_DATASET = "tarsur385/swebench-verified-trajectories"
 UPSTREAM_REVISION = "b55979d6b24850b72ae4d80f912526280cd6058a"

@@ -28,10 +28,10 @@ from agent_economics.kimi_judge import (
     _build_system_prompt,
     _build_user_message,
     _error_outcome_row,
+    _main,
     _validate_rubric,
     _verdict_schema,
     judge,
-    _main,
 )
 
 # Shaped like a real key. The client rejects short or templated values
@@ -131,7 +131,7 @@ class PromptBuildingTests(unittest.TestCase):
 
 class OutcomeRowTests(unittest.TestCase):
     def test_acceptable_row(self) -> None:
-        out, audit = _build_outcome_row("t-001", _KIMI_ACCEPT, _RUBRIC, "kimi-k3")
+        out, _audit = _build_outcome_row("t-001", _KIMI_ACCEPT, _RUBRIC, "kimi-k3")
         self.assertEqual(out["acceptable"], "true")
         self.assertEqual(out["business_value_usd"], "8.0")
         self.assertEqual(out["human_minutes"], "0")
@@ -139,7 +139,7 @@ class OutcomeRowTests(unittest.TestCase):
         self.assertEqual(out["incident_loss_usd"], "0")
 
     def test_not_acceptable_row(self) -> None:
-        out, audit = _build_outcome_row("t-002", _KIMI_REJECT, _RUBRIC, "kimi-k3")
+        out, _audit = _build_outcome_row("t-002", _KIMI_REJECT, _RUBRIC, "kimi-k3")
         self.assertEqual(out["acceptable"], "false")
         self.assertEqual(out["business_value_usd"], "0")
         self.assertEqual(out["human_minutes"], "8.0")
@@ -268,9 +268,11 @@ class JudgePipelineTests(unittest.TestCase):
             out_path = tmp_dir / "outcomes.csv"
             env_without_key = {k: v for k, v in __import__("os").environ.items()
                                if k != "MOONSHOT_API_KEY"}
-            with patch.dict("os.environ", env_without_key, clear=True):
-                with self.assertRaises(RuntimeError, msg="MOONSHOT_API_KEY"):
-                    judge(tasks_path, rubric_path, out_path)
+            with (
+                patch.dict("os.environ", env_without_key, clear=True),
+                self.assertRaises(RuntimeError, msg="MOONSHOT_API_KEY"),
+            ):
+                judge(tasks_path, rubric_path, out_path)
 
     def test_judge_raises_on_empty_task_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -279,9 +281,11 @@ class JudgePipelineTests(unittest.TestCase):
             tasks_path.write_text("task_id,output\n")
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
-                with self.assertRaises(ValueError):
-                    judge(tasks_path, rubric_path, out_path)
+            with (
+                patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}),
+                self.assertRaises(ValueError),
+            ):
+                judge(tasks_path, rubric_path, out_path)
 
     @patch("agent_economics.kimi_judge._call_kimi")
     def test_cli_main_returns_zero(self, mock_call: MagicMock) -> None:
@@ -430,9 +434,11 @@ class KimiRequestContractTests(unittest.TestCase):
             ("acceptable", {**valid, "acceptable": "yes"}),
             ("overall_score", {**valid, "overall_score": "high"}),
         ):
-            with self.subTest(field=field, value=mutated.get(field)):
-                with self.assertRaises(ValueError):
-                    _validate_verdict(mutated, _RUBRIC)
+            with (
+                self.subTest(field=field, value=mutated.get(field)),
+                self.assertRaises(ValueError),
+            ):
+                _validate_verdict(mutated, _RUBRIC)
 
     def test_token_budget_leaves_room_for_max_effort_reasoning(self) -> None:
         """K3 always reasons, and reasoning shares this budget."""
@@ -544,9 +550,11 @@ class KimiRequestContractTests(unittest.TestCase):
             rubric_path.write_text(json.dumps(_RUBRIC))
             out_path = tmp_dir / "outcomes.csv"
 
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
-                with self.assertRaises(kimi_client.KimiRequestError):
-                    judge(tasks_path, rubric_path, out_path, rate_limit=0)
+            with (
+                patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}),
+                self.assertRaises(kimi_client.KimiRequestError),
+            ):
+                judge(tasks_path, rubric_path, out_path, rate_limit=0)
 
             self.assertFalse(
                 out_path.exists(),
@@ -651,14 +659,16 @@ class KimiRequestContractTests(unittest.TestCase):
             tmp_dir = Path(tmp)
             rubric_path = tmp_dir / "rubric.json"
             rubric_path.write_text(json.dumps(_RUBRIC))
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
-                with self.assertRaises(ValueError):
-                    judge(
-                        tmp_dir / "tasks.csv",
-                        rubric_path,
-                        tmp_dir / "outcomes.csv",
-                        reasoning_effort="medium",
-                    )
+            with (
+                patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}),
+                self.assertRaises(ValueError),
+            ):
+                judge(
+                    tmp_dir / "tasks.csv",
+                    rubric_path,
+                    tmp_dir / "outcomes.csv",
+                    reasoning_effort="medium",
+                )
 
     @patch("agent_economics.kimi_judge._call_kimi")
     def test_audit_records_the_label_provenance(self, mock_call: MagicMock) -> None:

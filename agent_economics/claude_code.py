@@ -4,13 +4,14 @@ import hashlib
 import json
 import math
 from collections import Counter, defaultdict
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from numbers import Real
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from .conversion_contract import (
-    load_conversion_contract,
+    load_conversion_contract as load_conversion_contract,  # re-exported
     loads_strict_json,
     parse_baseline,
     parse_outcomes_and_manifest,
@@ -24,7 +25,6 @@ from .models import (
     TaskIdentity,
     TraceEvent,
 )
-
 
 SOURCE_ID = "source.claude-code-jsonl"
 SOURCE_VERSION = "1"
@@ -106,7 +106,7 @@ def _sha256_json(value: Any) -> str:
 
 
 def _opaque_id(prefix: str, session_id: str, source_id: str) -> str:
-    digest = _sha256_bytes(f"{session_id}\0{source_id}".encode("utf-8"))
+    digest = _sha256_bytes(f"{session_id}\0{source_id}".encode())
     return f"{prefix}-{digest}"
 
 

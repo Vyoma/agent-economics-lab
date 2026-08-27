@@ -26,7 +26,6 @@ from agent_economics.otel_genai import (
     inspect_otel_genai_json,
 )
 
-
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples" / "otel-genai"
 LANGFUSE = EXAMPLE / "langfuse-otlp.json"

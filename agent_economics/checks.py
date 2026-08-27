@@ -9,12 +9,11 @@ from .models import (
     CheckResult,
     CheckSpec,
     CheckStatus,
-    Coverage,
     ControlFinding,
+    Coverage,
     Decision,
     EvaluationView,
 )
-
 
 DEFAULT_REQUIRED_COVERAGE = frozenset(
     {

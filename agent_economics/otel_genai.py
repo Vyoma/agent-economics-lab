@@ -4,10 +4,11 @@ import base64
 import binascii
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from .conversion_contract import (
     load_conversion_contract,
@@ -21,7 +22,6 @@ from .conversion_contract import (
 )
 from .evidence import make_evidence_bundle, validate_evidence_bundle
 from .models import EvidenceBundle, ModelRate, TraceEvent
-
 
 SOURCE_ID = "source.otel-genai"
 SOURCE_VERSION = "1"
