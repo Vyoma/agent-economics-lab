@@ -35,6 +35,12 @@ from .claude_code_tree import (
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
 )
+from .delegation import (
+    DELEGATION_CLOSURE,
+    ClosureReport,
+    assess_bundle_closure,
+    delegation_closure_gate,
+)
 from .evidence import make_evidence_bundle
 from .frontier import (
     ArmSummary,
@@ -81,6 +87,7 @@ from .models import (
     TraceEvent,
     implementation_fingerprint,
 )
+from .mutation import Mutation, MutationReport, mutate
 from .otel_genai import (
     OtelGenAISession,
     conversion_contract_template as otel_genai_conversion_contract_template,
@@ -89,15 +96,27 @@ from .otel_genai import (
     otel_genai_bundle,
     otel_genai_bundle_from_session,
 )
+from .provenance import (
+    EVIDENCE_PROVENANCE,
+    Attestation,
+    ProvenancePolicy,
+    ProvenanceReport,
+    assess_provenance,
+    evidence_provenance_gate,
+    parse_attestations,
+)
 
 __all__ = [
     "ASSURANCE_ENGINE_IMPLEMENTATION",
     "DECISION_CONTRACT_SCHEMA",
     "DEFAULT_REQUIRED_COVERAGE",
+    "DELEGATION_CLOSURE",
+    "EVIDENCE_PROVENANCE",
     "ROUTING_SEMANTICS",
     "ArmSummary",
     "AssuranceCase",
     "AssuranceEngine",
+    "Attestation",
     "Baseline",
     "CheckMode",
     "CheckOutput",
@@ -105,6 +124,7 @@ __all__ = [
     "CheckSpec",
     "CheckStatus",
     "ClaudeCodeSession",
+    "ClosureReport",
     "Coverage",
     "Decision",
     "EconomicPolicy",
@@ -115,12 +135,18 @@ __all__ = [
     "FrontierDecision",
     "KimiRequestError",
     "ModelRate",
+    "Mutation",
+    "MutationReport",
     "OtelGenAISession",
     "Outcome",
     "PairedComparison",
+    "ProvenancePolicy",
+    "ProvenanceReport",
     "TaskIdentity",
     "TraceEvent",
     "__version__",
+    "assess_bundle_closure",
+    "assess_provenance",
     "claude_code_bundle",
     "claude_code_bundle_from_session",
     "claude_code_tree_bundle",
@@ -132,9 +158,11 @@ __all__ = [
     "decision_contract_manifest",
     "default_checks",
     "default_engine",
+    "delegation_closure_gate",
     "evaluate",
     "evaluate_bundle",
     "evaluate_frontier",
+    "evidence_provenance_gate",
     "implementation_fingerprint",
     "inspect_claude_code_jsonl",
     "inspect_claude_code_session_tree",
@@ -151,12 +179,14 @@ __all__ = [
     "load_rates",
     "load_traces",
     "make_evidence_bundle",
+    "mutate",
     "normalized_json_bundle",
     "normalized_json_document",
     "otel_genai_bundle",
     "otel_genai_bundle_from_session",
     "otel_genai_conversion_contract_template",
     "otel_genai_conversion_receipt",
+    "parse_attestations",
     "render_frontier_json",
     "render_frontier_markdown",
     "render_frontier_svg",

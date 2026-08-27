@@ -80,13 +80,50 @@ class Attestation:
         return (as_of - measured).days
 
 
+# Agreement is not one quantity. Raw agreement, Cohen's kappa and held-out
+# accuracy answer different questions and do not share a threshold: kappa
+# discounts chance agreement, raw agreement does not, so 0.8 means something
+# materially different in each. A single `min_agreement` compared across all
+# three was a category error, and a metrology reviewer would say so first.
+# ILAC-G8 requires a conformity statement to declare its decision rule; these
+# are ours, and an attestation whose method is not named here is refused rather
+# than silently graded on someone else's scale.
+METHOD_FLOORS: dict[str, float] = {
+    "agreement-vs-human-adjudication": 0.80,
+    "raw-agreement": 0.80,
+    "cohens-kappa": 0.60,
+    "fleiss-kappa": 0.60,
+    "krippendorff-alpha": 0.667,
+    "held-out-accuracy": 0.80,
+}
+
+
 @dataclass(frozen=True)
 class ProvenancePolicy:
-    """What an attestation must show before its instrument's evidence is accepted."""
+    """
+    What an attestation must show before its instrument's evidence is accepted.
 
-    min_agreement: float = 0.8
+    `min_agreement` overrides the per-method floor when set; leaving it None uses
+    METHOD_FLOORS, which is the defensible default. The floors are conventional
+    landmarks, not derived from this package's data, and are stated as such.
+    """
+
+    min_agreement: float | None = None
     min_sample_size: int = 100
     max_age_days: int = 180
+
+    def floor_for(self, method: str) -> float:
+        if self.min_agreement is not None:
+            return self.min_agreement
+        try:
+            return METHOD_FLOORS[method]
+        except KeyError:
+            raise ValueError(
+                f"unknown attestation method {method!r}; add it to METHOD_FLOORS "
+                "with a stated floor, or set ProvenancePolicy.min_agreement "
+                "explicitly. Grading an unknown method against another method's "
+                "threshold is not a decision rule."
+            ) from None
 
 
 @dataclass(frozen=True)
@@ -194,6 +231,7 @@ def assess_provenance(
     *,
     policy: ProvenancePolicy | None = None,
     as_of: dt.date,
+    independently_verified: Sequence[str] = (),
 ) -> ProvenanceReport:
     """
     Check every instrument this run's evidence depends on.
@@ -203,8 +241,21 @@ def assess_provenance(
     in this package is meant to be.
     """
     policy = policy or ProvenancePolicy()
+    corroborated = set(independently_verified)
     statuses: list[InstrumentStatus] = []
     for instrument in sorted(set(instruments)):
+        if instrument in corroborated:
+            # Its output is checked by something else, so this instrument is not
+            # the sole provider of its evidence and need not be attested. This is
+            # DO-178C's independent-verification exemption, borrowed knowingly.
+            statuses.append(
+                InstrumentStatus(
+                    instrument=instrument,
+                    attested=True,
+                    reason="",
+                )
+            )
+            continue
         record = attestations.get(instrument)
         if record is None:
             statuses.append(
@@ -218,9 +269,10 @@ def assess_provenance(
             continue
         age = record.age_days(as_of)
         reasons = []
-        if record.agreement < policy.min_agreement:
+        floor = policy.floor_for(record.method)
+        if record.agreement < floor:
             reasons.append(
-                f"agreement {record.agreement:.2f} below {policy.min_agreement:.2f}"
+                f"{record.method} {record.agreement:.2f} below {floor:.2f}"
             )
         if record.sample_size < policy.min_sample_size:
             reasons.append(

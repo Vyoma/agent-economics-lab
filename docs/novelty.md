@@ -29,33 +29,65 @@ shipped checks returns 1.0 every time. It is a regression test on an invariant,
 not a measurement, and `research/results/mutation-score/` records it as
 `detected_by_coverage_contract_by_construction`.
 
-## What might be novel, and is not yet established
+## What was claimed later, and what the sweeps left of it
 
-Two mechanisms were added later and carry landscape entries asserting what is
-absent from the field. **Those entries were written by their author and have not
-survived an independent refutation sweep.** Given that two earlier claims from the
-same author were destroyed by such sweeps, one by a paper predating the work by
-four months, the honest status of both is *unverified*.
+Two mechanisms were added after the corrections above, each with a landscape
+entry asserting what was absent from the field. Both entries were written by
+their author. Both were then put to an independent refutation sweep, and both
+came back **partially novel** with the framing gone and a narrow remainder.
 
-- **Coverage closure over dynamic delegation** (`agent_economics/delegation.py`).
-  A pinned contract assumes required evidence can be enumerated before the run.
-  That stops holding when the agent spawns subagents at runtime. Rather than
-  enumerate, require closure: each delegation is declared or it is unaccounted,
-  and unaccounted delegation is missing coverage. Prior art in composition is
-  deep: modular assurance cases, contract-based design, GSN away goals, dynamic
-  safety cases. The unverified part is applying it to structure discovered at
-  runtime as a check that refuses.
+### Coverage closure over dynamic delegation
 
-- **Attestation of the instruments that produced the evidence**
-  (`agent_economics/provenance.py`). Contracts record which instrument produced
-  the labels; nothing recorded whether it works. An unattested, weakly agreeing,
-  or lapsed instrument forces `INCOMPLETE`. This is a metrology calibration
-  certificate, expiry included, applied to eval instruments. Prior art is a
-  century deep. The unverified part is *gating a deployment decision* on
-  calibration state rather than reporting it.
+Gone: "applied to structure discovered at runtime, in an agent delegation tree,
+as a shipped check." Mishra and Sharad (arXiv:2606.09692, June 2026) name
+**delegation closure** as a requirement and state the coverage-accounting
+principle directly. Nian et al. (arXiv:2604.05485, April 2026) define an
+accounted-fraction over delegation events with a magnitude-weighted gap burden,
+arguing for the weighting in nearly the words used here. ISA 600 and ISA 705
+settled the concept decades ago, SOC 2's carve-out method is the same
+disjunction, and cost-weighted accounted-fraction is a published FinOps KPI.
 
-If either sweep returns a subsuming citation, this section should shrink again
-rather than be defended.
+Survives: **the denominator is the contract, not the ground truth.** The agent
+work measures whether the record captured what happened. This measures whether
+anyone undertook to assess what the record already shows. A run can be perfectly
+instrumented, every subagent traced, and still score zero closure because none
+was declared.
+
+### Attestation of evidence-producing instruments
+
+Gone: the metrology framing, and any suggestion the mechanism is new. Usami et
+al. (arXiv:2606.15610, June 2026) already argue a judge should be reported as a
+measurement instrument, with a metrological protocol. Eval Factsheets specified
+the record fields in December 2025. Outside AI the whole loop is routine: PPAP
+rejects a submission on Gauge R&R, CLIA makes a lab stop reporting an analyte
+after two failed proficiency events and sets a literal calibration interval, and
+ISO/IEC 17025 goes further by recalling results already issued. Closest of all,
+DO-330 and ISO 26262-8 tool qualification is the same mechanism, and its
+independent-verification exemption is the same carve-out.
+
+Survives, narrowly: an age limit evaluated against a caller-supplied `as_of`
+rather than the wall clock, and an `INCOMPLETE` outcome **distinct from FAIL**,
+so unknown quality does not route to STOP. Tool qualification is one-time and
+version-bound; a stochastic labeller changes without a version bump, so its
+certificate has to lapse on a clock.
+
+### What the sweeps found in the code, not the claims
+
+Both found the code failing to match its own docstring, which matters more than
+the citations:
+
+- `provenance.py` was **orphaned**. Not exported, not imported anywhere, so
+  "an unattested instrument forces INCOMPLETE" was not true of the shipped
+  system at all. Now exported and reachable.
+- Its docstring described a **sole-provider carve-out that did not exist**; the
+  gate refused on any failing instrument. Now implemented.
+- It compared raw agreement, Cohen's kappa and held-out accuracy against **one
+  threshold**, which is a category error ILAC-G8 exists to prevent. Floors are
+  now per method, and an unknown method is refused rather than graded on another
+  method's scale.
+- `delegation.py` promised accounting could be satisfied by "the delegated work
+  carrying a contract of its own". **That disjunct was never implemented**, and
+  it is what in-toto sublayouts already provide. The promise is removed.
 
 ## The claim actually worth making
 
@@ -120,5 +152,11 @@ even if nobody examined what it did. Attestation characterises the instrument,
 not the individual label: a judge in calibration can still be wrong about a
 particular task.
 
-And the two unverified claims above are unverified. They should be read as
-hypotheses until a sweep says otherwise.
+The two later claims have now been swept and both were narrowed; what is left of
+them is stated above and in docs/landscape.md, with the citations that did the
+narrowing. Neither should be described as novel without that context.
+
+Four separate novelty claims have been made in this repository. Three were
+destroyed outright and the fourth pair survived only in narrow, technical
+remainders. Anyone tempted to make a fifth should assume the same outcome and
+write it that way from the start.

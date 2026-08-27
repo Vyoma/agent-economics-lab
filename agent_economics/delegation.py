@@ -31,11 +31,26 @@ It is not an invariant. It varies with the run, it degrades as an agent becomes
 more dynamic, and it is a property of the contract measured against what the agent
 actually did, which is the direction of measurement this package otherwise lacks.
 
-Prior art, stated rather than skipped: modular and compositional assurance cases
-have long allowed one argument to discharge obligations onto another, and
-contract-based design formalises exactly this in systems engineering. What appears
-to be absent is any of it applied to structure discovered at runtime, in an agent
-delegation tree, as a shipped check. See docs/landscape.md.
+Prior art is extensive and this is a narrower contribution than it first looks.
+Group-audit standards settled the concept decades ago: under ISA 600 delegated
+work is either covered by the group team's procedures or by reviewed component
+work, and under ISA 705 an inability to obtain sufficient evidence yields a
+qualified opinion or a disclaimer, with materiality as the magnitude test. SOC 2
+carve-out versus inclusive method is the same disjunction. Cost-weighted
+accounted-fraction is a published FinOps KPI for untagged spend.
+
+In this domain specifically, two 2026 papers are closer than the earlier version
+of this docstring admitted. Mishra and Sharad (arXiv:2606.09692) name
+"delegation closure" as a requirement and state the coverage-accounting principle
+directly; Nian et al. (arXiv:2604.05485) define an accounted-fraction over
+delegation events with a magnitude-weighted gap burden, and argue for weighting
+in almost the terms used below.
+
+The distinction that survives is the denominator. Those measure whether the
+*record* captured what happened. This measures whether anyone *undertook to
+assess* what the record already shows. A run can be perfectly traced, with every
+subagent observed, and still score zero closure because none was declared. See
+docs/landscape.md for the citations and the full concession.
 """
 from __future__ import annotations
 
