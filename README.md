@@ -636,6 +636,28 @@ it.
 
 [Inspect the action contract](action.yml)
 
+## Ask what your harness cannot tell you
+
+```bash
+agent-economics audit --bundle bundle.json --ci
+```
+
+One command, four grounds for withholding a verdict: required coverage no check
+supplies, which gates actually carry this run, delegated work nobody undertook to
+assess, and instruments nobody validated. None of them is a score. Each is a
+reason the honest answer is `INCOMPLETE`.
+
+It runs on a bundle with no economics at all, so a team with a PII gate and a
+jailbreak gate can ask the question without first inventing a rate card:
+
+```text
+- Verdict on the evidence as supplied: **STOP**
+- Withheld on: **unprovided coverage**
+
+- `refusal_rate` — no enabled check supplies this
+- `jailbreak_safety` is pivotal: removing it flips this run green
+```
+
 ## What is actually novel here
 
 Less than earlier drafts of this README claimed. Three novelty claims made

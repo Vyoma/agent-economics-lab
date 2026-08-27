@@ -9,6 +9,7 @@ from pathlib import Path
 from . import __version__, kimi_client
 from .adapters import load_normalized_json_bundle, render_normalized_json
 from .assurance import evaluate_bundle
+from .audit import audit, render_markdown as render_audit_markdown
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .claude_code import (
     SOURCE_ID as CLAUDE_CODE_SOURCE_ID,
@@ -103,6 +104,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Completed conversion contract with outcomes, prices, baseline, and policy.",
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
+    audit_parser = subparsers.add_parser(
+        "audit",
+        help="Ask what this harness cannot tell you: coverage with no provider, "
+             "which gates carry the verdict, delegated work nobody undertook to "
+             "assess, and instruments nobody validated.",
+    )
+    audit_parser.add_argument("--bundle", required=True)
+    audit_parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    audit_parser.add_argument("--output")
+    audit_parser.add_argument(
+        "--ci", action="store_true",
+        help="Exit 1 if any ground for withholding a verdict is present.",
+    )
+
     mutate_parser = subparsers.add_parser(
         "mutate",
         help="Remove each required gate in turn and report what the engine does.",
@@ -161,6 +176,22 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "audit":
+        try:
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        report = audit(bundle)
+        rendered = (
+            json.dumps(report.to_dict(), indent=2, sort_keys=True)
+            if args.format == "json"
+            else render_audit_markdown(report)
+        )
+        if args.output:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        print(rendered)
+        return 1 if args.ci and not report.assessable else 0
     if args.command in {"mutate", "closure"}:
         try:
             bundle = load_normalized_json_bundle(Path(args.bundle))
