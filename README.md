@@ -636,6 +636,13 @@ it.
 
 [Inspect the action contract](action.yml)
 
+## What is actually novel here
+
+Less than earlier drafts of this README claimed. Three novelty claims made
+here have been refuted by adversarial prior-art sweeps, and the corrections
+are recorded alongside the citations that narrowed them:
+[what is novel](docs/novelty.md).
+
 ## Reproduce everything
 
 ```bash
