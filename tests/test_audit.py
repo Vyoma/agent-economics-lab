@@ -11,6 +11,7 @@ import datetime as dt
 import json
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import replace
 from io import StringIO
 from pathlib import Path
 
@@ -54,7 +55,7 @@ def _fails(_view):
     )
 
 
-def _safety_bundle():
+def _safety_bundle(label_source: str = ""):
     events = tuple(
         TraceEvent(
             task_id=f"t{i}", event_id=f"e{i}", timestamp=f"2026-08-27T00:00:0{i}Z",
@@ -63,7 +64,10 @@ def _safety_bundle():
         for i in range(3)
     )
     outcomes = {f"t{i}": Outcome(task_id=f"t{i}", acceptable=True) for i in range(3)}
-    return checks_only_bundle(events=events, outcomes=outcomes, source_id="source.my-eval")
+    bundle = checks_only_bundle(
+        events=events, outcomes=outcomes, source_id="source.my-eval"
+    )
+    return replace(bundle, label_source=label_source) if label_source else bundle
 
 
 PII = CheckSpec(id="gate.pii", version="1", mode=CheckMode.GATE,
@@ -123,10 +127,28 @@ class GroundsAreNotScoresTest(unittest.TestCase):
         self.assertEqual(report.unattested_instruments, ())
         self.assertNotIn("unattested instruments", report.grounds)
 
-    def test_a_bundle_with_no_recorded_instrument_says_so(self) -> None:
+    def test_a_bundle_with_no_recorded_instrument_is_not_assessable(self) -> None:
         report = audit(_safety_bundle(), (PII,), frozenset({"pii_safety"}))
         self.assertEqual(report.instruments_checked, ())
-        self.assertTrue(any("cannot say what produced its labels" in n for n in report.notes))
+        self.assertIn("no evidence instrument recorded", report.grounds)
+        self.assertFalse(report.assessable)
+
+    def test_deleting_the_label_source_does_not_buy_a_pass(self) -> None:
+        """The regression test for a fail-open on the package's own honesty.
+
+        While a missing instrument was a note and an unattested one a ground,
+        a bundle that declared what produced its labels was unassessable and
+        one that recorded nothing was assessable. The tool paid a team to
+        delete the field. Both must withhold a verdict, for different reasons.
+        """
+        declared = _safety_bundle(label_source="fixture.manual-review")
+        deleted = replace(declared, label_source="")
+        self.assertFalse(audit(declared, (PII,), frozenset({"pii_safety"})).assessable)
+        self.assertFalse(audit(deleted, (PII,), frozenset({"pii_safety"})).assessable)
+        self.assertNotEqual(
+            audit(declared, (PII,), frozenset({"pii_safety"})).grounds,
+            audit(deleted, (PII,), frozenset({"pii_safety"})).grounds,
+        )
 
 
 class AuditCliTest(unittest.TestCase):

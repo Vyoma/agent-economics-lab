@@ -647,6 +647,26 @@ supplies, which gates actually carry this run, delegated work nobody undertook t
 assess, and instruments nobody validated. None of them is a score. Each is a
 reason the honest answer is `INCOMPLETE`.
 
+The fourth ground asks what validated your evidence instruments. Answer it by
+supplying their calibration records; without one, the audit withholds:
+
+```bash
+agent-economics audit --bundle bundle.json \
+  --attestations attestations.json --as-of 2026-08-27
+```
+
+Each record states a method, an agreement figure, a sample size, what it was
+measured against, and when. Agreement is checked against a floor for its own
+method, and an unknown method is refused rather than graded on another method's
+scale. An instrument whose output is independently checked by something else is
+not the sole provider of its evidence and may be exempted with
+`--independently-verified`.
+
+A bundle that records no instrument at all is also withheld, and this is
+deliberate. While that was merely noted, declaring what produced your labels
+made a bundle unassessable until attested and recording nothing made it
+assessable, so the tool paid you to delete the field.
+
 It runs on a bundle with no economics at all, so a team with a PII gate and a
 jailbreak gate can ask the question without first inventing a rate card:
 

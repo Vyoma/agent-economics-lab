@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import sys
 from collections.abc import Sequence
@@ -45,6 +46,7 @@ from .otel_genai import (
     inspect_otel_genai_json,
     otel_genai_bundle_from_session,
 )
+from .provenance import Attestation
 from .report import render_json, render_markdown
 
 
@@ -114,6 +116,27 @@ def build_parser() -> argparse.ArgumentParser:
     audit_parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
     audit_parser.add_argument("--output")
     audit_parser.add_argument(
+        "--attestations",
+        help=(
+            "JSON file of calibration records for the evidence instruments, "
+            "keyed by instrument name. Without it, a bundle that declares what "
+            "produced its labels cannot be assessed -- and neither can one that "
+            "declares nothing."
+        ),
+    )
+    audit_parser.add_argument(
+        "--as-of",
+        help="ISO date to age attestations against. Defaults to today.",
+    )
+    audit_parser.add_argument(
+        "--independently-verified",
+        action="append", default=[], metavar="INSTRUMENT",
+        help=(
+            "An instrument whose output is checked by something else, so it is "
+            "not the sole provider of its evidence. Repeatable."
+        ),
+    )
+    audit_parser.add_argument(
         "--ci", action="store_true",
         help="Exit 1 if any ground for withholding a verdict is present.",
     )
@@ -180,6 +203,21 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _load_attestations(path: str | None) -> dict[str, Attestation] | None:
+    """Read calibration records, or None when none were supplied.
+
+    None and {} differ: None means no attestation reached this audit, {} means
+    a file was supplied that attests nothing. Both withhold a verdict, and the
+    audit says which it saw.
+    """
+    if path is None:
+        return None
+    raw = json.loads(Path(path).read_text())
+    return {
+        name: Attestation(instrument=name, **fields) for name, fields in raw.items()
+    }
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "audit":
@@ -188,7 +226,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         except (OSError, ValueError) as error:
             print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
             return 2
-        report = audit(bundle)
+        try:
+            attestations = _load_attestations(args.attestations)
+            as_of = dt.date.fromisoformat(args.as_of) if args.as_of else None
+        except (OSError, ValueError, TypeError, KeyError) as error:
+            print(f"INCOMPLETE: invalid attestation: {error}", file=sys.stderr)
+            return 2
+        report = audit(
+            bundle,
+            attestations=attestations,
+            as_of=as_of,
+            independently_verified=tuple(args.independently_verified),
+        )
         rendered = (
             json.dumps(report.to_dict(), indent=2, sort_keys=True)
             if args.format == "json"

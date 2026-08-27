@@ -36,7 +36,7 @@ from typing import Any
 from .assurance import AssuranceEngine
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .delegation import assess_bundle_closure
-from .models import CheckSpec, EvidenceBundle
+from .models import CheckSpec, EvidenceBundle, Unsupplied
 from .mutation import mutate
 from .provenance import Attestation, ProvenancePolicy, assess_provenance
 
@@ -49,10 +49,12 @@ class AuditReport:
     total_gates: int = 0
     unaccounted_delegations: tuple[str, ...] = ()
     delegated_spend_unassessed: float = 0.0
+    spend_is_priced: bool = True
     closure: float = 1.0
     unattested_instruments: tuple[tuple[str, str], ...] = ()
     instruments_checked: tuple[str, ...] = ()
     conformance_held: bool = True
+    no_instrument_recorded: bool = False
     notes: tuple[str, ...] = field(default_factory=tuple)
 
     @property
@@ -65,6 +67,8 @@ class AuditReport:
             reasons.append("unaccounted delegation")
         if self.unattested_instruments:
             reasons.append("unattested instruments")
+        if self.no_instrument_recorded:
+            reasons.append("no evidence instrument recorded")
         if not self.conformance_held:
             reasons.append("fail-closed invariant broken")
         return tuple(reasons)
@@ -82,12 +86,16 @@ class AuditReport:
             "pivotal_gates": list(self.pivotal_gates),
             "total_gates": self.total_gates,
             "unaccounted_delegations": list(self.unaccounted_delegations),
-            "delegated_spend_unassessed": self.delegated_spend_unassessed,
+            "delegated_spend_unassessed": (
+                self.delegated_spend_unassessed if self.spend_is_priced else None
+            ),
+            "spend_is_priced": self.spend_is_priced,
             "closure": self.closure,
             "unattested_instruments": [
                 {"instrument": i, "reason": r} for i, r in self.unattested_instruments
             ],
             "instruments_checked": list(self.instruments_checked),
+            "no_instrument_recorded": self.no_instrument_recorded,
             "fail_closed_conformance": self.conformance_held,
             "notes": list(self.notes),
         }
@@ -122,6 +130,7 @@ def audit(
     instruments = [i for i in (bundle.label_source,) if i]
     unattested: list[tuple[str, str]] = []
     notes: list[str] = []
+    no_instrument = False
     if instruments:
         if attestations is None and not independently_verified:
             unattested = [
@@ -137,10 +146,13 @@ def audit(
             )
             unattested = [(s.instrument, s.reason) for s in provenance.rejected]
     else:
-        notes.append(
-            "no evidence instrument recorded; this bundle cannot say what "
-            "produced its labels"
-        )
+        # A ground, not a note. As a note this rewarded deleting the field: a
+        # bundle declaring its label source was unassessable until attested,
+        # while one that recorded nothing was assessable. The gate paid a team
+        # to stop saying what produced its labels, which is the catalogued
+        # pattern arriving by a new route -- not a flattening at a boundary, a
+        # tool-manufactured incentive to perform one.
+        no_instrument = True
 
     if closure.suspected_delegations:
         notes.append(
@@ -155,10 +167,12 @@ def audit(
         total_gates=mutation.total,
         unaccounted_delegations=tuple(d.name for d in closure.unaccounted),
         delegated_spend_unassessed=closure.unaccounted_cost_usd,
+        spend_is_priced=not isinstance(bundle.rates, Unsupplied),
         closure=closure.closure,
         unattested_instruments=tuple(unattested),
         instruments_checked=tuple(instruments),
         conformance_held=mutation.fail_closed_conformance,
+        no_instrument_recorded=no_instrument,
         notes=tuple(notes),
     )
 
@@ -213,8 +227,17 @@ def render_markdown(report: AuditReport) -> str:
             f"- `{d}` spawned work that no contract declared"
             for d in report.unaccounted_delegations
         ]
-        lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated spend is "
-                  f"unassessed; closure {report.closure:.0%}."]
+        if report.spend_is_priced:
+            lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated "
+                      f"spend is unassessed; closure {report.closure:.0%}."]
+        else:
+            # No rate card was supplied, so every event cost is an unpriced zero.
+            # Printing "$0.0000" here would be a fabricated measurement produced
+            # by the one API whose purpose is refusing to fabricate economics:
+            # the refusal held in the verdict and leaked at the renderer.
+            lines += ["", f"Closure {report.closure:.0%}. The unassessed spend "
+                      "cannot be stated: no rate card was supplied, so this "
+                      "trace was never priced."]
     else:
         lines.append(f"All delegated work is accounted for (closure {report.closure:.0%}).")
     lines.append("")
@@ -228,7 +251,11 @@ def render_markdown(report: AuditReport) -> str:
             + ", ".join(f"`{i}`" for i in report.instruments_checked)
         )
     else:
-        lines.append("No evidence instrument is recorded on this bundle.")
+        lines.append(
+            "No evidence instrument is recorded on this bundle, so it cannot say "
+            "what produced its labels. That is a ground, not a note: treating it "
+            "as one would make deleting the field the cheapest way to pass."
+        )
     lines.append("")
 
     if report.notes:

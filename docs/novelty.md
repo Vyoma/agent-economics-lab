@@ -136,7 +136,7 @@ adversarial pass so far, and it is stated at that width deliberately.
 This is not novelty and it is probably the more useful half.
 
 On a single day of concentrated work, the mechanisms in this repository caught
-six real defects, four of them in the work of the person adding them:
+eight real defects, six of them in the work of the person adding them:
 
 1. The lint gate found `kimi_analyst.py` annotating its public API with names
    that had no module-level import, so `typing.get_type_hints()` raised
@@ -151,6 +151,23 @@ six real defects, four of them in the work of the person adding them:
    a comment inside the decision kernel.
 6. The implementation fingerprint refused a check whose source could not be
    retrieved, rather than admitting it to a contract unfingerprinted.
+7. An adversarial review of the audit found that a missing evidence instrument
+   was a note while an unattested one was a ground. A bundle that declared what
+   produced its labels was therefore unassessable until attested, and one that
+   recorded nothing was assessable. The gate paid a team to delete the field.
+   That is not a flattening at a boundary; it is a tool manufacturing the
+   incentive to perform one, on the package's own honesty dimension.
+8. With that fixed, the audit renderer still printed `$0.0000 of delegated
+   spend` for a bundle built by `checks_only_bundle`, whose entire purpose is
+   declaring that no rate card was supplied. The verdict was correct at every
+   step: closure was 0%, the decision was INCOMPLETE. The refusal held in the
+   logic and leaked at the last boundary, as a dollar figure to four decimal
+   places, computed from event costs that nothing had ever priced.
+
+The eighth is the sharpest, because the API that emitted the fabricated number
+is the one written specifically to refuse fabricating economics. Being right
+about the verdict is not the same as being honest about the number, and the
+place these come apart is the renderer, which no gate inspects.
 
 Separately, and most to the point: CI was red for five consecutive commits
 because a generator walked git history at verification time, which works on a

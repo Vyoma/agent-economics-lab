@@ -15,6 +15,12 @@ from .models import (
     Outcome,
     TaskIdentity,
     TraceEvent,
+    Unsupplied,
+)
+from .unsupplied import (
+    unsupplied_baseline,
+    unsupplied_policy,
+    unsupplied_rates,
 )
 
 
@@ -42,9 +48,12 @@ def normalized_json_bundle(raw: Mapping[str, Any]) -> EvidenceBundle:
         if outcome.task_id in outcomes:
             raise ValueError(f"Duplicate outcome task ID: {outcome.task_id!r}")
         outcomes[outcome.task_id] = outcome
-    rates = {
-        name: ModelRate(**values) for name, values in raw["rates"].items()
-    }
+    raw_rates = raw["rates"]
+    rates = (
+        unsupplied_rates()
+        if _is_absent(raw_rates, "rates")
+        else {name: ModelRate(**values) for name, values in raw_rates.items()}
+    )
     task_manifest: dict[str, TaskIdentity] = {}
     for row in raw.get("task_manifest", ()):
         identity = TaskIdentity(**row)
@@ -68,8 +77,16 @@ def normalized_json_bundle(raw: Mapping[str, Any]) -> EvidenceBundle:
         events=events,
         outcomes=outcomes,
         rates=rates,
-        baseline=Baseline(**raw["baseline"]),
-        policy=EconomicPolicy(**raw["policy"]),
+        baseline=(
+            unsupplied_baseline()
+            if _is_absent(raw["baseline"], "baseline")
+            else Baseline(**raw["baseline"])
+        ),
+        policy=(
+            unsupplied_policy()
+            if _is_absent(raw["policy"], "policy")
+            else EconomicPolicy(**raw["policy"])
+        ),
         source_id=source_id,
         source_version=source_version,
         task_manifest=task_manifest,
@@ -88,6 +105,22 @@ def normalized_json_bundle(raw: Mapping[str, Any]) -> EvidenceBundle:
     return bundle
 
 
+def _is_absent(value: Any, name: str) -> bool:
+    """A declared-absent economic input, as written by _absent_or."""
+    return isinstance(value, dict) and value.get("unsupplied") == name
+
+
+def _absent_or(value: Any, name: str, render: Any) -> Any:
+    """Serialise a declared-absent economic input.
+
+    A checks-only bundle declares that rates, baseline and policy were never
+    supplied. Without this the bundle could be built and audited in memory but
+    not written to the file `audit --bundle` reads, so the documented
+    checks-only path stopped at the interchange format.
+    """
+    return {"unsupplied": name} if isinstance(value, Unsupplied) else render(value)
+
+
 def normalized_json_document(
     bundle: EvidenceBundle,
     *,
@@ -99,11 +132,12 @@ def normalized_json_document(
         "outcomes": [
             asdict(bundle.outcomes[task_id]) for task_id in sorted(bundle.outcomes)
         ],
-        "rates": {
-            name: asdict(bundle.rates[name]) for name in sorted(bundle.rates)
-        },
-        "baseline": asdict(bundle.baseline),
-        "policy": asdict(bundle.policy),
+        "rates": _absent_or(
+            bundle.rates, "rates",
+            lambda r: {name: asdict(r[name]) for name in sorted(r)},
+        ),
+        "baseline": _absent_or(bundle.baseline, "baseline", asdict),
+        "policy": _absent_or(bundle.policy, "policy", asdict),
     }
     if bundle.declared_delegations:
         document["declared_delegations"] = list(bundle.declared_delegations)
