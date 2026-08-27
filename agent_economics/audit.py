@@ -35,7 +35,11 @@ from typing import Any
 
 from .assurance import AssuranceEngine
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
-from .delegation import assess_bundle_closure
+from .delegation import (
+    ClosureReport,
+    UnpricedDelegation,
+    assess_bundle_closure,
+)
 from .models import CheckSpec, EvidenceBundle, Unsupplied
 from .mutation import mutate
 from .provenance import Attestation, ProvenancePolicy, assess_provenance
@@ -55,6 +59,7 @@ class AuditReport:
     instruments_checked: tuple[str, ...] = ()
     conformance_held: bool = True
     no_instrument_recorded: bool = False
+    unpriced_delegation: str = ""
     notes: tuple[str, ...] = field(default_factory=tuple)
 
     @property
@@ -69,6 +74,8 @@ class AuditReport:
             reasons.append("unattested instruments")
         if self.no_instrument_recorded:
             reasons.append("no evidence instrument recorded")
+        if self.unpriced_delegation:
+            reasons.append("delegated work nothing priced")
         if not self.conformance_held:
             reasons.append("fail-closed invariant broken")
         return tuple(reasons)
@@ -96,6 +103,7 @@ class AuditReport:
             ],
             "instruments_checked": list(self.instruments_checked),
             "no_instrument_recorded": self.no_instrument_recorded,
+            "unpriced_delegation": self.unpriced_delegation,
             "fail_closed_conformance": self.conformance_held,
             "notes": list(self.notes),
         }
@@ -125,7 +133,15 @@ def audit(
 
     verdict = AssuranceEngine(checks=checks, required_coverage=required).evaluate(bundle)
     mutation = mutate(bundle, checks, required)
-    closure = assess_bundle_closure(bundle)
+    unpriced_delegation = ""
+    try:
+        closure = assess_bundle_closure(bundle)
+    except UnpricedDelegation as error:
+        # The ratio is unknowable, not zero. An audit that raises here would be
+        # a refusal the caller has to catch; the contract is that it returns a
+        # withheld verdict instead.
+        closure = ClosureReport()
+        unpriced_delegation = str(error)
 
     instruments = [i for i in (bundle.label_source,) if i]
     unattested: list[tuple[str, str]] = []
@@ -173,6 +189,7 @@ def audit(
         instruments_checked=tuple(instruments),
         conformance_held=mutation.fail_closed_conformance,
         no_instrument_recorded=no_instrument,
+        unpriced_delegation=unpriced_delegation,
         notes=tuple(notes),
     )
 

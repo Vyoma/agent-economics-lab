@@ -136,7 +136,7 @@ adversarial pass so far, and it is stated at that width deliberately.
 This is not novelty and it is probably the more useful half.
 
 On a single day of concentrated work, the mechanisms in this repository caught
-eight real defects, six of them in the work of the person adding them:
+nine real defects, seven of them in the work of the person adding them:
 
 1. The lint gate found `kimi_analyst.py` annotating its public API with names
    that had no module-level import, so `typing.get_type_hints()` raised
@@ -164,10 +164,25 @@ eight real defects, six of them in the work of the person adding them:
    logic and leaked at the last boundary, as a dollar figure to four decimal
    places, computed from event costs that nothing had ever priced.
 
-The eighth is the sharpest, because the API that emitted the fabricated number
-is the one written specifically to refuse fabricating economics. Being right
-about the verdict is not the same as being honest about the number, and the
-place these come apart is the renderer, which no gate inspects.
+9. Chasing that one to its root found the worst of the nine. Cost-weighted
+   closure summed `direct_cost_usd or 0.0` rather than calling `TraceEvent.cost`,
+   the resolver every other consumer uses, so any event priced by the rate card
+   instead of an explicit figure weighed nothing. On a run with $100 of declared
+   subagent spend and $18 of undeclared subagent spend, closure reported 100%
+   and $0.00 unaccounted. That is a green verdict over exactly the condition the
+   module exists to detect. Every adapter-built bundle sets an explicit cost,
+   which is why it survived; the documented CSV evidence path leaves the column
+   blank and prices from the rate card, and there it was live.
+
+The eighth is the sharpest of the pair that reached a reader, because the API
+that emitted the fabricated number is the one written specifically to refuse
+fabricating economics. The ninth is the most serious outright: a fail-open on
+the headline mechanism, caused by one `or 0.0` bypassing a resolver.
+
+Both were found by asking what a number would look like if it were wrong,
+rather than by a test. Being right about the verdict is not the same as being
+honest about the number, and the places these come apart are a renderer and an
+arithmetic default, neither of which any gate inspects.
 
 Separately, and most to the point: CI was red for five consecutive commits
 because a generator walked git history at verification time, which works on a

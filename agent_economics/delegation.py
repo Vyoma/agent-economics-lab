@@ -67,12 +67,23 @@ from .models import (
     CheckStatus,
     Decision,
     EvidenceBundle,
+    ModelRate,
     TraceEvent,
+    Unsupplied,
 )
 
 # The coverage dimension this module supplies. A plain string rather than a
 # Coverage member: it is not economic, and the engine accepts either.
 DELEGATION_CLOSURE = "delegation_closure"
+
+
+class UnpricedDelegation(LookupError):
+    """Raised when a delegated event's cost cannot be established.
+
+    Cost-weighted closure divides by delegated spend. An event nothing priced
+    contributes an unknown amount, not zero, so the ratio is unknowable and the
+    engine's fail-closed path must yield INCOMPLETE.
+    """
 
 
 class UnaccountedDelegation(LookupError):
@@ -172,6 +183,29 @@ class ClosureReport:
         }
 
 
+def _event_cost(
+    event: TraceEvent, rates: Mapping[str, ModelRate] | None
+) -> float:
+    """What this event cost, or a refusal.
+
+    `TraceEvent.cost` resolves an explicit cost first and otherwise prices token
+    counts against the rate card. Bypassing it treats every rate-priced event as
+    free.
+    """
+    if event.direct_cost_usd is not None:
+        return event.direct_cost_usd
+    if event.event_type != "model":
+        return 0.0
+    if rates is None or event.model not in rates:
+        raise UnpricedDelegation(
+            f"Event {event.event_id!r} carries no explicit cost and no rate for "
+            f"model {event.model!r}, so the spend it contributes to closure is "
+            "unknown. Counting it as zero would understate unaccounted "
+            "delegation, which is the one number this module exists to report."
+        )
+    return event.cost(dict(rates))
+
+
 def _children(edges: Sequence[tuple[str, str]]) -> dict[str, list[str]]:
     out: dict[str, list[str]] = defaultdict(list)
     for parent, child in edges:
@@ -211,6 +245,7 @@ def assess_closure(
     *,
     delegation_tools: Sequence[str] = ("Task", "Agent"),
     declared: Sequence[str] = (),
+    rates: Mapping[str, ModelRate] | None = None,
 ) -> ClosureReport:
     """
     Walk the delegation graph and report how much of it the contract accounts for.
@@ -218,6 +253,15 @@ def assess_closure(
     `declared` is the manifest of delegating event IDs the conversion contract
     anticipated. A delegation absent from it spawned work nobody planned to
     assess, whatever that work then cost.
+
+    `rates` prices events that carry token counts instead of an explicit cost.
+    Without it, such an event's cost is unknown and this refuses rather than
+    counting it as zero. Reading `direct_cost_usd or 0.0` here instead of the
+    resolver was a fail-open on the number this module exists to report: an
+    undeclared subagent priced by the rate card weighed nothing, so a run with
+    $100 of declared spend and $18 of undeclared spend reported 100% closure
+    and $0.00 unaccounted. Every adapter-built bundle sets an explicit cost;
+    the documented CSV evidence path does not, and that is where it bit.
     """
     by_id: dict[str, TraceEvent] = {e.event_id: e for e in events}
     children = _children(dependency_edges)
@@ -240,7 +284,7 @@ def assess_closure(
             continue
         reachable = _descendants(event.event_id, children)
         cost = sum(
-            by_id[e].direct_cost_usd or 0.0 for e in reachable if e in by_id
+            _event_cost(by_id[e], rates) for e in reachable if e in by_id
         )
         delegations.append(
             Delegation(
@@ -365,6 +409,7 @@ def assess_bundle_closure(
         bundle.dependency_edges,
         delegation_tools=delegation_tools,
         declared=bundle.declared_delegations if declared is None else declared,
+        rates=None if isinstance(bundle.rates, Unsupplied) else bundle.rates,
     )
 
 
@@ -373,6 +418,7 @@ __all__ = [
     "ClosureReport",
     "Delegation",
     "UnaccountedDelegation",
+    "UnpricedDelegation",
     "assess_bundle_closure",
     "assess_closure",
     "delegation_closure_gate",

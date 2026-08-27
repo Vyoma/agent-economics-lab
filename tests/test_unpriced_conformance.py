@@ -12,14 +12,26 @@ from __future__ import annotations
 
 import json
 import math
+import pathlib
 import unittest
+from dataclasses import replace
+from typing import ClassVar
 
+from agent_economics import load_normalized_json_bundle
 from agent_economics.adapters import (
     normalized_json_bundle,
     render_normalized_json,
 )
 from agent_economics.audit import audit, render_markdown
-from agent_economics.models import Outcome, TraceEvent, Unsupplied, UnsuppliedEvidence
+from agent_economics.delegation import assess_bundle_closure
+from agent_economics.evidence import make_evidence_bundle
+from agent_economics.models import (
+    ModelRate,
+    Outcome,
+    TraceEvent,
+    Unsupplied,
+    UnsuppliedEvidence,
+)
 from agent_economics.unsupplied import (
     checks_only_bundle,
     unsupplied_baseline,
@@ -135,3 +147,72 @@ class UnpricedSpendIsNotStated(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RatePricedDelegationIsNotFree(unittest.TestCase):
+    """Cost-weighted closure must price events the same way the rest of the package does.
+
+    `assess_closure` read `direct_cost_usd or 0.0` instead of `TraceEvent.cost`,
+    so any event priced by the rate card rather than an explicit figure weighed
+    nothing. Every adapter-built bundle sets an explicit cost, which is why this
+    survived. The documented CSV evidence path leaves the column blank and
+    prices from the rate card, and there it reported 100% closure and $0.00
+    unaccounted over $18.00 of undeclared subagent spend.
+    """
+
+    RATES: ClassVar[dict[str, ModelRate]] = {
+        "m": ModelRate(input_per_million_usd=3.0, output_per_million_usd=15.0)
+    }
+
+    def _event(self, index, name, kind="model", direct=None, tin=0, tout=0):
+        return TraceEvent(
+            task_id="t0", event_id=f"e{index}",
+            timestamp=f"2026-08-27T00:00:{index:02d}Z",
+            event_type=kind, name=name, model="m", direct_cost_usd=direct,
+            input_tokens=tin, output_tokens=tout,
+        )
+
+    def _mixed_bundle(self):
+        """$100 of declared subagent spend, $18 of undeclared, priced two ways."""
+        events = (
+            self._event(0, "chat", direct=0.0),
+            self._event(1, "Agent", "tool", direct=0.0),
+            self._event(2, "chat", direct=100.0),
+            self._event(3, "Agent", "tool", direct=0.0),
+            self._event(4, "chat", tin=1_000_000, tout=1_000_000),
+        )
+        reference = load_normalized_json_bundle(
+            pathlib.Path(__file__).resolve().parents[1]
+            / "examples" / "claude-code" / "bundle.json"
+        )
+        return make_evidence_bundle(
+            events=events, outcomes={"t0": Outcome(task_id="t0", acceptable=True)},
+            rates=self.RATES, baseline=reference.baseline, policy=reference.policy,
+            source_id="s.x", dependency_edges=(("e1", "e2"), ("e3", "e4")),
+            declared_delegations=("e1",),
+        )
+
+    def test_undeclared_rate_priced_spend_is_not_counted_as_zero(self) -> None:
+        report = assess_bundle_closure(self._mixed_bundle())
+        undeclared = next(d for d in report.delegations if not d.declared)
+        self.assertAlmostEqual(undeclared.spawned_cost_usd, 18.0)
+        self.assertAlmostEqual(report.unaccounted_cost_usd, 18.0)
+        self.assertLess(report.closure, 1.0)
+
+    def test_the_two_ways_of_stating_the_same_cost_agree(self) -> None:
+        explicit = self._event(9, "chat", direct=18.0)
+        rate_priced = self._event(9, "chat", tin=1_000_000, tout=1_000_000)
+        self.assertEqual(explicit.cost(self.RATES), rate_priced.cost(self.RATES))
+
+    def test_delegated_work_nothing_priced_withholds_rather_than_raising(self) -> None:
+        bundle = _bundle(dependency_edges=(("e1", "e2"),))
+        unpriced = replace(
+            bundle,
+            events=(
+                bundle.events[0], bundle.events[1],
+                self._event(2, "chat", tin=1_000_000, tout=1_000_000),
+            ),
+        )
+        report = audit(unpriced)
+        self.assertEqual(report.decision, "INCOMPLETE")
+        self.assertIn("delegated work nothing priced", report.grounds)
