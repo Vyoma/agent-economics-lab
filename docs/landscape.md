@@ -311,3 +311,86 @@ bar, and comparing all three against one number was a category error that
 ILAC-G8 exists to prevent. An attestation whose method has no stated floor is
 refused rather than graded on another method's scale. The floors are conventional
 landmarks, not derived from this package's data, and are labelled as such.
+
+## What other frameworks do when a check cannot run
+
+This section exists because the stance this package takes — that evidence which
+could not be produced is not a result — is only worth taking if the field does
+something else. A survey was run against primary sources to find out. **It
+refuted the premise it started from**, and the real answer is more interesting.
+
+### The premise that was wrong
+
+The survey set out to confirm that eval frameworks silently convert a failed
+check into a pass. **They do not.** No mainstream framework treats a broken
+check as a pass. The one clear historical case, Guardrails AI defaulting
+`on_fail` to `NOOP`, was fixed by its maintainers: the default became
+`OnFailAction.EXCEPTION` in v0.6.0. DeepEval's `ignore_errors`, which looked
+like the same thing, records the error and marks the item a **failure**, and
+both it and `skip_on_missing_params` default to `False`, so the default aborts.
+
+That framing is retired. It was wrong.
+
+### What the field actually divides on
+
+Not whether a broken check passes, but whether it is **counted somewhere the
+reader will see**.
+
+| Behaviour | Frameworks |
+|---|---|
+| Aborts by default | UK AISI Inspect, DeepEval, lm-evaluation-harness, HELM, Arize Phoenix, Guardrails 0.6+, openai/evals |
+| Reports an un-scored state | **Inspect** (counts `scored_samples` and `unscored_samples` beside the metric, and defaults `aggregate(on_missing="error")`), Langfuse, MLflow, Braintrust Python/TS, Phoenix, LangSmith (best effort) |
+| Drops from the denominator | Ragas, MLflow, Braintrust Python/TS, DeepEval under `skip_on_missing_params`, Weave numeric means |
+| Folds into a zero or a fail | OpenAI graders (documented: a grader exception or non-numeric output "will be marked as invalid and return a 0 grade"), promptfoo judge transport failures, DeepEval under `ignore_errors`, Braintrust C#/Java |
+
+**UK AISI Inspect is the closest prior art to the position this package takes,
+and it is better at the reporting half.** `Score.unscored()` is a first-class
+state, the exclusion is counted rather than merely performed, and the aggregate
+default is to error on missing values. Anything this package says about refusing
+should credit it.
+
+The sharpest remaining gap is silent denominator shrinkage. Ragas is the clearest
+case: with `raise_exceptions=False` and `np.nanmean`, a run where forty of a
+hundred judge calls fail reports the mean of the surviving sixty, in the same
+shape as a complete run, with no count of the missing forty. MLflow does the same
+with a log warning as the only signal. Both offer a stricter setting; neither
+makes it the default.
+
+### Every design here has a stated reason
+
+The maintainers are not careless, and the write-up should not imply it. DeepEval's
+flag exists because a custom model "generating invalid JSONs ... will stop the
+execution of the entire test run". MLflow isolates sub-scorer failures "so one bad
+scorer doesn't abort the whole ensemble". HELM drops NaN statistics because
+"Python's stdlib json.dumps() will produce invalid JSON when serializing a NaN".
+Weave's own pull request is candid that its fix is partial.
+
+Two projects have argued the principle explicitly, from opposite directions.
+promptfoo's source declines to invert a grader error into a pass because "a
+grader error is not evidence that the criterion was or was not met". Inspect's
+changelog reaches the same conclusion by the other route, keeping judge-parse
+failures visible "rather than inflating the INCORRECT count".
+
+### The honest conclusion
+
+The field has converged on *not a pass*. It has not converged on *how to report
+not a score*. An explicitly counted un-scored state is a minority position, held
+clearly by one framework and partially by several others.
+
+That is a narrower justification for this package's stance than the one it
+started with, and it is the true one.
+
+### This repository was doing the worst version of it
+
+Until the commit that added this section, `kimi_judge` wrote a task the judge
+never evaluated into the outcomes CSV as `acceptable: false`. That file is the
+evidence a verdict is built from, so a judge outage lowered the acceptable rate
+and was indistinguishable from a genuinely bad result. The audit sidecar recorded
+the truth and nothing downstream read it.
+
+That is the fold-into-a-fail behaviour catalogued above, in the package that
+argues against it, while `kimi_eval` twenty files away already excluded errors
+from its denominator under a test reading "an outage must not be reported as
+strictness". It is fixed, and it is recorded here rather than quietly corrected,
+because a survey of other people's defaults has no standing from a project that
+had not checked its own.

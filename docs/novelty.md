@@ -89,6 +89,30 @@ the citations:
   carrying a contract of its own". **That disjunct was never implemented**, and
   it is what in-toto sublayouts already provide. The promise is removed.
 
+## A fifth claim, tested and refuted
+
+The advice above was taken immediately and did not help.
+
+The next claim was that eval frameworks silently convert a failed check into a
+pass, which would have made refusing obviously correct. A survey against primary
+sources **refuted it**. No mainstream framework treats a broken check as a pass.
+The one clear case, Guardrails AI defaulting to `NOOP`, was fixed by its
+maintainers in v0.6.0. DeepEval's `ignore_errors`, which looked identical, marks
+the item a failure and defaults to off.
+
+What survives is narrower and true: the field has converged on *not a pass* and
+has not converged on *how to report not a score*. Silent denominator shrinkage is
+common, and an explicitly counted un-scored state is a minority position. **UK
+AISI Inspect holds it clearly, reports it better than this package does, and
+predates it.**
+
+The survey also found this repository committing the worst version of the
+behaviour it was surveying: a judge outage written into the outcomes file as
+`acceptable: false`. Fixed, and recorded in docs/landscape.md rather than quietly
+corrected.
+
+Five claims, five narrowings. The rate has not improved with practice.
+
 ## The claim actually worth making
 
 Not any single mechanism. Every one is borrowed:
