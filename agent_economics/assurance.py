@@ -16,6 +16,7 @@ from .models import (
     CheckResult,
     CheckSpec,
     CheckStatus,
+    ControlFinding,
     Coverage,
     Decision,
     EconomicPolicy,
@@ -25,6 +26,7 @@ from .models import (
     Outcome,
     TaskEconomics,
     TraceEvent,
+    Unsupplied,
 )
 
 DECISION_CONTRACT_SCHEMA = "assurance.decision-contract@2"
@@ -113,6 +115,71 @@ def _checked_sum(values: Sequence[float], label: str) -> float:
             "Check the cost units and the rate card."
         )
     return total
+
+
+def _economics_unsupplied(evidence: EvidenceBundle) -> bool:
+    """True when the operator declared the economic inputs absent."""
+    return any(
+        isinstance(value, Unsupplied)
+        for value in (evidence.rates, evidence.policy, evidence.baseline)
+    )
+
+
+class _UnsuppliedMetric:
+    """
+    A derived economic metric that could not be computed.
+
+    Deliberately not a float subclass. A float subclass leaks: abs, round, unary
+    minus, %, //, ** and math.fsum all bypass overridden comparisons and yield a
+    real number or a quiet nan, so a cost gate can total genuine spend, compare
+    nan against a ceiling, and pass. Every operation here raises.
+    """
+
+    __slots__ = ()
+
+    def _refuse(self, *_a: object, **_k: object) -> float:
+        raise LookupError(
+            "economic metrics were not computed because rates, policy or baseline "
+            "were declared unsupplied; a check that reads them cannot run"
+        )
+
+    __lt__ = __le__ = __gt__ = __ge__ = __eq__ = __ne__ = _refuse
+    __add__ = __sub__ = __mul__ = __truediv__ = __floordiv__ = _refuse
+    __mod__ = __pow__ = __divmod__ = _refuse
+    __radd__ = __rsub__ = __rmul__ = __rtruediv__ = __rfloordiv__ = _refuse
+    __rmod__ = __rpow__ = __rdivmod__ = _refuse
+    __float__ = __int__ = __index__ = __round__ = __trunc__ = _refuse
+    __floor__ = __ceil__ = __abs__ = __neg__ = __pos__ = _refuse
+    __bool__ = __hash__ = __format__ = _refuse
+
+    def __repr__(self) -> str:
+        return "<unsupplied metric>"
+
+
+def reconstruct_tasks_without_economics(
+    events: Sequence[TraceEvent],
+    outcomes: dict[str, Outcome],
+) -> tuple[TaskEconomics, ...]:
+    """Task records for a bundle carrying no economics. Costs refuse to be read."""
+    by_task: dict[str, list[TraceEvent]] = defaultdict(list)
+    for event in events:
+        by_task[event.task_id].append(event)
+    absent = _UnsuppliedMetric()
+    return tuple(
+        TaskEconomics(
+            task_id=task_id,
+            call_count=len(rows),
+            trace_cost_usd=absent,
+            human_cost_usd=absent,
+            remediation_cost_usd=absent,
+            incident_loss_usd=absent,
+            effective_cost_usd=absent,
+            acceptable=outcomes[task_id].acceptable,
+            business_value_usd=absent,
+        )
+        for task_id, rows in sorted(by_task.items())
+        if task_id in outcomes
+    )
 
 
 def reconstruct_tasks(
@@ -238,46 +305,67 @@ class AssuranceEngine:
         contract_digest = decision_contract_digest(
             self.checks, self.required_coverage
         )
-        tasks = reconstruct_tasks(
-            evidence.events, evidence.outcomes, evidence.rates, evidence.policy
-        )
-        if not tasks:
-            raise ValueError("At least one task is required")
-
-        accepted = sum(task.acceptable for task in tasks)
-        acceptable_rate = accepted / len(tasks)
-        total_cost = _checked_sum(
-            [task.effective_cost_usd for task in tasks], "total effective cost"
-        )
-        cost_per_acceptable = total_cost / accepted if accepted else math.inf
-        p95_cost = percentile([task.effective_cost_usd for task in tasks], 0.95)
-        max_cost = max(task.effective_cost_usd for task in tasks)
-        realized_value = _checked_sum(
-            [task.business_value_usd for task in tasks], "total realized value"
-        )
-        expected_net = (realized_value - total_cost) / len(tasks)
-        incremental_net = (
-            expected_net - evidence.baseline.expected_net_value_per_attempt_usd
-        )
-        derived_metrics = (
-            ("acceptable_rate", acceptable_rate),
-            ("total_effective_cost_usd", total_cost),
-            ("cost_per_acceptable_outcome_usd", cost_per_acceptable),
-            ("p95_task_cost_usd", p95_cost),
-            ("max_task_cost_usd", max_cost),
-            ("expected_net_value_per_attempt_usd", expected_net),
-            ("incremental_net_value_vs_baseline_usd", incremental_net),
-        )
-        non_finite = [
-            label for label, value in derived_metrics if not math.isfinite(value)
-        ]
-        if non_finite and not (
-            accepted == 0
-            and non_finite == ["cost_per_acceptable_outcome_usd"]
-        ):
-            raise ValueError(
-                "Computed economic metrics are not finite: " + ", ".join(non_finite)
+        # Economics may be declared absent (agent_economics.unsupplied). A bundle
+        # of traces and labels is a legitimate input when the required coverage is
+        # supplied entirely by non-economic checks. Nothing is defaulted to zero:
+        # every derived metric becomes a value that raises when read, so an
+        # economic gate added later fails closed rather than pricing at nothing.
+        if _economics_unsupplied(evidence):
+            tasks = reconstruct_tasks_without_economics(
+                evidence.events, evidence.outcomes
             )
+            if not tasks:
+                raise ValueError("At least one task is required")
+            _absent = _UnsuppliedMetric()
+            acceptable_rate = sum(t.acceptable for t in tasks) / len(tasks)
+            total_cost = _absent
+            cost_per_acceptable = _absent
+            p95_cost = _absent
+            max_cost = _absent
+            expected_net = _absent
+            incremental_net = _absent
+        else:
+            tasks = reconstruct_tasks(
+                evidence.events, evidence.outcomes, evidence.rates, evidence.policy
+            )
+            if not tasks:
+                raise ValueError("At least one task is required")
+
+            accepted = sum(task.acceptable for task in tasks)
+            acceptable_rate = accepted / len(tasks)
+            total_cost = _checked_sum(
+                [task.effective_cost_usd for task in tasks], "total effective cost"
+            )
+            cost_per_acceptable = total_cost / accepted if accepted else math.inf
+            p95_cost = percentile([task.effective_cost_usd for task in tasks], 0.95)
+            max_cost = max(task.effective_cost_usd for task in tasks)
+            realized_value = _checked_sum(
+                [task.business_value_usd for task in tasks], "total realized value"
+            )
+            expected_net = (realized_value - total_cost) / len(tasks)
+            incremental_net = (
+                expected_net - evidence.baseline.expected_net_value_per_attempt_usd
+            )
+            derived_metrics = (
+                ("acceptable_rate", acceptable_rate),
+                ("total_effective_cost_usd", total_cost),
+                ("cost_per_acceptable_outcome_usd", cost_per_acceptable),
+                ("p95_task_cost_usd", p95_cost),
+                ("max_task_cost_usd", max_cost),
+                ("expected_net_value_per_attempt_usd", expected_net),
+                ("incremental_net_value_vs_baseline_usd", incremental_net),
+            )
+            non_finite = [
+                label for label, value in derived_metrics if not math.isfinite(value)
+            ]
+            if non_finite and not (
+                accepted == 0
+                and non_finite == ["cost_per_acceptable_outcome_usd"]
+            ):
+                raise ValueError(
+                    "Computed economic metrics are not finite: " + ", ".join(non_finite)
+                )
+
         view = EvaluationView(
             events=evidence.events,
             dependency_edges=evidence.dependency_edges,
@@ -323,6 +411,22 @@ class AssuranceEngine:
                                     f"{type(error).__name__}: {error}"
                                 ),
                                 on_failure=check.failure_route or Decision.STOP,
+                            )
+                        )
+                    else:
+                        # A diagnostic cannot emit a FAIL result: the engine's own
+                        # validator rejects that. It supplies no required coverage,
+                        # so it is recorded as a finding and the verdict is unmoved.
+                        findings.append(
+                            ControlFinding(
+                                task_id="",
+                                control=check.id,
+                                severity="error",
+                                evidence=f"{type(error).__name__}: {error}",
+                                interpretation=(
+                                    "diagnostic could not run; it supplies no "
+                                    "required coverage, so the verdict is unaffected"
+                                ),
                             )
                         )
                     continue
