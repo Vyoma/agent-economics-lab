@@ -59,6 +59,7 @@ class AuditReport:
     instruments_checked: tuple[str, ...] = ()
     conformance_held: bool = True
     no_instrument_recorded: bool = False
+    delegation_count: int = 0
     unpriced_delegation: str = ""
     notes: tuple[str, ...] = field(default_factory=tuple)
 
@@ -103,6 +104,7 @@ class AuditReport:
             ],
             "instruments_checked": list(self.instruments_checked),
             "no_instrument_recorded": self.no_instrument_recorded,
+            "delegation_count": self.delegation_count,
             "unpriced_delegation": self.unpriced_delegation,
             "fail_closed_conformance": self.conformance_held,
             "notes": list(self.notes),
@@ -189,6 +191,7 @@ def audit(
         instruments_checked=tuple(instruments),
         conformance_held=mutation.fail_closed_conformance,
         no_instrument_recorded=no_instrument,
+        delegation_count=len(closure.delegations),
         unpriced_delegation=unpriced_delegation,
         notes=tuple(notes),
     )
@@ -256,7 +259,19 @@ def render_markdown(report: AuditReport) -> str:
                       "cannot be stated: no rate card was supplied, so this "
                       "trace was never priced."]
     else:
-        lines.append(f"All delegated work is accounted for (closure {report.closure:.0%}).")
+        if report.delegation_count == 0:
+            # Closure is accounted spend over delegated spend. With no
+            # delegation the ratio is 1.0 over an empty set, and printing
+            # "closure 100%" invites a reader to take it for verified coverage
+            # of work that never happened. Say what was actually observed.
+            lines.append(
+                "This run delegated no work, so there is no closure to measure."
+            )
+        else:
+            lines.append(
+                f"All {report.delegation_count} delegation(s) are accounted for "
+                f"(closure {report.closure:.0%})."
+            )
     lines.append("")
 
     lines += ["## 4. Instruments nobody validated", ""]

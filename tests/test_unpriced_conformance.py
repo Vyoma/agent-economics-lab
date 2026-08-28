@@ -216,3 +216,43 @@ class RatePricedDelegationIsNotFree(unittest.TestCase):
         report = audit(unpriced)
         self.assertEqual(report.decision, "INCOMPLETE")
         self.assertIn("delegated work nothing priced", report.grounds)
+
+
+class ChecksOnlyExampleIsReachable(unittest.TestCase):
+    """The documented checks-only path, exercised through the file audit reads.
+
+    This example exists because the path was documented and unreachable: the
+    bundle could be built in memory and never written to disk, so no user could
+    follow the README. It carries real token counts and states no cost, because
+    nothing priced those calls.
+    """
+
+    EXAMPLE: ClassVar[pathlib.Path] = (
+        pathlib.Path(__file__).resolve().parents[1]
+        / "examples" / "checks-only" / "bundle.json"
+    )
+
+    def test_the_committed_example_loads_and_stays_unpriced(self) -> None:
+        bundle = load_normalized_json_bundle(self.EXAMPLE)
+        for field in ("rates", "baseline", "policy"):
+            with self.subTest(field=field):
+                self.assertIsInstance(getattr(bundle, field), Unsupplied)
+
+    def test_it_states_no_cost_rather_than_a_fabricated_zero(self) -> None:
+        document = json.loads(self.EXAMPLE.read_text(encoding="utf-8"))
+        for event in document["events"]:
+            with self.subTest(event=event["event_id"]):
+                self.assertIsNone(event["direct_cost_usd"])
+                self.assertGreater(event["input_tokens"], 0)
+
+    def test_auditing_it_withholds_a_verdict(self) -> None:
+        report = audit(load_normalized_json_bundle(self.EXAMPLE))
+        self.assertEqual(report.decision, "INCOMPLETE")
+        self.assertFalse(report.assessable)
+
+
+class VacuousClosureIsNotReportedAsFullMarks(unittest.TestCase):
+    def test_a_run_with_no_delegation_says_so(self) -> None:
+        text = render_markdown(audit(_bundle()))
+        self.assertIn("delegated no work", text)
+        self.assertNotIn("closure 100%", text)

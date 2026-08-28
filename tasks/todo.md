@@ -61,3 +61,55 @@ Two things worth flagging:
    output-equality check.
 2. Local verification ran on 3.9 (rejected by the new guard) and 3.12 only.
    3.10, 3.11 and 3.13 are covered by the CI matrix, not by this session.
+
+---
+
+# Session 2026-08-28 — the audit's own honesty
+
+Plan came from a 9-agent pass (5 proposers with distinct lenses, 3
+cross-examiners seeing all proposals, 1 synthesizer). All three examiners
+ranked the same build first; none tried to kill it. The declarative `--spec`
+plane was dropped on their unanimous objection that it traded rigour for reach.
+
+## Planned
+
+- [x] (a) `normalized_json_document` emits `{"unsupplied": ...}` and reads it
+      back, so a checks-only bundle can reach the file `audit --bundle` loads.
+- [x] (b) `--attestations`, `--as-of`, `--independently-verified` on the audit
+      parser, threaded into the call site.
+- [x] (c) Promote "no evidence instrument recorded" from a note to a ground.
+- [x] (d) `examples/checks-only/`, byte-verified, plus `make audit` inside
+      `make reproduce`.
+- [x] (e) Parametrized conformance test over `Unsupplied` and the metric type.
+- [x] Dropped: the declarative `--spec` plane.
+
+## Found while building, not planned
+
+- [x] Defect 8: the audit renderer printed `$0.0000 of delegated spend` for a
+      bundle declaring no rate card. Now states that the spend cannot be stated;
+      JSON reports `null`.
+- [x] Defect 9: cost-weighted closure summed `direct_cost_usd or 0.0` instead of
+      `TraceEvent.cost`, so rate-priced events weighed nothing. $100 declared
+      plus $18 undeclared reported 100% closure and $0.00 unaccounted. Now 85%
+      and $18.00.
+- [x] Closure raising `UnpricedDelegation` reached callers through `audit()`.
+      Now converted to a withheld verdict.
+- [x] A run with zero delegations rendered as "closure 100%". Now says the run
+      delegated no work.
+
+## Review
+
+462 tests, lint clean, `make reproduce` green, 24/24 CI checks green. Decision
+contract digest `e7faae0cb2b0fb62...` unchanged throughout, which is the point:
+none of this altered check identity.
+
+Both new build targets were proven to fail before being trusted — the example
+gate on a tampered bundle, the audit gate on its `--ci` exit code.
+
+## Not done, and why
+
+- [ ] A CLI producer for checks-only traces. Needs `direct_cost_usd` itself to
+      be unsuppliable: 18 reads across 7 files, and the same shape that leaked
+      before when a metric subclassed `float`. The example's producer is the
+      committed generator using the documented public API, which is honest but
+      is not `convert`. This is the next real piece of work.

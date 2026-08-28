@@ -100,6 +100,22 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
+# The checks-only bundle has no CLI producer: nothing converts a raw trace into
+# one, because that needs an unpriced event cost. Its producer is the documented
+# public API, so the generator is committed and byte-compared like any adapter.
+checks-only:
+	@$(PYTHON) examples/checks-only/build.py /tmp/agent-economics-checks-only.json
+	@cmp /tmp/agent-economics-checks-only.json examples/checks-only/bundle.json
+
+# The audit is the package's front door and was outside the build gate entirely.
+# --ci exits nonzero on any ground, so these assert the withheld verdicts stay
+# withheld rather than merely that the command runs.
+audit:
+	@$(PYTHON) -m agent_economics audit --bundle examples/checks-only/bundle.json >/dev/null
+	@! $(PYTHON) -m agent_economics audit --bundle examples/checks-only/bundle.json --ci >/dev/null 2>&1
+	@! $(PYTHON) -m agent_economics audit --bundle examples/claude-code/bundle.json --ci >/dev/null 2>&1
+	@$(PYTHON) -m agent_economics audit --bundle examples/claude-code/bundle.json --format json >/dev/null
+
 claude-code:
 	@$(PYTHON) -m agent_economics convert \
 		--from claude-code \
@@ -153,7 +169,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit
 
 lessons:
 # Without set -e the loop reports only the LAST lesson's exit status, so a

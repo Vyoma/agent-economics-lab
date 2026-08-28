@@ -1,0 +1,99 @@
+{
+  "baseline": {
+    "unsupplied": "baseline"
+  },
+  "events": [
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "call-02",
+      "event_type": "model",
+      "input_tokens": 964,
+      "model": "claude-opus-4",
+      "name": "completion",
+      "output_tokens": 188,
+      "status": "ok",
+      "task_id": "answer-billing-question",
+      "timestamp": "2026-08-27T09:02:00Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "call-03",
+      "event_type": "model",
+      "input_tokens": 1405,
+      "model": "claude-opus-4",
+      "name": "completion",
+      "output_tokens": 96,
+      "status": "ok",
+      "task_id": "classify-abuse-report",
+      "timestamp": "2026-08-27T09:03:00Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "call-00",
+      "event_type": "model",
+      "input_tokens": 1842,
+      "model": "claude-opus-4",
+      "name": "completion",
+      "output_tokens": 274,
+      "status": "ok",
+      "task_id": "redact-support-ticket",
+      "timestamp": "2026-08-27T09:00:00Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "call-01",
+      "event_type": "model",
+      "input_tokens": 3210,
+      "model": "claude-opus-4",
+      "name": "completion",
+      "output_tokens": 512,
+      "status": "ok",
+      "task_id": "summarise-incident",
+      "timestamp": "2026-08-27T09:01:00Z"
+    }
+  ],
+  "outcomes": [
+    {
+      "acceptable": false,
+      "business_value_usd": 0.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "answer-billing-question"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 0.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "classify-abuse-report"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 0.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "redact-support-ticket"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 0.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "summarise-incident"
+    }
+  ],
+  "policy": {
+    "unsupplied": "policy"
+  },
+  "rates": {
+    "unsupplied": "rates"
+  }
+}
