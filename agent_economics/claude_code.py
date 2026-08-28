@@ -25,6 +25,7 @@ from .models import (
     TaskIdentity,
     TraceEvent,
 )
+from .unsupplied import checks_only_bundle
 
 DELEGATION_TOOL_NAMES = frozenset({"Agent", "Task"})
 
@@ -1178,6 +1179,81 @@ def _parse_delegation_contract(
     return tuple(sorted(declared))
 
 
+def _declares_no_pricing(pricing: Any) -> bool:
+    """A contract that states it supplies no rate card.
+
+    Spelled the same way the normalized JSON writes an absent economic input,
+    so a checks-only bundle reads the same on the wire as in a contract.
+    """
+    return isinstance(pricing, Mapping) and pricing.get("unsupplied") == "rates"
+
+
+def _checks_only_bundle_from_session(
+    session: ClaudeCodeSession,
+    contract: Mapping[str, Any],
+    *,
+    outcomes: Mapping[str, Outcome],
+    task_manifest: Mapping[str, TaskIdentity],
+    label_source: str,
+) -> EvidenceBundle:
+    """Convert a real session into a bundle with evidence but no economics.
+
+    Every call keeps its true token counts and states no cost, because nothing
+    priced it. Writing 0.0 here would fabricate a measurement in the one bundle
+    whose purpose is declaring economics absent, and closure would then weigh a
+    subagent's spend as free.
+    """
+    events: list[TraceEvent] = []
+    for call in session.model_calls:
+        usage = call.usage
+        events.append(
+            TraceEvent(
+                task_id=call.task_id,
+                event_id=call.event_id,
+                timestamp=call.timestamp,
+                event_type="model",
+                name="claude-code.model",
+                model=call.model,
+                input_tokens=(
+                    usage["input_tokens"]
+                    + usage["cache_read_input_tokens"]
+                    + usage["cache_creation_input_tokens"]
+                ),
+                output_tokens=usage["output_tokens"],
+                status="ok",
+                arguments={"usage": usage},
+            )
+        )
+    for call in session.tool_calls:
+        events.append(
+            TraceEvent(
+                task_id=call.task_id,
+                event_id=call.event_id,
+                timestamp=call.timestamp,
+                event_type="tool",
+                name=call.name,
+                status=call.status,
+                arguments=call.redacted_arguments,
+            )
+        )
+    events.sort(key=lambda event: (event.timestamp, event.event_id))
+    # Built in one call, not built and then `replace`d: `digest` is a stored
+    # field, so replacing content on an existing bundle keeps the old digest and
+    # yields an artifact whose integrity field describes something else.
+    return checks_only_bundle(
+        events=tuple(events),
+        outcomes=outcomes,
+        source_id=session.source_id,
+        source_version=session.source_version,
+        task_manifest=task_manifest,
+        dependency_edges=session.dependency_edges,
+        declared_delegations=_parse_delegation_contract(
+            session, tuple(events), contract.get("delegation")
+        ),
+        label_source=label_source,
+    )
+
+
 def claude_code_bundle_from_session(
     session: ClaudeCodeSession,
     contract: Mapping[str, Any],
@@ -1193,6 +1269,15 @@ def claude_code_bundle_from_session(
         contract.get("tasks"),
         contract.get("outcome_contract"),
     )
+
+    if _declares_no_pricing(contract.get("pricing")):
+        return _checks_only_bundle_from_session(
+            session,
+            contract,
+            outcomes=outcomes,
+            task_manifest=task_manifest,
+            label_source=label_source,
+        )
 
     pricing = _required_mapping(contract.get("pricing"), label="pricing")
     price_card_id = _required_string(
@@ -1372,7 +1457,11 @@ def conversion_receipt(
     outcome_contract = _required_mapping(
         contract.get("outcome_contract"), label="outcome_contract"
     )
-    pricing = _required_mapping(contract.get("pricing"), label="pricing")
+    pricing: Mapping[str, Any] = (
+        {}
+        if _declares_no_pricing(contract.get("pricing"))
+        else _required_mapping(contract.get("pricing"), label="pricing")
+    )
     return {
         "source_id": session.source_id,
         "source_version": session.source_version,
@@ -1383,8 +1472,15 @@ def conversion_receipt(
         "evidence_digest": bundle.digest,
         "task_unit": session.task_unit,
         "privacy_mode": session.privacy_mode,
-        "price_card_id": _required_string(
-            pricing.get("price_card_id"), label="pricing.price_card_id"
+        # A checks-only conversion has no price card. The receipt records that
+        # it had none rather than demanding one, so the absence is attested
+        # instead of blocking the conversion.
+        "price_card_id": (
+            None
+            if _declares_no_pricing(contract.get("pricing"))
+            else _required_string(
+                pricing.get("price_card_id"), label="pricing.price_card_id"
+            )
         ),
         "rubric_version": _required_string(
             outcome_contract.get("rubric_version"),

@@ -15,6 +15,7 @@ import math
 import pathlib
 import unittest
 from dataclasses import replace
+from types import SimpleNamespace
 from typing import ClassVar
 
 from agent_economics import load_normalized_json_bundle
@@ -23,7 +24,11 @@ from agent_economics.adapters import (
     render_normalized_json,
 )
 from agent_economics.audit import audit, render_markdown
-from agent_economics.delegation import assess_bundle_closure
+from agent_economics.delegation import (
+    UnpricedDelegation,
+    assess_bundle_closure,
+    delegation_closure_gate,
+)
 from agent_economics.evidence import make_evidence_bundle
 from agent_economics.models import (
     ModelRate,
@@ -204,7 +209,8 @@ class RatePricedDelegationIsNotFree(unittest.TestCase):
         rate_priced = self._event(9, "chat", tin=1_000_000, tout=1_000_000)
         self.assertEqual(explicit.cost(self.RATES), rate_priced.cost(self.RATES))
 
-    def test_delegated_work_nothing_priced_withholds_rather_than_raising(self) -> None:
+    def test_unpriced_delegation_falls_back_to_counting_and_says_so(self) -> None:
+        """Not a refusal and not a zero: a weaker measurement, named."""
         bundle = _bundle(dependency_edges=(("e1", "e2"),))
         unpriced = replace(
             bundle,
@@ -213,9 +219,42 @@ class RatePricedDelegationIsNotFree(unittest.TestCase):
                 self._event(2, "chat", tin=1_000_000, tout=1_000_000),
             ),
         )
+        closure = assess_bundle_closure(unpriced)
+        self.assertEqual(closure.basis, "count")
+        self.assertIsNone(closure.delegated_cost_usd)
+        self.assertIsNone(closure.unaccounted_cost_usd)
         report = audit(unpriced)
         self.assertEqual(report.decision, "INCOMPLETE")
-        self.assertIn("delegated work nothing priced", report.grounds)
+        self.assertIn("delegated spend never established", report.grounds)
+
+    def test_the_gate_refuses_to_compare_a_count_ratio_to_a_spend_threshold(self) -> None:
+        """The report may state the count ratio. The gate may not act on it."""
+        events = (
+            self._event(0, "chat", direct=0.0),
+            self._event(1, "Agent", "tool", direct=0.0),
+            self._event(2, "chat", tin=1_000_000, tout=1_000_000),
+        )
+        view = SimpleNamespace(
+            events=events, dependency_edges=(("e1", "e2"),),
+            rates=unsupplied_rates(),
+        )
+        spec = delegation_closure_gate(declared=("e1",))
+        with self.assertRaises(UnpricedDelegation):
+            spec.run(view)
+
+    def test_a_rate_priced_delegation_still_passes_the_gate(self) -> None:
+        """The regression: the view carries rates and the gate must use them."""
+        events = (
+            self._event(0, "chat", direct=0.0),
+            self._event(1, "Agent", "tool", direct=0.0),
+            self._event(2, "chat", tin=1_000_000, tout=1_000_000),
+        )
+        view = SimpleNamespace(
+            events=events, dependency_edges=(("e1", "e2"),), rates=self.RATES,
+        )
+        output = delegation_closure_gate(declared=("e1",)).run(view)
+        self.assertTrue(output.results)
+        self.assertIn("18.0000", output.results[0].message)
 
 
 class ChecksOnlyExampleIsReachable(unittest.TestCase):
@@ -243,7 +282,38 @@ class ChecksOnlyExampleIsReachable(unittest.TestCase):
         for event in document["events"]:
             with self.subTest(event=event["event_id"]):
                 self.assertIsNone(event["direct_cost_usd"])
+        models = [e for e in document["events"] if e["event_type"] == "model"]
+        self.assertTrue(models)
+        for event in models:
+            with self.subTest(event=event["event_id"]):
                 self.assertGreater(event["input_tokens"], 0)
+
+    def test_it_came_from_the_same_session_as_the_priced_example(self) -> None:
+        """The point of the example: one real trace, converted two ways.
+
+        If this had to be hand-authored, the checks-only path would be
+        documented and still unreachable from a real session.
+        """
+        root = pathlib.Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (root / "examples" / "checks-only" / "conversion-contract.json")
+            .read_text(encoding="utf-8")
+        )
+        self.assertEqual(contract["pricing"], {"unsupplied": "rates"})
+        self.assertNotIn("baseline", contract)
+        self.assertNotIn("policy", contract)
+
+    def test_the_committed_bundle_digest_matches_its_content(self) -> None:
+        """`digest` is a stored field, so a bundle built by `replace` lies.
+
+        The conversion built this in one call for that reason; loading verifies
+        the receipt digest against recomputed evidence, which is what caught it.
+        """
+        bundle = load_normalized_json_bundle(self.EXAMPLE)
+        document = json.loads(self.EXAMPLE.read_text(encoding="utf-8"))
+        self.assertEqual(
+            document["conversion"]["evidence_digest"], bundle.digest
+        )
 
     def test_auditing_it_withholds_a_verdict(self) -> None:
         report = audit(load_normalized_json_bundle(self.EXAMPLE))

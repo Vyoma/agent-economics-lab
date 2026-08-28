@@ -113,3 +113,79 @@ gate on a tampered bundle, the audit gate on its `--ci` exit code.
       before when a metric subclassed `float`. The example's producer is the
       committed generator using the documented public API, which is honest but
       is not `convert`. This is the next real piece of work.
+
+---
+
+# Session 2026-08-28b — unpriced event cost
+
+## What the investigation actually found
+
+The premise in the previous entry was wrong in a useful way. `direct_cost_usd`
+does not need an `Unsupplied` variant. `None` already means "not stated, derive
+from the rate card", and an unsupplied rate card already refuses every read, so
+the model-event path fails closed today. Two real holes remain, and one is a
+regression I introduced in the closure fix.
+
+- [x] **Regression, mine.** `delegation_closure_gate` calls `assess_closure`
+      without rates, though `EvaluationView` carries them. After the defect-9
+      fix, a bundle whose model events are rate-priced (`direct_cost_usd=None`)
+      raises `UnpricedDelegation` inside the gate even though the rates are
+      right there. 462 tests missed it: nothing exercises a rate-priced
+      delegation through the gate.
+- [x] **Tool events are asserted free.** `TraceEvent.cost` returns 0.0 for any
+      non-model event before consulting rates. Real adapters price tool calls
+      (claude_code.py:1325), so with no rate card an undeclared subagent whose
+      descendants are all `WebSearch`/`WebFetch` reports `$0.00` unaccounted.
+      The verdict held; the figure was invented. Same shape as defect 8.
+
+## Design: report richly, gate strictly
+
+Closure is cost-weighted because one subagent burning most of the run matters
+more than five that return immediately. That weighting needs costs. Without
+them the honest fallback is not refusal and not zero, it is a different and
+weaker measurement, named as such: count the delegations.
+
+- [x] `ClosureReport.basis` is `"cost"` or `"count"`.
+- [x] Cost basis when every delegated event's cost can be established.
+      Count basis otherwise, and then `delegated_cost_usd` and
+      `unaccounted_cost_usd` are `None`, never `0.0`.
+- [x] `delegation_closure_gate` refuses under count basis. A ratio of counts
+      must never be silently compared against a threshold meaning cost. The
+      report gains information; the gate keeps failing closed.
+- [x] Renderer states which basis produced the number.
+
+## Then the thing that was blocked
+
+- [x] `convert --checks-only`: the conversion contract may omit pricing,
+      baseline and policy. Events carry real token counts and state no cost.
+- [x] Regenerate `examples/checks-only/` from a real session through `convert`
+      rather than the bespoke build script, if that path proves sufficient.
+
+## Success criteria
+
+- A rate-priced delegation passes through the gate again (regression closed).
+- No `$0.00` appears anywhere costs were not established.
+- The count-basis gate refusal is proven, not assumed.
+- `make reproduce` green, decision contract digest unchanged.
+
+## Review
+
+466 tests, lint clean, `make reproduce` green. All four success criteria met:
+the rate-priced delegation passes the gate again, no `$0.00` appears anywhere
+costs were not established, the count-basis gate refusal is proven by test, and
+the decision contract digest is unchanged.
+
+`examples/checks-only/` is now the same session as `examples/claude-code/`,
+converted under a contract declaring no rate card, so the example is produced by
+`convert` rather than by a bespoke script. The build script it replaced is
+deleted.
+
+Two more defects found while building, both mine, both recorded in
+docs/novelty.md as 10 and 11. The tenth was introduced by the fix for the ninth,
+in the same file, within the hour. Worth remembering when the fix feels obvious.
+
+A third, caught by the loader rather than by me: `EvidenceBundle.digest` is a
+stored field, so building a bundle and then `dataclasses.replace`-ing content
+onto it keeps the old digest. The conversion now builds in one call. The load
+path verifies the receipt digest against recomputed evidence, which is what
+surfaced it.

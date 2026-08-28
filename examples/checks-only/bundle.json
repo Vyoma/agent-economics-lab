@@ -2,92 +2,243 @@
   "baseline": {
     "unsupplied": "baseline"
   },
+  "conversion": {
+    "claude_code_versions": [
+      "2.1.198"
+    ],
+    "contract_schema_version": 1,
+    "conversion_contract_sha256": "90e869f4ceaf9e516d5d7d25b57d0ff6dcfc7fa8115990b3fa0ebcfa02dd7ab6",
+    "counts": {
+      "dependency_edges": 4,
+      "model_calls": 4,
+      "relevant_records": 9,
+      "tasks": 2,
+      "tool_calls": 2
+    },
+    "evidence_digest": "84d5bae587eb7a40e8ea382ae4b7415795355ba7a3dbef8845effea4c39b6511",
+    "inventory_sha256": "d99358abf88090f717d4e361ced9b38a5a9c5dee571e8e8ca854f4c06f73487f",
+    "label_source": "fixture.manual-review",
+    "price_card_id": null,
+    "privacy_mode": "content-redacted-type-shapes-only",
+    "raw_sha256": "72b29b9ae7d8df77aa48a45228d3e52ca559141742e51a72082c40c75d4e1a4d",
+    "rubric_version": "fixture.acceptable-task@1",
+    "source_id": "source.claude-code-jsonl",
+    "source_version": "1",
+    "task_unit": "external-user-prompt"
+  },
+  "dependency_edges": [
+    [
+      "cc-model-05c744366772a43f8542529a3adc16a5cb715b398a92c985a2c3819785c9038d",
+      "cc-tool-21ad85a314204b8db751bbd2591dbfbbf90c6f0edd86a658bea8125b23a3f112"
+    ],
+    [
+      "cc-model-638bd890b74650adcf88d5c95bbebe480b699b8e83c82833e90bbad2bfc35bf6",
+      "cc-tool-a167efe3ee2a61acee544c738e36fe1abbf8dc94d9e02b9affe9c410408777ef"
+    ],
+    [
+      "cc-tool-21ad85a314204b8db751bbd2591dbfbbf90c6f0edd86a658bea8125b23a3f112",
+      "cc-model-dff8bc2fee9d6ee393d6022b047802ffa401f4f73b73c64c2997a00f4166a071"
+    ],
+    [
+      "cc-tool-a167efe3ee2a61acee544c738e36fe1abbf8dc94d9e02b9affe9c410408777ef",
+      "cc-model-5c21e7f7fa4fecaf82708ea609fa5e14d538c2b165600f20559103f3b5b4ddb6"
+    ]
+  ],
   "events": [
     {
-      "arguments": {},
+      "arguments": {
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 20
+          },
+          "cache_creation_input_tokens": 20,
+          "cache_read_input_tokens": 500,
+          "input_tokens": 80,
+          "output_tokens": 40,
+          "server_tool_use": {
+            "web_search_requests": 0
+          }
+        }
+      },
       "direct_cost_usd": null,
-      "event_id": "call-02",
+      "event_id": "cc-model-05c744366772a43f8542529a3adc16a5cb715b398a92c985a2c3819785c9038d",
       "event_type": "model",
-      "input_tokens": 964,
-      "model": "claude-opus-4",
-      "name": "completion",
-      "output_tokens": 188,
+      "input_tokens": 600,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 40,
       "status": "ok",
-      "task_id": "answer-billing-question",
-      "timestamp": "2026-08-27T09:02:00Z"
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5",
+      "timestamp": "2026-07-17T16:01:01.000Z"
     },
     {
-      "arguments": {},
+      "arguments": {
+        "field_count": 2,
+        "fields": [
+          {
+            "kind": "integer"
+          },
+          {
+            "kind": "string"
+          }
+        ],
+        "kind": "object"
+      },
       "direct_cost_usd": null,
-      "event_id": "call-03",
-      "event_type": "model",
-      "input_tokens": 1405,
-      "model": "claude-opus-4",
-      "name": "completion",
-      "output_tokens": 96,
-      "status": "ok",
-      "task_id": "classify-abuse-report",
-      "timestamp": "2026-08-27T09:03:00Z"
+      "event_id": "cc-tool-21ad85a314204b8db751bbd2591dbfbbf90c6f0edd86a658bea8125b23a3f112",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "",
+      "name": "Bash",
+      "output_tokens": 0,
+      "status": "error",
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5",
+      "timestamp": "2026-07-17T16:01:01.000Z"
     },
     {
-      "arguments": {},
+      "arguments": {
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 600,
+          "input_tokens": 60,
+          "output_tokens": 30,
+          "server_tool_use": {
+            "web_search_requests": 1
+          }
+        }
+      },
       "direct_cost_usd": null,
-      "event_id": "call-00",
+      "event_id": "cc-model-dff8bc2fee9d6ee393d6022b047802ffa401f4f73b73c64c2997a00f4166a071",
       "event_type": "model",
-      "input_tokens": 1842,
-      "model": "claude-opus-4",
-      "name": "completion",
-      "output_tokens": 274,
+      "input_tokens": 660,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 30,
       "status": "ok",
-      "task_id": "redact-support-ticket",
-      "timestamp": "2026-08-27T09:00:00Z"
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5",
+      "timestamp": "2026-07-17T16:01:03.000Z"
     },
     {
-      "arguments": {},
+      "arguments": {
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 60,
+            "ephemeral_5m_input_tokens": 40
+          },
+          "cache_creation_input_tokens": 100,
+          "cache_read_input_tokens": 200,
+          "input_tokens": 100,
+          "output_tokens": 50,
+          "server_tool_use": {
+            "web_search_requests": 0
+          }
+        }
+      },
       "direct_cost_usd": null,
-      "event_id": "call-01",
+      "event_id": "cc-model-638bd890b74650adcf88d5c95bbebe480b699b8e83c82833e90bbad2bfc35bf6",
       "event_type": "model",
-      "input_tokens": 3210,
-      "model": "claude-opus-4",
-      "name": "completion",
-      "output_tokens": 512,
+      "input_tokens": 400,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 50,
       "status": "ok",
-      "task_id": "summarise-incident",
-      "timestamp": "2026-08-27T09:01:00Z"
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833",
+      "timestamp": "2026-07-17T16:00:01.000Z"
+    },
+    {
+      "arguments": {
+        "field_count": 2,
+        "fields": [
+          {
+            "kind": "integer"
+          },
+          {
+            "kind": "string"
+          }
+        ],
+        "kind": "object"
+      },
+      "direct_cost_usd": null,
+      "event_id": "cc-tool-a167efe3ee2a61acee544c738e36fe1abbf8dc94d9e02b9affe9c410408777ef",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "",
+      "name": "Read",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833",
+      "timestamp": "2026-07-17T16:00:02.000Z"
+    },
+    {
+      "arguments": {
+        "usage": {
+          "billing_context": {
+            "inference_geo": null,
+            "service_tier": "standard",
+            "speed": null
+          },
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 0,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "cache_creation_input_tokens": 0,
+          "cache_read_input_tokens": 400,
+          "input_tokens": 50,
+          "output_tokens": 25,
+          "server_tool_use": {
+            "web_search_requests": 0
+          }
+        }
+      },
+      "direct_cost_usd": null,
+      "event_id": "cc-model-5c21e7f7fa4fecaf82708ea609fa5e14d538c2b165600f20559103f3b5b4ddb6",
+      "event_type": "model",
+      "input_tokens": 450,
+      "model": "claude-test",
+      "name": "claude-code.model",
+      "output_tokens": 25,
+      "status": "ok",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833",
+      "timestamp": "2026-07-17T16:00:04.000Z"
     }
   ],
+  "label_source": "fixture.manual-review",
   "outcomes": [
     {
       "acceptable": false,
       "business_value_usd": 0.0,
-      "human_minutes": 0.0,
+      "human_minutes": 2.0,
       "incident_loss_usd": 0.0,
-      "remediation_cost_usd": 0.0,
-      "task_id": "answer-billing-question"
+      "remediation_cost_usd": 0.5,
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5"
     },
     {
       "acceptable": true,
-      "business_value_usd": 0.0,
-      "human_minutes": 0.0,
+      "business_value_usd": 10.0,
+      "human_minutes": 0.5,
       "incident_loss_usd": 0.0,
       "remediation_cost_usd": 0.0,
-      "task_id": "classify-abuse-report"
-    },
-    {
-      "acceptable": true,
-      "business_value_usd": 0.0,
-      "human_minutes": 0.0,
-      "incident_loss_usd": 0.0,
-      "remediation_cost_usd": 0.0,
-      "task_id": "redact-support-ticket"
-    },
-    {
-      "acceptable": true,
-      "business_value_usd": 0.0,
-      "human_minutes": 0.0,
-      "incident_loss_usd": 0.0,
-      "remediation_cost_usd": 0.0,
-      "task_id": "summarise-incident"
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833"
     }
   ],
   "policy": {
@@ -95,5 +246,17 @@
   },
   "rates": {
     "unsupplied": "rates"
-  }
+  },
+  "task_manifest": [
+    {
+      "input_digest": "f6c6d18ec5fb39bc56ee43391b7a57eecfeea46ae96bfe41b4a138f4cf7a3a1e",
+      "rubric_version": "fixture.acceptable-task@1",
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5"
+    },
+    {
+      "input_digest": "993410b14258bb9bea8537996648be90ae6ea9aeb1d6b7b8d74f31601e72c8aa",
+      "rubric_version": "fixture.acceptable-task@1",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833"
+    }
+  ]
 }

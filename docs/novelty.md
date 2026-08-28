@@ -136,7 +136,7 @@ adversarial pass so far, and it is stated at that width deliberately.
 This is not novelty and it is probably the more useful half.
 
 On a single day of concentrated work, the mechanisms in this repository caught
-nine real defects, seven of them in the work of the person adding them:
+eleven real defects, nine of them in the work of the person adding them:
 
 1. The lint gate found `kimi_analyst.py` annotating its public API with names
    that had no module-level import, so `typing.get_type_hints()` raised
@@ -178,6 +178,23 @@ The eighth is the sharpest of the pair that reached a reader, because the API
 that emitted the fabricated number is the one written specifically to refuse
 fabricating economics. The ninth is the most serious outright: a fail-open on
 the headline mechanism, caused by one `or 0.0` bypassing a resolver.
+
+10. Fixing the ninth introduced the tenth, immediately. `delegation_closure_gate`
+    called `assess_closure` without rates, though the view it receives carries
+    them, so a bundle whose model events were rate-priced became unpriceable
+    inside the gate while its rate card sat one attribute away. 462 tests did
+    not cover a rate-priced delegation through the gate.
+11. `TraceEvent.cost` answers 0.0 for any non-model event before consulting
+    rates. That is right when a rate card exists to have priced the tool call
+    and an unsupported claim when none does: which tools are billed is exactly
+    what a rate card says. An undeclared subagent whose descendants were all
+    `WebSearch` reported `$0.00` unaccounted.
+
+The tenth is the useful one to sit with. It was introduced by the fix for the
+ninth, in the same file, within the hour, by someone who had just written the
+lesson about this exact class of error. The suite was green across it. What
+caught it was constructing the input that would make the number wrong, which is
+the only technique on this list that found anything.
 
 Both were found by asking what a number would look like if it were wrong,
 rather than by a test. Being right about the verdict is not the same as being

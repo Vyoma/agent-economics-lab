@@ -110,6 +110,7 @@ class Delegation:
     spawned_event_ids: tuple[str, ...]
     spawned_cost_usd: float
     declared: bool
+    priced: bool = True
 
     @property
     def accounted(self) -> bool:
@@ -122,6 +123,7 @@ class ClosureReport:
     total_events: int = 0
     declared_manifest: tuple[str, ...] = field(default_factory=tuple)
     suspected_delegations: tuple[str, ...] = field(default_factory=tuple)
+    basis: str = "cost"
 
     @property
     def total(self) -> int:
@@ -132,27 +134,43 @@ class ClosureReport:
         return tuple(d for d in self.delegations if not d.accounted)
 
     @property
-    def delegated_cost_usd(self) -> float:
+    def delegated_cost_usd(self) -> float | None:
+        """Total delegated spend, or None when it was never established.
+
+        None rather than 0.0. A caller that formats this into a report gets a
+        TypeError instead of a plausible dollar figure nothing priced.
+        """
+        if self.basis != "cost":
+            return None
         return sum(d.spawned_cost_usd for d in self.delegations)
 
     @property
-    def unaccounted_cost_usd(self) -> float:
+    def unaccounted_cost_usd(self) -> float | None:
+        if self.basis != "cost":
+            return None
         return sum(d.spawned_cost_usd for d in self.unaccounted)
 
     @property
     def closure(self) -> float:
         """
-        Accounted share of delegated compute, by cost.
+        Accounted share of delegated compute.
 
-        Cost rather than count, because one undeclared subagent that burns most of
-        the run matters more than five that return immediately. Undefined when
-        nothing was delegated, which is reported as fully closed: an agent that
-        never delegated has no delegation to account for.
+        Cost-weighted where costs are known, because one undeclared subagent that
+        burns most of the run matters more than five that return immediately.
+        That weighting needs costs. Where they could not be established this
+        counts delegations instead and `basis` says so, because the honest
+        fallback is a weaker measurement named as such, not a confident zero.
+        Undefined when nothing was delegated, reported as fully closed: an agent
+        that never delegated has no delegation to account for.
         """
-        total = self.delegated_cost_usd
+        if not self.delegations:
+            return 1.0
+        if self.basis != "cost":
+            return (self.total - len(self.unaccounted)) / self.total
+        total = self.delegated_cost_usd or 0.0
         if total <= 0:
             return 1.0 if not self.unaccounted else 0.0
-        return (total - self.unaccounted_cost_usd) / total
+        return (total - (self.unaccounted_cost_usd or 0.0)) / total
 
     @property
     def max_depth(self) -> int:
@@ -161,6 +179,7 @@ class ClosureReport:
     def to_dict(self) -> dict[str, Any]:
         return {
             "closure": self.closure,
+            "basis": self.basis,
             "delegations": self.total,
             "unaccounted": len(self.unaccounted),
             "max_depth": self.max_depth,
@@ -185,25 +204,26 @@ class ClosureReport:
 
 def _event_cost(
     event: TraceEvent, rates: Mapping[str, ModelRate] | None
-) -> float:
-    """What this event cost, or a refusal.
+) -> float | None:
+    """What this event cost, or None when that cannot be established.
 
     `TraceEvent.cost` resolves an explicit cost first and otherwise prices token
     counts against the rate card. Bypassing it treats every rate-priced event as
-    free.
+    free, which is how an undeclared subagent came to weigh nothing.
+
+    None is not zero. With no rate card we cannot price a model call, and we
+    equally cannot assert that a `WebSearch` was free: which tools are billed is
+    exactly what a rate card says. `TraceEvent.cost` answers 0.0 for any
+    non-model event before consulting rates, which is right when a rate card
+    exists to have priced it and an unsupported claim when none does.
     """
     if event.direct_cost_usd is not None:
         return event.direct_cost_usd
+    if rates is None:
+        return None
     if event.event_type != "model":
         return 0.0
-    if rates is None or event.model not in rates:
-        raise UnpricedDelegation(
-            f"Event {event.event_id!r} carries no explicit cost and no rate for "
-            f"model {event.model!r}, so the spend it contributes to closure is "
-            "unknown. Counting it as zero would understate unaccounted "
-            "delegation, which is the one number this module exists to report."
-        )
-    return event.cost(dict(rates))
+    return None if event.model not in rates else event.cost(dict(rates))
 
 
 def _children(edges: Sequence[tuple[str, str]]) -> dict[str, list[str]]:
@@ -271,6 +291,7 @@ def assess_closure(
     declared_set = set(declared)
 
     delegations: list[Delegation] = []
+    all_priced = True
     for event in events:
         spawns = children.get(event.event_id, ())
         # Delegation is identified by the tool that performs it, matching the
@@ -283,9 +304,11 @@ def assess_closure(
         if event.name not in delegation_tools or not spawns:
             continue
         reachable = _descendants(event.event_id, children)
-        cost = sum(
-            _event_cost(by_id[e], rates) for e in reachable if e in by_id
-        )
+        costs = [_event_cost(by_id[e], rates) for e in reachable if e in by_id]
+        priced = None not in costs
+        cost = sum(c for c in costs if c is not None) if priced else 0.0
+        if not priced:
+            all_priced = False
         delegations.append(
             Delegation(
                 event_id=event.event_id,
@@ -295,6 +318,7 @@ def assess_closure(
                 spawned_event_ids=reachable,
                 spawned_cost_usd=cost,
                 declared=event.event_id in declared_set,
+                priced=priced,
             )
         )
 
@@ -322,6 +346,7 @@ def assess_closure(
         total_events=len(events),
         declared_manifest=tuple(sorted(declared_set)),
         suspected_delegations=suspected,
+        basis="cost" if all_priced else "count",
     )
 
 
@@ -340,20 +365,38 @@ def delegation_closure_gate(
     """
 
     def run(view) -> CheckOutput:
+        # The view carries the rate card. Not passing it was a regression: with
+        # cost resolution routed through the resolver, a bundle whose model
+        # events are rate-priced would be unpriceable here while its rates sat
+        # one attribute away.
         report = assess_closure(
             view.events,
             view.dependency_edges,
             delegation_tools=delegation_tools,
             declared=declared,
+            rates=None if isinstance(view.rates, Unsupplied) else view.rates,
         )
+        if report.basis != "cost" and report.delegations:
+            # minimum_closure means a share of spend. A share of counts is a
+            # different quantity, and comparing one to the other silently is how
+            # a weaker measurement passes for the stronger one. The report may
+            # state the count ratio; the gate may not act on it.
+            raise UnpricedDelegation(
+                f"{report.total} delegation(s) present but the cost of "
+                "delegated work could not be established, so closure was "
+                f"measured by count ({report.closure:.1%}), not by spend. "
+                f"The required {minimum_closure:.1%} is a share of spend and "
+                "these are not the same quantity. Supply a rate card, or "
+                "state each event's cost."
+            )
         if report.closure < minimum_closure:
             names = ", ".join(sorted({d.name for d in report.unaccounted}))
             raise UnaccountedDelegation(
                 f"{len(report.unaccounted)} of {report.total} delegation(s) "
                 f"undeclared ({names}); "
-                f"${report.unaccounted_cost_usd:.4f} of "
-                f"${report.delegated_cost_usd:.4f} delegated spend was never "
-                f"undertaken for assessment; closure {report.closure:.1%} "
+                f"${report.unaccounted_cost_usd or 0.0:.4f} of "
+                f"${report.delegated_cost_usd or 0.0:.4f} delegated spend was "
+                f"never undertaken for assessment; closure {report.closure:.1%} "
                 f"below the required {minimum_closure:.1%}"
             )
         message = (
@@ -362,7 +405,7 @@ def delegation_closure_gate(
             else (
                 f"{report.total} delegation(s) accounted for, "
                 f"depth {report.max_depth}, "
-                f"${report.delegated_cost_usd:.4f} delegated"
+                f"${report.delegated_cost_usd or 0.0:.4f} delegated"
             )
         )
         if report.suspected_delegations:

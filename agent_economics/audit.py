@@ -36,8 +36,6 @@ from typing import Any
 from .assurance import AssuranceEngine
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .delegation import (
-    ClosureReport,
-    UnpricedDelegation,
     assess_bundle_closure,
 )
 from .models import CheckSpec, EvidenceBundle, Unsupplied
@@ -76,7 +74,7 @@ class AuditReport:
         if self.no_instrument_recorded:
             reasons.append("no evidence instrument recorded")
         if self.unpriced_delegation:
-            reasons.append("delegated work nothing priced")
+            reasons.append("delegated spend never established")
         if not self.conformance_held:
             reasons.append("fail-closed invariant broken")
         return tuple(reasons)
@@ -135,15 +133,16 @@ def audit(
 
     verdict = AssuranceEngine(checks=checks, required_coverage=required).evaluate(bundle)
     mutation = mutate(bundle, checks, required)
-    unpriced_delegation = ""
-    try:
-        closure = assess_bundle_closure(bundle)
-    except UnpricedDelegation as error:
-        # The ratio is unknowable, not zero. An audit that raises here would be
-        # a refusal the caller has to catch; the contract is that it returns a
-        # withheld verdict instead.
-        closure = ClosureReport()
-        unpriced_delegation = str(error)
+    closure = assess_bundle_closure(bundle)
+    # Closure falls back to counting delegations where their cost could not be
+    # established, and says so. Counted coverage is a real measurement, but it
+    # is not the cost-weighted one this harness reports, so the difference is a
+    # ground rather than a footnote.
+    unpriced_delegation = (
+        f"{closure.total} delegation(s) measured by count, not by spend"
+        if closure.basis != "cost" and closure.delegations
+        else ""
+    )
 
     instruments = [i for i in (bundle.label_source,) if i]
     unattested: list[tuple[str, str]] = []
@@ -268,9 +267,15 @@ def render_markdown(report: AuditReport) -> str:
                 "This run delegated no work, so there is no closure to measure."
             )
         else:
+            basis = (
+                "by spend"
+                if not report.unpriced_delegation
+                else "by count, because the cost of delegated work was never "
+                "established"
+            )
             lines.append(
                 f"All {report.delegation_count} delegation(s) are accounted for "
-                f"(closure {report.closure:.0%})."
+                f"(closure {report.closure:.0%}, measured {basis})."
             )
     lines.append("")
 

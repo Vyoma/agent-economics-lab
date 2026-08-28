@@ -100,11 +100,15 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
-# The checks-only bundle has no CLI producer: nothing converts a raw trace into
-# one, because that needs an unpriced event cost. Its producer is the documented
-# public API, so the generator is committed and byte-compared like any adapter.
+# The same session as the claude-code example, converted under a contract that
+# declares no rate card. Proves the checks-only path is reachable from a real
+# trace through `convert`, not only from the Python API.
 checks-only:
-	@$(PYTHON) examples/checks-only/build.py /tmp/agent-economics-checks-only.json
+	@$(PYTHON) -m agent_economics convert \
+		--from claude-code \
+		--in examples/claude-code/session.jsonl \
+		--contract examples/checks-only/conversion-contract.json \
+		--out /tmp/agent-economics-checks-only.json
 	@cmp /tmp/agent-economics-checks-only.json examples/checks-only/bundle.json
 
 # The audit is the package's front door and was outside the build gate entirely.

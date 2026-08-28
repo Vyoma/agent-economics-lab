@@ -668,7 +668,22 @@ made a bundle unassessable until attested and recording nothing made it
 assessable, so the tool paid you to delete the field.
 
 It runs on a bundle with no economics at all, so a team with a PII gate and a
-jailbreak gate can ask the question without first inventing a rate card:
+jailbreak gate can ask the question without first inventing a rate card. Convert
+a real session under a contract that declares no pricing:
+
+```json
+{ "pricing": { "unsupplied": "rates" } }
+```
+
+Every call keeps its true token counts and states no cost, because nothing
+priced it. Where the cost of delegated work cannot be established, closure
+counts delegations instead of weighting them by spend and says which it did:
+a share of counts and a share of spend are different quantities, so the report
+may state the count ratio and the gate refuses to compare it against a
+threshold meaning spend. See `examples/checks-only/`, the same session as
+`examples/claude-code/` converted without a price card.
+
+
 
 ```text
 - Verdict on the evidence as supplied: **STOP**

@@ -60,6 +60,8 @@ def checks_only_bundle(
     source_version: str = "1",
     task_manifest: Mapping[str, TaskIdentity] | None = None,
     dependency_edges: Sequence[tuple[str, str]] = (),
+    declared_delegations: Sequence[str] = (),
+    label_source: str = "",
 ) -> EvidenceBundle:
     """
     A bundle carrying evidence but no economics.
@@ -80,6 +82,8 @@ def checks_only_bundle(
         source_version=source_version,
         task_manifest=task_manifest,
         dependency_edges=dependency_edges,
+        declared_delegations=declared_delegations,
+        label_source=label_source,
     )
 
 
