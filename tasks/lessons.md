@@ -27,6 +27,25 @@ and 455 tests were passing when both were live.
 **Rule:** a ratio over an empty denominator is not a measurement. Say "this run
 delegated no work", never "closure 100%".
 
+## The fix for a defect is where the next defect lives
+
+Defect 10 was introduced by the fix for defect 9. Same file, same hour, by
+someone who had just written the lesson above about this exact class of error.
+Routing closure through the cost resolver was right; the gate then called that
+resolver without the rate card sitting one attribute away on the view it
+already receives. The suite was green across it.
+
+**Rule:** after fixing a defect, enumerate every caller of the thing you
+changed and construct the input that makes each one wrong. `grep` for the
+function you touched. A fix narrows one path and widens another, and the
+widened one is never the path the failing test exercised.
+
+**Rule:** when a plan's premise turns out to be wrong, say so before building.
+This session's plan asserted `direct_cost_usd` needed an `Unsupplied` variant
+across 18 sites in 7 files. Ten minutes of probing showed `None` plus an
+unsupplied rate card already fails closed, and the real work was two holes
+elsewhere. The investigation was worth more than the plan.
+
 ## Never assert what a script did; make the script prove it
 
 I printed `"helper added"` from a Python edit whose `str.replace` anchor never
