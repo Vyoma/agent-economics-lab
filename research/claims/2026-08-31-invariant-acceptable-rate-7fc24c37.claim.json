@@ -1,0 +1,55 @@
+{
+  "assertion": "Remove gate.acceptable-rate and this otherwise-passing evidence yields INCOMPLETE, not SCALE: the requirement does not depart with the gate that served it.",
+  "checks": [
+    {
+      "id": "gate.unit-economics",
+      "implementation_digest": "fb307284a8ea50b2e4bde0c2f7c51685208f7ec86cb729049348387648a189db",
+      "version": "1"
+    },
+    {
+      "id": "gate.tail-cost",
+      "implementation_digest": "fff2447fe34eb7f985a58985c6d2e5cb710ecfba593ddebc3f1b089f5852142f",
+      "version": "1"
+    },
+    {
+      "id": "gate.net-value",
+      "implementation_digest": "c40963947db38aa3f69f634807567ee9638b0168e812da17a01c4520222f54ea",
+      "version": "1"
+    },
+    {
+      "id": "gate.counterfactual",
+      "implementation_digest": "4ae3afbdc430769970dfb35d33c74c84a638c472a05ea9c68cda599aa34c7d2c",
+      "version": "1"
+    },
+    {
+      "id": "gate.runtime-caps",
+      "implementation_digest": "9afae434f5ab6982497e7b8e4f92e25db484698135d65a6d1d02d0717cb34392",
+      "version": "1"
+    },
+    {
+      "id": "diagnostic.repeated-tool-shape",
+      "implementation_digest": "af950cc90dc0acb8aa947d3e66758d2699512c9ac6af991f7e6ecf32dbf4fac3",
+      "version": "1"
+    },
+    {
+      "id": "diagnostic.directed-cycle",
+      "implementation_digest": "de3430198f0be5b7b2e02d3720eb7202fe662ae72a59a70b60299312a402f0c7",
+      "version": "1"
+    }
+  ],
+  "decision": "INCOMPLETE",
+  "decision_contract_digest": "0acd42377a6607459195bd6a0fd3c4febaaa38769cfff922a6490a840f37f34f",
+  "evidence_digest": "06db27d4af08bb30c2505c9bbc11ed422bf76368ecef0edf57adaa2a8f958781",
+  "issued_at": "2026-08-31",
+  "issuer": "agent-economics-lab",
+  "required_coverage": [
+    "business_value",
+    "counterfactual",
+    "outcome_quality",
+    "runtime_caps",
+    "tail_risk",
+    "unit_economics"
+  ],
+  "schema_version": "assurance.claim@1",
+  "source_commit": "7fc24c370aafc53cd459ae8ed0093d9564903688"
+}

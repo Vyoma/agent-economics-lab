@@ -156,6 +156,16 @@ def build_parser() -> argparse.ArgumentParser:
     )
     claim_parser.add_argument("--issuer", default="")
     claim_parser.add_argument(
+        "--omit-check", action="append", default=[], metavar="CHECK_ID",
+        help=(
+            "Issue the claim with this check removed while keeping the full "
+            "required coverage. The decision must then be INCOMPLETE, because "
+            "a requirement does not depart with the gate that served it. "
+            "Repeatable. This is how to publish the fail-closed invariant as a "
+            "claim a stranger can refute, one gate at a time."
+        ),
+    )
+    claim_parser.add_argument(
         "--source-commit", default="",
         help=(
             "The revision this claim is issued against. Without it a claim "
@@ -263,8 +273,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         except (OSError, ValueError) as error:
             print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
             return 2
+        specs = tuple(default_checks())
+        if args.omit_check:
+            unknown = sorted(set(args.omit_check) - {spec.id for spec in specs})
+            if unknown:
+                print(
+                    f"INCOMPLETE: no such check(s): {', '.join(unknown)}",
+                    file=sys.stderr,
+                )
+                return 2
+            omitted = set(args.omit_check)
+            specs = tuple(spec for spec in specs if spec.id not in omitted)
         document = issue_claim(
-            bundle, args.assertion, issuer=args.issuer,
+            bundle, args.assertion, checks=specs, issuer=args.issuer,
             source_commit=args.source_commit,
         ).render()
         if args.output:
