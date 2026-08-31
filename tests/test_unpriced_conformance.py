@@ -133,19 +133,47 @@ class DeclaredAbsenceSurvivesTheWire(unittest.TestCase):
                 self.assertIsInstance(getattr(restored, field), Unsupplied)
 
 
+def _genuinely_unpriced():
+    """A delegated call with no stated cost and no rate card to price it.
+
+    Distinct from a call whose cost is stated as 0.0: that is a supplied
+    number, and reporting it is honest. The predicate is whether the cost
+    could be established, not whether a rate card happens to exist.
+    """
+    return checks_only_bundle(
+        events=(
+            _event(0, "chat", cost=0.0),
+            _event(1, "Agent", "tool", cost=0.0),
+            TraceEvent(
+                task_id="t0", event_id="e2",
+                timestamp="2026-08-27T00:00:02Z", event_type="model",
+                name="chat", model="m", input_tokens=1_000_000,
+                output_tokens=1_000_000,
+            ),
+        ),
+        outcomes={"t0": Outcome(task_id="t0", acceptable=True)},
+        source_id="s.x", dependency_edges=(("e1", "e2"),),
+    )
+
+
 class UnpricedSpendIsNotStated(unittest.TestCase):
     def test_an_unpriced_trace_does_not_report_a_dollar_figure(self) -> None:
-        text = render_markdown(audit(_bundle(dependency_edges=(("e1", "e2"),))))
+        text = render_markdown(audit(_genuinely_unpriced()))
         self.assertNotIn("$", text)
         self.assertIn("never priced", text)
 
     def test_the_json_reports_null_rather_than_a_fabricated_zero(self) -> None:
-        report = audit(_bundle(dependency_edges=(("e1", "e2"),))).to_dict()
+        report = audit(_genuinely_unpriced()).to_dict()
         self.assertIsNone(report["delegated_spend_unassessed"])
         self.assertFalse(report["spend_is_priced"])
 
-    def test_an_unpriced_trace_still_fails_closed_on_closure(self) -> None:
+    def test_a_stated_zero_cost_is_still_reported(self) -> None:
+        """The corrected predicate. A supplied 0.0 is a number, not an absence."""
         report = audit(_bundle(dependency_edges=(("e1", "e2"),)))
+        self.assertTrue(report.spend_is_priced)
+
+    def test_an_unpriced_trace_still_fails_closed_on_closure(self) -> None:
+        report = audit(_genuinely_unpriced())
         self.assertEqual(report.closure, 0.0)
         self.assertFalse(report.assessable)
 

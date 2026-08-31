@@ -38,7 +38,7 @@ from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .delegation import (
     assess_bundle_closure,
 )
-from .models import CheckSpec, EvidenceBundle, Unsupplied
+from .models import CheckSpec, EvidenceBundle
 from .mutation import mutate
 from .provenance import Attestation, ProvenancePolicy, assess_provenance
 
@@ -184,7 +184,12 @@ def audit(
         total_gates=mutation.total,
         unaccounted_delegations=tuple(d.name for d in closure.unaccounted),
         delegated_spend_unassessed=closure.unaccounted_cost_usd,
-        spend_is_priced=not isinstance(bundle.rates, Unsupplied),
+        # Whether a rate card exists is the wrong question. The right one is
+        # whether every delegated cost could be established, which is exactly
+        # what closure already had to decide. A bundle with no rate card but an
+        # explicit cost on every event can state its spend; suppressing the
+        # figure there withholds a number that was genuinely known.
+        spend_is_priced=closure.basis == "cost",
         closure=closure.closure,
         unattested_instruments=tuple(unattested),
         instruments_checked=tuple(instruments),

@@ -84,6 +84,49 @@ stop. Those are in [the honest limits](#the-honest-limits), not buried.
 
 **Your agent passed every enabled check. Did every required check run?**
 
+## The finding: defects that were live while the suite was green
+
+Every bug benchmark I know of hands you a failing test and asks for a fix.
+SWE-bench, Defects4J, BugsInPy, QuixBytes: the failing test **is** the task.
+Mutation testing swaps the roles, but its mutants are synthetic and the suite
+is the thing being scored.
+
+This repository accumulated the other case, and did not go looking for it.
+Five defects, catalogued with the commit each was live at, in a package whose
+entire purpose is refusing to report numbers it cannot support, written by
+someone hunting exactly this class of error:
+
+| defect | commit | tests passing | suite green |
+|---|---|---|---|
+| the gate paid teams to delete their own honesty field | `4b60e19` | 448 | **yes** |
+| a dollar figure computed from costs nothing had priced | `4b60e19` | 448 | **yes** |
+| rate-priced subagent spend weighed nothing | `ffb6ca4` | 455 | **yes** |
+| the fix for the row above left the gate unable to price anything | `dbc28e8` | 462 | **yes** |
+| tool calls asserted free with no rate card to say so | `dbc28e8` | 462 | **yes** |
+
+**5 of 5 were live at a commit where the entire suite passed**, across 2275
+passing tests. Nothing here is reintroduced and nothing is synthetic. `make
+green-defects` checks out each of those commits, runs the whole suite there,
+and runs the probe that discriminates. Every number in that table is produced
+by that run.
+
+The asset is not the defect list. It is the **discriminating probe** attached
+to each one: the input that makes the wrong number visibly wrong. For the third
+row, one run with $100 of declared subagent spend and $18 of undeclared spend:
+closure reported 100% and $0.00 unaccounted. That probe is what no test had,
+and writing probes is the only technique on the list that ever found anything.
+
+The fourth row is the one to sit with. It was introduced *by the fix for the
+third*, in the same file, within the hour, by an agent that had just written
+the lesson about that exact class of error. The suite stayed green across it.
+
+Five defects, one repository, one author, one day. That is a case series, not
+a rate, and it does not estimate how often this happens anywhere else. What it
+establishes is existence and mechanism: a green suite is evidence that
+specified behaviour holds, never that the specification produces a number worth
+reporting, and every defect above sat inside that gap.
+[The full corpus, with each probe.](research/GREEN_DEFECTS.md)
+
 ## What makes this different
 
 Every verdict is bound to a fixed, versioned list of required economic

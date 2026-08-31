@@ -135,6 +135,31 @@ adversarial pass so far, and it is stated at that width deliberately.
 
 This is not novelty and it is probably the more useful half.
 
+**Since writing that, it became the novelty.** The list below is no longer an
+anecdote about diligence; it is a corpus with a measurable property. Five of
+these defects have been pinned to the commit they were live at, and at every
+one of those commits the entire test suite passed: 448, 448, 455, 462, 462
+tests, all green, all with a real defect in the decision path.
+
+Every bug benchmark I am aware of hands you a failing test and asks for a fix.
+SWE-bench, Defects4J, BugsInPy and QuixBugs are all built that way; the failing
+test is the task. Mutation testing inverts the roles but its mutants are
+synthetic and the suite is the artefact being scored. A corpus of real defects
+whose defining property is that the suite was *green* is a different object,
+and `research/green_defects.py` builds it from git rather than from
+reintroduction, so there is nothing synthetic in it.
+
+What each entry carries that a defect list does not is the **discriminating
+probe**: the concrete input that makes the wrong number visibly wrong. That is
+the thing no test had. It is also the only technique on this page that ever
+found anything, which is why the probes are committed and run rather than
+described.
+
+The honest limit is the population. Five defects, one repository, one author,
+one day. A case series, not a rate. It cannot say how often this happens
+elsewhere, and no sampling frame here would support the claim if it tried. It
+establishes existence, mechanism, and a method.
+
 On a single day of concentrated work, the mechanisms in this repository caught
 eleven real defects, nine of them in the work of the person adding them:
 

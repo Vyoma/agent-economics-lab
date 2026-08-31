@@ -100,6 +100,13 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
+# Checks out the commit before each catalogued defect's fix, runs the whole
+# suite there, and runs the probe that discriminates. Pinned commits, so the
+# output is deterministic and byte-comparable like any other artifact.
+green-defects:
+	@$(PYTHON) research/green_defects.py $(PYTHON) > /tmp/agent-economics-green-defects.md
+	@cmp /tmp/agent-economics-green-defects.md research/GREEN_DEFECTS.md
+
 # The same session as the claude-code example, converted under a contract that
 # declares no rate card. Proves the checks-only path is reachable from a real
 # trace through `convert`, not only from the Python API.
@@ -173,7 +180,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects
 
 lessons:
 # Without set -e the loop reports only the LAST lesson's exit status, so a
