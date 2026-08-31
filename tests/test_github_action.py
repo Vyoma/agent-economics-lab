@@ -210,3 +210,60 @@ class GitHubActionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheActionCanVerifyAClaim(unittest.TestCase):
+    """Claim mode, and the guards that keep the two modes from colliding.
+
+    The enforce step reads an exit code the evaluate step produces. Unguarded,
+    a claim-mode run reached it with that variable unset and ran `exit ""`,
+    which bash rejects with 255 -- failing closed, but with a code outside this
+    action's documented set and no indication why.
+    """
+
+    #: Read as text, not parsed. This repository ships zero runtime
+    #: dependencies and its dev extras are ruff and coverage; importing pyyaml
+    #: here would have passed locally and raised ImportError in CI, which is
+    #: the rule in tasks/lessons.md about verification needing what the
+    #: verifier will not have.
+    def setUp(self) -> None:
+        self.metadata = (ROOT / "action.yml").read_text(encoding="utf-8")
+
+    def _block(self, name: str) -> str:
+        """The text of one step, from its name to the next step's dash."""
+        start = self.metadata.index(f"- name: {name}")
+        following = self.metadata.find("\n    - name: ", start + 1)
+        return self.metadata[start : following if following != -1 else len(self.metadata)]
+
+    def test_claim_is_an_input_and_verdict_is_an_output(self) -> None:
+        self.assertIn("  claim:", self.metadata)
+        self.assertIn("  verdict:", self.metadata)
+
+    def test_the_two_modes_are_mutually_exclusive(self) -> None:
+        self.assertIn("if: ${{ inputs.claim != '' }}", self._block("Verify a published claim"))
+        self.assertIn("if: ${{ inputs.claim == '' }}", self._block("Evaluate economic assurance"))
+
+    def test_every_step_reading_evaluate_output_is_guarded_to_that_mode(self) -> None:
+        """A step consuming a skipped step's output must not run.
+
+        Unguarded, claim mode reached the enforce step with
+        AGENT_ECONOMICS_EXIT_CODE unset and ran `exit ""`, which bash rejects
+        with 255: failing closed, but with a code outside this action's
+        documented set.
+        """
+        for name in ("Upsert pull request report", "Enforce SCALE-only policy"):
+            with self.subTest(step=name):
+                block = self._block(name)
+                self.assertTrue(
+                    "steps.evaluate" in block
+                    or "AGENT_ECONOMICS_EXIT_CODE" in block,
+                    "this test guards the wrong step if it reads neither",
+                )
+                self.assertIn("inputs.claim == ''", block)
+
+    def test_the_verify_step_maps_every_exit_code_to_a_verdict(self) -> None:
+        script = self._block("Verify a published claim")
+        for code, verdict in (("0", "SUPPORTED"), ("4", "REFUTED")):
+            with self.subTest(code=code):
+                self.assertIn(f"{code}) verdict={verdict}", script)
+        self.assertIn("*) verdict=UNVERIFIED", script)
