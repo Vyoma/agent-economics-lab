@@ -112,6 +112,23 @@ held-out:
 # Every published claim must verify against the evidence it names, and must
 # still refuse when handed the wrong evidence. A verifier that only ever says
 # SUPPORTED is not a verifier, so both directions are asserted.
+# Reissue the published claims against the current tree, pinning the revision
+# so a reader can later ask whether each was true when made, not only whether
+# it is still true. Without the pin the record resets on every refactor.
+reissue-claims:
+	@$(PYTHON) -m agent_economics claim \
+		--bundle examples/claude-code/bundle.json \
+		--issuer agent-economics-lab \
+		--source-commit "$$(git rev-parse HEAD)" \
+		--assertion "The bundled Claude Code session does not clear the shipped gates; this evidence routes to ASSIST." \
+		--output research/claims/claude-code.claim.json
+	@$(PYTHON) -m agent_economics claim \
+		--bundle examples/checks-only/bundle.json \
+		--issuer agent-economics-lab \
+		--source-commit "$$(git rev-parse HEAD)" \
+		--assertion "The checks-only conversion of the same session withholds a verdict: it has no economics and no attested instrument." \
+		--output research/claims/checks-only.claim.json
+
 claims:
 	@$(PYTHON) -m agent_economics verify \
 		--claim research/claims/claude-code.claim.json \

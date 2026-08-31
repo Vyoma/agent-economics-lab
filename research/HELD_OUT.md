@@ -39,7 +39,7 @@ Generated on CPython 3.12.13.
 
 | package | files | lines | divergences | per kLOC | lone dissenters |
 |---|---|---|---|---|---|
-| `agent_economics` | 28 | 11868 | 17 | 1.43 | 4 |
+| `agent_economics` | 28 | 11912 | 17 | 1.43 | 4 |
 | `json` | 5 | 1317 | 7 | 5.32 | 0 |
 | `logging` | 3 | 5047 | 1 | 0.2 | 0 |
 | `email` | 29 | 10415 | 6 | 0.58 | 2 |

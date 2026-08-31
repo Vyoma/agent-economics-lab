@@ -55,5 +55,6 @@
     "tail_risk",
     "unit_economics"
   ],
-  "schema_version": "assurance.claim@1"
+  "schema_version": "assurance.claim@1",
+  "source_commit": "1d96bcdf034ff13e21662879b36df3ce3f6411a6"
 }

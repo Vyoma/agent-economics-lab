@@ -275,3 +275,65 @@ class ForgeriesFoundByAdversarialReview(unittest.TestCase):
             with self.subTest(value=type(hostile).__name__):
                 result = verify(hostile, bundle)
                 self.assertIs(result.verdict, Verdict.UNVERIFIED)
+
+
+class TheRecordMustSurviveTheCodeMoving(unittest.TestCase):
+    """A claim binds each check by its source text, so the record decays.
+
+    Adding a comment inside a gate body changes that gate's implementation
+    digest and makes every prior claim UNVERIFIED. Demonstrated against a real
+    scratch checkout, not assumed. A track record that resets on each refactor
+    is not a track record, and calendar time is the only asset here that cannot
+    be copied, so this is the thing that would have quietly killed it.
+
+    The claim therefore pins the revision it was issued against, which lets a
+    reader ask two different questions: is this still true of the code today,
+    and was it true when it was made.
+    """
+
+    def test_a_claim_records_the_revision_it_was_issued_against(self) -> None:
+        claim = issue(
+            _bundle(), "x", issued_at=ISSUED, source_commit="0" * 40
+        )
+        self.assertEqual(claim.source_commit, "0" * 40)
+        self.assertEqual(
+            json.loads(claim.render())["source_commit"], "0" * 40
+        )
+
+    def test_the_published_claims_pin_a_revision(self) -> None:
+        for name in ("claude-code", "checks-only"):
+            with self.subTest(claim=name):
+                document = json.loads(
+                    (ROOT / "research" / "claims" / f"{name}.claim.json")
+                    .read_text(encoding="utf-8")
+                )
+                self.assertRegex(document["source_commit"], r"^[0-9a-f]{40}$")
+
+    def test_an_unreproducible_claim_names_where_to_check_it(self) -> None:
+        bundle = _bundle()
+        claim = issue(bundle, "x", issued_at=ISSUED, source_commit="a" * 40)
+        moved = replace(
+            claim,
+            checks=(replace(claim.checks[0], implementation_digest="f" * 64),)
+            + claim.checks[1:],
+        )
+        result = verify(moved, bundle)
+        self.assertIs(result.verdict, Verdict.UNVERIFIED)
+        self.assertTrue(
+            any("a" * 40 in reason for reason in result.reasons),
+            "the verdict must name the revision to check against",
+        )
+
+    def test_a_claim_without_a_revision_says_so(self) -> None:
+        bundle = _bundle()
+        claim = issue(bundle, "x", issued_at=ISSUED)
+        moved = replace(
+            claim,
+            checks=(replace(claim.checks[0], implementation_digest="f" * 64),)
+            + claim.checks[1:],
+        )
+        result = verify(moved, bundle)
+        self.assertIs(result.verdict, Verdict.UNVERIFIED)
+        self.assertTrue(
+            any("records no source commit" in reason for reason in result.reasons)
+        )

@@ -155,6 +155,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--assertion", required=True, help="What this claim asserts, in prose."
     )
     claim_parser.add_argument("--issuer", default="")
+    claim_parser.add_argument(
+        "--source-commit", default="",
+        help=(
+            "The revision this claim is issued against. Without it a claim "
+            "cannot be re-checked after the code moves, and the record decays "
+            "on the next refactor."
+        ),
+    )
     claim_parser.add_argument("--output")
 
     verify_parser = subparsers.add_parser(
@@ -255,7 +263,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         except (OSError, ValueError) as error:
             print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
             return 2
-        document = issue_claim(bundle, args.assertion, issuer=args.issuer).render()
+        document = issue_claim(
+            bundle, args.assertion, issuer=args.issuer,
+            source_commit=args.source_commit,
+        ).render()
         if args.output:
             Path(args.output).write_text(document, encoding="utf-8")
             print(f"Wrote {args.output}")

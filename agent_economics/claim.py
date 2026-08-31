@@ -73,6 +73,18 @@ class Claim:
     required_coverage: tuple[str, ...]
     issued_at: str
     issuer: str = ""
+    #: The source revision this claim was issued against, when known.
+    #:
+    #: Without it the record decays. A claim binds each check by the text that
+    #: implemented it, so a comment added inside a gate body makes every prior
+    #: claim UNVERIFIED -- demonstrated, not assumed. A track record that resets
+    #: on each refactor is not a track record, and calendar time is the only
+    #: thing here that cannot be copied.
+    #:
+    #: Recording it lets a reader ask two different questions: is this still
+    #: true of the code today, and was it true when issued. The second is what
+    #: makes the record durable.
+    source_commit: str = ""
     schema_version: str = CLAIM_SCHEMA_VERSION
 
     def to_dict(self) -> dict[str, Any]:
@@ -86,6 +98,7 @@ class Claim:
             "required_coverage": list(self.required_coverage),
             "issued_at": self.issued_at,
             "issuer": self.issuer,
+            "source_commit": self.source_commit,
         }
 
     def render(self) -> str:
@@ -197,6 +210,7 @@ def parse_claim(raw: Mapping[str, Any]) -> Claim:
         required_coverage=tuple(str(item) for item in coverage),
         issued_at=raw["issued_at"],
         issuer=str(raw.get("issuer", "")),
+        source_commit=str(raw.get("source_commit", "")),
     )
 
 
@@ -208,6 +222,7 @@ def issue(
     required_coverage: frozenset[Any] | None = None,
     issued_at: dt.date | None = None,
     issuer: str = "",
+    source_commit: str = "",
 ) -> Claim:
     """Evaluate the bundle and bind the result into a portable claim."""
     specs = tuple(default_checks() if checks is None else checks)
@@ -242,6 +257,7 @@ def issue(
         required_coverage=tuple(sorted(engine.required_coverage)),
         issued_at=(issued_at or dt.date.today()).isoformat(),
         issuer=issuer,
+        source_commit=source_commit,
     )
 
 
@@ -336,12 +352,21 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
             specs.append(spec)
 
         if unavailable or substituted:
+            where = (
+                f" This claim was issued against commit "
+                f"{claim.source_commit}; check it out and verify there to ask "
+                "whether it was true when made, rather than whether it is "
+                "still true of this code."
+                if claim.source_commit
+                else " This claim records no source commit, so there is no "
+                "revision to check it against."
+            )
             # Not REFUTED. The claim may be perfectly true; this build simply
             # cannot reproduce it, and saying "false" would be a stronger
             # statement than the evidence licenses.
             return Verification(
                 Verdict.UNVERIFIED, assertion,
-                reasons=tuple(unavailable + substituted),
+                reasons=tuple(unavailable + substituted) + (where.strip(),),
                 checked=tuple(checked),
             )
         checked.append(f"all {len(specs)} checks bound by identity and source")
