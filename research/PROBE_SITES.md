@@ -19,7 +19,7 @@ Derived mechanically from the shapes of five defects that were live while the su
 - **Learned from:** the vacuous closure line
 - **Why it hides:** A ratio over nothing is 1.0 or a guarded constant. Printed as a percentage it reads as full marks for work that never happened.
 
-### S4 — early return that answers before consulting its qualifier  (33 sites)
+### S4 — early return that answers before consulting its qualifier  (36 sites)
 
 - **Learned from:** D11
 - **Why it hides:** A branch that returns a value before reading the parameter that would qualify it is right in the configuration the tests build and unsupported in the one they do not.
@@ -29,7 +29,7 @@ Derived mechanically from the shapes of five defects that were live while the su
 - **Learned from:** D10
 - **Why it hides:** A helper takes an optional input and a caller with that input in hand does not pass it. The helper then degrades, correctly, to a weaker answer nobody asked for.
 
-## The 285 sites
+## The 288 sites
 
 ### S1 (36)
 
@@ -210,10 +210,10 @@ agent_economics/assurance.py:345  expected_net = (realized_value - total_cost) /
 agent_economics/assurance.py:339  cost_per_acceptable = total_cost / accepted if accepted else math.inf
 agent_economics/claude_code.py:1360  token_cost = (
 agent_economics/claude_code_tree.py:452  subagent_dir = parent_path.with_suffix("") / "subagents"
-agent_economics/cli.py:327  subagent_dir = source_path.with_suffix("") / "subagents"
-agent_economics/cli.py:427  (output_dir / name).write_text(content, encoding="utf-8")
-agent_economics/cli.py:419  if not (verify_dir / name).exists()
-agent_economics/cli.py:420  or (verify_dir / name).read_text(encoding="utf-8") != content
+agent_economics/cli.py:386  subagent_dir = source_path.with_suffix("") / "subagents"
+agent_economics/cli.py:486  (output_dir / name).write_text(content, encoding="utf-8")
+agent_economics/cli.py:478  if not (verify_dir / name).exists()
+agent_economics/cli.py:479  or (verify_dir / name).read_text(encoding="utf-8") != content
 agent_economics/delegation.py:175  return (total - (self.unaccounted_cost_usd or 0.0)) / total
 agent_economics/delegation.py:171  return (self.total - len(self.unaccounted)) / self.total
 agent_economics/frontier.py:200  adjusted_alpha = (1 - confidence) / (2 * (len(arms) - 1))
@@ -266,29 +266,32 @@ agent_economics/models.py:109  return (
 agent_economics/models.py:141  return self.cost_per_attempt_usd / self.acceptable_rate
 ```
 
-### S4 (33)
+### S4 (36)
 
 ```
-agent_economics/cli.py:524  in main(): return 2
-agent_economics/cli.py:275  in main(): return 0
-agent_economics/cli.py:314  in main(): return 0
-agent_economics/cli.py:396  in main(): return 0
-agent_economics/cli.py:490  in main(): return 0
-agent_economics/cli.py:523  in main(): return 0
-agent_economics/cli.py:274  in main(): return 1
-agent_economics/cli.py:344  in main(): return 2
-agent_economics/cli.py:404  in main(): return 2
-agent_economics/cli.py:500  in main(): return 0
-agent_economics/cli.py:228  in main(): return 2
-agent_economics/cli.py:234  in main(): return 2
-agent_economics/cli.py:255  in main(): return 2
-agent_economics/cli.py:394  in main(): return 2
-agent_economics/cli.py:409  in main(): return 2
-agent_economics/cli.py:424  in main(): return 1
-agent_economics/cli.py:466  in main(): return 2
-agent_economics/cli.py:479  in main(): return 2
-agent_economics/cli.py:503  in main(): return 2
-agent_economics/cli.py:514  in main(): return 2
+agent_economics/cli.py:583  in main(): return 2
+agent_economics/cli.py:264  in main(): return 0
+agent_economics/cli.py:334  in main(): return 0
+agent_economics/cli.py:373  in main(): return 0
+agent_economics/cli.py:455  in main(): return 0
+agent_economics/cli.py:549  in main(): return 0
+agent_economics/cli.py:582  in main(): return 0
+agent_economics/cli.py:333  in main(): return 1
+agent_economics/cli.py:403  in main(): return 2
+agent_economics/cli.py:463  in main(): return 2
+agent_economics/cli.py:559  in main(): return 0
+agent_economics/cli.py:257  in main(): return 2
+agent_economics/cli.py:273  in main(): return 2
+agent_economics/cli.py:287  in main(): return 2
+agent_economics/cli.py:293  in main(): return 2
+agent_economics/cli.py:314  in main(): return 2
+agent_economics/cli.py:453  in main(): return 2
+agent_economics/cli.py:468  in main(): return 2
+agent_economics/cli.py:483  in main(): return 1
+agent_economics/cli.py:525  in main(): return 2
+agent_economics/cli.py:538  in main(): return 2
+agent_economics/cli.py:562  in main(): return 2
+agent_economics/cli.py:573  in main(): return 2
 agent_economics/delegation.py:228  in _event_cost(): return 0.0
 agent_economics/delegation.py:169  in closure(): return 1.0
 agent_economics/frontier.py:472  in _binomial_cdf(): return 1.0
@@ -319,9 +322,9 @@ agent_economics/checks.py:106  _result(...) omits task_id  [results=(_result("ga
 agent_economics/claude_code.py:768  _inspect_claude_code_jsonl_bytes(...) omits allow_empty_tasks  [return _inspect_claude_code_jsonl_bytes(]
 agent_economics/claude_code.py:520  _normalize_usage(...) omits allow_zero  [usage = _normalize_usage(]
 agent_economics/claude_code_tree.py:494  _inspect_claude_code_jsonl_bytes(...) omits allow_empty_tasks  [parent = _inspect_claude_code_jsonl_byte]
-agent_economics/cli.py:235  audit(...) omits policy  [report = audit(]
-agent_economics/cli.py:258  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
-agent_economics/cli.py:454  load_csv_bundle(...) omits label_source  [else load_csv_bundle(**csv_paths)]
+agent_economics/cli.py:294  audit(...) omits policy  [report = audit(]
+agent_economics/cli.py:317  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
+agent_economics/cli.py:513  load_csv_bundle(...) omits label_source  [else load_csv_bundle(**csv_paths)]
 agent_economics/evidence.py:429  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [problems = validate_evidence_bundle(bund]
 agent_economics/evidence.py:86  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:120  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
@@ -343,13 +346,13 @@ agent_economics/otel_genai.py:808  make_evidence_bundle(...) omits declared_dele
 
 ## Why the coarse shapes are not the method
 
-285 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
+288 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
 
 ## The narrowing that has support
 
 All five known defects share a sharper form than any shape above: the same quantity computed two ways, with one way wrong. That is why each read fine in isolation and why a test exercising either path alone passed. Divergence is enumerable, and there are far fewer of them.
 
-**17 divergences**, against 285 coarse sites.
+**17 divergences**, against 288 coarse sites.
 
 ### `_inspect_claude_code_jsonl_bytes(..., allow_empty_tasks=)`  (inconsistent-caller)
 
@@ -388,7 +391,7 @@ All five known defects share a sharper form than any shape above: the same quant
 
 ### `assess_bundle_closure(..., declared=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/cli.py:258`
+- passes / resolves (1): `agent_economics/cli.py:317`
 - omits / reads raw (1): `agent_economics/audit.py:136`
 
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)

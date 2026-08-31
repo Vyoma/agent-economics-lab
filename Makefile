@@ -109,6 +109,20 @@ frontier:
 held-out:
 	@$(PYTHON) research/held_out.py --check research/HELD_OUT.md
 
+# Every published claim must verify against the evidence it names, and must
+# still refuse when handed the wrong evidence. A verifier that only ever says
+# SUPPORTED is not a verifier, so both directions are asserted.
+claims:
+	@$(PYTHON) -m agent_economics verify \
+		--claim research/claims/claude-code.claim.json \
+		--bundle examples/claude-code/bundle.json > /dev/null
+	@$(PYTHON) -m agent_economics verify \
+		--claim research/claims/checks-only.claim.json \
+		--bundle examples/checks-only/bundle.json > /dev/null
+	@! $(PYTHON) -m agent_economics verify \
+		--claim research/claims/claude-code.claim.json \
+		--bundle examples/checks-only/bundle.json > /dev/null 2>&1
+
 # Regenerates the pre-registered site list. It must not drift from the code it
 # was derived from, or the search it authorises is against a different package.
 probe-sites:
@@ -195,7 +209,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims
 
 lessons:
 # Without set -e the loop reports only the LAST lesson's exit status, so a

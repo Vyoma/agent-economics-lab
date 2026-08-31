@@ -12,6 +12,11 @@ from .adapters import load_normalized_json_bundle, render_normalized_json
 from .assurance import evaluate_bundle
 from .audit import audit, render_markdown as render_audit_markdown
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+from .claim import (
+    issue as issue_claim,
+    parse_claim,
+    verify as verify_claim,
+)
 from .claude_code import (
     SOURCE_ID as CLAUDE_CODE_SOURCE_ID,
     SOURCE_VERSION as CLAUDE_CODE_SOURCE_VERSION,
@@ -141,6 +146,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Exit 1 if any ground for withholding a verdict is present.",
     )
 
+    claim_parser = subparsers.add_parser(
+        "claim",
+        help="Issue a portable claim binding a decision to its evidence.",
+    )
+    claim_parser.add_argument("--bundle", required=True)
+    claim_parser.add_argument(
+        "--assertion", required=True, help="What this claim asserts, in prose."
+    )
+    claim_parser.add_argument("--issuer", default="")
+    claim_parser.add_argument("--output")
+
+    verify_parser = subparsers.add_parser(
+        "verify",
+        help=(
+            "Check a claim against evidence without trusting whoever issued "
+            "it. Exits 0 SUPPORTED, 2 UNVERIFIED, 4 REFUTED."
+        ),
+    )
+    verify_parser.add_argument("--claim", required=True)
+    verify_parser.add_argument("--bundle", required=True)
+    verify_parser.add_argument(
+        "--format", choices=("markdown", "json"), default="markdown"
+    )
+
     mutate_parser = subparsers.add_parser(
         "mutate",
         help="Remove each required gate in turn and report what the engine does.",
@@ -220,6 +249,36 @@ def _load_attestations(path: str | None) -> dict[str, Attestation] | None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "claim":
+        try:
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        document = issue_claim(bundle, args.assertion, issuer=args.issuer).render()
+        if args.output:
+            Path(args.output).write_text(document, encoding="utf-8")
+            print(f"Wrote {args.output}")
+        else:
+            sys.stdout.write(document)
+        return 0
+
+    if args.command == "verify":
+        try:
+            claim = parse_claim(json.loads(Path(args.claim).read_text()))
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError, TypeError) as error:
+            # Refusing to read the inputs is a failure to verify, never a pass.
+            print(f"UNVERIFIED: {error}", file=sys.stderr)
+            return 2
+        result = verify_claim(claim, bundle)
+        print(
+            json.dumps(result.to_dict(), indent=2, sort_keys=True)
+            if args.format == "json"
+            else result.render()
+        )
+        return {"SUPPORTED": 0, "UNVERIFIED": 2, "REFUTED": 4}[result.verdict.value]
+
     if args.command == "audit":
         try:
             bundle = load_normalized_json_bundle(Path(args.bundle))

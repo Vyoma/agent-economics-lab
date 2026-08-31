@@ -84,6 +84,44 @@ stop. Those are in [the honest limits](#the-honest-limits), not buried.
 
 **Your agent passed every enabled check. Did every required check run?**
 
+## Check this repository without trusting it
+
+Everything below is something *this project* checked. A reader who does not run
+the code has to take it on faith, which is the posture this package exists to
+argue against, applied to itself.
+
+So the claims are portable and you can refute them:
+
+```bash
+agent-economics verify --claim research/claims/claude-code.claim.json \
+                       --bundle examples/claude-code/bundle.json
+```
+
+Exit 0 `SUPPORTED`, 2 `UNVERIFIED`, 4 `REFUTED`. The verifier recomputes the
+evidence digest, rebinds every check by identity *and* by the source text that
+implemented it, recomputes the decision contract, and re-runs the engine. Hand
+it different evidence and it exits 4. Hand it a claim naming a check whose
+source differs from yours and it exits 2, because a claim you cannot reproduce
+is not a claim you have disproved.
+
+`UNVERIFIED` is the load-bearing verdict. A verifier that cannot separate
+"false" from "I could not tell" is the same fail-open catalogued below, moved
+one level up, so no failure path returns `SUPPORTED` and none raises.
+
+**The first version of this was forgeable, and the forgery is why the design
+looks like this.** A claim states its own contract, so the issuer chooses it.
+Dropping the single failing gate and requiring no coverage produced a claim
+reading "Safe to scale: every gate passes" that verified `SUPPORTED` against
+evidence whose honest verdict was `ASSIST`. Confirming that a decision follows
+from a contract its author wrote verifies nothing. `SUPPORTED` now requires a
+contract at least as strong as the shipped one; anything weaker is `UNVERIFIED`
+and names the dropped dimensions. That is this package's own rule about missing
+gates, turned on its own output.
+
+What it does not do: nothing here establishes that the evidence describes
+reality. A bundle can be internally perfect and a fabrication. This verifies
+the inference, not the world, and says so in its own output.
+
 ## The finding: defects that were live while the suite was green
 
 Every bug benchmark I know of hands you a failing test and asks for a fix.
@@ -139,7 +177,7 @@ found those five, not a method. So the method was written down and the target
 list committed *before* any probe: all five defects share a sharper form than
 any single code smell, namely one quantity computed two ways with one way wrong.
 Enumerating those divergences gave 18 sites at pre-registration, against 285 for
-the naive shapes. `research/PROBE_SITES.md` regenerates from current code, so it
+the naive shapes (the regenerated file now reads 288 as the package grew). `research/PROBE_SITES.md` regenerates from current code, so it
 now reads 17 against 285: the fixes removed one. The pre-registered file is the
 git blob at `552323b`, not the working copy.
 
