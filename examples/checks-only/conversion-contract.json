@@ -1,0 +1,51 @@
+{
+  "adapter": {
+    "privacy_mode": "content-redacted-type-shapes-only",
+    "source_id": "source.claude-code-jsonl",
+    "source_version": "1",
+    "task_unit": "external-user-prompt"
+  },
+  "outcome_contract": {
+    "label_source": "fixture.manual-review",
+    "rubric_version": "fixture.acceptable-task@1"
+  },
+  "pricing": {
+    "unsupplied": "rates"
+  },
+  "schema_version": 1,
+  "source_inventory": {
+    "claude_code_versions": [
+      "2.1.198"
+    ],
+    "dependency_edge_count": 4,
+    "inventory_sha256": "d99358abf88090f717d4e361ced9b38a5a9c5dee571e8e8ca854f4c06f73487f",
+    "model_call_count": 4,
+    "raw_sha256": "72b29b9ae7d8df77aa48a45228d3e52ca559141742e51a72082c40c75d4e1a4d",
+    "relevant_record_count": 9,
+    "task_count": 2,
+    "tool_call_count": 2,
+    "unexpanded_delegation_tools": []
+  },
+  "tasks": [
+    {
+      "acceptable": false,
+      "business_value_usd": 0.0,
+      "human_minutes": 2.0,
+      "incident_loss_usd": 0.0,
+      "input_digest": "f6c6d18ec5fb39bc56ee43391b7a57eecfeea46ae96bfe41b4a138f4cf7a3a1e",
+      "remediation_cost_usd": 0.5,
+      "started_at": "2026-07-17T16:01:00.000Z",
+      "task_id": "cc-task-7c8f7376b6418b72b583b8a2f0fe8f61a2ba469c3d20e76038c2301107e6a5d5"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 10.0,
+      "human_minutes": 0.5,
+      "incident_loss_usd": 0.0,
+      "input_digest": "993410b14258bb9bea8537996648be90ae6ea9aeb1d6b7b8d74f31601e72c8aa",
+      "remediation_cost_usd": 0.0,
+      "started_at": "2026-07-17T16:00:00.000Z",
+      "task_id": "cc-task-bd59bb1f5dea500f618ce4374917b187f0c081ce773ef0345de6250bf3633833"
+    }
+  ]
+}

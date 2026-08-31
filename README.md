@@ -84,6 +84,183 @@ stop. Those are in [the honest limits](#the-honest-limits), not buried.
 
 **Your agent passed every enabled check. Did every required check run?**
 
+## Check this repository without trusting it
+
+Everything below is something *this project* checked. A reader who does not run
+the code has to take it on faith, which is the posture this package exists to
+argue against, applied to itself.
+
+So the claims are portable and you can refute them:
+
+```bash
+agent-economics verify --claim research/claims/claude-code.claim.json \
+                       --bundle examples/claude-code/bundle.json
+```
+
+Exit 0 `SUPPORTED`, 2 `UNVERIFIED`, 4 `REFUTED`. The verifier recomputes the
+evidence digest, rebinds every check by identity *and* by the source text that
+implemented it, recomputes the decision contract, and re-runs the engine. Hand
+it different evidence and it exits 4. Hand it a claim naming a check whose
+source differs from yours and it exits 2, because a claim you cannot reproduce
+is not a claim you have disproved.
+
+`UNVERIFIED` is the load-bearing verdict. A verifier that cannot separate
+"false" from "I could not tell" is the same fail-open catalogued below, moved
+one level up, so no failure path returns `SUPPORTED` and none raises.
+
+**Every version of this was forgeable until an adversary was pointed at it.**
+Four forgeries, each verifying `SUPPORTED` against evidence that did not
+support the claim, and each is now a regression test in `tests/test_claim.py`:
+
+1. **Subsetting the contract.** A claim states its own contract, so the issuer
+   chooses it. Dropping the single failing gate and requiring no coverage
+   produced "Safe to scale: every gate passes" against evidence whose honest
+   verdict was `ASSIST`. `SUPPORTED` now requires every dimension the shipped
+   contract requires.
+2. **Shipping your own pass marks.** That fix was structural and the numbers
+   were still free. Thresholds live in the bundle, so the audited party
+   supplies them: identical events, identical labels, honest digest, every
+   dimension covered, and setting `min_acceptable_rate` to `0.0` turned
+   `ASSIST` into `SCALE`. Worse, the verifier printed "contract is at least as
+   strong as the shipped one" while doing it, which was false as printed. A
+   threshold no gate could fail against is now detected and named — a gate that
+   keeps its name and cannot fail, arriving through the numbers instead of the
+   gate list.
+3. **A self-attested digest.** `verify` compared `bundle.digest` without
+   recomputing it. `digest` is a stored field, so flipping every outcome label
+   with `dataclasses.replace` left the published digest intact. It is now
+   recomputed from contents.
+4. **Prose that reads as endorsed.** `assertion` is free text bound to nothing,
+   and the output headlined `# SUPPORTED` directly above it. "Zero breaches,
+   safe for unsupervised rollout" verified against an `ASSIST`. The heading now
+   names the decision, and the wording is labelled as the issuer's, unverified.
+
+`verify()` was also not total, which its own docstring promised: the handler
+catching failures read `claim.assertion` *after* the failure, so passing a
+parsed dict — the likeliest caller mistake — raised `AttributeError` from
+inside the guard written to prevent it.
+
+What it still does not do: nothing here establishes that the evidence describes
+reality. A bundle can be internally perfect and a fabrication. This verifies
+the inference, not the world, and says so in its own output.
+
+## The finding: defects that were live while the suite was green
+
+Every bug benchmark I know of hands you a failing test and asks for a fix.
+SWE-bench, Defects4J, BugsInPy, QuixBytes: the failing test **is** the task.
+Mutation testing swaps the roles, but its mutants are synthetic and the suite
+is the thing being scored.
+
+This repository accumulated the other case, and did not go looking for it.
+Five defects, catalogued with the commit each was live at, in a package whose
+entire purpose is refusing to report numbers it cannot support, written by
+someone hunting exactly this class of error:
+
+| defect | commit | tests passing | suite green |
+|---|---|---|---|
+| the gate paid teams to delete their own honesty field | `4b60e19` | 448 | **yes** |
+| a dollar figure computed from costs nothing had priced | `4b60e19` | 448 | **yes** |
+| rate-priced subagent spend weighed nothing | `ffb6ca4` | 455 | **yes** |
+| the fix for the row above left the gate unable to price anything | `dbc28e8` | 462 | **yes** |
+| tool calls asserted free with no rate card to say so | `dbc28e8` | 462 | **yes** |
+
+**5 of 5 were live at a commit where the entire suite passed.** The five sit at
+three distinct commits, so the distinct suite total is 1365 tests, not the 2275
+an earlier version of this section published by summing the column.
+
+That statistic is weaker than it first looks, and the weakness is fatal to the
+strong reading. Every fix commit in this repository adds its regression test in
+the same commit. So "the suite was green at the parent of the fix" reduces to
+"the regression test did not exist yet", which is true of essentially every bug
+fix in every repository. `make green-defects` measures commit hygiene, not a
+property of defects, and 5 of 5 is the expected result anywhere.
+
+The asset is not the defect list. It is the **discriminating probe** attached
+to each one: the input that makes the wrong number visibly wrong. For the third
+row, one run with $100 of declared subagent spend and $18 of undeclared spend:
+closure reported 100% and $0.00 unaccounted. That probe is what no test had,
+and writing probes is the only technique on the list that ever found anything.
+
+The fourth row is the one to sit with. It was introduced *by the fix for the
+third*, in the same file, within the hour, by an agent that had just written
+the lesson about that exact class of error. The suite stayed green across it.
+
+Five defects, one repository, one author, one day. That is a case series, not
+a rate, and it does not estimate how often this happens anywhere else. What it
+establishes is existence and mechanism: a green suite is evidence that
+specified behaviour holds, never that the specification produces a number worth
+reporting, and every defect above sat inside that gap.
+[The full corpus, with each probe.](research/GREEN_DEFECTS.md)
+
+### Then the same method, run forwards
+
+A corpus assembled after the fact cannot report a hit rate, because suspicion
+found those five, not a method. So the method was written down and the target
+list committed *before* any probe: all five defects share a sharper form than
+any single code smell, namely one quantity computed two ways with one way wrong.
+Enumerating those divergences gave 18 sites at pre-registration, against 285 for
+the naive shapes (the regenerated file now reads 288 as the package grew). `research/PROBE_SITES.md` regenerates from current code, so it
+now reads 17 against 285: the fixes removed one. The pre-registered file is the
+git blob at `552323b`, not the working copy.
+
+**18 divergences probed, 3 real defects at 3 sites**, or 3/13 counted as
+distinct sites.
+
+The count went 3, then 2, then 3, and the movement is worth more than the
+number. It was first published as 3 by counting a crash the detector never
+pointed at; an adversarial review removed that, correctly. A second review then
+found a real fail-open at a site this repository had published as *probed and
+correct*: blank token columns in a CSV were priced at $0.00 against the rate
+card, and `gate.unit-economics` passed on "$0.00 <= $2.00". The probe had been
+run with a bundle whose events carried explicit costs, so it could not observe
+the defect it was aimed at, and it reported a miss that looked like diligence.
+
+A wrong probe is worse than no probe. It converts an unexamined site into an
+examined one in the record while examining nothing.
+
+The largest defect in this repository came out of it. The CSV evidence path
+could not express delegation at all: a trace with two `Agent` calls and $500 of
+subagent spend reported zero delegations, 100% closure, and **the gate passed**,
+saying "no delegation in this run". The schema had no column for the graph, so
+the absence of a record was reported as the absence of the thing.
+
+[The site list](research/PROBE_SITES.md), whose pre-registered version is
+`git show 552323b:research/PROBE_SITES.md`, and [what probing it found, misses
+included](research/PROBE_RESULTS.md). The detector on [code it did not come
+from](research/HELD_OUT.md), where it found nothing.
+
+### What this is not
+
+The technique is old and the repository should have said so from the start.
+Publishing it as a new category was the sixth novelty claim made here without
+the adversarial prior-art sweep the project's own process demands, and an
+adversarial review found the omission immediately.
+
+Deriving an oracle where none exists is **the oracle problem**, surveyed by Barr
+et al. (IEEE TSE, 2015). The standard answer is **metamorphic testing** (Chen
+et al., 1998), which asserts a relation between two runs rather than a value for
+one. D07 is a textbook metamorphic relation, and this repository already ships
+three of them in `tests/test_stress_properties.py` — permutation invariance and
+two monotonicity relations. The claim in `GREEN_DEFECTS.md` that such a defect
+is one "no single-case assertion can express" is refuted by a file in the same
+suite. What actually happened is narrower and duller: those relations were
+written for the decision kernel and never applied to `audit()`.
+
+Enumerating call sites that disagree about an optional argument, and ranking by
+how lopsided the disagreement is, is **Engler et al., "Bugs as Deviant
+Behavior" (SOSP 2001)**, which infers beliefs from code and ranks deviations by
+exactly that ratio. `inconsistent_callers()` is a re-implementation of a
+twenty-five-year-old idea, arrived at independently, which is not the same as
+arriving at it first. Related: differential testing (McKeeman, 1998), N-version
+programming and its correlated-error problem (Knight and Leveson, 1986).
+
+And the "green while live" statistic is close to a tautology, addressed above.
+
+The honest delta is the target, not the technique: applying deviance inference
+and metamorphic relations to an assurance system's own honesty — the gates that
+decide whether to trust an AI system — rather than to the system under test.
+That is a small delta. It is the one that survives.
+
 ## What makes this different
 
 Every verdict is bound to a fixed, versioned list of required economic
@@ -635,6 +812,70 @@ production use. Stable `v1` tags follow successful dogfood rather than preceding
 it.
 
 [Inspect the action contract](action.yml)
+
+## Ask what your harness cannot tell you
+
+```bash
+agent-economics audit --bundle bundle.json --ci
+```
+
+One command, four grounds for withholding a verdict: required coverage no check
+supplies, which gates actually carry this run, delegated work nobody undertook to
+assess, and instruments nobody validated. None of them is a score. Each is a
+reason the honest answer is `INCOMPLETE`.
+
+The fourth ground asks what validated your evidence instruments. Answer it by
+supplying their calibration records; without one, the audit withholds:
+
+```bash
+agent-economics audit --bundle bundle.json \
+  --attestations attestations.json --as-of 2026-08-27
+```
+
+Each record states a method, an agreement figure, a sample size, what it was
+measured against, and when. Agreement is checked against a floor for its own
+method, and an unknown method is refused rather than graded on another method's
+scale. An instrument whose output is independently checked by something else is
+not the sole provider of its evidence and may be exempted with
+`--independently-verified`.
+
+A bundle that records no instrument at all is also withheld, and this is
+deliberate. While that was merely noted, declaring what produced your labels
+made a bundle unassessable until attested and recording nothing made it
+assessable, so the tool paid you to delete the field.
+
+It runs on a bundle with no economics at all, so a team with a PII gate and a
+jailbreak gate can ask the question without first inventing a rate card. Convert
+a real session under a contract that declares no pricing:
+
+```json
+{ "pricing": { "unsupplied": "rates" } }
+```
+
+Every call keeps its true token counts and states no cost, because nothing
+priced it. Where the cost of delegated work cannot be established, closure
+counts delegations instead of weighting them by spend and says which it did:
+a share of counts and a share of spend are different quantities, so the report
+may state the count ratio and the gate refuses to compare it against a
+threshold meaning spend. See `examples/checks-only/`, the same session as
+`examples/claude-code/` converted without a price card.
+
+
+
+```text
+- Verdict on the evidence as supplied: **STOP**
+- Withheld on: **unprovided coverage**
+
+- `refusal_rate` — no enabled check supplies this
+- `jailbreak_safety` is pivotal: removing it flips this run green
+```
+
+## What is actually novel here
+
+Less than earlier drafts of this README claimed. Three novelty claims made
+here have been refuted by adversarial prior-art sweeps, and the corrections
+are recorded alongside the citations that narrowed them:
+[what is novel](docs/novelty.md).
 
 ## Reproduce everything
 

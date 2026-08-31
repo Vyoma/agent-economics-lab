@@ -228,3 +228,169 @@ Do not build yet:
 Offline source mappers are a contribution lane; live SDK clients and runtime
 instrumentation are not. Extensions beyond this boundary should be pulled by real
 case-study contributions, not guessed in advance.
+
+## Coverage closure over dynamic delegation
+
+`agent_economics/delegation.py` measures the share of delegated spend a contract
+accounts for. An adversarial prior-art sweep was asked to refute the claim and
+returned *partially novel*, with several sources closer than the first draft of
+that module admitted. They are listed first.
+
+| Prior art | What it establishes |
+|---|---|
+| Mishra and Sharad, *Observability for Delegated Execution in Agentic AI Systems*, [arXiv:2606.09692](https://arxiv.org/abs/2606.09692), June 2026 | States the premise almost verbatim, names **"delegation closure / lineage"** as a requirement, and states the coverage-accounting principle: uncovered channels must be treated as unknown, and global accountability requires explicit detection of missing coverage. The closest work by some distance. |
+| Nian et al., *Auditable Agents*, [arXiv:2604.05485](https://arxiv.org/abs/2604.05485), April 2026 | Defines an accounted-fraction over policy-relevant actions **including delegation events**, plus a magnitude-weighted Gap Burden, and argues for magnitude weighting in nearly the terms used here. Also reaches an "incomplete" verdict. |
+| Armesto and Kolb, *Closure Gaps and Delegation Envelopes for Open-World AI Agents*, [arXiv:2604.25000](https://arxiv.org/abs/2604.25000), April 2026 | Terminology collision rather than subsumption: their closure gaps concern specification adequacy before acting. Noted because "closure", "delegation" and "open-world" are now taken twice in this space. |
+| ISA 600 (Revised), group audits; ISA 705 (Revised) | Delegated work is either covered by the group team's procedures or by reviewed component work, and an inability to obtain sufficient evidence produces a qualified opinion or a disclaimer, with materiality as the magnitude test. This subsumes the concept completely and predates it by decades. |
+| SOC 2 carve-out versus inclusive method | The same disjunction: a delegated subservice organisation is inside the report or explicitly outside its opinion. |
+| FinOps Foundation untagged-cost KPI | Cost-weighted accounted-fraction, published as a KPI, already carried into AI spend attribution. The weighting argument is not new. |
+| in-toto sublayouts | Already implement "the delegated work carries a contract of its own", verified recursively. An earlier draft of `delegation.py` promised that disjunct without implementing it; the promise has been removed. |
+| AgentSpec ([arXiv:2503.18666](https://arxiv.org/abs/2503.18666)); allowlists of permitted sub-agents in agent gateways | "Declare permitted delegations" is shipped practice. These prevent at spawn time; they do not measure a residual or return an incomplete verdict. |
+
+### What survives
+
+**The denominator is the contract, not the ground truth.** The agent work above
+measures whether the *record* captured what happened: whether the gateway
+observed the tool, whether the trace covered the lifecycle. This measures whether
+anyone *undertook to assess* what the record already shows. A run can be
+perfectly instrumented, every subagent traced, full observability coverage, and
+still score zero closure because no delegation was declared. That failure mode is
+invisible to all three agent papers, and it is the one that bears on a scale
+decision.
+
+Narrowly: a cost-weighted ratio of delegated spend accounted for by a declared
+manifest carried in a pinned conversion contract, computed offline from a trace,
+where a shortfall routes to `INCOMPLETE` rather than `FAIL`, shipped as a check.
+The refusal is real and verifiable: `assurance.py` computes `unmet_coverage` from
+gates that could not run and routes it above the STOP branch.
+
+Lanes the sweep found empty, which is where the ground is firmest: distributed
+tracing treats orphan and missing spans purely as data-quality troubleshooting,
+with no accounted-fraction and no gate; contract-based design remains
+closed-composition; and no observability or eval product detects that a spawned
+subagent was never declared.
+
+## Attestation for the instruments that produced the evidence
+
+`agent_economics/provenance.py` refuses a verdict when an evidence-producing
+instrument is unattested, weakly agreeing, or out of calibration. A second sweep
+returned *partially novel*, and the mechanism is not new anywhere except this
+domain.
+
+| Prior art | What it establishes |
+|---|---|
+| DO-330 and ISO 26262-8 clause 11, tool qualification | **The strongest citation against this.** Certification credit cannot be taken from an unqualified tool, and the independent-verification exemption is the same sole-provider carve-out implemented here. Cited here because `docs/landscape.md` already referenced these standards for a different point while missing the clause containing this mechanism. |
+| PPAP element 10 with Measurement Systems Analysis | A production-release decision is refused when Gauge R&R fails: an agreement analogue, a stated sample design, a named reference, a date. |
+| CLIA: 42 CFR 493 subpart H; 42 CFR 493.1255; Westgard QC | Two failed proficiency events and a laboratory must cease reporting that analyte. Calibration verification at least every six months is a literal maximum age. QC failure holds patient results. Analysers refuse to run a test once a calibration curve lapses. The closest complete analogue, expiry included. |
+| ISO/IEC 17025:2017 clauses 6.4.9 and 7.10 | Goes further than this module: equipment found out of calibration triggers review and recall of results already issued. This refuses only forward. |
+| Usami et al., *LLM Judges Have Dark Current*, [arXiv:2606.15610](https://arxiv.org/abs/2606.15610), June 2026 | Argues a judge should be reported as a measurement instrument and gives a metrological protocol for measuring the measuring device. **The metrology framing is theirs and predates this.** It defines no threshold, no expiry and no consequence. |
+| *Eval Factsheets*, [arXiv:2512.04062](https://arxiv.org/abs/2512.04062) | Specifies the attestation record fields, including who made the evaluation and when, and how it is reliable. Reporting only. |
+| *Evaluation Cards*, [arXiv:2606.09809](https://arxiv.org/abs/2606.09809) | Explicitly declines to assign pass/fail thresholds. Evidence that the field's reporting layer deliberately does not gate. |
+| *Trust or Escalate*, [arXiv:2407.18370](https://arxiv.org/abs/2407.18370) | The only thing in the judge literature that refuses, but per instance on runtime confidence, not a deployment decision on a stored calibration record. |
+| Crowdsourcing gold-question QC; sample ratio mismatch; in-toto, SLSA and Conforma attestation expiry | Agreement against a reference deciding whether labels count; apparatus-integrity gates; and the expiry pattern. All attest identity, process integrity, or per-item quality rather than instrument calibration. |
+
+### What survives
+
+Three things together, and only the third is genuinely unclaimed: a stored
+per-instrument record; an age limit evaluated against a caller-supplied `as_of`
+rather than the wall clock, so a verdict is reproducible; and an `INCOMPLETE`
+outcome **distinct from FAIL**, so that unknown quality does not route to STOP.
+
+The honest concession on tool qualification is that the mechanism is entirely
+theirs. Tool qualification qualifies a deterministic tool against a development
+process, once, bound to a version, with no time-based expiry and no agreement
+statistic. The object here is a stochastic instrument whose behaviour changes
+without a version bump, so the certificate has to carry an agreement number
+against a named reference on a stated sample and a date, and it has to lapse on a
+clock rather than on a version.
+
+Two corrections the sweep forced. The module now implements the sole-provider
+carve-out its docstring described and its code did not. And thresholds are
+per-method: raw agreement, Cohen's kappa and held-out accuracy do not share a
+bar, and comparing all three against one number was a category error that
+ILAC-G8 exists to prevent. An attestation whose method has no stated floor is
+refused rather than graded on another method's scale. The floors are conventional
+landmarks, not derived from this package's data, and are labelled as such.
+
+## What other frameworks do when a check cannot run
+
+This section exists because the stance this package takes — that evidence which
+could not be produced is not a result — is only worth taking if the field does
+something else. A survey was run against primary sources to find out. **It
+refuted the premise it started from**, and the real answer is more interesting.
+
+### The premise that was wrong
+
+The survey set out to confirm that eval frameworks silently convert a failed
+check into a pass. **They do not.** No mainstream framework treats a broken
+check as a pass. The one clear historical case, Guardrails AI defaulting
+`on_fail` to `NOOP`, was fixed by its maintainers: the default became
+`OnFailAction.EXCEPTION` in v0.6.0. DeepEval's `ignore_errors`, which looked
+like the same thing, records the error and marks the item a **failure**, and
+both it and `skip_on_missing_params` default to `False`, so the default aborts.
+
+That framing is retired. It was wrong.
+
+### What the field actually divides on
+
+Not whether a broken check passes, but whether it is **counted somewhere the
+reader will see**.
+
+| Behaviour | Frameworks |
+|---|---|
+| Aborts by default | UK AISI Inspect, DeepEval, lm-evaluation-harness, HELM, Arize Phoenix, Guardrails 0.6+, openai/evals |
+| Reports an un-scored state | **Inspect** (counts `scored_samples` and `unscored_samples` beside the metric, and defaults `aggregate(on_missing="error")`), Langfuse, MLflow, Braintrust Python/TS, Phoenix, LangSmith (best effort) |
+| Drops from the denominator | Ragas, MLflow, Braintrust Python/TS, DeepEval under `skip_on_missing_params`, Weave numeric means |
+| Folds into a zero or a fail | OpenAI graders (documented: a grader exception or non-numeric output "will be marked as invalid and return a 0 grade"), promptfoo judge transport failures, DeepEval under `ignore_errors`, Braintrust C#/Java |
+
+**UK AISI Inspect is the closest prior art to the position this package takes,
+and it is better at the reporting half.** `Score.unscored()` is a first-class
+state, the exclusion is counted rather than merely performed, and the aggregate
+default is to error on missing values. Anything this package says about refusing
+should credit it.
+
+The sharpest remaining gap is silent denominator shrinkage. Ragas is the clearest
+case: with `raise_exceptions=False` and `np.nanmean`, a run where forty of a
+hundred judge calls fail reports the mean of the surviving sixty, in the same
+shape as a complete run, with no count of the missing forty. MLflow does the same
+with a log warning as the only signal. Both offer a stricter setting; neither
+makes it the default.
+
+### Every design here has a stated reason
+
+The maintainers are not careless, and the write-up should not imply it. DeepEval's
+flag exists because a custom model "generating invalid JSONs ... will stop the
+execution of the entire test run". MLflow isolates sub-scorer failures "so one bad
+scorer doesn't abort the whole ensemble". HELM drops NaN statistics because
+"Python's stdlib json.dumps() will produce invalid JSON when serializing a NaN".
+Weave's own pull request is candid that its fix is partial.
+
+Two projects have argued the principle explicitly, from opposite directions.
+promptfoo's source declines to invert a grader error into a pass because "a
+grader error is not evidence that the criterion was or was not met". Inspect's
+changelog reaches the same conclusion by the other route, keeping judge-parse
+failures visible "rather than inflating the INCORRECT count".
+
+### The honest conclusion
+
+The field has converged on *not a pass*. It has not converged on *how to report
+not a score*. An explicitly counted un-scored state is a minority position, held
+clearly by one framework and partially by several others.
+
+That is a narrower justification for this package's stance than the one it
+started with, and it is the true one.
+
+### This repository was doing the worst version of it
+
+Until the commit that added this section, `kimi_judge` wrote a task the judge
+never evaluated into the outcomes CSV as `acceptable: false`. That file is the
+evidence a verdict is built from, so a judge outage lowered the acceptable rate
+and was indistinguishable from a genuinely bad result. The audit sidecar recorded
+the truth and nothing downstream read it.
+
+That is the fold-into-a-fail behaviour catalogued above, in the package that
+argues against it, while `kimi_eval` twenty files away already excluded errors
+from its denominator under a test reading "an outage must not be reported as
+strictness". It is fixed, and it is recorded here rather than quietly corrected,
+because a survey of other people's defaults has no standing from a project that
+had not checked its own.

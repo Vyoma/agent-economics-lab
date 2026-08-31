@@ -257,7 +257,7 @@ class FrontierTests(unittest.TestCase):
         self.assertTrue(any("acceptable must be boolean" in item for item in case.problems))
 
     def test_zero_rate_card_usage_fails_closed(self) -> None:
-        plan, bundles, problems = load_experiment(PLAN_PATH)
+        _plan, bundles, _problems = load_experiment(PLAN_PATH)
         original = bundles["balanced-4-step"]
         events = list(original.events)
         events[0] = replace(
@@ -267,21 +267,26 @@ class FrontierTests(unittest.TestCase):
             output_tokens=0,
             direct_cost_usd=None,
         )
-        bundles["balanced-4-step"] = make_evidence_bundle(
-            events=events,
-            outcomes=original.outcomes,
-            rates={
-                **original.rates,
-                "priced-model": ModelRate(1.0, 2.0),
-            },
-            baseline=original.baseline,
-            policy=original.policy,
-            source_id="source.test-zero-usage",
-            task_manifest=original.task_manifest,
-        )
-        case = evaluate_frontier(plan, bundles, problems)
-        self.assertEqual(case.decision, FrontierDecision.INCOMPLETE)
-        self.assertTrue(any("zero rate-card usage" in item for item in case.problems))
+        # The refusal now fires at construction rather than at the frontier.
+        # An event with no stated cost and no token usage has a cost nothing
+        # established, so no bundle containing one should exist to be compared.
+        # This check was opt-in until the documented CSV path was found pricing
+        # blank token columns at $0.00 and passing gate.unit-economics on
+        # "$0.00 <= $2.00".
+        with self.assertRaises(ValueError) as caught:
+            make_evidence_bundle(
+                events=events,
+                outcomes=original.outcomes,
+                rates={
+                    **original.rates,
+                    "priced-model": ModelRate(1.0, 2.0),
+                },
+                baseline=original.baseline,
+                policy=original.policy,
+                source_id="source.test-zero-usage",
+                task_manifest=original.task_manifest,
+            )
+        self.assertIn("zero rate-card usage", str(caught.exception))
 
     def test_baseline_drift_fails_closed(self) -> None:
         plan, bundles, problems = load_experiment(PLAN_PATH)

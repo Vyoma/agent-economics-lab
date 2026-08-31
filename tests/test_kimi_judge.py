@@ -24,6 +24,7 @@ from agent_economics import kimi_client
 from agent_economics.kimi_judge import (
     _DEFAULT_MODEL,
     _DEFAULT_REASONING_EFFORT,
+    UnjudgedTasks,
     _build_outcome_row,
     _build_system_prompt,
     _build_user_message,
@@ -162,18 +163,26 @@ class OutcomeRowTests(unittest.TestCase):
 
 
 class ErrorRowTests(unittest.TestCase):
-    def test_error_row_counts_as_unacceptable(self) -> None:
-        out, audit = _error_outcome_row("t-fail", _RUBRIC, "timeout")
-        self.assertEqual(out["acceptable"], "false")
-        self.assertEqual(out["business_value_usd"], "0")
+    """
+    A task the judge never evaluated produces no label.
+
+    It used to produce `acceptable: false`, which folds a judge outage into the
+    acceptable rate where it is indistinguishable from a genuinely bad result.
+    kimi_eval already refuses this on the evaluation side, with the docstring
+    "an outage must not be reported as strictness"; this is the same rule on the
+    labelling side.
+    """
+
+    def test_an_unjudged_task_yields_no_outcomes_row(self) -> None:
+        out, _audit = _error_outcome_row("t-fail", _RUBRIC, "timeout")
+        self.assertIsNone(out)
+
+    def test_the_audit_sidecar_still_records_what_happened(self) -> None:
+        _out, audit = _error_outcome_row("t-fail", _RUBRIC, "timeout")
         self.assertIn("timeout", audit["rationale"])
         self.assertEqual(audit["model_id"], "error")
-
-    def test_error_row_zeros_out_costs(self) -> None:
-        out, _ = _error_outcome_row("t-fail", _RUBRIC, "network error")
-        self.assertEqual(out["human_minutes"], "0")
-        self.assertEqual(out["remediation_cost_usd"], "0")
-        self.assertEqual(out["incident_loss_usd"], "0")
+        self.assertEqual(audit["label_source"], "kimi-judge@error")
+        self.assertIsNone(audit["overall_score"])
 
 
 class JudgePipelineTests(unittest.TestCase):
@@ -252,13 +261,27 @@ class JudgePipelineTests(unittest.TestCase):
             rubric_path = self._write_rubric(tmp_dir)
             out_path = tmp_dir / "outcomes.csv"
 
-            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
+            # Refusing is the default: a partial outcomes file is evidence, and
+            # once a task is missing from it nobody downstream can tell an outage
+            # from a task that was never submitted.
+            with (
+                patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}),
+                self.assertRaises(UnjudgedTasks) as caught,
+            ):
                 judge(tasks_path, rubric_path, out_path, rate_limit=0)
+            self.assertEqual(caught.exception.task_ids, ("t-err",))
 
+            # With the override the task is omitted, never labelled, so the
+            # trace-to-outcome mismatch fails closed at bundle validation.
+            with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
+                judge(
+                    tasks_path, rubric_path, out_path,
+                    rate_limit=0, allow_unjudged=True,
+                )
             with open(out_path, newline="") as f:
                 rows = list(csv.DictReader(f))
 
-        self.assertEqual(rows[0]["acceptable"], "false")
+        self.assertEqual(rows, [])
 
     def test_judge_raises_without_api_key(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -561,7 +584,9 @@ class KimiRequestContractTests(unittest.TestCase):
                 "a rejected request must not produce an outcomes file",
             )
 
-    def _run_judge_against_post(self, mock_post: MagicMock, verdict: dict) -> list[dict]:
+    def _run_judge_against_post(
+        self, mock_post: MagicMock, verdict: dict, *, allow_unjudged: bool = False
+    ) -> list[dict]:
         """Drive judge() through the real client with only the socket mocked."""
         mock_post.return_value = {
             "choices": [{"message": {"content": json.dumps(verdict)}}],
@@ -578,7 +603,10 @@ class KimiRequestContractTests(unittest.TestCase):
             rubric_path.write_text(json.dumps(_RUBRIC))
             out_path = tmp_dir / "outcomes.csv"
             with patch.dict("os.environ", {"MOONSHOT_API_KEY": _FAKE_KEY}):
-                judge(tasks_path, rubric_path, out_path, rate_limit=0)
+                judge(
+                    tasks_path, rubric_path, out_path,
+                    rate_limit=0, allow_unjudged=allow_unjudged,
+                )
             with open(out_path, newline="") as handle:
                 return list(csv.DictReader(handle))
 
@@ -601,7 +629,14 @@ class KimiRequestContractTests(unittest.TestCase):
     def test_end_to_end_rejects_an_out_of_range_verdict(
         self, mock_post: MagicMock
     ) -> None:
-        """An impossible score must fail the judgment, not enter the economics."""
+        """
+        An impossible score must not enter the economics at all.
+
+        It used to be written as `acceptable: false`, which enters the economics
+        as a rejection. A malformed verdict is a defect in the response, not a
+        judgment about the task, so it now produces no label: the same treatment
+        the request-defect path already gets.
+        """
         criteria = [criterion["id"] for criterion in _RUBRIC["criteria"]]
         rows = self._run_judge_against_post(
             mock_post,
@@ -612,8 +647,9 @@ class KimiRequestContractTests(unittest.TestCase):
                 "acceptable": True,
                 "rationale": "impossible score",
             },
+            allow_unjudged=True,
         )
-        self.assertEqual(rows[0]["acceptable"], "false")
+        self.assertEqual(rows, [])
 
     @patch("agent_economics.kimi_client._post")
     def test_provider_error_message_is_surfaced(

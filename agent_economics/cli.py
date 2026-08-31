@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import sys
 from collections.abc import Sequence
@@ -9,7 +10,13 @@ from pathlib import Path
 from . import __version__, kimi_client
 from .adapters import load_normalized_json_bundle, render_normalized_json
 from .assurance import evaluate_bundle
+from .audit import audit, render_markdown as render_audit_markdown
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+from .claim import (
+    issue as issue_claim,
+    parse_claim,
+    verify as verify_claim,
+)
 from .claude_code import (
     SOURCE_ID as CLAUDE_CODE_SOURCE_ID,
     SOURCE_VERSION as CLAUDE_CODE_SOURCE_VERSION,
@@ -44,6 +51,7 @@ from .otel_genai import (
     inspect_otel_genai_json,
     otel_genai_bundle_from_session,
 )
+from .provenance import Attestation
 from .report import render_json, render_markdown
 
 
@@ -103,6 +111,73 @@ def build_parser() -> argparse.ArgumentParser:
         help="Completed conversion contract with outcomes, prices, baseline, and policy.",
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
+    audit_parser = subparsers.add_parser(
+        "audit",
+        help="Ask what this harness cannot tell you: coverage with no provider, "
+             "which gates carry the verdict, delegated work nobody undertook to "
+             "assess, and instruments nobody validated.",
+    )
+    audit_parser.add_argument("--bundle", required=True)
+    audit_parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    audit_parser.add_argument("--output")
+    audit_parser.add_argument(
+        "--attestations",
+        help=(
+            "JSON file of calibration records for the evidence instruments, "
+            "keyed by instrument name. Without it, a bundle that declares what "
+            "produced its labels cannot be assessed -- and neither can one that "
+            "declares nothing."
+        ),
+    )
+    audit_parser.add_argument(
+        "--as-of",
+        help="ISO date to age attestations against. Defaults to today.",
+    )
+    audit_parser.add_argument(
+        "--independently-verified",
+        action="append", default=[], metavar="INSTRUMENT",
+        help=(
+            "An instrument whose output is checked by something else, so it is "
+            "not the sole provider of its evidence. Repeatable."
+        ),
+    )
+    audit_parser.add_argument(
+        "--ci", action="store_true",
+        help="Exit 1 if any ground for withholding a verdict is present.",
+    )
+
+    claim_parser = subparsers.add_parser(
+        "claim",
+        help="Issue a portable claim binding a decision to its evidence.",
+    )
+    claim_parser.add_argument("--bundle", required=True)
+    claim_parser.add_argument(
+        "--assertion", required=True, help="What this claim asserts, in prose."
+    )
+    claim_parser.add_argument("--issuer", default="")
+    claim_parser.add_argument(
+        "--source-commit", default="",
+        help=(
+            "The revision this claim is issued against. Without it a claim "
+            "cannot be re-checked after the code moves, and the record decays "
+            "on the next refactor."
+        ),
+    )
+    claim_parser.add_argument("--output")
+
+    verify_parser = subparsers.add_parser(
+        "verify",
+        help=(
+            "Check a claim against evidence without trusting whoever issued "
+            "it. Exits 0 SUPPORTED, 2 UNVERIFIED, 4 REFUTED."
+        ),
+    )
+    verify_parser.add_argument("--claim", required=True)
+    verify_parser.add_argument("--bundle", required=True)
+    verify_parser.add_argument(
+        "--format", choices=("markdown", "json"), default="markdown"
+    )
+
     mutate_parser = subparsers.add_parser(
         "mutate",
         help="Remove each required gate in turn and report what the engine does.",
@@ -138,6 +213,12 @@ def build_parser() -> argparse.ArgumentParser:
     judge_parser.add_argument("--rubric", required=True, help="rubric.json path")
     judge_parser.add_argument("--out", required=True, help="Output outcomes.csv path")
     judge_parser.add_argument("--model", default="kimi-k3")
+    judge_parser.add_argument(
+        "--allow-unjudged", action="store_true",
+        help="Write labels for the tasks that were judged and omit the rest, "
+             "rather than refusing. Omitted tasks are never labelled, so the "
+             "gap fails closed when a bundle is built.",
+    )
     judge_parser.add_argument("--rate-limit", type=int, default=5,
                               help="Max Kimi API calls per second (0 = unlimited)")
     judge_parser.add_argument("--reasoning-effort",
@@ -159,8 +240,83 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _load_attestations(path: str | None) -> dict[str, Attestation] | None:
+    """Read calibration records, or None when none were supplied.
+
+    None and {} differ: None means no attestation reached this audit, {} means
+    a file was supplied that attests nothing. Both withhold a verdict, and the
+    audit says which it saw.
+    """
+    if path is None:
+        return None
+    raw = json.loads(Path(path).read_text())
+    return {
+        name: Attestation(instrument=name, **fields) for name, fields in raw.items()
+    }
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "claim":
+        try:
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        document = issue_claim(
+            bundle, args.assertion, issuer=args.issuer,
+            source_commit=args.source_commit,
+        ).render()
+        if args.output:
+            Path(args.output).write_text(document, encoding="utf-8")
+            print(f"Wrote {args.output}")
+        else:
+            sys.stdout.write(document)
+        return 0
+
+    if args.command == "verify":
+        try:
+            claim = parse_claim(json.loads(Path(args.claim).read_text()))
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError, TypeError) as error:
+            # Refusing to read the inputs is a failure to verify, never a pass.
+            print(f"UNVERIFIED: {error}", file=sys.stderr)
+            return 2
+        result = verify_claim(claim, bundle)
+        print(
+            json.dumps(result.to_dict(), indent=2, sort_keys=True)
+            if args.format == "json"
+            else result.render()
+        )
+        return {"SUPPORTED": 0, "UNVERIFIED": 2, "REFUTED": 4}[result.verdict.value]
+
+    if args.command == "audit":
+        try:
+            bundle = load_normalized_json_bundle(Path(args.bundle))
+        except (OSError, ValueError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        try:
+            attestations = _load_attestations(args.attestations)
+            as_of = dt.date.fromisoformat(args.as_of) if args.as_of else None
+        except (OSError, ValueError, TypeError, KeyError) as error:
+            print(f"INCOMPLETE: invalid attestation: {error}", file=sys.stderr)
+            return 2
+        report = audit(
+            bundle,
+            attestations=attestations,
+            as_of=as_of,
+            independently_verified=tuple(args.independently_verified),
+        )
+        rendered = (
+            json.dumps(report.to_dict(), indent=2, sort_keys=True)
+            if args.format == "json"
+            else render_audit_markdown(report)
+        )
+        if args.output:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        print(rendered)
+        return 1 if args.ci and not report.assessable else 0
     if args.command in {"mutate", "closure"}:
         try:
             bundle = load_normalized_json_bundle(Path(args.bundle))
@@ -378,7 +534,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         ) as error:
             print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
             return 2
-        report = render_json(case) if args.format == "json" else render_markdown(case)
+        try:
+            report = (
+                render_json(case) if args.format == "json" else render_markdown(case)
+            )
+        except LookupError as error:
+            # The renderer asked for an economic figure the bundle declared
+            # unsupplied. Refusing is right; escaping as a traceback is not.
+            # Exit 1 was not in this CLI's documented set at all (0 SCALE,
+            # 2 INCOMPLETE, 3 ASSIST, 4 STOP), so a checks-only bundle -- the
+            # path the README points readers to -- crashed with an exit code
+            # that meant nothing.
+            print(f"INCOMPLETE: {error}", file=sys.stderr)
+            return 2
         if args.output:
             Path(args.output).write_text(report, encoding="utf-8")
         print(report)

@@ -100,6 +100,79 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
+# The detector on code it did not come from. Deliberately NOT in `reproduce`:
+# it measures the running interpreter's own standard library, so its numbers
+# move with the Python version and the CI matrix spans four. Byte-comparing it
+# there would fail on three of them for a reason that is not a defect. The
+# artifact records the version it was generated on; this regenerates and diffs
+# without asserting, so drift is visible without being fatal.
+held-out:
+	@$(PYTHON) research/held_out.py --check research/HELD_OUT.md
+
+# Every published claim must verify against the evidence it names, and must
+# still refuse when handed the wrong evidence. A verifier that only ever says
+# SUPPORTED is not a verifier, so both directions are asserted.
+# Reissue the published claims against the current tree, pinning the revision
+# so a reader can later ask whether each was true when made, not only whether
+# it is still true. Without the pin the record resets on every refactor.
+reissue-claims:
+	@$(PYTHON) -m agent_economics claim \
+		--bundle examples/claude-code/bundle.json \
+		--issuer agent-economics-lab \
+		--source-commit "$$(git rev-parse HEAD)" \
+		--assertion "The bundled Claude Code session does not clear the shipped gates; this evidence routes to ASSIST." \
+		--output research/claims/claude-code.claim.json
+	@$(PYTHON) -m agent_economics claim \
+		--bundle examples/checks-only/bundle.json \
+		--issuer agent-economics-lab \
+		--source-commit "$$(git rev-parse HEAD)" \
+		--assertion "The checks-only conversion of the same session withholds a verdict: it has no economics and no attested instrument." \
+		--output research/claims/checks-only.claim.json
+
+claims:
+	@$(PYTHON) -m agent_economics verify \
+		--claim research/claims/claude-code.claim.json \
+		--bundle examples/claude-code/bundle.json > /dev/null
+	@$(PYTHON) -m agent_economics verify \
+		--claim research/claims/checks-only.claim.json \
+		--bundle examples/checks-only/bundle.json > /dev/null
+	@! $(PYTHON) -m agent_economics verify \
+		--claim research/claims/claude-code.claim.json \
+		--bundle examples/checks-only/bundle.json > /dev/null 2>&1
+
+# Regenerates the pre-registered site list. It must not drift from the code it
+# was derived from, or the search it authorises is against a different package.
+probe-sites:
+	@$(PYTHON) research/probe_sites.py > /tmp/agent-economics-probe-sites.md
+	@cmp /tmp/agent-economics-probe-sites.md research/PROBE_SITES.md
+
+# Checks out the commit before each catalogued defect's fix, runs the whole
+# suite there, and runs the probe that discriminates. Pinned commits, so the
+# output is deterministic and byte-comparable like any other artifact.
+green-defects:
+	@$(PYTHON) research/green_defects.py $(PYTHON) > /tmp/agent-economics-green-defects.md
+	@cmp /tmp/agent-economics-green-defects.md research/GREEN_DEFECTS.md
+
+# The same session as the claude-code example, converted under a contract that
+# declares no rate card. Proves the checks-only path is reachable from a real
+# trace through `convert`, not only from the Python API.
+checks-only:
+	@$(PYTHON) -m agent_economics convert \
+		--from claude-code \
+		--in examples/claude-code/session.jsonl \
+		--contract examples/checks-only/conversion-contract.json \
+		--out /tmp/agent-economics-checks-only.json
+	@cmp /tmp/agent-economics-checks-only.json examples/checks-only/bundle.json
+
+# The audit is the package's front door and was outside the build gate entirely.
+# --ci exits nonzero on any ground, so these assert the withheld verdicts stay
+# withheld rather than merely that the command runs.
+audit:
+	@$(PYTHON) -m agent_economics audit --bundle examples/checks-only/bundle.json >/dev/null
+	@! $(PYTHON) -m agent_economics audit --bundle examples/checks-only/bundle.json --ci >/dev/null 2>&1
+	@! $(PYTHON) -m agent_economics audit --bundle examples/claude-code/bundle.json --ci >/dev/null 2>&1
+	@$(PYTHON) -m agent_economics audit --bundle examples/claude-code/bundle.json --format json >/dev/null
+
 claude-code:
 	@$(PYTHON) -m agent_economics convert \
 		--from claude-code \
@@ -153,7 +226,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims
 
 lessons:
 # Without set -e the loop reports only the LAST lesson's exit status, so a

@@ -95,9 +95,15 @@ def validate_evidence_bundle(
                         f"{event_label} has unknown model cost; provide "
                         "direct_cost_usd or a model rate"
                     )
+                # Unconditional, not gated on require_explicit_costs. A model
+                # event with no stated cost and no token usage has a cost
+                # nothing established, and pricing it at $0.00 against a rate
+                # card is fabrication on any path. This was opt-in and the
+                # documented CSV path did not opt in, so blank token columns
+                # produced $0.00 total effective cost and gate.unit-economics
+                # passed on "$0.00 <= $2.00".
                 elif (
-                    require_explicit_costs
-                    and _is_integer(event.input_tokens)
+                    _is_integer(event.input_tokens)
                     and _is_integer(event.output_tokens)
                     and event.input_tokens + event.output_tokens <= 0
                 ):
@@ -315,6 +321,28 @@ def validate_evidence_bundle(
                 problems.append(issue)
 
     return tuple(problems)
+
+
+def recompute_digest(bundle: EvidenceBundle) -> str:
+    """Recompute a bundle's digest from its contents.
+
+    `EvidenceBundle.digest` is a stored field, so a bundle can carry a digest
+    that describes something else -- `dataclasses.replace` produces one every
+    time. Anything verifying a claim must recompute rather than read, or the
+    single anchor tying a claim to specific evidence is a value the evidence
+    asserts about itself.
+    """
+    return _canonical_digest(
+        bundle.events,
+        bundle.outcomes,
+        bundle.rates,
+        bundle.baseline,
+        bundle.policy,
+        bundle.task_manifest,
+        bundle.dependency_edges,
+        bundle.declared_delegations,
+        bundle.label_source,
+    )
 
 
 def _canonical_digest(

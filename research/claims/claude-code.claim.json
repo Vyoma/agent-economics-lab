@@ -1,0 +1,60 @@
+{
+  "assertion": "The bundled Claude Code session does not clear the shipped gates; this evidence routes to ASSIST.",
+  "checks": [
+    {
+      "id": "gate.acceptable-rate",
+      "implementation_digest": "de3c9fccaead251676f33102652942f52e5ce4db6ac12f4bdb90b88ee0073249",
+      "version": "1"
+    },
+    {
+      "id": "gate.unit-economics",
+      "implementation_digest": "fb307284a8ea50b2e4bde0c2f7c51685208f7ec86cb729049348387648a189db",
+      "version": "1"
+    },
+    {
+      "id": "gate.tail-cost",
+      "implementation_digest": "fff2447fe34eb7f985a58985c6d2e5cb710ecfba593ddebc3f1b089f5852142f",
+      "version": "1"
+    },
+    {
+      "id": "gate.net-value",
+      "implementation_digest": "c40963947db38aa3f69f634807567ee9638b0168e812da17a01c4520222f54ea",
+      "version": "1"
+    },
+    {
+      "id": "gate.counterfactual",
+      "implementation_digest": "4ae3afbdc430769970dfb35d33c74c84a638c472a05ea9c68cda599aa34c7d2c",
+      "version": "1"
+    },
+    {
+      "id": "gate.runtime-caps",
+      "implementation_digest": "9afae434f5ab6982497e7b8e4f92e25db484698135d65a6d1d02d0717cb34392",
+      "version": "1"
+    },
+    {
+      "id": "diagnostic.repeated-tool-shape",
+      "implementation_digest": "af950cc90dc0acb8aa947d3e66758d2699512c9ac6af991f7e6ecf32dbf4fac3",
+      "version": "1"
+    },
+    {
+      "id": "diagnostic.directed-cycle",
+      "implementation_digest": "de3430198f0be5b7b2e02d3720eb7202fe662ae72a59a70b60299312a402f0c7",
+      "version": "1"
+    }
+  ],
+  "decision": "ASSIST",
+  "decision_contract_digest": "e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab",
+  "evidence_digest": "4aa4c7373a2b1d84de756c831d358e5935d648c616319989969a4af6ac85c632",
+  "issued_at": "2026-08-31",
+  "issuer": "agent-economics-lab",
+  "required_coverage": [
+    "business_value",
+    "counterfactual",
+    "outcome_quality",
+    "runtime_caps",
+    "tail_risk",
+    "unit_economics"
+  ],
+  "schema_version": "assurance.claim@1",
+  "source_commit": "1d96bcdf034ff13e21662879b36df3ce3f6411a6"
+}

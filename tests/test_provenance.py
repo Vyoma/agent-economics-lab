@@ -84,7 +84,8 @@ class AssessmentTest(unittest.TestCase):
 
     def test_agreement_below_the_floor_is_rejected(self) -> None:
         report = self._assess([_record(agreement=0.62)])
-        self.assertIn("agreement 0.62", report.rejected[0].reason)
+        self.assertIn("0.62 below", report.rejected[0].reason)
+        self.assertIn("agreement-vs-human-adjudication", report.rejected[0].reason)
 
     def test_too_small_a_sample_is_rejected(self) -> None:
         report = self._assess([_record(sample_size=40)])
@@ -186,3 +187,62 @@ class AgeArithmeticTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SoleProviderCarveOutTest(unittest.TestCase):
+    """
+    An instrument whose output is checked by something else is not the sole
+    provider of its evidence and need not be attested.
+
+    The module's docstring described this and its code did not implement it: the
+    gate refused on any failing instrument. A prior-art sweep found the gap, and
+    also found that the carve-out is DO-178C's independent-verification
+    exemption, which docs/landscape.md now cites rather than claims.
+    """
+
+    def test_a_corroborated_instrument_needs_no_attestation(self) -> None:
+        report = assess_provenance(
+            ["judge@v1"], {}, as_of=TODAY, independently_verified=["judge@v1"]
+        )
+        self.assertTrue(report.all_accepted)
+
+    def test_the_same_instrument_uncorroborated_is_rejected(self) -> None:
+        self.assertFalse(assess_provenance(["judge@v1"], {}, as_of=TODAY).all_accepted)
+
+    def test_corroborating_a_different_instrument_does_not_help(self) -> None:
+        report = assess_provenance(
+            ["judge@v1"], {}, as_of=TODAY, independently_verified=["some-other@v1"]
+        )
+        self.assertFalse(report.all_accepted)
+
+
+class PerMethodFloorTest(unittest.TestCase):
+    """
+    Raw agreement, Cohen's kappa and held-out accuracy do not share a threshold.
+
+    Kappa discounts chance agreement and raw agreement does not, so 0.8 means
+    materially different things. Comparing all three against one `min_agreement`
+    was a category error; ILAC-G8 requires a conformity statement to declare its
+    decision rule.
+    """
+
+    def _accepts(self, method: str, agreement: float) -> bool:
+        raw = parse_attestations([_record(method=method, agreement=agreement)])
+        return assess_provenance(["judge@v1"], raw, as_of=TODAY).all_accepted
+
+    def test_the_same_number_passes_as_kappa_and_fails_as_raw_agreement(self) -> None:
+        self.assertTrue(self._accepts("cohens-kappa", 0.70))
+        self.assertFalse(self._accepts("raw-agreement", 0.70))
+
+    def test_an_unknown_method_is_refused_not_graded_on_another_scale(self) -> None:
+        raw = parse_attestations([_record(method="vibes-based")])
+        with self.assertRaises(ValueError) as ctx:
+            assess_provenance(["judge@v1"], raw, as_of=TODAY)
+        self.assertIn("unknown attestation method", str(ctx.exception))
+
+    def test_an_explicit_policy_floor_overrides_the_per_method_default(self) -> None:
+        raw = parse_attestations([_record(method="vibes-based", agreement=0.99)])
+        report = assess_provenance(
+            ["judge@v1"], raw, as_of=TODAY, policy=ProvenancePolicy(min_agreement=0.9)
+        )
+        self.assertTrue(report.all_accepted)
