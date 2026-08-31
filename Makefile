@@ -100,6 +100,17 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
+# The detector on code it did not come from. Deliberately NOT in `reproduce`:
+# it measures the running interpreter's own standard library, so its numbers
+# move with the Python version and the CI matrix spans four. Byte-comparing it
+# there would fail on three of them for a reason that is not a defect. The
+# artifact records the version it was generated on; this regenerates and diffs
+# without asserting, so drift is visible without being fatal.
+held-out:
+	@$(PYTHON) research/held_out.py > /tmp/agent-economics-held-out.md
+	@diff /tmp/agent-economics-held-out.md research/HELD_OUT.md \
+		|| echo "held-out table differs (expected on a different Python)"
+
 # Regenerates the pre-registered site list. It must not drift from the code it
 # was derived from, or the search it authorises is against a different package.
 probe-sites:
