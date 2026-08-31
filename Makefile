@@ -109,36 +109,39 @@ frontier:
 held-out:
 	@$(PYTHON) research/held_out.py --check research/HELD_OUT.md
 
-# Every published claim must verify against the evidence it names, and must
-# still refuse when handed the wrong evidence. A verifier that only ever says
-# SUPPORTED is not a verifier, so both directions are asserted.
-# Reissue the published claims against the current tree, pinning the revision
-# so a reader can later ask whether each was true when made, not only whether
-# it is still true. Without the pin the record resets on every refactor.
-reissue-claims:
+# Append-only. Issues a NEW claim file named by date and revision; it never
+# rewrites an existing one, because a record that overwrites itself is not a
+# record. The first version overwrote two files on every reissue, so the
+# "record" was permanently two current claims.
+#   make issue-claim BUNDLE=examples/x/bundle.json SLUG=x ASSERTION="..."
+issue-claim:
+	@test -n "$(BUNDLE)" -a -n "$(SLUG)" -a -n "$(ASSERTION)" \
+		|| { echo "need BUNDLE, SLUG and ASSERTION"; exit 2; }
 	@$(PYTHON) -m agent_economics claim \
-		--bundle examples/claude-code/bundle.json \
+		--bundle "$(BUNDLE)" \
 		--issuer agent-economics-lab \
 		--source-commit "$$(git rev-parse HEAD)" \
-		--assertion "The bundled Claude Code session does not clear the shipped gates; this evidence routes to ASSIST." \
-		--output research/claims/claude-code.claim.json
-	@$(PYTHON) -m agent_economics claim \
-		--bundle examples/checks-only/bundle.json \
-		--issuer agent-economics-lab \
-		--source-commit "$$(git rev-parse HEAD)" \
-		--assertion "The checks-only conversion of the same session withholds a verdict: it has no economics and no attested instrument." \
-		--output research/claims/checks-only.claim.json
+		--assertion "$(ASSERTION)" \
+		--output "research/claims/$$(date +%Y-%m-%d)-$(SLUG)-$$(git rev-parse --short=8 HEAD).claim.json"
 
-claims:
-	@$(PYTHON) -m agent_economics verify \
-		--claim research/claims/claude-code.claim.json \
-		--bundle examples/claude-code/bundle.json > /dev/null
-	@$(PYTHON) -m agent_economics verify \
-		--claim research/claims/checks-only.claim.json \
-		--bundle examples/checks-only/bundle.json > /dev/null
-	@! $(PYTHON) -m agent_economics verify \
-		--claim research/claims/claude-code.claim.json \
-		--bundle examples/checks-only/bundle.json > /dev/null 2>&1
+# The ledger is the record. --check fails the build on a REFUTED claim, on a
+# malformed one, and on an UNVERIFIED one pinning no revision a reader could
+# check it against. A published falsehood stays a failure until it is retracted
+# rather than quietly regenerated.
+ledger:
+	@$(PYTHON) research/ledger.py --check
+	@$(PYTHON) research/ledger.py > /tmp/agent-economics-ledger.md
+	@cmp /tmp/agent-economics-ledger.md research/claims/LEDGER.md
+
+# The ledger verifies every claim against the evidence it names. This adds the
+# other direction: handed the wrong evidence a claim must refuse. A verifier
+# that only ever says SUPPORTED is not a verifier.
+claims: ledger
+	@set -e; for claim in research/claims/*-claude-code-*.claim.json; do \
+		! $(PYTHON) -m agent_economics verify \
+			--claim "$$claim" \
+			--bundle examples/checks-only/bundle.json > /dev/null 2>&1; \
+	done
 
 # Regenerates the pre-registered site list. It must not drift from the code it
 # was derived from, or the search it authorises is against a different package.

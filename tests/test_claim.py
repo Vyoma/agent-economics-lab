@@ -301,12 +301,11 @@ class TheRecordMustSurviveTheCodeMoving(unittest.TestCase):
         )
 
     def test_the_published_claims_pin_a_revision(self) -> None:
-        for name in ("claude-code", "checks-only"):
-            with self.subTest(claim=name):
-                document = json.loads(
-                    (ROOT / "research" / "claims" / f"{name}.claim.json")
-                    .read_text(encoding="utf-8")
-                )
+        claims = sorted((ROOT / "research" / "claims").glob("*.claim.json"))
+        self.assertTrue(claims, "the ledger must hold at least one claim")
+        for path in claims:
+            with self.subTest(claim=path.name):
+                document = json.loads(path.read_text(encoding="utf-8"))
                 self.assertRegex(document["source_commit"], r"^[0-9a-f]{40}$")
 
     def test_an_unreproducible_claim_names_where_to_check_it(self) -> None:

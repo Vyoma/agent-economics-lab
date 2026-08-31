@@ -11,6 +11,18 @@ inputs:
     description: Path to one normalized Agent Economics JSON bundle
     required: false
     default: ""
+  claim:
+    description: >-
+      Path to a published claim to check against `bundle`. When set, the action
+      verifies the claim instead of issuing a fresh decision: it recomputes the
+      evidence digest from contents, rebinds every check by identity and by the
+      source text that implemented it, recomputes the decision contract, and
+      re-runs the engine. Only SUPPORTED passes. REFUTED means the evidence
+      contradicts the claim. UNVERIFIED means this build cannot reproduce it,
+      which is not the same as the claim being false, and the verdict names the
+      revision it was issued against so you can check it there.
+    required: false
+    default: ""
   traces:
     description: Path to the trace CSV for CSV input mode
     required: false
@@ -66,6 +78,9 @@ outputs:
   report:
     description: Absolute path to the generated Markdown assurance report
     value: ${{ steps.evaluate.outputs.report }}
+  verdict:
+    description: SUPPORTED, REFUTED, or UNVERIFIED when `claim` was supplied
+    value: ${{ steps.verify.outputs.verdict }}
 
 runs:
   using: composite
@@ -85,8 +100,32 @@ runs:
         --no-deps
         "$AGENT_ECONOMICS_ACTION_PATH"
 
+    - name: Verify a published claim
+      id: verify
+      if: ${{ inputs.claim != '' }}
+      shell: bash
+      env:
+        INPUT_CLAIM: ${{ inputs.claim }}
+        INPUT_BUNDLE: ${{ inputs.bundle }}
+      run: |
+        set +e
+        python -m agent_economics verify \
+          --claim "$INPUT_CLAIM" --bundle "$INPUT_BUNDLE" | tee "$RUNNER_TEMP/verification.md"
+        code=${PIPESTATUS[0]}
+        case "$code" in
+          0) verdict=SUPPORTED ;;
+          4) verdict=REFUTED ;;
+          *) verdict=UNVERIFIED ;;
+        esac
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        if [ "$code" != "0" ]; then
+          echo "::error::claim verification returned $verdict" >&2
+          exit "$code"
+        fi
+
     - name: Evaluate economic assurance
       id: evaluate
+      if: ${{ inputs.claim == '' }}
       shell: bash
       env:
         INPUT_BUNDLE: ${{ inputs.bundle }}
@@ -112,7 +151,7 @@ runs:
           --report-dir "$RUNNER_TEMP"
 
     - name: Upsert pull request report
-      if: ${{ inputs.comment == 'true' && inputs.github-token != '' && github.event_name == 'pull_request' }}
+      if: ${{ inputs.claim == '' && inputs.comment == 'true' && inputs.github-token != '' && github.event_name == 'pull_request' }}
       uses: actions/github-script@v9
       env:
         REPORT_PATH: ${{ steps.evaluate.outputs.report }}
@@ -153,7 +192,15 @@ runs:
             });
           }
 
+    # Guarded on the mode that produces the exit code it reads. Unguarded, a
+    # claim-mode run reached this step with AGENT_ECONOMICS_EXIT_CODE unset
+    # from the skipped evaluate step and ran `exit ""`. bash rejects that with
+    # "numeric argument required" and exits 255, so it failed closed rather
+    # than open -- but 255 is not one of this action's documented codes and
+    # tells a reader nothing about why. Verified, because the first version of
+    # this comment asserted it exited 0 without checking.
     - name: Enforce SCALE-only policy
+      if: ${{ inputs.claim == '' }}
       shell: bash
       env:
         AGENT_ECONOMICS_EXIT_CODE: ${{ steps.evaluate.outputs.exit-code }}

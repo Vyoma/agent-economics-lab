@@ -93,9 +93,35 @@ argue against, applied to itself.
 So the claims are portable and you can refute them:
 
 ```bash
-agent-economics verify --claim research/claims/claude-code.claim.json \
+agent-economics verify --claim research/claims/2026-08-31-claude-code-4768c6df.claim.json \
                        --bundle examples/claude-code/bundle.json
 ```
+
+The full record is [research/claims/LEDGER.md](research/claims/LEDGER.md).
+It is append-only: one file per issuance, named by the date and the revision it
+was issued against, never rewritten. `make ledger` regenerates it and **fails
+the build on any claim the evidence contradicts**, permanently, until that
+claim is retracted rather than quietly regenerated.
+
+Any repository can gate on a claim without cloning this one:
+
+```yaml
+- uses: Vyoma/agent-economics-lab@main
+  with:
+    claim: path/to/some.claim.json
+    bundle: path/to/bundle.json
+```
+
+Only `SUPPORTED` passes. `REFUTED` and `UNVERIFIED` both fail the job and they
+mean different things: the first says the evidence contradicts the claim, the
+second says that build cannot reproduce it and names the revision that can.
+
+A claim also pins the commit it was issued against, because it binds each check
+by the source text that implemented it. Without the pin, adding a comment
+inside a gate body makes every prior claim `UNVERIFIED` — demonstrated, not
+assumed — and a record that resets on each refactor is not a record. With it, a
+reader can ask two separate questions: is this still true of the code today,
+and was it true when it was made.
 
 Exit 0 `SUPPORTED`, 2 `UNVERIFIED`, 4 `REFUTED`. The verifier recomputes the
 evidence digest, rebinds every check by identity *and* by the source text that
