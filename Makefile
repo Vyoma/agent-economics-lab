@@ -100,6 +100,12 @@ frontier:
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
+# Regenerates the pre-registered site list. It must not drift from the code it
+# was derived from, or the search it authorises is against a different package.
+probe-sites:
+	@$(PYTHON) research/probe_sites.py > /tmp/agent-economics-probe-sites.md
+	@cmp /tmp/agent-economics-probe-sites.md research/PROBE_SITES.md
+
 # Checks out the commit before each catalogued defect's fix, runs the whole
 # suite there, and runs the probe that discriminates. Pinned commits, so the
 # output is deterministic and byte-comparable like any other artifact.
@@ -180,7 +186,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites
 
 lessons:
 # Without set -e the loop reports only the LAST lesson's exit status, so a

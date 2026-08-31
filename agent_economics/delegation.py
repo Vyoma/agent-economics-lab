@@ -123,6 +123,8 @@ class ClosureReport:
     total_events: int = 0
     declared_manifest: tuple[str, ...] = field(default_factory=tuple)
     suspected_delegations: tuple[str, ...] = field(default_factory=tuple)
+    #: Delegation-tool calls with no recorded descendants at all.
+    unrecorded_delegations: tuple[str, ...] = field(default_factory=tuple)
     basis: str = "cost"
 
     @property
@@ -187,6 +189,7 @@ class ClosureReport:
             "unaccounted_cost_usd": self.unaccounted_cost_usd,
             "declared_manifest": list(self.declared_manifest),
             "suspected_delegations": list(self.suspected_delegations),
+            "unrecorded_delegations": list(self.unrecorded_delegations),
             "detail": [
                 {
                     "event_id": d.event_id,
@@ -326,6 +329,20 @@ def assess_closure(
     # tools. Not counted as delegation, because they are probably sequencing.
     # Reported so that an adapter for a framework whose delegation tool is named
     # something else does not silently read as fully closed.
+    # A call to a known delegation tool that spawned nothing. Either the
+    # subagent genuinely did no work, or the graph was never captured. The
+    # difference is not knowable from here, and reporting "no delegation in this
+    # run" collapses the second into the first. A CSV trace with no
+    # parent_event_id column produces exactly this and passed the gate on $500
+    # of subagent spend.
+    unrecorded = tuple(
+        sorted(
+            event.event_id
+            for event in events
+            if event.name in delegation_tools
+            and not children.get(event.event_id, ())
+        )
+    )
     known = {d.event_id for d in delegations}
     suspected = tuple(
         sorted(
@@ -346,6 +363,7 @@ def assess_closure(
         total_events=len(events),
         declared_manifest=tuple(sorted(declared_set)),
         suspected_delegations=suspected,
+        unrecorded_delegations=unrecorded,
         basis="cost" if all_priced else "count",
     )
 
@@ -376,6 +394,15 @@ def delegation_closure_gate(
             declared=declared,
             rates=None if isinstance(view.rates, Unsupplied) else view.rates,
         )
+        if report.unrecorded_delegations:
+            raise UnaccountedDelegation(
+                f"{len(report.unrecorded_delegations)} call(s) to a delegation "
+                f"tool spawned no recorded work "
+                f"({', '.join(report.unrecorded_delegations)}). Either nothing "
+                "was delegated or the graph was not captured, and this evidence "
+                "cannot tell which. Record the delegation graph, or remove the "
+                "tool from delegation_tools if it does not delegate."
+            )
         if report.basis != "cost" and report.delegations:
             # minimum_closure means a share of spend. A share of counts is a
             # different quantity, and comparing one to the other silently is how

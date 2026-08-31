@@ -34,6 +34,7 @@ def load_rates(path: str | Path) -> dict[str, ModelRate]:
 
 
 def load_traces(path: str | Path) -> list[TraceEvent]:
+    """Read trace events. `parent_event_id`, where present, builds the graph."""
     events: list[TraceEvent] = []
     with Path(path).open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
@@ -110,6 +111,23 @@ def load_policy(path: str | Path) -> EconomicPolicy:
     return EconomicPolicy(**raw)
 
 
+def load_dependency_edges(path: str | Path) -> tuple[tuple[str, str], ...]:
+    """Parent/child edges from the optional `parent_event_id` column.
+
+    Without this the CSV path could not express delegation at all, so a trace
+    containing subagent calls reported no delegation and the closure gate passed
+    on it. A format that cannot say a thing is not evidence that the thing did
+    not happen.
+    """
+    edges: list[tuple[str, str]] = []
+    with Path(path).open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            parent = (row.get("parent_event_id") or "").strip()
+            if parent:
+                edges.append((parent, row["event_id"]))
+    return tuple(edges)
+
+
 def load_csv_bundle(
     *,
     traces: str | Path,
@@ -125,6 +143,7 @@ def load_csv_bundle(
         rates=load_rates(rates),
         baseline=load_baseline(baseline),
         policy=load_policy(policy),
+        dependency_edges=load_dependency_edges(traces),
         source_id="source.csv",
         source_version="1",
         label_source=label_source,

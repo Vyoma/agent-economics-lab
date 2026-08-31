@@ -127,6 +127,27 @@ specified behaviour holds, never that the specification produces a number worth
 reporting, and every defect above sat inside that gap.
 [The full corpus, with each probe.](research/GREEN_DEFECTS.md)
 
+### Then the same method, run forwards
+
+A corpus assembled after the fact cannot report a hit rate, because suspicion
+found those five, not a method. So the method was written down and the target
+list committed *before* any probe: all five defects share a sharper form than
+any single code smell, namely one quantity computed two ways with one way wrong.
+Enumerating those divergences gives 18 sites, against 285 for the naive shapes.
+
+**18 divergences probed, 3 real defects at 2 sites, 16 found nothing.** Roughly
+one site in eight. That is not a good detector; it is a detector that works,
+which is a lower bar, and it is reported with its denominator.
+
+The largest defect in this repository came out of it. The CSV evidence path
+could not express delegation at all: a trace with two `Agent` calls and $500 of
+subagent spend reported zero delegations, 100% closure, and **the gate passed**,
+saying "no delegation in this run". The schema had no column for the graph, so
+the absence of a record was reported as the absence of the thing.
+
+[The pre-registered sites](research/PROBE_SITES.md) (committed at `552323b`,
+before probing) and [what probing them found, misses included](research/PROBE_RESULTS.md).
+
 ## What makes this different
 
 Every verdict is bound to a fixed, versioned list of required economic

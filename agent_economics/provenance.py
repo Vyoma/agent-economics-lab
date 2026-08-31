@@ -299,12 +299,22 @@ def evidence_provenance_gate(
     attestations: Mapping[str, Attestation],
     as_of: dt.date,
     policy: ProvenancePolicy | None = None,
+    independently_verified: Sequence[str] = (),
 ) -> CheckSpec:
-    """A gate requiring that every evidence-producing instrument is in calibration."""
+    """A gate requiring that every evidence-producing instrument is in calibration.
+
+    `independently_verified` names instruments whose output is checked by
+    something else, so they are not the sole provider of their evidence. The
+    carve-out existed in `assess_provenance` and in the audit but could not be
+    reached through this gate, so the audit reported no grounds on a
+    corroborated instrument and the gate then refused it. Erring safe, but the
+    audit reads as a prediction of the gate and was not one.
+    """
 
     def run(_view) -> CheckOutput:
         report = assess_provenance(
-            instruments, attestations, policy=policy, as_of=as_of
+            instruments, attestations, policy=policy, as_of=as_of,
+            independently_verified=independently_verified,
         )
         if not report.all_accepted:
             detail = "; ".join(
@@ -314,9 +324,16 @@ def evidence_provenance_gate(
                 f"{len(report.rejected)} of {len(report.statuses)} evidence "
                 f"instrument(s) cannot be relied on ({detail})"
             )
+        # An instrument exempted as not-sole-provider has no agreement figure,
+        # because nothing attested it. Formatting None here raised TypeError, so
+        # the success path crashed on exactly the case the carve-out exists for.
         summary = ", ".join(
-            f"{s.instrument} at {s.agreement:.2f} on {s.sample_size}, "
-            f"{s.age_days}d old"
+            (
+                f"{s.instrument} corroborated elsewhere, not attested"
+                if s.agreement is None
+                else f"{s.instrument} at {s.agreement:.2f} on "
+                f"{s.sample_size}, {s.age_days}d old"
+            )
             for s in report.statuses
         )
         return CheckOutput(

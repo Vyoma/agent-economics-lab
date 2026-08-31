@@ -24,12 +24,12 @@ Derived mechanically from the shapes of five defects that were live while the su
 - **Learned from:** D11
 - **Why it hides:** A branch that returns a value before reading the parameter that would qualify it is right in the configuration the tests build and unsupported in the one they do not.
 
-### S5 — caller omitting an optional parameter it could supply  (33 sites)
+### S5 — caller omitting an optional parameter it could supply  (32 sites)
 
 - **Learned from:** D10
 - **Why it hides:** A helper takes an optional input and a caller with that input in hand does not pass it. The helper then degrades, correctly, to a weaker answer nobody asked for.
 
-## The 285 sites
+## The 284 sites
 
 ### S1 (36)
 
@@ -39,19 +39,19 @@ agent_economics/claude_code.py:253  usage.get("output_tokens", 0), label=f"{labe
 agent_economics/claude_code.py:256  usage.get("cache_read_input_tokens", 0),
 agent_economics/claude_code.py:260  usage.get("cache_creation_input_tokens", 0),
 agent_economics/claude_code.py:359  variant["server_tool_use"].get(name, 0)
-agent_economics/delegation.py:170  total = self.delegated_cost_usd or 0.0
-agent_economics/delegation.py:173  return (total - (self.unaccounted_cost_usd or 0.0)) / total
-agent_economics/delegation.py:279  counting it as zero. Reading `direct_cost_usd or 0.0` here instead of the
-agent_economics/delegation.py:317  depth=depth.get(event.event_id, 0),
-agent_economics/delegation.py:397  f"${report.unaccounted_cost_usd or 0.0:.4f} of "
-agent_economics/delegation.py:398  f"${report.delegated_cost_usd or 0.0:.4f} delegated spend was "
-agent_economics/delegation.py:408  f"${report.delegated_cost_usd or 0.0:.4f} delegated"
-agent_economics/io.py:56  input_tokens=int(row.get("input_tokens") or 0),
-agent_economics/io.py:57  output_tokens=int(row.get("output_tokens") or 0),
-agent_economics/io.py:88  business_value_usd=float(row.get("business_value_usd") or 0),
-agent_economics/io.py:89  human_minutes=float(row.get("human_minutes") or 0),
-agent_economics/io.py:90  remediation_cost_usd=float(row.get("remediation_cost_usd") or 0),
-agent_economics/io.py:91  incident_loss_usd=float(row.get("incident_loss_usd") or 0),
+agent_economics/delegation.py:172  total = self.delegated_cost_usd or 0.0
+agent_economics/delegation.py:175  return (total - (self.unaccounted_cost_usd or 0.0)) / total
+agent_economics/delegation.py:282  counting it as zero. Reading `direct_cost_usd or 0.0` here instead of the
+agent_economics/delegation.py:320  depth=depth.get(event.event_id, 0),
+agent_economics/delegation.py:424  f"${report.unaccounted_cost_usd or 0.0:.4f} of "
+agent_economics/delegation.py:425  f"${report.delegated_cost_usd or 0.0:.4f} delegated spend was "
+agent_economics/delegation.py:435  f"${report.delegated_cost_usd or 0.0:.4f} delegated"
+agent_economics/io.py:57  input_tokens=int(row.get("input_tokens") or 0),
+agent_economics/io.py:58  output_tokens=int(row.get("output_tokens") or 0),
+agent_economics/io.py:89  business_value_usd=float(row.get("business_value_usd") or 0),
+agent_economics/io.py:90  human_minutes=float(row.get("human_minutes") or 0),
+agent_economics/io.py:91  remediation_cost_usd=float(row.get("remediation_cost_usd") or 0),
+agent_economics/io.py:92  incident_loss_usd=float(row.get("incident_loss_usd") or 0),
 agent_economics/kimi_analyst.py:371  n = metrics.get("attempts", 0)
 agent_economics/kimi_analyst.py:372  ar = metrics.get("acceptable_rate", 0.0)
 agent_economics/kimi_analyst.py:392  f"  total_effective_cost:             ${metrics.get('total_effective_cost_usd', 0):.4f}"
@@ -91,13 +91,13 @@ agent_economics/checks.py:102  f"${view.incremental_net_value_vs_baseline_usd:.2
 agent_economics/checks.py:103  f"{'<' if failed else '>='} ${threshold:.2f}"
 agent_economics/checks.py:135  f"{task_id}: ${trace_cost:.4f} trace cost > cap of "
 agent_economics/checks.py:136  f"${view.policy.max_trace_cost_per_task_usd:.4f}"
-agent_economics/delegation.py:387  f"measured by count ({report.closure:.1%}), not by spend. "
-agent_economics/delegation.py:388  f"The required {minimum_closure:.1%} is a share of spend and "
-agent_economics/delegation.py:397  f"${report.unaccounted_cost_usd or 0.0:.4f} of "
-agent_economics/delegation.py:398  f"${report.delegated_cost_usd or 0.0:.4f} delegated spend was "
-agent_economics/delegation.py:399  f"never undertaken for assessment; closure {report.closure:.1%} "
-agent_economics/delegation.py:400  f"below the required {minimum_closure:.1%}"
-agent_economics/delegation.py:408  f"${report.delegated_cost_usd or 0.0:.4f} delegated"
+agent_economics/delegation.py:414  f"measured by count ({report.closure:.1%}), not by spend. "
+agent_economics/delegation.py:415  f"The required {minimum_closure:.1%} is a share of spend and "
+agent_economics/delegation.py:424  f"${report.unaccounted_cost_usd or 0.0:.4f} of "
+agent_economics/delegation.py:425  f"${report.delegated_cost_usd or 0.0:.4f} delegated spend was "
+agent_economics/delegation.py:426  f"never undertaken for assessment; closure {report.closure:.1%} "
+agent_economics/delegation.py:427  f"below the required {minimum_closure:.1%}"
+agent_economics/delegation.py:435  f"${report.delegated_cost_usd or 0.0:.4f} delegated"
 agent_economics/frontier.py:786  f"breakage upper bound {breakage_upper:.3%} exceeds "
 agent_economics/frontier.py:787  f"{plan.max_breakage_rate:.3%}"
 agent_economics/frontier.py:791  f"cost-reduction lower bound {cost_lower:.3%} is below "
@@ -186,7 +186,7 @@ agent_economics/label_error.py:310  f"{abs(a / (a + d) - 1):>11.2%}")
 agent_economics/label_error.py:333  print(f"  {r:>12.0%} {s:>7.0%} {e:>8.2%} {1 - e:>9.1%}  {verdict:>12}")
 agent_economics/label_error.py:341  print(f"    slack up to {s:>5.0%}:  {running[0]:>2} of {running[1]:>2} sufficient")
 agent_economics/provenance.py:275  f"{record.method} {record.agreement:.2f} below {floor:.2f}"
-agent_economics/provenance.py:318  f"{s.instrument} at {s.agreement:.2f} on {s.sample_size}, "
+agent_economics/provenance.py:334  else f"{s.instrument} at {s.agreement:.2f} on "
 agent_economics/report.py:62  f"| Acceptable outcomes | {accepted} ({case.acceptable_rate:.1%}) |",
 agent_economics/report.py:63  f"| Total effective cost | ${case.total_effective_cost_usd:.2f} |",
 agent_economics/report.py:66  f"${case.cost_per_acceptable_outcome_usd:.2f} |"
@@ -214,8 +214,8 @@ agent_economics/cli.py:327  subagent_dir = source_path.with_suffix("") / "subage
 agent_economics/cli.py:427  (output_dir / name).write_text(content, encoding="utf-8")
 agent_economics/cli.py:419  if not (verify_dir / name).exists()
 agent_economics/cli.py:420  or (verify_dir / name).read_text(encoding="utf-8") != content
-agent_economics/delegation.py:173  return (total - (self.unaccounted_cost_usd or 0.0)) / total
-agent_economics/delegation.py:169  return (self.total - len(self.unaccounted)) / self.total
+agent_economics/delegation.py:175  return (total - (self.unaccounted_cost_usd or 0.0)) / total
+agent_economics/delegation.py:171  return (self.total - len(self.unaccounted)) / self.total
 agent_economics/frontier.py:200  adjusted_alpha = (1 - confidence) / (2 * (len(arms) - 1))
 agent_economics/frontier.py:502  low = observed / trials
 agent_economics/frontier.py:724  adjusted_alpha = (1 - plan.confidence_level) / (2 * candidate_count)
@@ -288,8 +288,8 @@ agent_economics/cli.py:424  in main(): return 1
 agent_economics/cli.py:466  in main(): return 2
 agent_economics/cli.py:491  in main(): return 2
 agent_economics/cli.py:502  in main(): return 2
-agent_economics/delegation.py:225  in _event_cost(): return 0.0
-agent_economics/delegation.py:167  in closure(): return 1.0
+agent_economics/delegation.py:228  in _event_cost(): return 0.0
+agent_economics/delegation.py:169  in closure(): return 1.0
 agent_economics/frontier.py:472  in _binomial_cdf(): return 1.0
 agent_economics/frontier.py:501  in clopper_pearson_upper(): return 1.0
 agent_economics/github_action.py:313  in main(): return 0
@@ -303,7 +303,7 @@ agent_economics/label_error.py:342  in main(): return 0
 agent_economics/models.py:102  in cost(): return 0.0
 ```
 
-### S5 (33)
+### S5 (32)
 
 ```
 agent_economics/assurance.py:524  make_evidence_bundle(...) omits declared_delegations, dependency_edges, label_source, source_version, task_manifest  [evidence = make_evidence_bundle(]
@@ -332,24 +332,23 @@ agent_economics/evidence.py:257  _numeric_issue(...) omits integer, maximum, min
 agent_economics/evidence.py:285  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
 agent_economics/evidence.py:294  _numeric_issue(...) omits integer, maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:308  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
-agent_economics/io.py:122  make_evidence_bundle(...) omits declared_delegations, dependency_edges, task_manifest  [return make_evidence_bundle(]
+agent_economics/io.py:140  make_evidence_bundle(...) omits declared_delegations, task_manifest  [return make_evidence_bundle(]
 agent_economics/kimi_analyst.py:507  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
 agent_economics/kimi_analyst.py:529  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
 agent_economics/kimi_client.py:398  assert_mfjs_compatible(...) omits path  [assert_mfjs_compatible(response_format)]
 agent_economics/kimi_judge.py:541  judge(...) omits allow_unjudged  [judge(args.task_results, args.rubric, ar]
 agent_economics/otel_genai.py:808  make_evidence_bundle(...) omits declared_delegations  [bundle = make_evidence_bundle(]
-agent_economics/provenance.py:306  assess_provenance(...) omits independently_verified  [report = assess_provenance(]
 ```
 
 ## Why the coarse shapes are not the method
 
-285 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
+284 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
 
 ## The narrowing that has support
 
 All five known defects share a sharper form than any shape above: the same quantity computed two ways, with one way wrong. That is why each read fine in isolation and why a test exercising either path alone passed. Divergence is enumerable, and there are far fewer of them.
 
-**18 divergences**, against 285 coarse sites.
+**17 divergences**, against 284 coarse sites.
 
 ### `_inspect_claude_code_jsonl_bytes(..., allow_empty_tasks=)`  (inconsistent-caller)
 
@@ -391,35 +390,30 @@ All five known defects share a sharper form than any shape above: the same quant
 - passes / resolves (1): `agent_economics/cli.py:258`
 - omits / reads raw (1): `agent_economics/audit.py:136`
 
-### `assess_provenance(..., independently_verified=)`  (inconsistent-caller)
-
-- passes / resolves (1): `agent_economics/audit.py:157`
-- omits / reads raw (1): `agent_economics/provenance.py:306`
-
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/unsupplied.py:75`
-- omits / reads raw (3): `agent_economics/assurance.py:524`, `agent_economics/io.py:122`, `agent_economics/otel_genai.py:808`
+- omits / reads raw (3): `agent_economics/assurance.py:524`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`
 
 ### `make_evidence_bundle(..., dependency_edges=)`  (inconsistent-caller)
 
-- passes / resolves (4): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
-- omits / reads raw (2): `agent_economics/assurance.py:524`, `agent_economics/io.py:122`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
+- omits / reads raw (1): `agent_economics/assurance.py:524`
 
 ### `make_evidence_bundle(..., label_source=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/io.py:122`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:524`
 
 ### `make_evidence_bundle(..., source_version=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/io.py:122`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:524`
 
 ### `make_evidence_bundle(..., task_manifest=)`  (inconsistent-caller)
 
 - passes / resolves (4): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1419`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
-- omits / reads raw (2): `agent_economics/assurance.py:524`, `agent_economics/io.py:122`
+- omits / reads raw (2): `agent_economics/assurance.py:524`, `agent_economics/io.py:140`
 
 ### `validate_evidence_bundle(..., label=)`  (inconsistent-caller)
 
@@ -438,8 +432,8 @@ All five known defects share a sharper form than any shape above: the same quant
 
 ### `direct_cost_usd / .cost()`  (raw-field-vs-resolver)
 
-- passes / resolves (3): `agent_economics/assurance.py:207`, `agent_economics/checks.py:118`, `agent_economics/delegation.py:226`
-- omits / reads raw (6): `agent_economics/delegation.py:220`, `agent_economics/delegation.py:221`, `agent_economics/evidence.py:91`, `agent_economics/evidence.py:115`, `agent_economics/models.py:99`, `agent_economics/models.py:100`
+- passes / resolves (3): `agent_economics/assurance.py:207`, `agent_economics/checks.py:118`, `agent_economics/delegation.py:229`
+- omits / reads raw (6): `agent_economics/delegation.py:223`, `agent_economics/delegation.py:224`, `agent_economics/evidence.py:91`, `agent_economics/evidence.py:115`, `agent_economics/models.py:99`, `agent_economics/models.py:100`
 
 ## What this list is not
 
