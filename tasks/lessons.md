@@ -27,6 +27,25 @@ and 455 tests were passing when both were live.
 **Rule:** a ratio over an empty denominator is not a measurement. Say "this run
 delegated no work", never "closure 100%".
 
+## Verification must not need anything the verifier will not have
+
+A generator walked git history at verification time. Fine on a full local
+clone, broken on every shallow CI checkout. That cost five red commits, was
+written up in docs/novelty.md as a story, and then **happened again in
+`research/green_defects.py`** in the same repository, because a story is not a
+rule and nothing checked for the shape.
+
+**Rule:** before putting anything in `make reproduce`, list what it reads that
+is not a file in the repository -- git history, the network, the clock, an
+interpreter's own standard library, an environment variable -- and decide
+explicitly whether CI has it. If it genuinely needs the thing, configure CI to
+provide it and say why in the workflow. If it does not, remove the dependency.
+
+**Rule:** a target that cannot run in CI must not be in `reproduce`.
+`make held-out` measures the running interpreter's own stdlib, so its numbers
+move with the Python version across a four-version matrix. It is a standalone
+target with a version guard, and the reason is written at the recipe.
+
 ## The fix for a defect is where the next defect lives
 
 Defect 10 was introduced by the fix for defect 9. Same file, same hour, by

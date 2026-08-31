@@ -17,7 +17,20 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
+      # Full history, not the default shallow clone. `make green-defects`
+      # checks out the commit before each catalogued defect's fix and runs the
+      # suite there, so the history IS the evidence. Freezing its results to a
+      # committed file would make the one artifact whose point is independent
+      # re-derivation unverifiable.
+      #
+      # This exact failure -- a generator walking git history at verification
+      # time, fine on a full local clone, broken on every shallow CI checkout
+      # -- already cost this repository five red commits and is recorded in
+      # docs/novelty.md. It recurred because the lesson was written as a story
+      # and never as a rule.
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}

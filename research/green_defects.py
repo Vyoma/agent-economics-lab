@@ -244,8 +244,18 @@ emit("with no rate card, is unpriced tool spend reported as zero dollars?",
 
 def _checkout(commit: str, destination: pathlib.Path) -> None:
     archive = subprocess.run(
-        ["git", "archive", commit], cwd=ROOT, capture_output=True, check=True
+        ["git", "archive", commit], cwd=ROOT, capture_output=True, check=False
     )
+    if archive.returncode != 0:
+        # A shallow clone has the tip and nothing behind it. Say so, rather
+        # than surfacing a bare CalledProcessError from six frames down.
+        raise SystemExit(
+            f"cannot read commit {commit}: {archive.stderr.decode().strip()}\n"
+            "This corpus checks out historical commits, so it needs the "
+            "history. On a shallow clone (the CI default) fetch it with "
+            "`git fetch --unshallow`, or set `fetch-depth: 0` on the checkout "
+            "step."
+        )
     subprocess.run(
         ["tar", "-x", "-C", str(destination)], input=archive.stdout, check=True
     )
