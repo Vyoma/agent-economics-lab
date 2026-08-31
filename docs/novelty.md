@@ -135,6 +135,61 @@ adversarial pass so far, and it is stated at that width deliberately.
 
 This is not novelty and it is probably the more useful half.
 
+## What survives adversarial review, and what does not
+
+Two independent reviews of the claims below found the following, and all of it
+was verified before being written down.
+
+**Dead.** "Green defects are an unserved category" is false. Deriving a verdict
+where no ground truth exists is the oracle problem (Barr et al., IEEE TSE 2015)
+and the standard answer is metamorphic testing (Chen et al., 1998). This
+repository already shipped three metamorphic relations in
+`tests/test_stress_properties.py` while claiming in `GREEN_DEFECTS.md` that such
+a defect is one "no single-case assertion can express". The relations existed;
+they had only ever been applied to the decision kernel, never to `audit()`. That
+claim was the sixth novelty claim made here without the adversarial prior-art
+sweep this project's own process demands.
+
+**Dead.** "Enumerate call sites that disagree about an optional argument, ranked
+by how lopsided the disagreement is" is Engler et al., *Bugs as Deviant
+Behavior* (SOSP 2001), including the ratio ranking. Arrived at independently,
+which is not the same as arrived at first. Neighbouring work: differential
+testing (McKeeman, 1998), N-version programming and its correlated-error
+problem (Knight and Leveson, 1986).
+
+**Close to tautological.** "The suite was green while the defect was live"
+reduces to "the regression test did not exist yet", because every fix commit
+here adds its test in the same commit. 5 of 5 is the expected result in any
+repository.
+
+**Wounded, badly.** No defect catalogued here was older than four days or ever
+shipped in a tagged release. The last tag predates the modules most of them
+live in. A project finding bugs in its own unreleased code is describing
+ordinary development.
+
+**Wounded.** The rule was derived from five defects and evaluated on the same
+codebase. `research/HELD_OUT.md` runs it against six standard-library packages
+and finds no defect in any of them. Converting a divergence into a defect took
+domain knowledge every time it worked.
+
+**Survives.** One author, hunting one class of error in an assurance package he
+wrote, pre-registered a mechanically enumerated target list before probing it,
+tabulated the misses, published the negative held-out result, and corrected the
+count downward and then upward under review. Three real defects out of eighteen
+candidates, one of them a fail-open on a documented input path. The technique is
+old; the target is not. Applying deviance inference and metamorphic relations to
+an assurance system's own honesty -- to the gates that decide whether to trust
+an AI system, rather than to the system under test -- is a small delta, and it
+is the one that holds.
+
+**The durable part is not a technique at all.** It is that every number here is
+gated by a test or a byte-comparison, every gate was broken on purpose to prove
+it can fail, the pre-registration is a git object rather than a claim, and two
+adversarial reviews were run and acted on rather than filed. That is copyable by
+anyone, which disqualifies it as a moat and is the reason to write it down.
+
+## The earlier framing, kept for the record
+
 **Since writing that, it became the novelty.** The list below is no longer an
 anecdote about diligence; it is a corpus with a measurable property. Five of
 these defects have been pinned to the commit they were live at, and at every

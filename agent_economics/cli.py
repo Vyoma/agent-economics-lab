@@ -464,7 +464,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         ) as error:
             print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
             return 2
-        report = render_json(case) if args.format == "json" else render_markdown(case)
+        try:
+            report = (
+                render_json(case) if args.format == "json" else render_markdown(case)
+            )
+        except LookupError as error:
+            # The renderer asked for an economic figure the bundle declared
+            # unsupplied. Refusing is right; escaping as a traceback is not.
+            # Exit 1 was not in this CLI's documented set at all (0 SCALE,
+            # 2 INCOMPLETE, 3 ASSIST, 4 STOP), so a checks-only bundle -- the
+            # path the README points readers to -- crashed with an exit code
+            # that meant nothing.
+            print(f"INCOMPLETE: {error}", file=sys.stderr)
+            return 2
         if args.output:
             Path(args.output).write_text(report, encoding="utf-8")
         print(report)

@@ -89,7 +89,16 @@ class ThePublishedNumbersMatchTheReport(unittest.TestCase):
                     f"README claims {tests} tests at {commit}; the generated "
                     "report disagrees",
                 )
-        self.assertIn("across 2275\npassing tests", readme.replace("  ", " "))
+        # The distinct suite total, not the column sum. The five defects sit at
+        # three commits, so summing the column double-counted two of them and
+        # published 2275 where the distinct figure is 1365.
+        self.assertIn("1365 tests", readme)
+        # 2275 may appear only where the README says it was wrong, never as the
+        # figure itself. A correction that erases the corrected number hides
+        # that anything was corrected.
+        for line in readme.splitlines():
+            if "2275" in line:
+                self.assertIn("not the 2275", line)
 
     def test_the_population_limit_is_stated(self) -> None:
         """A case series presented as a rate would be the thing this repo is against."""

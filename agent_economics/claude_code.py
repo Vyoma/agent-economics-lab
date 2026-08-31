@@ -155,10 +155,6 @@ def _required_list(value: Any, *, label: str) -> list[Any]:
     return value
 
 
-def _required_bool(value: Any, *, label: str) -> bool:
-    if not isinstance(value, bool):
-        raise ValueError(f"{label} must be boolean")
-    return value
 
 
 def _extract_prompt_content(record: Mapping[str, Any]) -> Any | None:

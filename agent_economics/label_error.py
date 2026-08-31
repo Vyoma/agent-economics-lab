@@ -152,15 +152,6 @@ def check_proposition_2(trials: int = 2000) -> float:
     return worst
 
 
-def net_bias_tolerance(r: float, s: float) -> float:
-    """The quantity that actually has to stay small: |false accepts - false rejects| / n.
-
-    P1 shows the distortion is governed by net bias `D = FP - FN`, not by total
-    disagreement. So `epsilon_star` bounds `|D|/n`. Quoting an agreement rate
-    instead is a worst case over error compositions: a judge whose errors cancel
-    can disagree far more often and move the metric not at all.
-    """
-    return epsilon_star(r, s)
 
 
 def check_proposition_3(trials: int = 4000) -> bool:

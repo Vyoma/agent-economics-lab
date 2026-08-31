@@ -92,13 +92,60 @@ distance between a tool and a moat.
 """
 
 
-def main() -> int:
+def check(existing: pathlib.Path) -> int:
+    """Compare against the committed artifact, but only on its own interpreter.
+
+    The table measures the running interpreter's own standard library, so it
+    moves with the Python version and the CI matrix spans four. Asserting
+    across versions would fail for a reason that is not a defect. Asserting on
+    the *same* version is exactly right, and the previous recipe did neither:
+    `|| echo` swallowed every difference, so the gate could not fail at all.
+    """
+    version = ".".join(str(part) for part in sys.version_info[:3])
+    text = existing.read_text(encoding="utf-8")
+    recorded = ""
+    for line in text.splitlines():
+        if line.startswith("Generated on CPython "):
+            recorded = line.removeprefix("Generated on CPython ").rstrip(".")
+            break
+    if recorded != version:
+        print(
+            f"held-out artifact was generated on CPython {recorded or '?'}; "
+            f"running {version}. Skipping the comparison, which would differ "
+            "for a reason that is not a defect.",
+            file=sys.stderr,
+        )
+        return 0
+    import io
+    from contextlib import redirect_stdout
+
+    buffer = io.StringIO()
+    with redirect_stdout(buffer):
+        _emit()
+    if buffer.getvalue() != text:
+        print(
+            f"held-out table drifted on CPython {version}. Regenerate with "
+            "`python research/held_out.py > research/HELD_OUT.md`.",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
+def _emit() -> None:
     version = ".".join(str(part) for part in sys.version_info[:3])
     print(HEADER, end="")
     print(f"Generated on CPython {version}.\n")
     roots = ["agent_economics"] + [str(STDLIB / name) for name in HELD_OUT]
     divergence_main([*roots, "--show", "5"])
     print(FOOTER, end="")
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] == "--check":
+        return check(pathlib.Path(argv[1]))
+    _emit()
     return 0
 
 

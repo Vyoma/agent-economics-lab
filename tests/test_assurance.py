@@ -316,10 +316,22 @@ class AssuranceTests(unittest.TestCase):
             decision_contract_digest((opaque,), DEFAULT_REQUIRED_COVERAGE)
 
     def test_implementation_fingerprint_ignores_nesting_depth(self) -> None:
-        """Indentation must not change the fingerprint of identical logic."""
+        """Indentation must not change the fingerprint of identical logic.
+
+        This asserted `f(x) == f(x)` against a cached function, so the second
+        call was a cache hit and the test could not fail. It now compares a
+        module-level definition with a textually identical one nested inside a
+        function, which is the property the name claims.
+        """
+
+        def _permissive_gate(view):
+            """A gate that enforces nothing while still claiming its coverage."""
+            return CheckOutput(results=())
+
         self.assertEqual(
+            implementation_fingerprint(globals()["_permissive_gate"]),
             implementation_fingerprint(_permissive_gate),
-            implementation_fingerprint(_permissive_gate),
+            "identical source at a different nesting depth must fingerprint alike",
         )
         original = default_checks()[0]
         self.assertEqual(

@@ -5,11 +5,19 @@ for a fix: SWE-bench, Defects4J, BugsInPy, QuixBugs. The failing test *is* the
 task. Mutation testing inverts the roles, but its mutants are synthetic and the
 suite is the artefact under evaluation.
 
-This corpus is the other case, and the defining property is in the name. Each
-entry is a real defect that was live in this repository, in an assurance system
-whose whole purpose is refusing to report numbers it cannot support, at a commit
-where the entire suite passed. Not "a test was missing" -- green, across hundreds
-of tests written by someone actively hunting this exact class of error.
+This corpus is the other case. Each entry is a real defect that was live in this
+repository at a commit where the entire suite passed.
+
+**Read that statistic sceptically; it is close to a tautology.** Every fix commit
+here adds its regression test in the same commit, so "the suite was green at the
+parent of the fix" reduces to "the regression test did not exist yet", which is
+true of essentially every bug fix in every repository. 5 of 5 is the expected
+result anywhere, and `_suite_at` measures commit hygiene rather than a property
+of defects. An adversarial review made this point and it is correct.
+
+What is not tautological, and is the only thing worth taking from this file, is
+the per-defect `invisibility` field: *which* technique would have caught each
+one. That question has real answers and they differ by defect.
 
 The measurement needs no reintroduction and no synthetic mutant. Git holds the
 states. For each defect this checks out the commit before its fix, runs the full
@@ -101,9 +109,14 @@ DEFECTS: tuple[GreenDefect, ...] = (
             "unassessable; recording nothing made it assessable."
         ),
         invisibility=(
-            "Both behaviours were individually correct and individually tested. "
-            "The defect is the *relation* between two cases, which no "
-            "single-case assertion can express."
+            "Caught by a metamorphic relation: deleting evidence must never "
+            "increase assessability. An earlier version of this file claimed no "
+            "single-case assertion could express it, implying nothing could -- "
+            "wrong, and refuted by tests/test_stress_properties.py in this same "
+            "suite, which already used the technique on the decision kernel. It "
+            "was simply never applied to audit(). "
+            "tests/test_audit_metamorphic.py now states it, and fails at "
+            "4b60e19 where this defect was live."
         ),
         probe=PREAMBLE + '''
 declared = audit(replace(BASE, label_source="fixture.manual-review"))

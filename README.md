@@ -104,11 +104,16 @@ someone hunting exactly this class of error:
 | the fix for the row above left the gate unable to price anything | `dbc28e8` | 462 | **yes** |
 | tool calls asserted free with no rate card to say so | `dbc28e8` | 462 | **yes** |
 
-**5 of 5 were live at a commit where the entire suite passed**, across 2275
-passing tests. Nothing here is reintroduced and nothing is synthetic. `make
-green-defects` checks out each of those commits, runs the whole suite there,
-and runs the probe that discriminates. Every number in that table is produced
-by that run.
+**5 of 5 were live at a commit where the entire suite passed.** The five sit at
+three distinct commits, so the distinct suite total is 1365 tests, not the 2275
+an earlier version of this section published by summing the column.
+
+That statistic is weaker than it first looks, and the weakness is fatal to the
+strong reading. Every fix commit in this repository adds its regression test in
+the same commit. So "the suite was green at the parent of the fix" reduces to
+"the regression test did not exist yet", which is true of essentially every bug
+fix in every repository. `make green-defects` measures commit hygiene, not a
+property of defects, and 5 of 5 is the expected result anywhere.
 
 The asset is not the defect list. It is the **discriminating probe** attached
 to each one: the input that makes the wrong number visibly wrong. For the third
@@ -133,11 +138,25 @@ A corpus assembled after the fact cannot report a hit rate, because suspicion
 found those five, not a method. So the method was written down and the target
 list committed *before* any probe: all five defects share a sharper form than
 any single code smell, namely one quantity computed two ways with one way wrong.
-Enumerating those divergences gives 18 sites, against 285 for the naive shapes.
+Enumerating those divergences gave 18 sites at pre-registration, against 285 for
+the naive shapes. `research/PROBE_SITES.md` regenerates from current code, so it
+now reads 17 against 285: the fixes removed one. The pre-registered file is the
+git blob at `552323b`, not the working copy.
 
-**18 divergences probed, 3 real defects at 2 sites, 16 found nothing.** Roughly
-one site in eight. That is not a good detector; it is a detector that works,
-which is a lower bar, and it is reported with its denominator.
+**18 divergences probed, 3 real defects at 3 sites**, or 3/13 counted as
+distinct sites.
+
+The count went 3, then 2, then 3, and the movement is worth more than the
+number. It was first published as 3 by counting a crash the detector never
+pointed at; an adversarial review removed that, correctly. A second review then
+found a real fail-open at a site this repository had published as *probed and
+correct*: blank token columns in a CSV were priced at $0.00 against the rate
+card, and `gate.unit-economics` passed on "$0.00 <= $2.00". The probe had been
+run with a bundle whose events carried explicit costs, so it could not observe
+the defect it was aimed at, and it reported a miss that looked like diligence.
+
+A wrong probe is worse than no probe. It converts an unexamined site into an
+examined one in the record while examining nothing.
 
 The largest defect in this repository came out of it. The CSV evidence path
 could not express delegation at all: a trace with two `Agent` calls and $500 of
@@ -145,8 +164,42 @@ subagent spend reported zero delegations, 100% closure, and **the gate passed**,
 saying "no delegation in this run". The schema had no column for the graph, so
 the absence of a record was reported as the absence of the thing.
 
-[The pre-registered sites](research/PROBE_SITES.md) (committed at `552323b`,
-before probing) and [what probing them found, misses included](research/PROBE_RESULTS.md).
+[The site list](research/PROBE_SITES.md), whose pre-registered version is
+`git show 552323b:research/PROBE_SITES.md`, and [what probing it found, misses
+included](research/PROBE_RESULTS.md). The detector on [code it did not come
+from](research/HELD_OUT.md), where it found nothing.
+
+### What this is not
+
+The technique is old and the repository should have said so from the start.
+Publishing it as a new category was the sixth novelty claim made here without
+the adversarial prior-art sweep the project's own process demands, and an
+adversarial review found the omission immediately.
+
+Deriving an oracle where none exists is **the oracle problem**, surveyed by Barr
+et al. (IEEE TSE, 2015). The standard answer is **metamorphic testing** (Chen
+et al., 1998), which asserts a relation between two runs rather than a value for
+one. D07 is a textbook metamorphic relation, and this repository already ships
+three of them in `tests/test_stress_properties.py` — permutation invariance and
+two monotonicity relations. The claim in `GREEN_DEFECTS.md` that such a defect
+is one "no single-case assertion can express" is refuted by a file in the same
+suite. What actually happened is narrower and duller: those relations were
+written for the decision kernel and never applied to `audit()`.
+
+Enumerating call sites that disagree about an optional argument, and ranking by
+how lopsided the disagreement is, is **Engler et al., "Bugs as Deviant
+Behavior" (SOSP 2001)**, which infers beliefs from code and ranks deviations by
+exactly that ratio. `inconsistent_callers()` is a re-implementation of a
+twenty-five-year-old idea, arrived at independently, which is not the same as
+arriving at it first. Related: differential testing (McKeeman, 1998), N-version
+programming and its correlated-error problem (Knight and Leveson, 1986).
+
+And the "green while live" statistic is close to a tautology, addressed above.
+
+The honest delta is the target, not the technique: applying deviance inference
+and metamorphic relations to an assurance system's own honesty — the gates that
+decide whether to trust an AI system — rather than to the system under test.
+That is a small delta. It is the one that survives.
 
 ## What makes this different
 

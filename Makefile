@@ -107,9 +107,7 @@ frontier:
 # artifact records the version it was generated on; this regenerates and diffs
 # without asserting, so drift is visible without being fatal.
 held-out:
-	@$(PYTHON) research/held_out.py > /tmp/agent-economics-held-out.md
-	@diff /tmp/agent-economics-held-out.md research/HELD_OUT.md \
-		|| echo "held-out table differs (expected on a different Python)"
+	@$(PYTHON) research/held_out.py --check research/HELD_OUT.md
 
 # Regenerates the pre-registered site list. It must not drift from the code it
 # was derived from, or the search it authorises is against a different package.

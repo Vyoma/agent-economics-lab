@@ -19,7 +19,7 @@ Each row checks out the commit before the defect's fix, runs the whole suite the
 - **File:** `agent_economics/audit.py`
 - **Live at** `4b60e19`, **fixed by** `ffb6ca4`
 - **Mechanism:** A missing evidence instrument was a note while an unattested one was a ground. Declaring what produced your labels made a bundle unassessable; recording nothing made it assessable.
-- **Why no test expressed it:** Both behaviours were individually correct and individually tested. The defect is the *relation* between two cases, which no single-case assertion can express.
+- **Why no test expressed it:** Caught by a metamorphic relation: deleting evidence must never increase assessability. An earlier version of this file claimed no single-case assertion could express it, implying nothing could -- wrong, and refuted by tests/test_stress_properties.py in this same suite, which already used the technique on the decision kernel. It was simply never applied to audit(). tests/test_audit_metamorphic.py now states it, and fails at 4b60e19 where this defect was live.
 - **Probe:** does deleting the field naming your label source buy a pass?
   - while live: `{'declared_assessable': False, 'deleted_assessable': True}`
   - after the fix: `{'declared_assessable': False, 'deleted_assessable': False}`
