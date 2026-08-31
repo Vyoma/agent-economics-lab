@@ -103,6 +103,19 @@ was issued against, never rewritten. `make ledger` regenerates it and **fails
 the build on any claim the evidence contradicts**, permanently, until that
 claim is retracted rather than quietly regenerated.
 
+Any repository can gate on a claim without cloning this one:
+
+```yaml
+- uses: Vyoma/agent-economics-lab@main
+  with:
+    claim: path/to/some.claim.json
+    bundle: path/to/bundle.json
+```
+
+Only `SUPPORTED` passes. `REFUTED` and `UNVERIFIED` both fail the job and they
+mean different things: the first says the evidence contradicts the claim, the
+second says that build cannot reproduce it and names the revision that can.
+
 A claim also pins the commit it was issued against, because it binds each check
 by the source text that implemented it. Without the pin, adding a comment
 inside a gate body makes every prior claim `UNVERIFIED` — demonstrated, not
