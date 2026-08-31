@@ -97,6 +97,18 @@ agent-economics verify --claim research/claims/2026-08-31-claude-code-4768c6df.c
                        --bundle examples/claude-code/bundle.json
 ```
 
+**The record carries the invariant, not just verdicts.** Two claims saying "this
+fixture does not clear the gates" would be safe and nearly unfalsifiable. Six
+more say something a regression would break: *remove this one gate and an
+otherwise-passing run yields `INCOMPLETE`, not `SCALE`* — the requirement does
+not depart with the gate that served it. Issue your own with
+`--omit-check GATE_ID`.
+
+Injecting the dynamic-contract fail-open this project argues against, shrinking
+the contract to whatever the enabled checks happen to cover, refutes four of
+those six and fails the build. That is the difference between a record and a
+decoration.
+
 The full record is [research/claims/LEDGER.md](research/claims/LEDGER.md).
 It is append-only: one file per issuance, named by the date and the revision it
 was issued against, never rewritten. `make ledger` regenerates it and **fails

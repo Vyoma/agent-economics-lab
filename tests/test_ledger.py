@@ -101,3 +101,58 @@ class ThePublishedLedgerIsCurrent(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheRecordCarriesTheInvariant(unittest.TestCase):
+    """The record is only worth keeping if a regression would refute it.
+
+    Two claims saying "this fixture does not clear the gates" are safe and
+    nearly unfalsifiable. The invariant claims are the opposite: each asserts
+    that removing one required gate turns an otherwise-passing run into
+    INCOMPLETE. Injecting the dynamic-contract fail-open this package argues
+    against -- shrinking the contract to whatever the enabled checks cover --
+    refutes several of them and fails the build.
+    """
+
+    def _required_gates(self) -> set[str]:
+        from agent_economics.checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+        return {
+            spec.id
+            for spec in default_checks()
+            if set(spec.covers) & set(DEFAULT_REQUIRED_COVERAGE)
+        }
+
+    def test_every_required_gate_has_an_invariant_claim(self) -> None:
+        """Dropping a gate's claim must not be a silent way to weaken the record."""
+        claimed = set()
+        for path in CLAIMS.glob("*invariant*.claim.json"):
+            document = json.loads(path.read_text(encoding="utf-8"))
+            present = {binding["id"] for binding in document["checks"]}
+            missing = self._required_gates() - present
+            claimed |= missing
+        self.assertEqual(
+            claimed, self._required_gates(),
+            "every required gate needs a claim asserting the run goes "
+            "INCOMPLETE without it",
+        )
+
+    def test_each_invariant_claim_keeps_full_coverage_and_claims_incomplete(self) -> None:
+        from agent_economics.checks import DEFAULT_REQUIRED_COVERAGE
+        paths = sorted(CLAIMS.glob("*invariant*.claim.json"))
+        self.assertTrue(paths)
+        for path in paths:
+            with self.subTest(claim=path.name):
+                document = json.loads(path.read_text(encoding="utf-8"))
+                self.assertEqual(
+                    set(document["required_coverage"]),
+                    set(DEFAULT_REQUIRED_COVERAGE),
+                    "the requirement must not depart with the gate",
+                )
+                self.assertEqual(document["decision"], "INCOMPLETE")
+
+    def test_the_baseline_claim_asserts_the_run_otherwise_passes(self) -> None:
+        """Without this, "removing a gate yields INCOMPLETE" could be trivially true."""
+        baseline = sorted(CLAIMS.glob("*tree-baseline*.claim.json"))
+        self.assertEqual(len(baseline), 1)
+        document = json.loads(baseline[0].read_text(encoding="utf-8"))
+        self.assertEqual(document["decision"], "SCALE")
