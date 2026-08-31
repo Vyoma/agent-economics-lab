@@ -189,3 +189,89 @@ class TheVerifierIsTotal(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ForgeriesFoundByAdversarialReview(unittest.TestCase):
+    """Each of these verified SUPPORTED against evidence that did not support it."""
+
+    def _permissive(self, bundle):
+        """The same events and labels, with the audited party's own pass marks."""
+        from agent_economics.evidence import make_evidence_bundle
+        policy = replace(
+            bundle.policy, min_acceptable_rate=0.0,
+            max_cost_per_acceptable_outcome_usd=1e9, max_p95_task_cost_usd=1e9,
+            max_trace_cost_per_task_usd=1e9, max_calls_per_task=10**9,
+            min_expected_net_value_per_attempt_usd=-1e9,
+            min_incremental_net_value_vs_baseline_usd=-1e9,
+        )
+        return make_evidence_bundle(
+            events=bundle.events, outcomes=bundle.outcomes, rates=bundle.rates,
+            baseline=bundle.baseline, policy=policy, source_id=bundle.source_id,
+            task_manifest=bundle.task_manifest,
+            dependency_edges=bundle.dependency_edges,
+            declared_delegations=bundle.declared_delegations,
+            label_source=bundle.label_source,
+        )
+
+    def test_shipping_your_own_pass_marks_does_not_verify(self) -> None:
+        """The contract binds which gates run, never what they enforce.
+
+        Identical events, identical labels, honest digest, every dimension
+        covered: only the thresholds moved, and ASSIST became SCALE.
+        """
+        honest = _bundle()
+        rigged = self._permissive(honest)
+        self.assertEqual(rigged.events, honest.events)
+        self.assertEqual(rigged.outcomes, honest.outcomes)
+
+        claim = issue(
+            rigged, "All gates PASS. Cleared to SCALE.", issued_at=ISSUED
+        )
+        self.assertEqual(claim.decision, "SCALE")
+        result = verify(claim, rigged)
+        self.assertIs(result.verdict, Verdict.UNVERIFIED)
+        self.assertIn("no gate could fail against", result.reasons[0])
+
+    def test_an_honest_policy_is_not_flagged_as_inert(self) -> None:
+        """The floor must not fire on ordinary thresholds."""
+        bundle = _bundle()
+        self.assertIs(verify(_claim(bundle), bundle).verdict, Verdict.SUPPORTED)
+
+    def test_a_carried_over_digest_does_not_authenticate_edited_evidence(self) -> None:
+        """`digest` is a stored field; verify must recompute, not read."""
+        honest = _bundle()
+        claim = _claim(honest)
+        doctored = replace(
+            honest,
+            outcomes={
+                task: replace(outcome, acceptable=True)
+                for task, outcome in honest.outcomes.items()
+            },
+        )
+        self.assertEqual(
+            doctored.digest, claim.evidence_digest,
+            "the stored field must still look authentic for this to be a test",
+        )
+        self.assertIs(verify(claim, doctored).verdict, Verdict.REFUTED)
+
+    def test_the_prose_is_never_presented_as_verified(self) -> None:
+        bundle = _bundle()
+        claim = issue(
+            bundle,
+            "Zero breaches, 100% acceptable, safe for unsupervised rollout.",
+            issued_at=ISSUED,
+        )
+        result = verify(claim, bundle)
+        self.assertIs(result.verdict, Verdict.SUPPORTED)
+        text = result.render()
+        self.assertIn("which nothing here verifies", text)
+        self.assertIn("decision `ASSIST`", text)
+        self.assertFalse(result.to_dict()["assertion_is_verified"])
+
+    def test_verify_is_total_against_things_that_are_not_claims(self) -> None:
+        """The handler read `claim.assertion` after the failure it was catching."""
+        bundle = _bundle()
+        for hostile in (json.loads(_claim().render()), None, 7, "claim", []):
+            with self.subTest(value=type(hostile).__name__):
+                result = verify(hostile, bundle)
+                self.assertIs(result.verdict, Verdict.UNVERIFIED)

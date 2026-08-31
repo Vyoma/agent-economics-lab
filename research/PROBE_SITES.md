@@ -325,7 +325,7 @@ agent_economics/claude_code_tree.py:494  _inspect_claude_code_jsonl_bytes(...) o
 agent_economics/cli.py:294  audit(...) omits policy  [report = audit(]
 agent_economics/cli.py:317  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
 agent_economics/cli.py:513  load_csv_bundle(...) omits label_source  [else load_csv_bundle(**csv_paths)]
-agent_economics/evidence.py:429  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [problems = validate_evidence_bundle(bund]
+agent_economics/evidence.py:451  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [problems = validate_evidence_bundle(bund]
 agent_economics/evidence.py:86  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:120  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
 agent_economics/evidence.py:180  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(f"{label}: rate {]
@@ -422,17 +422,17 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `validate_evidence_bundle(..., label=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/claude_code.py:1428`, `agent_economics/frontier.py:621`, `agent_economics/otel_genai.py:820`
-- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:429`
+- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:451`
 
 ### `validate_evidence_bundle(..., require_explicit_costs=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/claude_code.py:1428`, `agent_economics/frontier.py:621`, `agent_economics/otel_genai.py:820`
-- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:429`
+- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:451`
 
 ### `validate_evidence_bundle(..., require_task_manifest=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/claude_code.py:1428`, `agent_economics/frontier.py:621`, `agent_economics/otel_genai.py:820`
-- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:429`
+- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:451`
 
 ### `direct_cost_usd / .cost()`  (raw-field-vs-resolver)
 

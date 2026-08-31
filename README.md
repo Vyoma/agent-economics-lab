@@ -108,17 +108,39 @@ is not a claim you have disproved.
 "false" from "I could not tell" is the same fail-open catalogued below, moved
 one level up, so no failure path returns `SUPPORTED` and none raises.
 
-**The first version of this was forgeable, and the forgery is why the design
-looks like this.** A claim states its own contract, so the issuer chooses it.
-Dropping the single failing gate and requiring no coverage produced a claim
-reading "Safe to scale: every gate passes" that verified `SUPPORTED` against
-evidence whose honest verdict was `ASSIST`. Confirming that a decision follows
-from a contract its author wrote verifies nothing. `SUPPORTED` now requires a
-contract at least as strong as the shipped one; anything weaker is `UNVERIFIED`
-and names the dropped dimensions. That is this package's own rule about missing
-gates, turned on its own output.
+**Every version of this was forgeable until an adversary was pointed at it.**
+Four forgeries, each verifying `SUPPORTED` against evidence that did not
+support the claim, and each is now a regression test in `tests/test_claim.py`:
 
-What it does not do: nothing here establishes that the evidence describes
+1. **Subsetting the contract.** A claim states its own contract, so the issuer
+   chooses it. Dropping the single failing gate and requiring no coverage
+   produced "Safe to scale: every gate passes" against evidence whose honest
+   verdict was `ASSIST`. `SUPPORTED` now requires every dimension the shipped
+   contract requires.
+2. **Shipping your own pass marks.** That fix was structural and the numbers
+   were still free. Thresholds live in the bundle, so the audited party
+   supplies them: identical events, identical labels, honest digest, every
+   dimension covered, and setting `min_acceptable_rate` to `0.0` turned
+   `ASSIST` into `SCALE`. Worse, the verifier printed "contract is at least as
+   strong as the shipped one" while doing it, which was false as printed. A
+   threshold no gate could fail against is now detected and named — a gate that
+   keeps its name and cannot fail, arriving through the numbers instead of the
+   gate list.
+3. **A self-attested digest.** `verify` compared `bundle.digest` without
+   recomputing it. `digest` is a stored field, so flipping every outcome label
+   with `dataclasses.replace` left the published digest intact. It is now
+   recomputed from contents.
+4. **Prose that reads as endorsed.** `assertion` is free text bound to nothing,
+   and the output headlined `# SUPPORTED` directly above it. "Zero breaches,
+   safe for unsupervised rollout" verified against an `ASSIST`. The heading now
+   names the decision, and the wording is labelled as the issuer's, unverified.
+
+`verify()` was also not total, which its own docstring promised: the handler
+catching failures read `claim.assertion` *after* the failure, so passing a
+parsed dict — the likeliest caller mistake — raised `AttributeError` from
+inside the guard written to prevent it.
+
+What it still does not do: nothing here establishes that the evidence describes
 reality. A bundle can be internally perfect and a fabrication. This verifies
 the inference, not the world, and says so in its own output.
 
