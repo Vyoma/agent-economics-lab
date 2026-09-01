@@ -1,0 +1,9 @@
+{
+  "swe-bench-verified.hidden-tests@pinned-upstream": {
+    "agreement": 0.912,
+    "measured_at": "2026-08-31",
+    "method": "test-retest-agreement",
+    "reference": "500 byte-identical transcripts published upstream as two arms (gpt-5.2-codex, gpt-5.2-high) and scored twice; see research/OUTCOME_AUDIT.md",
+    "sample_size": 500
+  }
+}
