@@ -239,7 +239,11 @@ class OtelGenAIAdapterTests(unittest.TestCase):
                     ]
                 )
                 evaluate_exit = main(
-                    ["evaluate", "--bundle", str(bundle), "--ci"]
+                    [
+                        "evaluate", "--bundle", str(bundle), "--ci",
+                        "--attestations", str(ROOT / "examples" / "attestations.json"),
+                        "--as-of", "2026-09-01",
+                    ]
                 )
         self.assertEqual(template_exit, 0)
         self.assertEqual(convert_exit, 0)

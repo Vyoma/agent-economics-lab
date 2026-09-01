@@ -169,6 +169,41 @@ class GateTest(unittest.TestCase):
         )
 
 
+class FutureDatedAttestationTest(unittest.TestCase):
+    """A certificate dated after the audit is not a calibration that happened.
+
+    The guard existed and no test protected it: a mutation replacing
+    `if age < 0` with an unreachable comparison survived the entire suite,
+    reopening the exact fail-open the adjacent comment records as fixed once
+    already. A certificate "measured" next year read as freshly calibrated.
+    """
+
+    def test_a_future_dated_certificate_is_refused(self) -> None:
+        raw = parse_attestations([_record(measured_at="2027-06-01")])
+        report = assess_provenance(
+            ["judge@v1"], raw, as_of=dt.date(2026, 9, 1)
+        )
+        self.assertFalse(report.all_accepted)
+        status = report.statuses[0]
+        self.assertFalse(status.accepted)
+        self.assertIn("in the future", status.reason)
+
+    def test_one_day_ahead_is_already_refused(self) -> None:
+        """The boundary: measured tomorrow is exactly as unmeasured."""
+        raw = parse_attestations([_record(measured_at="2026-09-02")])
+        report = assess_provenance(
+            ["judge@v1"], raw, as_of=dt.date(2026, 9, 1)
+        )
+        self.assertFalse(report.all_accepted)
+
+    def test_measured_on_the_audit_date_is_accepted(self) -> None:
+        raw = parse_attestations([_record(measured_at="2026-09-01")])
+        report = assess_provenance(
+            ["judge@v1"], raw, as_of=dt.date(2026, 9, 1)
+        )
+        self.assertTrue(report.all_accepted)
+
+
 class AgeArithmeticTest(unittest.TestCase):
     def test_age_is_measured_in_whole_days(self) -> None:
         record = Attestation(

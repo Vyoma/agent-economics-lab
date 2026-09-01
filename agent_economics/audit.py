@@ -28,6 +28,7 @@ a jailbreak gate can ask the question without first inventing a rate card.
 """
 from __future__ import annotations
 
+import dataclasses
 import datetime as dt
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -38,7 +39,7 @@ from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .delegation import (
     assess_bundle_closure,
 )
-from .models import CheckSpec, EvidenceBundle
+from .models import AssuranceCase, CheckSpec, Decision, EvidenceBundle
 from .mutation import mutate
 from .provenance import Attestation, ProvenancePolicy, assess_provenance
 
@@ -111,6 +112,54 @@ class AuditReport:
             "fail_closed_conformance": self.conformance_held,
             "notes": list(self.notes),
         }
+
+
+def decide(
+    bundle: EvidenceBundle,
+    checks: Sequence[CheckSpec] | None = None,
+    required_coverage: frozenset[Any] | None = None,
+    *,
+    attestations: Mapping[str, Attestation] | None = None,
+    policy: ProvenancePolicy | None = None,
+    independently_verified: Sequence[str] = (),
+    as_of: dt.date | None = None,
+) -> tuple[AssuranceCase, AuditReport]:
+    """Evaluate and audit as one act. A SCALE the audit refuses is INCOMPLETE.
+
+    This existed as two commands, and the two disagreed on shipped surfaces:
+    `evaluate --ci` returned exit 0 for a bundle whose outcome instrument
+    nobody had attested and whose delegation was never declared, while `audit
+    --ci` on the identical bundle withheld with grounds. The reassuring answer
+    was the default. Every surface that issues a green decision goes through
+    here now, so the auditor and the gate cannot answer differently: the only
+    reachable SCALE is one the audit has no grounds against.
+
+    ASSIST, STOP, and INCOMPLETE pass through untouched. They are already
+    refusals to scale, and demoting them would hide *why* the evidence failed
+    behind why it was inadmissible.
+    """
+    checks = tuple(checks if checks is not None else default_checks())
+    required = (
+        required_coverage if required_coverage is not None else DEFAULT_REQUIRED_COVERAGE
+    )
+    case = AssuranceEngine(checks=checks, required_coverage=required).evaluate(bundle)
+    report = audit(
+        bundle,
+        checks,
+        required,
+        attestations=attestations,
+        policy=policy,
+        independently_verified=independently_verified,
+        as_of=as_of,
+    )
+    if case.decision is Decision.SCALE and not report.assessable:
+        case = dataclasses.replace(
+            case,
+            decision=Decision.INCOMPLETE,
+            missing_coverage=case.missing_coverage
+            + tuple(f"audit: {ground}" for ground in report.grounds),
+        )
+    return case, report
 
 
 def audit(

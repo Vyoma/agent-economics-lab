@@ -149,6 +149,8 @@ jobs:
           adapter: claude-code-tree
           session: examples/claude-code-tree/session.jsonl
           contract: examples/claude-code-tree/conversion-contract.json
+          attestations: examples/attestations.json
+          as-of: "2026-09-01"
           python-version: ${{ matrix.python-version }}
           comment: "false"
 
@@ -172,6 +174,8 @@ jobs:
           adapter: otel-genai
           session: examples/otel-genai/langfuse-otlp.json
           contract: examples/otel-genai/langfuse-conversion-contract.json
+          attestations: examples/attestations.json
+          as-of: "2026-09-01"
           python-version: ${{ matrix.python-version }}
           comment: "false"
 
@@ -188,12 +192,27 @@ jobs:
           test "$EXIT_CODE" = "0"
           grep -F "**Decision: SCALE**" "$REPORT"
 
+      - name: Build a bundle that can go green
+        if: ${{ matrix.python-version == '3.12' }}
+        # The frontier arm this step used to evaluate records no outcome
+        # instrument, which is INCOMPLETE by design now that a SCALE must
+        # survive the audit. Bundle mode is exercised on evidence that names
+        # its instrument and ships a calibration record for it.
+        run: >-
+          PYTHONPATH=. python -m agent_economics convert
+          --from claude-code-tree
+          --in examples/claude-code-tree/session.jsonl
+          --contract examples/claude-code-tree/conversion-contract.json
+          --out /tmp/agent-economics-green-bundle.json
+
       - name: Dogfood SCALE pass path
         if: ${{ matrix.python-version == '3.12' }}
         id: scale
         uses: ./
         with:
-          bundle: examples/compute-frontier/arms/balanced-4-step.json
+          bundle: /tmp/agent-economics-green-bundle.json
+          attestations: examples/attestations.json
+          as-of: "2026-09-01"
           python-version: ${{ matrix.python-version }}
           comment: "false"
 

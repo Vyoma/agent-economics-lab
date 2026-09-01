@@ -393,7 +393,20 @@ def evidence_provenance_gate(
         # unbounded max_age is a gate that cannot fail; the digest must say so.
         config={
             "instruments": sorted(instruments),
-            "attested_instruments": sorted(attestations),
+            # The records themselves, not just their names: a decision gated
+            # on a 0.95/n=500 certificate and one gated on kappa 0.10/n=3
+            # produced byte-identical contract digests, which contradicted the
+            # sentence below. What the gate enforces is the record's content.
+            "attestations": {
+                name: {
+                    "method": record.method,
+                    "agreement": record.agreement,
+                    "sample_size": record.sample_size,
+                    "reference": record.reference,
+                    "measured_at": record.measured_at,
+                }
+                for name, record in sorted(attestations.items())
+            },
             "independently_verified": sorted(independently_verified),
             "as_of": as_of.isoformat(),
             "policy": (

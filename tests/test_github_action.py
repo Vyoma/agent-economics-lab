@@ -15,13 +15,25 @@ ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
 
 
-def csv_inputs(policy: Path | None = None) -> ActionInputs:
+def csv_inputs(policy: Path | None = None, *, attested: bool = False) -> ActionInputs:
+    """`attested=True` names the fixture instrument and supplies its
+    calibration record, which a SCALE now requires on every shipped surface."""
+    extra = (
+        {
+            "label_source": "fixture.manual-review",
+            "attestations": str(EXAMPLES / "attestations.json"),
+            "as_of": "2026-09-01",
+        }
+        if attested
+        else {}
+    )
     return ActionInputs(
         traces=str(EXAMPLES / "support_trace.csv"),
         outcomes=str(EXAMPLES / "outcomes.csv"),
         rates=str(EXAMPLES / "rates.json"),
         baseline=str(EXAMPLES / "baseline.json"),
         policy=str(policy or EXAMPLES / "policy.json"),
+        **extra,
     )
 
 
@@ -55,7 +67,7 @@ class GitHubActionTests(unittest.TestCase):
                 encoding="utf-8",
             )
             report = Path(directory) / "report.md"
-            result = run_action(csv_inputs(policy_path), report)
+            result = run_action(csv_inputs(policy_path, attested=True), report)
             rendered = report.read_text(encoding="utf-8")
         self.assertEqual(result.decision, "SCALE")
         self.assertEqual(result.exit_code, 0)
@@ -108,6 +120,8 @@ class GitHubActionTests(unittest.TestCase):
                     contract=str(
                         fixture / "langfuse-conversion-contract.json"
                     ),
+                    attestations=str(EXAMPLES / "attestations.json"),
+                    as_of="2026-09-01",
                 ),
                 report,
             )
@@ -125,6 +139,8 @@ class GitHubActionTests(unittest.TestCase):
                     adapter="claude-code-tree",
                     session=str(fixture / "session.jsonl"),
                     contract=str(fixture / "conversion-contract.json"),
+                    attestations=str(EXAMPLES / "attestations.json"),
+                    as_of="2026-09-01",
                 ),
                 report,
             )

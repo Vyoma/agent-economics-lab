@@ -216,3 +216,22 @@ findings; it is (a) an auditor anyone can point at a trajectory dataset and
       byte-compared by `make corpus`.
 - [x] Registered: CoderForge clean (reward re-derives on all 434 parseable
       rows, 0 disagreements); JetBrains `resolved` populated on 0 of 1,785.
+
+## Review — the three-agent audit and its repairs (2026-09-01)
+
+Three adversarial agents (validity, novelty, bulletproofness) ran against the
+whole repository. Everything they found is fixed, guarded, and merged or in
+review; each fix carries a regression test proven non-vacuous by corruption.
+
+- [x] PR 15 (merged): the corpus. One instrument, a registry, three datasets;
+      CoderForge clean bill by log re-adjudication, JetBrains resolved-null
+      finding, fail-closed parser born from its own 186 false positives.
+- [x] PR 16 (merged): five refuted numbers corrected; every numeral above the
+      README fold bound to frozen evidence; probe accounting reconciled.
+- [x] PR 17: decide() — a SCALE the audit refuses is INCOMPLETE on every
+      shipped surface; mutation M4 killed; provenance digest binds records;
+      dead duplicate digest deleted; six attack-regression tests.
+- [x] PR 18 (stacked): sixth-sweep prior art cited at full strength
+      (Cost-of-Pass, Kapoor, HAL; AgentLens, ATBench, UTBoost, SWE-Bench+;
+      InvarLock, EvalHub; ABC, EvalGen, psychometrics line).
+- [ ] PyPI publication: still a 404, still the user's call.

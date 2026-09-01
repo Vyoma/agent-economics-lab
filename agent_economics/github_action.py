@@ -31,6 +31,16 @@ class ActionInputs:
     adapter: str = ""
     session: str = ""
     contract: str = ""
+    #: Names the instrument behind CSV outcome labels; forwarded to
+    #: `evaluate --label-source`. Only meaningful in CSV mode.
+    label_source: str = ""
+    #: ISO date to age attestations against; forwarded to `evaluate --as-of`
+    #: so a pinned workflow stays reproducible.
+    as_of: str = ""
+    #: Instrument attestations, forwarded to `evaluate --attestations`. Without
+    #: one for the bundle's outcome instrument, SCALE is unreachable and the
+    #: action reports INCOMPLETE, which is its contract working, not failing.
+    attestations: str = ""
 
 
 @dataclass(frozen=True)
@@ -161,6 +171,8 @@ def run_action(inputs: ActionInputs, report_path: Path) -> ActionResult:
                 "--policy",
                 inputs.policy,
             ]
+            if inputs.label_source:
+                evaluate_arguments += ["--label-source", inputs.label_source]
         else:
             bundle_path = Path(directory) / "converted-bundle.json"
             conversion_code, conversion_stdout, conversion_stderr = _invoke_cli(
@@ -188,6 +200,10 @@ def run_action(inputs: ActionInputs, report_path: Path) -> ActionResult:
                 )
             evaluate_arguments = ["evaluate", "--bundle", str(bundle_path)]
 
+        if inputs.attestations:
+            evaluate_arguments += ["--attestations", inputs.attestations]
+        if inputs.as_of:
+            evaluate_arguments += ["--as-of", inputs.as_of]
         exit_code, evaluation_stdout, evaluation_stderr = _invoke_cli(
             evaluate_arguments
             + [
@@ -264,6 +280,9 @@ def _parser() -> argparse.ArgumentParser:
         "adapter",
         "session",
         "contract",
+        "attestations",
+        "label-source",
+        "as-of",
     ):
         parser.add_argument(f"--{name}", default="")
     parser.add_argument("--report")
@@ -298,6 +317,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             adapter=args.adapter,
             session=args.session,
             contract=args.contract,
+            attestations=args.attestations,
+            label_source=getattr(args, "label_source", ""),
+            as_of=getattr(args, "as_of", ""),
         ),
         report_path,
     )

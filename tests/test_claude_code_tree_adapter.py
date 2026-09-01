@@ -452,7 +452,14 @@ class ClaudeCodeTreeAdapterTests(unittest.TestCase):
                 (EXAMPLE / "bundle.json").read_text(encoding="utf-8"),
             )
             self.assertEqual(
-                main(["evaluate", "--bundle", str(bundle_path), "--ci"]),
+                main(
+                    [
+                        "evaluate", "--bundle", str(bundle_path), "--ci",
+                        "--attestations",
+                        str(ROOT / "examples" / "attestations.json"),
+                        "--as-of", "2026-09-01",
+                    ]
+                ),
                 0,
             )
 

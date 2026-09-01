@@ -114,3 +114,13 @@ saying so.
 **Rule:** when part of a task is blocked, finish every unblocked part and name
 the blocked remainder explicitly. Do not let one blocked sub-item quietly
 absorb its siblings.
+
+## Never `git checkout --` a file carrying uncommitted intended work (2026-09-01)
+
+Proving a new guard non-vacuous means corrupting a file and restoring it. I
+restored README.md with `git checkout -- README.md` while my own uncommitted
+corrections were in it, and wiped them along with the corruption. The rule:
+before any corrupt-and-restore experiment, either commit the intended state
+first (a WIP commit is fine) or restore by writing back the exact original
+string, never by checkout. The same applies to scripted experiments: hold the
+original bytes in memory and write them back.

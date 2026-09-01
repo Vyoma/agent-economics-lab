@@ -17,8 +17,9 @@ def render_markdown(case: AssuranceCase) -> str:
     if case.missing_coverage:
         lines.extend(
             [
-                "A bounded decision cannot be issued because required assurance "
-                "coverage is not supplied by the enabled gates.",
+                "A bounded decision cannot be issued: required assurance "
+                "coverage is unsupplied, or the audit found grounds to "
+                "withhold a SCALE. Each item below names one.",
                 "",
             ]
         )
