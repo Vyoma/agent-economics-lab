@@ -221,6 +221,10 @@ public-case:
 	@PYTHONPATH=. $(PYTHON) examples/public-swebench/build_case.py \
 		--source examples/public-swebench/runs.json \
 		--output-dir /tmp/agent-economics-public-swebench
+	@cmp /tmp/agent-economics-public-swebench/arms/candidate-opus.json \
+		examples/public-swebench/arms/candidate-opus.json
+	@cmp /tmp/agent-economics-public-swebench/arms/reference-haiku.json \
+		examples/public-swebench/arms/reference-haiku.json
 	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-public-swebench/arms/candidate-opus.json
 	@$(PYTHON) -m agent_economics frontier \
