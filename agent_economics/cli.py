@@ -9,7 +9,7 @@ from pathlib import Path
 
 from . import __version__, kimi_client
 from .adapters import load_normalized_json_bundle, render_normalized_json
-from .assurance import evaluate_bundle
+from .assurance import AssuranceEngine, evaluate_bundle
 from .audit import audit, render_markdown as render_audit_markdown
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .claim import (
@@ -52,6 +52,7 @@ from .otel_genai import (
     otel_genai_bundle_from_session,
 )
 from .provenance import Attestation
+from .registry import UnknownCheck, default_registry
 from .report import render_json, render_markdown
 
 
@@ -66,6 +67,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     evaluate_parser = subparsers.add_parser("evaluate")
+    evaluate_parser.add_argument(
+        "--check", action="append", default=[], metavar="CHECK_ID",
+        help=(
+            "Compose the contract from named checks instead of the default "
+            "six. Repeatable, and order is significant because the decision "
+            "contract digest binds it. `agent-economics capabilities` lists "
+            "what this build can run, including gate.delegation-closure and "
+            "gate.evidence-provenance, which no CLI path could reach before."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--require-coverage", action="append", default=[], metavar="DIMENSION",
+        help=(
+            "Require a coverage dimension. Defaults to the shipped economic "
+            "set. A dimension with no enabled provider yields INCOMPLETE, "
+            "which is the point."
+        ),
+    )
     evaluate_parser.add_argument("--bundle")
     evaluate_parser.add_argument("--traces")
     evaluate_parser.add_argument("--outcomes")
@@ -420,9 +439,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("converter.claude-code-session-tree@1")
         print("converter.otel-genai@1")
         print("\nCHECKS")
-        for check in default_checks():
-            required = "required" if check.covers & DEFAULT_REQUIRED_COVERAGE else "optional"
-            print(f"{check.manifest_id}  {check.mode.value}  {required}")
+        # From the registry, not a hardcoded list. This printed only the six
+        # economic gates, so the two shipped gates nothing could reach were
+        # also invisible in the capability report that advertises them.
+        shipped = {spec.id for spec in default_checks()}
+        for check_id, version, summary in default_registry().describe():
+            default = "default" if check_id in shipped else "opt-in"
+            print(f"{check_id}@{version}  {default}  {summary}")
         print("\nRENDERERS")
         print("renderer.markdown@1")
         print("renderer.json@1")
@@ -586,7 +609,32 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if args.bundle
                 else load_csv_bundle(**csv_paths)
             )
-            case = evaluate_bundle(evidence)
+            if args.check or args.require_coverage:
+                # A contract composed by name. The registry builds the two
+                # factory gates from the evidence itself -- the delegation
+                # manifest the bundle declares, the instrument it names -- so
+                # naming them on a command line is enough, and neither could
+                # be reached from any CLI path before.
+                registry = default_registry()
+                names = args.check or [
+                    spec.id for spec in default_checks()
+                ]
+                specs = registry.compose(names, bundle=evidence)
+                coverage = (
+                    frozenset(args.require_coverage)
+                    if args.require_coverage
+                    else frozenset(DEFAULT_REQUIRED_COVERAGE)
+                )
+                case = AssuranceEngine(
+                    specs, required_coverage=coverage
+                ).evaluate(evidence)
+            else:
+                case = evaluate_bundle(evidence)
+        except UnknownCheck as error:
+            # A contract naming a check nobody can build is unreadable, not
+            # weaker. Refusing beats evaluating whatever remains.
+            print(f"INCOMPLETE: {error}", file=sys.stderr)
+            return 2
         except (
             ArithmeticError,
             AttributeError,
