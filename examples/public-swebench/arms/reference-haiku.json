@@ -8,7 +8,7 @@
   "conversion": {
     "claim_scope": "public benchmark, trace spend only, zero monetized value",
     "cost_field": "info.model_stats.instance_cost",
-    "evidence_digest": "c88375512518ad44a03ff98b4eb44b8184825aaaeacdcd02eb0e9ce0f8497a4d",
+    "evidence_digest": "ae0bfbd3f2bd017d061439eecf64a1017ce5e4bc28840f3b72ff4cca9c51cf0e",
     "model": "claude-4.5-haiku-high",
     "outcome_field": "info.resolved",
     "public_source_manifest_sha256": "8c44735ab39468e0207d9cf959cb23166cca935f266159ac916abc2eba47e5b7",
@@ -18976,6 +18976,7 @@
       "timestamp": ""
     }
   ],
+  "label_source": "swe-bench-verified.hidden-tests@pinned-upstream",
   "outcomes": [
     {
       "acceptable": true,

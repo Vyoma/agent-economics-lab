@@ -14,12 +14,34 @@ string `"unknown"`.
 | `claude-4.5-haiku-high` | 500 | 333 | 66.6% | 0 | 66.6% |
 | `claude-4.5-opus-high` | 500 | 384 | 76.8% | 0 | 76.8% |
 | `claude-opus-4.6` | 500 | 386 | 77.2% | 8 | 76.8% |
+| `gemini-3-flash-high` | 500 | 379 | 75.8% | 0 | 75.8% |
+| `glm-5-high` | 500 | 364 | 72.8% | 0 | 72.8% |
+| `gpt-5-mini` | 500 | 281 | 56.2% | 0 | 56.2% |
 | `gpt-5.2-codex` | 500 | 364 | 72.8% | 0 | 72.8% |
+| `gpt-5.2-high` | 500 | 364 | 72.8% | 0 | 72.8% |
+| `minimax-m2.5-high` | 500 | 379 | 75.8% | 0 | 75.8% |
 | `gemini-3-pro` | 500 | 500 | 100.0% | 500 | **unestablished** |
 
-**1 of 5 arms examined report a resolution rate that their own cross-check field does not confirm for a single task.**
+**1 of 10 arms examined report a resolution rate that their own cross-check field does not confirm for a single task.**
 
 `gemini-3-pro` reads **100%** from `info.resolved` across all 500 tasks, at $480.01 of published spend over 25,641 API calls. Its cross-check is `"unknown"` on all 500. There is no confirmed rate to report, which is different from a low one.
+
+## The same transcripts, published twice, scored differently
+
+One arm pair carries byte-identical transcripts. Same messages,
+same cost to sixteen decimal places, same API call count; the
+files differ only in `info.docent.model_label` and the run id.
+
+That accident is useful. It scored the same input twice, which is
+a direct reading of how repeatable this outcome label is.
+
+`gpt-5.2-codex` and `gpt-5.2-high`: **500 of 500 transcripts identical**, and `info.resolved` disagrees on **44** of them. Agreement with itself on identical input: **91.2%**.
+
+Examples where the same transcript was scored both ways: `django__django-11138`, `django__django-11149`, `django__django-11265`.
+
+Across the 9 arms with a confirmed rate, the spread is 21 points (56.2% to 76.8%). The label disagrees with itself by 9. Gaps of a few points between models in this dataset cannot be distinguished from the instrument disagreeing with itself; the largest gaps can.
+
+What causes it is not established here. Flaky tests, a non-deterministic evaluation environment, and a labelling pipeline that scored the two copies at different times would all produce this, and nothing in the frozen evidence separates them. What is established is narrower and enough: the label is not a function of the transcript.
 
 ## What this is and is not
 

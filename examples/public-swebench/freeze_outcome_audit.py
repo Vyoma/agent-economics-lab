@@ -28,6 +28,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parent
 UPSTREAM_DATASET = "tarsur385/swebench-verified-trajectories"
 UPSTREAM_REVISION = "b55979d6b24850b72ae4d80f912526280cd6058a"
+#: Every arm upstream carries the same task set. An arm holding fewer rows was
+#: not fully downloaded, and a rate computed over a partial arm is a sample
+#: presented in a table of censuses. Downloading was rate-limited repeatedly
+#: while this was built, and 1,000 files came back as rate-limit HTML with
+#: HTTP 200, so this is a live hazard rather than a theoretical one.
+EXPECTED_TASKS = 500
 
 
 def _row(path: Path) -> dict[str, Any] | None:
@@ -48,17 +54,27 @@ def _row(path: Path) -> dict[str, Any] | None:
         "api_calls": stats.get("api_calls"),
         "instance_cost_usd": stats.get("instance_cost"),
         "trajectory_sha256": hashlib.sha256(raw).hexdigest(),
+        # The transcript alone, canonically encoded. The whole-file hash above
+        # differs between two arms that share a transcript, because the model
+        # label and run id sit in the same file. Without this, one arm pair
+        # publishing the same 500 transcripts under different labels is
+        # invisible in the frozen evidence.
+        "messages_sha256": hashlib.sha256(
+            json.dumps(document.get("messages"), sort_keys=True).encode("utf-8")
+        ).hexdigest(),
     }
 
 
 def freeze(arms: dict[str, Path]) -> dict[str, Any]:
     frozen: dict[str, Any] = {}
+    incomplete: dict[str, int] = {}
     for arm, root in sorted(arms.items()):
         rows = [row for path in sorted(root.rglob("*.json")) if (row := _row(path))]
-        if not rows:
-            # An arm that produced nothing is omitted rather than recorded as
-            # empty. A rate-limited download is not evidence of anything, and a
-            # zero-row arm in the table would read as one.
+        if len(rows) != EXPECTED_TASKS:
+            # Recorded as not obtained, with its count, rather than included at
+            # a smaller n or dropped silently. Either would let a failed fetch
+            # read as a finding.
+            incomplete[arm] = len(rows)
             continue
         frozen[arm] = sorted(rows, key=lambda item: item["task_id"] or "")
     return {
@@ -76,7 +92,9 @@ def freeze(arms: dict[str, Path]) -> dict[str, Any]:
             "For each trajectory, does info.resolved agree with "
             "info.scores.resolved beside it?"
         ),
+        "expected_tasks_per_arm": EXPECTED_TASKS,
         "arms": frozen,
+        "not_obtained": incomplete,
     }
 
 
@@ -96,7 +114,14 @@ def main() -> None:
     Path(args.output).write_text(
         json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    print(f"Wrote {args.output}: {len(document['arms'])} arms")
+    print(
+        f"Wrote {args.output}: {len(document['arms'])} complete arms"
+        + (
+            f", {len(document['not_obtained'])} not obtained "
+            f"({document['not_obtained']})"
+            if document["not_obtained"] else ""
+        )
+    )
 
 
 if __name__ == "__main__":

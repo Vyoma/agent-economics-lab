@@ -49,6 +49,44 @@ def _summarise(rows: list[dict]) -> dict:
     }
 
 
+def duplicate_arms(document: dict) -> list[dict]:
+    """Arm pairs publishing the same transcripts under different model labels.
+
+    Detected on the transcript hash, not the whole-file hash: the model label
+    and run id live in the same file, so two arms sharing a transcript hash
+    differently. When a pair is found, the outcomes attached to those identical
+    transcripts give a direct reading of how repeatable the outcome label is,
+    because the same input was scored twice.
+    """
+    arms = document["arms"]
+    found = []
+    names = sorted(arms)
+    for i, first in enumerate(names):
+        for second in names[i + 1:]:
+            left = {r["task_id"]: r for r in arms[first]}
+            right = {r["task_id"]: r for r in arms[second]}
+            shared = sorted(set(left) & set(right))
+            if not shared:
+                continue
+            identical = [
+                t for t in shared
+                if left[t]["messages_sha256"] == right[t]["messages_sha256"]
+            ]
+            if len(identical) != len(shared):
+                continue
+            disagree = [
+                t for t in identical if left[t]["resolved"] != right[t]["resolved"]
+            ]
+            found.append({
+                "arms": (first, second),
+                "n": len(identical),
+                "disagree": len(disagree),
+                "agreement": (len(identical) - len(disagree)) / len(identical),
+                "examples": disagree[:3],
+            })
+    return found
+
+
 def render(document: dict) -> str:
     arms = {arm: _summarise(rows) for arm, rows in document["arms"].items()}
     order = sorted(arms, key=lambda a: (arms[a]["confirmed_rate"] is None, a))
@@ -94,6 +132,50 @@ def render(document: dict) -> str:
             "is different from a low one.",
             "",
         ]
+    duplicates = duplicate_arms(document)
+    confirmed_rates = [
+        s["confirmed_rate"] for s in arms.values() if s["confirmed_rate"] is not None
+    ]
+    spread = (max(confirmed_rates) - min(confirmed_rates)) * 100 if confirmed_rates else 0.0
+    if duplicates:
+        lines += [
+            "## The same transcripts, published twice, scored differently",
+            "",
+            "One arm pair carries byte-identical transcripts. Same messages,",
+            "same cost to sixteen decimal places, same API call count; the",
+            "files differ only in `info.docent.model_label` and the run id.",
+            "",
+            "That accident is useful. It scored the same input twice, which is",
+            "a direct reading of how repeatable this outcome label is.",
+            "",
+        ]
+        for pair in duplicates:
+            first, second = pair["arms"]
+            lines += [
+                f"`{first}` and `{second}`: **{pair['n']} of {pair['n']} "
+                f"transcripts identical**, and `info.resolved` disagrees on "
+                f"**{pair['disagree']}** of them. Agreement with itself on "
+                f"identical input: **{pair['agreement']:.1%}**.",
+                "",
+                f"Examples where the same transcript was scored both ways: "
+                f"{', '.join('`' + t + '`' for t in pair['examples'])}.",
+                "",
+                f"Across the {len(confirmed_rates)} arms with a confirmed "
+                f"rate, the spread is {spread:.0f} points "
+                f"({min(confirmed_rates):.1%} to {max(confirmed_rates):.1%}). "
+                f"The label disagrees with itself by "
+                f"{(1 - pair['agreement']) * 100:.0f}. Gaps of a few points "
+                "between models in this dataset cannot be distinguished from "
+                "the instrument disagreeing with itself; the largest gaps can.",
+                "",
+                "What causes it is not established here. Flaky tests, a "
+                "non-deterministic evaluation environment, and a labelling "
+                "pipeline that scored the two copies at different times would "
+                "all produce this, and nothing in the frozen evidence "
+                "separates them. What is established is narrower and enough: "
+                "the label is not a function of the transcript.",
+                "",
+            ]
     lines += [
         "## What this is and is not",
         "",

@@ -7,7 +7,7 @@ This is an evidence-based routing decision: SCALE autonomously, ASSIST with huma
 ## Assurance manifest
 
 - Source adapter: `source.public-swebench-mini-agent@1`
-- Evidence digest: `2d063279479ebeff05654482a77ad53eb6076441315e462b1881e0c56e5a4394`
+- Evidence digest: `7f1d389eaa72c96d5f497c807feeea11d46ae41953d137c49e940fbcda2b9761`
 - Decision-contract digest: `e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab`
 - Report renderer: `renderer.markdown@1`
 - Enabled checks:

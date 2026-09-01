@@ -9,7 +9,7 @@ a claim that was wrong; it is one you check out a commit to test, and
 the verdict names which commit. A claim the evidence contradicts is a
 published falsehood and fails the build until it is retracted.
 
-**12 claims on the record, 12 reproducing against the current tree.**
+**14 claims on the record, 11 reproducing against the current tree.**
 
 | issued | claim | decision | against today's code |
 |---|---|---|---|
@@ -21,9 +21,11 @@ published falsehood and fails the build until it is retracted.
 | 2026-08-31 | Remove gate.runtime-caps and this otherwise-passing evidence yields INCOMPLETE, not S... | `INCOMPLETE` | **SUPPORTED** |
 | 2026-08-31 | Remove gate.tail-cost and this otherwise-passing evidence yields INCOMPLETE, not SCAL... | `INCOMPLETE` | **SUPPORTED** |
 | 2026-08-31 | Remove gate.unit-economics and this otherwise-passing evidence yields INCOMPLETE, not... | `INCOMPLETE` | **SUPPORTED** |
-| 2026-08-31 | The same 20 SWE-bench Verified tasks run with claude-4.5-haiku-high as reference. 55%... | `STOP` | **SUPPORTED** |
-| 2026-08-31 | On real SWE-bench trajectories, removing gate.acceptable-rate does not soften the ver... | `INCOMPLETE` | **SUPPORTED** |
-| 2026-08-31 | Real deployment, not a fixture: 20 mini-SWE-agent runs of claude-opus-4.6 on SWE-benc... | `STOP` | **SUPPORTED** |
+| 2026-08-31 | The same 20 SWE-bench Verified tasks run with claude-4.5-haiku-high as reference. 55%... | `STOP` | **UNVERIFIED** |
+| 2026-08-31 | The claude-4.5-haiku-high reference arm over the same 20 tasks, with the same declare... | `STOP` | **SUPPORTED** |
+| 2026-08-31 | On real SWE-bench trajectories, removing gate.acceptable-rate does not soften the ver... | `INCOMPLETE` | **UNVERIFIED** |
+| 2026-08-31 | Real deployment, not a fixture: 20 mini-SWE-agent runs of claude-opus-4.6 on SWE-benc... | `STOP` | **UNVERIFIED** |
+| 2026-08-31 | 20 mini-SWE-agent runs of claude-opus-4.6 on SWE-bench Verified, now declaring that t... | `STOP` | **SUPPORTED** |
 | 2026-08-31 | The bundled Claude Code tree session clears every shipped gate: this evidence yields ... | `SCALE` | **SUPPORTED** |
 
 ## Each claim in full
@@ -114,8 +116,19 @@ published falsehood and fails the build until it is retracted.
 
 - Issued **2026-08-31** by agent-economics-lab
 - Decision claimed: `STOP`
-- Evidence: `examples/public-swebench/arms/reference-haiku.json`
+- Evidence: `(absent)`
 - Issued against commit: `0b3c38bfe8a6a143ff46ce5250d30d7760fe504d`
+- Against the current tree: **UNVERIFIED**
+- the evidence this names is not shipped in this repository
+
+### `2026-08-31-swebench-haiku-attributed-ae7527bc.claim.json`
+
+> The claude-4.5-haiku-high reference arm over the same 20 tasks, with the same declared adjudicator: STOP.
+
+- Issued **2026-08-31** by agent-economics-lab
+- Decision claimed: `STOP`
+- Evidence: `examples/public-swebench/arms/reference-haiku.json`
+- Issued against commit: `ae7527bc3e9fad6e41110a53cb7ea607e9f41cfa`
 - Against the current tree: **SUPPORTED**
 
 ### `2026-08-31-swebench-invariant-0b3c38bf.claim.json`
@@ -124,9 +137,10 @@ published falsehood and fails the build until it is retracted.
 
 - Issued **2026-08-31** by agent-economics-lab
 - Decision claimed: `INCOMPLETE`
-- Evidence: `examples/public-swebench/arms/candidate-opus.json`
+- Evidence: `(absent)`
 - Issued against commit: `0b3c38bfe8a6a143ff46ce5250d30d7760fe504d`
-- Against the current tree: **SUPPORTED**
+- Against the current tree: **UNVERIFIED**
+- the evidence this names is not shipped in this repository
 
 ### `2026-08-31-swebench-opus-0b3c38bf.claim.json`
 
@@ -134,8 +148,19 @@ published falsehood and fails the build until it is retracted.
 
 - Issued **2026-08-31** by agent-economics-lab
 - Decision claimed: `STOP`
-- Evidence: `examples/public-swebench/arms/candidate-opus.json`
+- Evidence: `(absent)`
 - Issued against commit: `0b3c38bfe8a6a143ff46ce5250d30d7760fe504d`
+- Against the current tree: **UNVERIFIED**
+- the evidence this names is not shipped in this repository
+
+### `2026-08-31-swebench-opus-attributed-ae7527bc.claim.json`
+
+> 20 mini-SWE-agent runs of claude-opus-4.6 on SWE-bench Verified, now declaring that the SWE-bench hidden tests adjudicated the outcomes. The shipped gates still do not clear it: STOP, and the audit additionally withholds because nobody has attested that instrument.
+
+- Issued **2026-08-31** by agent-economics-lab
+- Decision claimed: `STOP`
+- Evidence: `examples/public-swebench/arms/candidate-opus.json`
+- Issued against commit: `ae7527bc3e9fad6e41110a53cb7ea607e9f41cfa`
 - Against the current tree: **SUPPORTED**
 
 ### `2026-08-31-tree-baseline-7fc24c37.claim.json`

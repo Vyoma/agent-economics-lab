@@ -8,7 +8,7 @@
   "conversion": {
     "claim_scope": "public benchmark, trace spend only, zero monetized value",
     "cost_field": "info.model_stats.instance_cost",
-    "evidence_digest": "2d063279479ebeff05654482a77ad53eb6076441315e462b1881e0c56e5a4394",
+    "evidence_digest": "7f1d389eaa72c96d5f497c807feeea11d46ae41953d137c49e940fbcda2b9761",
     "model": "claude-opus-4.6",
     "outcome_field": "info.resolved",
     "public_source_manifest_sha256": "8c44735ab39468e0207d9cf959cb23166cca935f266159ac916abc2eba47e5b7",
@@ -8496,6 +8496,7 @@
       "timestamp": ""
     }
   ],
+  "label_source": "swe-bench-verified.hidden-tests@pinned-upstream",
   "outcomes": [
     {
       "acceptable": true,
