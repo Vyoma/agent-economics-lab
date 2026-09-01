@@ -4,8 +4,9 @@ import hashlib
 import json
 import math
 from collections import Counter, defaultdict
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from typing import Any
 
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .evidence import make_evidence_bundle, validate_evidence_bundle
@@ -39,6 +40,28 @@ def _coverage_name(coverage: object) -> str:
     return coverage.value if isinstance(coverage, Coverage) else str(coverage)
 
 
+def _canonical_config(config: Mapping[str, Any]) -> dict[str, Any]:
+    """Config rendered so equal configurations hash equally.
+
+    Sets and tuples are ordered, everything else is left to the JSON encoder,
+    which rejects what it cannot represent -- so a gate cannot smuggle its
+    enforcement past the digest inside an unserialisable object.
+    """
+    rendered: dict[str, Any] = {}
+    for key in sorted(config):
+        value = config[key]
+        if isinstance(value, (set, frozenset)):
+            rendered[key] = sorted(str(item) for item in value)
+        elif isinstance(value, (list, tuple)):
+            rendered[key] = [
+                sorted(str(i) for i in v) if isinstance(v, (set, frozenset)) else v
+                for v in value
+            ]
+        else:
+            rendered[key] = value
+    return rendered
+
+
 def decision_contract_manifest(
     checks: Sequence[CheckSpec],
     required_coverage: frozenset[Coverage],
@@ -60,6 +83,13 @@ def decision_contract_manifest(
             {
                 "manifest_id": check.manifest_id,
                 "mode": check.mode.value,
+                # Present only when the gate has configuration, so a check
+                # whose behaviour is entirely in its source is unchanged and
+                # the shipped contract digest does not move.
+                **(
+                    {"config": _canonical_config(check.config)}
+                    if check.config else {}
+                ),
                 "covers": sorted(_coverage_name(i) for i in check.covers),
                 "failure_route": (
                     check.failure_route.value

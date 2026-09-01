@@ -5,7 +5,7 @@ import hashlib
 import inspect
 import json
 import textwrap
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any
@@ -250,6 +250,23 @@ class CheckSpec:
     covers: frozenset[Coverage]
     run: CheckFn
     failure_route: Decision | None = None
+    #: The configuration this gate enforces, when its behaviour lives in
+    #: captured arguments rather than in its source.
+    #:
+    #: `implementation_digest` hashes the source of `run`, which is the right
+    #: thing for a plain function and blind for a closure. The two most
+    #: consequential gates shipped here are factories: `delegation_closure_gate`
+    #: and `evidence_provenance_gate` close over the thresholds and manifests
+    #: that are their entire enforcement. A gate built with
+    #: `minimum_closure=0.0` and no delegation tools cannot fail, and produced a
+    #: contract digest byte-identical to the strict one -- the failure this
+    #: package names as harder than a missing gate, arriving through closure
+    #: arguments instead of through the gate list.
+    #:
+    #: Empty by default, and omitted from the manifest when empty, so a check
+    #: whose behaviour is fully in its source is unaffected and the shipped
+    #: contract digest does not move.
+    config: Mapping[str, Any] = field(default_factory=dict)
 
     @property
     def manifest_id(self) -> str:

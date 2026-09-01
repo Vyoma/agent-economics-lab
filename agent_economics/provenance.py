@@ -388,6 +388,22 @@ def evidence_provenance_gate(
         covers=frozenset({EVIDENCE_PROVENANCE}),
         run=run,
         failure_route=Decision.STOP,
+        # As with the closure gate, everything this enforces is captured here.
+        # A policy of min_agreement=0.0, min_sample_size=0 and an effectively
+        # unbounded max_age is a gate that cannot fail; the digest must say so.
+        config={
+            "instruments": sorted(instruments),
+            "attested_instruments": sorted(attestations),
+            "independently_verified": sorted(independently_verified),
+            "as_of": as_of.isoformat(),
+            "policy": (
+                {
+                    "min_agreement": (policy or ProvenancePolicy()).min_agreement,
+                    "min_sample_size": (policy or ProvenancePolicy()).min_sample_size,
+                    "max_age_days": (policy or ProvenancePolicy()).max_age_days,
+                }
+            ),
+        },
     )
 
 

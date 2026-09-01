@@ -39,7 +39,7 @@ Generated on CPython 3.12.13.
 
 | package | files | lines | divergences | per kLOC | lone dissenters |
 |---|---|---|---|---|---|
-| `agent_economics` | 28 | 12157 | 19 | 1.56 | 4 |
+| `agent_economics` | 28 | 12278 | 19 | 1.55 | 4 |
 | `json` | 5 | 1317 | 7 | 5.32 | 0 |
 | `logging` | 3 | 5047 | 1 | 0.2 | 0 |
 | `email` | 29 | 10415 | 6 | 0.58 | 2 |
@@ -51,11 +51,11 @@ Generated on CPython 3.12.13.
 
 ```
 make_evidence_bundle(..., dependency_edges=)  5 pass / 1 omit
-    the omits: assurance.py:524
+    the omits: assurance.py:554
 make_evidence_bundle(..., label_source=)  5 pass / 1 omit
-    the omits: assurance.py:524
+    the omits: assurance.py:554
 make_evidence_bundle(..., source_version=)  5 pass / 1 omit
-    the omits: assurance.py:524
+    the omits: assurance.py:554
 _numeric_issue(..., integer=)  2 pass / 8 omit
     the passes: evidence.py:86, evidence.py:314
 _numeric_issue(..., maximum=)  2 pass / 8 omit
