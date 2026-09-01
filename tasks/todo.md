@@ -189,3 +189,30 @@ stored field, so building a bundle and then `dataclasses.replace`-ing content
 onto it keeps the old digest. The conversion now builds in one call. The load
 path verifies the receipt digest against recomputed evidence, which is what
 surfaced it.
+
+## Corpus — generalize the audit into an instrument plus an accumulating registry (2026-09-01)
+
+The finding pipeline is hardcoded to one dataset. The moat is not the two
+findings; it is (a) an auditor anyone can point at a trajectory dataset and
+(b) a growing corpus of frozen-evidence audit results with priority dates.
+
+- [x] Per-dataset specs (in `research/corpus/freeze.py`, not JSON: two
+      bespoke extractors into one frozen schema beat a field-mapping DSL for
+      three datasets). CoderForge sha 753f0504, JetBrains sha dd79e254,
+      registry row for tarsur385 derived from its existing frozen evidence.
+- [x] `research/corpus/freeze.py`: fetch rows via datasets-server, verify the
+      repo sha did not move during the fetch, write content-free frozen rows
+      (ids, outcome fields, hashes, parsed graded-test statuses). Never store
+      prompts, patches, messages, or logs.
+- [x] `research/corpus/audit.py`: offline from frozen rows. Checks:
+      cross-field disagreement, constant outcome column, duplicate transcript
+      hashes, degenerate economics, re-adjudication from parsed test statuses.
+      Fail-closed: a row whose graded tests cannot all be located is UNPARSED,
+      never a disagreement (the 186 false hits from the pytest-only parser are
+      the lesson).
+- [x] Test-log parser handling pytest, Django-runner, and sympy formats, with tests
+      that feed each format and a mixed/unparseable log.
+- [x] `research/CORPUS.md` generated registry + per-dataset reports,
+      byte-compared by `make corpus`.
+- [x] Registered: CoderForge clean (reward re-derives on all 434 parseable
+      rows, 0 disagreements); JetBrains `resolved` populated on 0 of 1,785.
