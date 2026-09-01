@@ -128,14 +128,45 @@ def _raw_path(raw_root: Path, *, task_id: str, model: str) -> Path:
     )
 
 
-def freeze(raw_root: Path) -> dict[str, Any]:
-    selected_digest = _sha256_bytes(
-        ("".join(f"{task_id}\n" for task_id in TASK_IDS)).encode("utf-8")
+def _census_task_ids(raw_root: Path) -> tuple[str, ...]:
+    """Every task present for both model labels, verified against the pin.
+
+    A census removes selection entirely, which is strictly stronger than any
+    sample however well drawn. The 20-task version of this case was drawn
+    outcome-blind by a documented rule, which was the right thing to do when
+    the whole population was not in hand; it now is.
+    """
+    per_model = []
+    for model in (REFERENCE_MODEL, TARGET_MODEL):
+        root = raw_root / "swebench_verified_raw" / model
+        if not root.is_dir():
+            root = raw_root / model
+        per_model.append({path.name for path in root.iterdir() if path.is_dir()})
+    task_ids = tuple(sorted(per_model[0] & per_model[1]))
+    digest = _sha256_bytes(
+        ("".join(f"{task_id}\n" for task_id in task_ids)).encode("utf-8")
     )
-    if selected_digest != SELECTED_TASK_IDS_SHA256:
+    if digest != ELIGIBLE_TASK_IDS_SHA256:
+        raise ValueError(
+            "The eligible population on disk does not match the pinned digest: "
+            f"{digest} against {ELIGIBLE_TASK_IDS_SHA256}. Either the download "
+            "is incomplete or the upstream revision moved."
+        )
+    return task_ids
+
+
+def freeze(raw_root: Path, *, census: bool = False) -> dict[str, Any]:
+    task_ids = _census_task_ids(raw_root) if census else TASK_IDS
+    selected_digest = _sha256_bytes(
+        ("".join(f"{task_id}\n" for task_id in task_ids)).encode("utf-8")
+    )
+    expected = (
+        ELIGIBLE_TASK_IDS_SHA256 if census else SELECTED_TASK_IDS_SHA256
+    )
+    if selected_digest != expected:
         raise ValueError("Frozen task selection digest is inconsistent")
     tasks: list[dict[str, Any]] = []
-    for task_id in TASK_IDS:
+    for task_id in task_ids:
         runs = {}
         for model in (REFERENCE_MODEL, TARGET_MODEL):
             path = _raw_path(raw_root, task_id=task_id, model=model)
@@ -157,13 +188,16 @@ def freeze(raw_root: Path) -> dict[str, Any]:
                 "task IDs present for both fixed model labels at the pinned revision"
             ),
             "order": "lexicographic task_id",
-            "stride": 20,
+            "stride": 1 if census else 20,
             "offset": 0,
-            "take": 20,
+            "take": len(task_ids),
+            # A census has no selection to be blind about; the flag records
+            # that the 20-task sample was drawn before outcomes were seen.
             "outcome_blind": True,
+            "census": census,
             "eligible_task_count": 500,
             "eligible_task_ids_sha256": ELIGIBLE_TASK_IDS_SHA256,
-            "selected_task_ids_sha256": SELECTED_TASK_IDS_SHA256,
+            "selected_task_ids_sha256": selected_digest,
             "digest_encoding": "sorted task IDs, UTF-8, one newline per ID",
         },
         "rubric": {
@@ -196,9 +230,18 @@ def main() -> None:
         "--output",
         default=str(ROOT / "runs.json"),
     )
+    parser.add_argument(
+        "--census",
+        action="store_true",
+        help=(
+            "Freeze every eligible task rather than the 20-task sample. "
+            "Removes selection entirely, and refuses unless the population on "
+            "disk hashes to the pinned eligible digest."
+        ),
+    )
     args = parser.parse_args()
     output = Path(args.output)
-    document = freeze(Path(args.raw_root))
+    document = freeze(Path(args.raw_root), census=args.census)
     output.write_text(
         json.dumps(document, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

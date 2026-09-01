@@ -48,14 +48,24 @@ class TheRealArmsDecideWhatTheReadmeSays(unittest.TestCase):
                 f"${case.cost_per_acceptable_outcome_usd:.2f}",
             )
         for label, (rate, spend, per_resolved) in expected.items():
-            row = next(
-                (line for line in readme.splitlines() if line.startswith(f"| `{label}`")),
-                None,
-            )
+            # More than one README table names these arms now: the outcome
+            # audit lists the same models with different columns. Assert that
+            # some row carries all three economic figures, rather than assuming
+            # the first row bearing the name is the right one.
+            candidates = [
+                line for line in readme.splitlines()
+                if line.startswith(f"| `{label}`")
+            ]
             with self.subTest(arm=label):
-                self.assertIsNotNone(row, f"no README row for {label}")
-                for value in (rate, spend, per_resolved):
-                    self.assertIn(value, row)
+                self.assertTrue(candidates, f"no README row for {label}")
+                self.assertTrue(
+                    any(
+                        all(value in row for value in (rate, spend, per_resolved))
+                        for row in candidates
+                    ),
+                    f"no row for {label} carries {rate}, {spend} and "
+                    f"{per_resolved}; found {candidates}",
+                )
 
     def test_the_task_count_is_twenty_paired(self) -> None:
         counts = {
