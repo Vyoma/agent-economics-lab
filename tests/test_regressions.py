@@ -416,7 +416,10 @@ class ReadmeMatchesTheEngine(unittest.TestCase):
 
     def test_no_recorded_terminal_asset_is_cited(self) -> None:
         self.assertFalse((ROOT / "assets/demo.gif").exists())
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = "\n".join(
+            (ROOT / name).read_text(encoding="utf-8")
+            for name in ("README.md", "docs/recipes.md")
+        )
         for pattern in ("demo.gif", ".mp4", ".webm", ".mov"):
             with self.subTest(pattern=pattern):
                 self.assertNotIn(pattern, readme)
@@ -437,7 +440,10 @@ class ReadmeMatchesTheEngine(unittest.TestCase):
                 )
             )
         )
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        readme = "\n".join(
+            (ROOT / name).read_text(encoding="utf-8")
+            for name in ("README.md", "docs/recipes.md")
+        )
         for line in (
             "**Decision: ASSIST**",
             "| Cost per acceptable outcome | $3.50 |",
@@ -450,3 +456,47 @@ class ReadmeMatchesTheEngine(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DocumentationLinksResolve(unittest.TestCase):
+    """Moving a section must not silently break the links inside it.
+
+    Restructuring the README to lead with the finding moved twelve worked
+    examples into docs/recipes.md, one directory deeper. Every relative path
+    they carried was written from the repository root and broke: 22 of them, in
+    a repo where an outside reviewer had previously found zero.
+    """
+
+    def _markdown(self):
+        return [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
+
+    def test_every_relative_link_points_at_a_file_that_exists(self) -> None:
+        import re
+
+        for path in self._markdown():
+            text = path.read_text(encoding="utf-8")
+            for match in re.finditer(r"\]\((?!https?:|#|mailto:)([^)#]+)", text):
+                target = (path.parent / match.group(1)).resolve()
+                with self.subTest(doc=path.name, link=match.group(1)):
+                    self.assertTrue(target.exists(), f"{path.name} -> {match.group(1)}")
+
+    def test_every_in_page_anchor_names_a_heading(self) -> None:
+        import re
+
+        for path in self._markdown():
+            text = path.read_text(encoding="utf-8")
+            headings = {
+                re.sub(r"[^a-z0-9 -]", "", heading.lower()).replace(" ", "-")
+                for heading in re.findall(r"^#{2,4} (.+)$", text, re.M)
+            }
+            for anchor in re.findall(r"\]\(#([a-z0-9-]+)\)", text):
+                with self.subTest(doc=path.name, anchor=anchor):
+                    self.assertIn(anchor, headings)
+
+    def test_the_readme_leads_with_the_finding(self) -> None:
+        """It sat at line 122 behind two sections of instructions."""
+
+        lines = (ROOT / "README.md").read_text(encoding="utf-8").splitlines()
+        first = next(i for i, line in enumerate(lines) if line.startswith("## "))
+        self.assertEqual(lines[first], "## Found in the wild")
+        self.assertLess(first, 60, "the finding must be reachable without scrolling")
