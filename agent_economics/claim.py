@@ -39,6 +39,7 @@ from .assurance import (
 )
 from .evidence import recompute_digest
 from .models import CheckSpec, EvidenceBundle, Unsupplied
+from .registry import default_registry
 
 CLAIM_SCHEMA_VERSION = "assurance.claim@1"
 
@@ -400,8 +401,23 @@ def verify(
         checked.append("evidence digest recomputes from contents and matches")
 
         # Caller-supplied first, so a build can verify a claim about a gate it
-        # does not ship, then the defaults.
+        # does not ship; then the defaults; then anything else this build has
+        # registered, rebuilt from the evidence.
+        #
+        # Rebuilding a factory gate from the bundle is safe because the claim
+        # binds its configuration into the contract digest: if the evidence
+        # produces a different manifest or threshold than the claim was issued
+        # under, the recomputed contract will not match and this refuses.
         available = {spec.id: spec for spec in default_checks()}
+        for binding in claim.checks:
+            if binding.id in available:
+                continue
+            try:
+                available[binding.id] = default_registry().build(
+                    binding.id, bundle=bundle
+                )
+            except Exception:  # an unbuildable check is simply absent, not fatal
+                continue
         available.update({spec.id: spec for spec in checks})
         specs: list[CheckSpec] = []
         unavailable: list[str] = []

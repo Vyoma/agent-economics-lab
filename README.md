@@ -1018,6 +1018,32 @@ it.
 
 [Inspect the action contract](action.yml)
 
+## Compose a contract by name
+
+`agent-economics capabilities` lists every check this build can run. Two of
+them — delegation closure and evidence provenance — shipped, were documented,
+and reached no command-line decision at all, because the check set was a
+literal compiled into four consumers rather than something a caller could ask
+for.
+
+```bash
+agent-economics evaluate --bundle bundle.json \
+  --check gate.acceptable-rate \
+  --check gate.delegation-closure \
+  --require-coverage outcome_quality \
+  --require-coverage delegation_closure
+```
+
+Order matters, because the decision-contract digest binds it: the same checks
+in a different order are a different contract. A check the build cannot
+resolve is refused with exit 2 rather than dropped, because a contract naming a
+check nobody can build is unreadable rather than weaker.
+
+Both of those gates are built from the evidence itself — the delegation
+manifest the bundle declares, the instrument it names — so naming one on a
+command line is enough. A contract that let the caller supply the manifest
+could declare every delegation accounted for without the evidence saying so.
+
 ## Ask what your harness cannot tell you
 
 ```bash

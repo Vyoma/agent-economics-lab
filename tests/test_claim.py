@@ -482,3 +482,46 @@ class ACustomContractCanBeVerified(unittest.TestCase):
         )
         self.assertEqual(forged.decision, "SCALE")
         self.assertIs(verify(forged, reference).verdict, Verdict.UNVERIFIED)
+
+
+class ARegistryContractIsVerifiable(unittest.TestCase):
+    """A claim over a contract this build can compose must be checkable.
+
+    `verify` resolved only against `default_checks()`, so a claim including
+    `gate.delegation-closure` -- a gate this package ships and documents --
+    was unverifiable by the build that issued it.
+    """
+
+    def _claim_with_delegation(self):
+        from agent_economics.checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+        from agent_economics.delegation import DELEGATION_CLOSURE
+        from agent_economics.registry import default_registry
+
+        bundle = load_normalized_json_bundle(EXAMPLE)
+        specs = default_registry().compose(
+            [s.id for s in default_checks()] + ["gate.delegation-closure"],
+            bundle=bundle,
+        )
+        claim = issue(
+            bundle, "Contract includes delegation closure.", checks=specs,
+            required_coverage=frozenset(DEFAULT_REQUIRED_COVERAGE)
+            | {DELEGATION_CLOSURE},
+            issued_at=ISSUED, source_commit="0" * 40,
+        )
+        return bundle, claim
+
+    def test_it_verifies_without_the_caller_supplying_the_gate(self) -> None:
+        bundle, claim = self._claim_with_delegation()
+        self.assertIs(verify(claim, bundle).verdict, Verdict.SUPPORTED)
+
+    def test_the_rebuilt_gate_is_still_bound_by_source(self) -> None:
+        """Rebuilding from the registry must not become a way past the digest."""
+        bundle, claim = self._claim_with_delegation()
+        index = next(
+            i for i, b in enumerate(claim.checks)
+            if b.id == "gate.delegation-closure"
+        )
+        bindings = list(claim.checks)
+        bindings[index] = replace(bindings[index], implementation_digest="f" * 64)
+        result = verify(replace(claim, checks=tuple(bindings)), bundle)
+        self.assertIs(result.verdict, Verdict.UNVERIFIED)
