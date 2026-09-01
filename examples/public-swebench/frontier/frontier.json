@@ -7,7 +7,7 @@
       "cost_per_acceptable_outcome_usd": 0.602557339286,
       "decision_contract_digest": "e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab",
       "dominated": false,
-      "evidence_digest": "2d063279479ebeff05654482a77ad53eb6076441315e462b1881e0c56e5a4394",
+      "evidence_digest": "7f1d389eaa72c96d5f497c807feeea11d46ae41953d137c49e940fbcda2b9761",
       "expected_net_value_per_attempt_usd": -0.4217901375,
       "mean_effective_cost_usd": 0.4217901375,
       "paired_tasks": 20
@@ -19,7 +19,7 @@
       "cost_per_acceptable_outcome_usd": 0.488630590909,
       "decision_contract_digest": "e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab",
       "dominated": false,
-      "evidence_digest": "c88375512518ad44a03ff98b4eb44b8184825aaaeacdcd02eb0e9ce0f8497a4d",
+      "evidence_digest": "ae0bfbd3f2bd017d061439eecf64a1017ce5e4bc28840f3b72ff4cca9c51cf0e",
       "expected_net_value_per_attempt_usd": -0.268746825,
       "mean_effective_cost_usd": 0.268746825,
       "paired_tasks": 20

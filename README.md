@@ -86,36 +86,54 @@ stop. Those are in [the honest limits](#the-honest-limits), not buried.
 
 ## Found in the wild
 
-Pointing this at a public dataset produced the thing it was built to catch, in
-somebody else's data rather than its own.
+Pointed at a public dataset, this produced two things it was built to catch, in
+data it did not produce.
 
-The [swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories)
-dataset publishes agent runs across ten model arms. Each trajectory carries
+All ten model arms of
+[swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories),
+500 SWE-bench Verified tasks each, 5,000 trajectories. Each carries
 `info.resolved`, which reads as the adjudicated outcome, and beside it
-`info.scores.resolved`. For five arms downloaded in full:
+`info.scores.resolved`.
 
 | arm | n | naive rate | cross-check unknown | confirmed rate |
 |---|---:|---:|---:|---:|
 | `claude-4.5-haiku-high` | 500 | 66.6% | 0 | 66.6% |
 | `claude-4.5-opus-high` | 500 | 76.8% | 0 | 76.8% |
 | `claude-opus-4.6` | 500 | 77.2% | 8 | 76.8% |
+| `gemini-3-flash-high` | 500 | 75.8% | 0 | 75.8% |
+| `glm-5-high` | 500 | 72.8% | 0 | 72.8% |
+| `gpt-5-mini` | 500 | 56.2% | 0 | 56.2% |
 | `gpt-5.2-codex` | 500 | 72.8% | 0 | 72.8% |
-| `gemini-3-pro` | 500 | **100.0%** | **500** | **unestablished** |
+| `gpt-5.2-high` | 500 | 72.8% | 0 | 72.8% |
+| `minimax-m2.5-high` | 500 | 75.8% | 0 | 75.8% |
+| `gemini-3-pro` | 500 | 100.0% | 500 | **unestablished** |
 
-`gemini-3-pro` reads 100% on all 500 tasks from `info.resolved`, at $480.01 of
-published spend over 25,641 API calls, while its own cross-check says
-`"unknown"` for every one. Real runs, real spend, unscored outcomes, and a field
-left at its default. A 100% rate on SWE-bench Verified is not a result anyone
-has achieved.
+**One arm's outcome was never scored.** `gemini-3-pro` reads 100% on all 500
+tasks from `info.resolved`, at $480.01 of published spend over 25,641 API calls,
+while its own cross-check says `"unknown"` for every one. Real runs, unscored
+outcomes, and a field left at its default. A 100% rate on SWE-bench Verified is
+not a result anyone has achieved.
 
-The dataset is not at fault. It ships the cross-check that reveals this and
-marks the unscored arm honestly. The failure belongs to a consumer that reads
-one field and publishes a rate, which is the exact shape this repository is
-about: the information needed to refuse was one field away.
+**Two arms are the same runs.** `gpt-5.2-codex` and `gpt-5.2-high` carry
+byte-identical transcripts on all 500 tasks — same messages, same cost to
+sixteen decimals, same call count — differing only in `model_label` and run id.
+
+That accident is the useful part: it scored the same input twice.
+**`info.resolved` disagrees with itself on 44 of those 500, so the label agrees
+with itself 91.2% of the time on identical input.** The spread
+across the nine scored arms is 21 points. The label's own disagreement is 9.
+Small gaps between models here cannot be distinguished from the instrument
+disagreeing with itself.
+
+Neither is a claim that the dataset is wrong: it ships the cross-check that
+reveals the first, and the duplication is visible to anyone who hashes the
+transcripts. Neither is a claim about any model. What causes the 8.8% is not
+established — flaky tests, a non-deterministic environment, and a labelling
+pipeline scoring the copies at different times would all look like this.
 
 [The audit, its limits, and the frozen evidence.](research/OUTCOME_AUDIT.md)
 Reproducible offline from content-free rows that each carry the SHA-256 of the
-upstream trajectory: `make outcome-audit`.
+upstream trajectory and of its transcript: `make outcome-audit`.
 
 ## End to end, on real agent runs
 

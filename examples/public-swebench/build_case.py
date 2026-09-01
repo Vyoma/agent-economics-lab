@@ -193,6 +193,12 @@ def _bundle(
         source_id=SOURCE_ID,
         source_version=SOURCE_VERSION,
         task_manifest=_task_manifest(source),
+        # What adjudicated these outcomes. The case shipped without this, so
+        # every audit of it withheld on "no evidence instrument recorded" --
+        # correctly, because nothing said whether the labels came from hidden
+        # tests, a model, or a default. For this dataset it is the SWE-bench
+        # hidden tests, and the rubric block already named them.
+        label_source=source["rubric"]["version"],
     )
 
 
