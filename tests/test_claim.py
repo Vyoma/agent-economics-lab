@@ -26,6 +26,8 @@ from agent_economics.claim import (
     parse_claim,
     verify,
 )
+from agent_economics.models import Outcome
+from agent_economics.unsupplied import checks_only_bundle
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples" / "claude-code" / "bundle.json"
@@ -90,7 +92,12 @@ class ForgingAClaim(unittest.TestCase):
             result.verdict, Verdict.UNVERIFIED,
             "a claim under a weakened contract must not be confirmed",
         )
-        self.assertIn("requires less than the shipped contract", result.reasons[0])
+        # Caught by the contract-relative rule, which fires first and is
+        # stronger: the claim still carries gates for dimensions it stopped
+        # requiring, so removing them would not change the verdict. The
+        # shipped-floor message is the fallback for a claim that drops the
+        # coverage without dropping the gate.
+        self.assertIn("without requiring those dimensions", result.reasons[0])
 
     def test_requiring_no_coverage_never_verifies(self) -> None:
         bundle = _bundle()
@@ -364,3 +371,114 @@ class TheRecordMustSurviveTheCodeMoving(unittest.TestCase):
         self.assertTrue(
             any("records no source commit" in reason for reason in result.reasons)
         )
+
+
+class ACustomContractCanBeVerified(unittest.TestCase):
+    """The claim layer and the custom-gate story were mutually exclusive.
+
+    `verify` resolved checks only against `default_checks()`, so a team with a
+    PII gate -- the motivating example in `unsupplied` -- could issue a claim
+    that nobody, including them, could ever verify. And the coverage floor
+    demanded every shipped economic dimension, so a safety-only contract was
+    unverifiable by construction even once the gate could be resolved.
+    """
+
+    def _gate(self):
+        from agent_economics.models import (
+            CheckMode,
+            CheckOutput,
+            CheckResult,
+            CheckSpec,
+            CheckStatus,
+            Decision,
+        )
+
+        def pii_gate(view) -> CheckOutput:
+            return CheckOutput(results=(CheckResult(
+                check_id="gate.pii", status=CheckStatus.PASS, message="clean",
+            ),))
+
+        return CheckSpec(
+            id="gate.pii", version="1", mode=CheckMode.GATE,
+            covers=frozenset({"pii_safety"}), run=pii_gate,
+            failure_route=Decision.STOP,
+        )
+
+    def _bundle_and_claim(self, spec, coverage=frozenset({"pii_safety"})):
+        from agent_economics.models import TraceEvent
+
+        events = tuple(
+            TraceEvent(
+                task_id=f"t{i}", event_id=f"e{i}",
+                timestamp=f"2026-08-27T00:00:0{i}Z", event_type="model",
+                name="chat", model="m", direct_cost_usd=0.0,
+            )
+            for i in range(2)
+        )
+        bundle = checks_only_bundle(
+            events=events,
+            outcomes={f"t{i}": Outcome(task_id=f"t{i}", acceptable=True)
+                      for i in range(2)},
+            source_id="s.x",
+        )
+        claim = issue(
+            bundle, "Our PII gate passes.", checks=(spec,),
+            required_coverage=coverage, issued_at=ISSUED,
+            source_commit="0" * 40,
+        )
+        return bundle, claim
+
+    def test_a_supplied_gate_lets_a_custom_claim_verify(self) -> None:
+        spec = self._gate()
+        bundle, claim = self._bundle_and_claim(spec)
+        result = verify(claim, bundle, checks=(spec,))
+        self.assertIs(result.verdict, Verdict.SUPPORTED)
+
+    def test_it_says_which_shipped_dimensions_the_custom_contract_omits(self) -> None:
+        """A caveat, not a refusal: the claim was never about economics."""
+        spec = self._gate()
+        bundle, claim = self._bundle_and_claim(spec)
+        result = verify(claim, bundle, checks=(spec,))
+        self.assertTrue(result.caveats)
+        self.assertIn("custom contract", result.caveats[0])
+        self.assertIn("unit_economics", result.caveats[0])
+
+    def test_a_build_without_the_gate_still_cannot_verify(self) -> None:
+        spec = self._gate()
+        bundle, claim = self._bundle_and_claim(spec)
+        self.assertIs(verify(claim, bundle).verdict, Verdict.UNVERIFIED)
+
+    def test_a_supplied_gate_with_different_source_is_refused(self) -> None:
+        """Supplying checks must not be a way to smuggle in a permissive one."""
+        spec = self._gate()
+        bundle, claim = self._bundle_and_claim(spec)
+        swapped = replace(
+            claim,
+            checks=(replace(claim.checks[0], implementation_digest="f" * 64),),
+        )
+        self.assertIs(verify(swapped, bundle, checks=(spec,)).verdict, Verdict.UNVERIFIED)
+
+    def test_a_gate_whose_dimension_is_not_required_is_refused(self) -> None:
+        """The weakening that applies to every contract, custom or shipped."""
+        spec = self._gate()
+        bundle, claim = self._bundle_and_claim(spec, coverage=frozenset())
+        result = verify(claim, bundle, checks=(spec,))
+        self.assertIs(result.verdict, Verdict.UNVERIFIED)
+        self.assertIn("without requiring those", result.reasons[0])
+
+    def test_the_original_forgery_is_still_refused(self) -> None:
+        """Dropping the failing shipped gate and requiring nothing."""
+        from agent_economics.assurance import AssuranceEngine, default_checks
+
+        bundle = _bundle()
+        full = tuple(default_checks())
+        reference = load_normalized_json_bundle(EXAMPLE)
+        case = AssuranceEngine(full).evaluate(reference)
+        failing = {r.check_id for r in case.check_results if r.status.value != "PASS"}
+        forged = issue(
+            reference, "Safe to scale.",
+            checks=tuple(s for s in full if s.id not in failing),
+            required_coverage=frozenset(), issued_at=ISSUED,
+        )
+        self.assertEqual(forged.decision, "SCALE")
+        self.assertIs(verify(forged, reference).verdict, Verdict.UNVERIFIED)

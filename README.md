@@ -301,6 +301,12 @@ it different evidence and it exits 4. Hand it a claim naming a check whose
 source differs from yours and it exits 2, because a claim you cannot reproduce
 is not a claim you have disproved.
 
+A claim about gates this build does not ship is verifiable too: pass them in.
+The claim binds each by source digest, so supplying a permissive substitute is
+still `UNVERIFIED`. Before that, a team with a PII gate and a jailbreak gate --
+the case this package is built around -- could issue a claim nobody, including
+them, could ever check.
+
 `UNVERIFIED` is the load-bearing verdict. A verifier that cannot separate
 "false" from "I could not tell" is the same fail-open catalogued below, moved
 one level up, so no failure path returns `SUPPORTED` and none raises.
