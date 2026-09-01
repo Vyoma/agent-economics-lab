@@ -128,8 +128,8 @@ Routing semantics:
 
 | Decision | Meaning |
 |---|---|
-| `INCOMPLETE` | Enabled gates do not supply one or more dimensions in the fixed decision contract |
-| `SCALE` | All economic checks pass and no deterministic control cap is breached |
+| `INCOMPLETE` | Enabled gates do not supply one or more dimensions in the fixed decision contract, or the audit found grounds to withhold a `SCALE` |
+| `SCALE` | All economic checks pass, no deterministic control cap is breached, and the audit has no grounds to withhold: instruments attested, delegation accounted |
 | `ASSIST` | Value remains positive, but at least one policy/control boundary fails |
 | `STOP` | A required value gate fails, including the counterfactual value floor |
 
@@ -137,6 +137,13 @@ The counterfactual is a gate, not merely a comparison table. The default policy
 requires incremental net value versus the named baseline to be at least zero. An
 agent that is profitable in isolation but worse than the available alternative
 cannot receive `SCALE`.
+
+On the shipped surfaces (`evaluate --ci`, the GitHub Action) a `SCALE` is
+issued through one act: the engine decides, then the audit is asked for
+grounds to withhold, and a `SCALE` the audit refuses is returned as
+`INCOMPLETE` carrying those grounds. `ASSIST` and `STOP` pass through
+untouched: they are already refusals to scale, and demoting them would hide
+why the evidence failed behind why it was inadmissible.
 
 Checks are explicitly composed and recorded by ID/version. Removing an optional
 diagnostic changes only its findings. Disabling a sole-provider gate while its
