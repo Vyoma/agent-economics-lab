@@ -32,6 +32,41 @@ data.
 | how it works | [architecture](#architecture), then [methodology](docs/methodology.md) |
 | whether it is new | [prior art and the narrow delta](docs/landscape.md) |
 | to wire it into CI | [`action.yml`](action.yml), it runs as a GitHub Action |
+| to publish a claim of your own | [issue your first claim](#issue-your-first-claim), four commands from a CSV |
+
+## Issue your first claim
+
+Every command below takes a *bundle*, the normalized evidence format. Until
+recently the only way to get one was one of the three adapters, so anyone with
+ordinary CSV evidence could evaluate it and never publish a claim about it.
+That friction is what keeps a record single-issuer, and it is invisible from
+inside the project.
+
+```bash
+agent-economics bundle \
+  --traces traces.csv --outcomes outcomes.csv \
+  --rates rates.json --baseline baseline.json --policy policy.json \
+  --label-source "my-team.manual-review@v1" \
+  --out bundle.json
+
+agent-economics claim --bundle bundle.json \
+  --issuer "my-team" --source-commit "$(git rev-parse HEAD)" \
+  --assertion "What you are asserting, in your own words." \
+  --output my.claim.json
+```
+
+Anyone can then check it without trusting you, and gets `REFUTED` if you hand
+them the wrong evidence:
+
+```bash
+agent-economics verify --claim my.claim.json --bundle bundle.json
+```
+
+`--label-source` is worth filling in. It names what produced your outcome
+labels: a rubric version, a judge model, a test suite. Leave it out and the
+audit withholds, because nothing then says whether the labels were adjudicated
+or defaulted — which is exactly the failure
+[found upstream](#found-in-the-wild).
 
 ## What this is, in plain words
 
