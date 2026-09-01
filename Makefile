@@ -215,6 +215,8 @@ claude-code-tree: check-python
 	@cmp /tmp/agent-economics-claude-code-tree.json examples/claude-code-tree/bundle.json
 	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code-tree.json \
+		--attestations examples/attestations.json \
+		--as-of 2026-09-01 \
 		--ci
 
 otel-genai: check-python
@@ -226,6 +228,8 @@ otel-genai: check-python
 	@cmp /tmp/agent-economics-otel-langfuse.json examples/otel-genai/langfuse-bundle.json
 	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-otel-langfuse.json \
+		--attestations examples/attestations.json \
+		--as-of 2026-09-01 \
 		--ci
 	@$(PYTHON) -m agent_economics convert \
 		--from otel-genai \
@@ -235,6 +239,8 @@ otel-genai: check-python
 	@cmp /tmp/agent-economics-otel-arize.json examples/otel-genai/arize-openinference-bundle.json
 	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-otel-arize.json \
+		--attestations examples/attestations.json \
+		--as-of 2026-09-01 \
 		--ci
 
 public-case: check-python
