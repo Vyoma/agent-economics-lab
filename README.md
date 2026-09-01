@@ -39,6 +39,11 @@ All ten model arms of
 `info.resolved`, which reads as the adjudicated outcome, and beside it
 `info.scores.resolved`.
 
+It is an independent upload under an individual account, not a release by any of
+the vendors whose models the arms are named for. An arm name below identifies a
+set of runs in this dataset. It is not a number any vendor published, and nothing
+here is a measurement of a model.
+
 | arm | n | naive rate | cross-check unknown | confirmed rate |
 |---|---:|---:|---:|---:|
 | `claude-4.5-haiku-high` | 500 | 66.6% | 0 | 66.6% |

@@ -132,6 +132,11 @@ def render(document: dict) -> str:
     lines = [
         "# What the outcome field says, and what its cross-check says",
         "",
+        "The dataset is an independent upload under an individual account, not",
+        "a release by any of the vendors whose models the arms are named for. An",
+        "arm name identifies a set of runs in this dataset. It is not a number any",
+        "vendor published, and nothing below is a measurement of a model.",
+        "",
         "Every arm here records real API calls and real published spend, both",
         "of which are in the frozen evidence and checkable. They differ in",
         "whether the outcome was confirmed.",
