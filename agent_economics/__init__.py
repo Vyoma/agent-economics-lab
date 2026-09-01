@@ -1,6 +1,6 @@
 """Small, dependency-free primitives for an agent economic assurance case."""
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 from .adapters import (
     load_normalized_json_bundle,
