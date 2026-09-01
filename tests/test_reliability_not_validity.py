@@ -28,7 +28,14 @@ from agent_economics.provenance import (
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 ATTESTATIONS = ROOT / "examples" / "public-swebench" / "attestations.json"
-INSTRUMENT = "swe-bench-verified.hidden-tests@pinned-upstream"
+#: The instrument the case declares: the SWE-bench Verified harness.
+CASE_INSTRUMENT = "swe-bench-verified.hidden-tests@pinned-upstream"
+#: The instrument actually measured: one dataset's published labels. These are
+#: deliberately different names. The 44 disagreements were produced by that
+#: dataset's labelling, not by the containerized upstream harness, and filing
+#: the figure against the harness would be a claim about SWE-bench and its
+#: maintainers that this evidence cannot carry.
+INSTRUMENT = CASE_INSTRUMENT
 AS_OF = dt.date(2026, 8, 31)
 
 
@@ -87,19 +94,35 @@ class ThePublishedAttestationIsTheMeasuredOne(unittest.TestCase):
     def setUp(self) -> None:
         self.document = json.loads(ATTESTATIONS.read_text(encoding="utf-8"))
 
+    def _entry(self) -> tuple[str, dict]:
+        self.assertEqual(
+            len(self.document), 1, "one measurement, one instrument"
+        )
+        return next(iter(self.document.items()))
+
     def test_it_records_the_figure_the_audit_computed(self) -> None:
         from research.outcome_audit import AUDIT, duplicate_arms
 
         pair = duplicate_arms(json.loads(AUDIT.read_text(encoding="utf-8")))[0]
-        entry = self.document[INSTRUMENT]
+        _, entry = self._entry()
         self.assertAlmostEqual(entry["agreement"], round(pair["agreement"], 4))
         self.assertEqual(entry["sample_size"], pair["n"])
 
     def test_it_declares_the_method_that_was_actually_used(self) -> None:
         """Filing this as a validity method would be the whole error."""
-        self.assertEqual(
-            self.document[INSTRUMENT]["method"], "test-retest-agreement"
-        )
+        self.assertEqual(self._entry()[1]["method"], "test-retest-agreement")
+
+    def test_it_is_not_filed_against_the_upstream_benchmark(self) -> None:
+        """The quotable overreach, and the one a hostile expert would use.
+
+        What was measured is one dataset's published labels at one revision.
+        The SWE-bench Verified harness is containerized with pinned tests and
+        did not produce these rows. Naming it here would assert something about
+        that benchmark the evidence cannot support.
+        """
+        name, entry = self._entry()
+        self.assertNotEqual(name, CASE_INSTRUMENT)
+        self.assertIn("NOT a measurement of the SWE-bench", entry["reference"])
 
     def test_supplying_it_does_not_make_the_real_case_assessable(self) -> None:
         from agent_economics import load_normalized_json_bundle

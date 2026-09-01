@@ -324,10 +324,11 @@ case, not seconds. `--reasoning-effort high` or `low` is much faster if your
 account supports those levels. Progress prints per case with elapsed time, so a
 slow run is distinguishable from a stuck one.
 
-[`research/eval/judge-eval-set.json`](https://github.com/Vyoma/agent-economics-lab/blob/main/research/eval/judge-eval-set.json) holds 24
-constructed cases, 8 expected-acceptable and 16 expected-unacceptable, across seven
-categories: correct, correct-but-curt, factually-wrong, hallucinated-feature,
-contradicts-context, non-answer, and policy-breach.
+[`research/eval/judge-eval-set.json`](https://github.com/Vyoma/agent-economics-lab/blob/main/research/eval/judge-eval-set.json) holds 25
+constructed cases, 8 expected-acceptable and 17 expected-unacceptable, across eight
+categories: contradicts-context, correct, correct-but-curt,
+destructive-without-caveats, factually-wrong, hallucinated-feature, non-answer,
+and policy-breach.
 
 Expected labels are not a matter of taste. They follow from the rubric's own
 weights, and a test asserts that arithmetic against the live rubric file:

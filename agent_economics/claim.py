@@ -268,6 +268,25 @@ def issue(
 #: detects a threshold that is *inert*, not one that is merely lenient, because
 #: no normative standard for "strict enough" exists and inventing one here would
 #: be the fabrication this package refuses.
+#: The same test applied to the baseline. `gate.counterfactual` compares the
+#: run against it, so the baseline is a pass mark the audited party supplies
+#: exactly as the policy is. Checking only the policy left the forgery this
+#: guard exists to stop escaping one field over: identical events, identical
+#: labels, a baseline costing a million dollars an attempt, and STOP becomes
+#: SCALE while the verifier printed "no threshold in this evidence is inert".
+#: Only the one value that cannot be an honest declaration. A baseline costing
+#: a million dollars an attempt is not a baseline. The first version of this
+#: also flagged a non-positive `value_per_acceptable_outcome_usd` and a
+#: non-positive `acceptable_rate`, which broke a true published claim: the
+#: public SWE-bench case sets value-per-outcome to zero because resolving a
+#: benchmark task carries no assigned dollar value, and that is a statement
+#: about the domain rather than a rigged pass mark. Flagging an honest zero as
+#: a rigged threshold is the same error as accepting a rigged one, pointed the
+#: other way, and it is worse here because it refuses evidence that was fine.
+_INERT_BASELINE: tuple[tuple[str, str, float], ...] = (
+    ("cost_per_attempt_usd", ">=", 1e6),
+)
+
 _INERT_THRESHOLDS: tuple[tuple[str, str, float], ...] = (
     ("min_acceptable_rate", "<=", 0.0),
     ("max_cost_per_acceptable_outcome_usd", ">=", 1e6),
@@ -277,6 +296,27 @@ _INERT_THRESHOLDS: tuple[tuple[str, str, float], ...] = (
     ("min_expected_net_value_per_attempt_usd", "<=", -1e6),
     ("min_incremental_net_value_vs_baseline_usd", "<=", -1e6),
 )
+
+
+def _inert_against(subject: Any, spec: tuple[tuple[str, str, float], ...]) -> tuple[str, ...]:
+    if isinstance(subject, Unsupplied) or subject is None:
+        return ()
+    found: list[str] = []
+    for name, direction, bound in spec:
+        try:
+            value = float(getattr(subject, name))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        if (direction == "<=" and value <= bound) or (
+            direction == ">=" and value >= bound
+        ):
+            found.append(f"{name}={value:g}")
+    return tuple(found)
+
+
+def inert_baseline(baseline: Any) -> tuple[str, ...]:
+    """Baseline values a counterfactual gate could not fail against."""
+    return _inert_against(baseline, _INERT_BASELINE)
 
 
 def inert_thresholds(policy: Any) -> tuple[str, ...]:
@@ -407,7 +447,9 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
         # labels, every dimension covered, and ASSIST becomes SCALE. The earlier
         # wording here -- "contract is at least as strong as the shipped one" --
         # was false as printed, and vouched for numbers never inspected.
-        inert = inert_thresholds(getattr(bundle, "policy", None))
+        inert = inert_thresholds(getattr(bundle, "policy", None)) + inert_baseline(
+            getattr(bundle, "baseline", None)
+        )
         if inert:
             return Verification(
                 Verdict.UNVERIFIED, assertion,
@@ -420,7 +462,10 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
                 ),
                 checked=tuple(checked),
             )
-        checked.append("no threshold in this evidence is inert")
+        checked.append(
+            "no threshold or baseline in this evidence is inert, against the "
+            "stated bounds"
+        )
         recomputed_contract = decision_contract_digest(tuple(specs), coverage)
         if recomputed_contract != claim.decision_contract_digest:
             return Verification(

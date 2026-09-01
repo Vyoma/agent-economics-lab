@@ -31,7 +31,13 @@ TRACES = (
     "t1,e1,2026-07-01T10:00:00Z,model,answer,frontier-large,1200,300,\n"
     "t2,e2,2026-07-01T10:01:00Z,model,answer,frontier-large,900,250,\n"
 )
-OUTCOMES = "task_id,acceptable\nt1,true\nt2,false\n"
+# Every economic column is declared: an outcomes file silent about
+# incident loss has not said there was none, and the loader refuses it.
+OUTCOMES = (
+    "task_id,acceptable,business_value_usd,human_minutes,remediation_cost_usd,incident_loss_usd\n"
+    "t1,true,10,,,\n"
+    "t2,false,0,45,120,1200\n"
+)
 
 
 def _run(argv: list[str]) -> tuple[int, str]:

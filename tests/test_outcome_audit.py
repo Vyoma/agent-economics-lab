@@ -132,7 +132,28 @@ class TheFinding(unittest.TestCase):
         text = PAGE.read_text(encoding="utf-8")
         self.assertIn("not a claim that the dataset is wrong", text)
         self.assertIn("not a claim about any model's real capability", text)
-        self.assertIn("rate-limited", text)
+
+    def test_the_page_states_its_coverage_truthfully(self) -> None:
+        """This assertion previously required the word "rate-limited", which
+        pinned a stale sentence claiming five arms were missing while all ten
+        were present. A guard that requires a falsehood is worse than none.
+        """
+        text = PAGE.read_text(encoding="utf-8")
+        missing = self.document.get("not_obtained") or {}
+        if missing:
+            self.assertIn("did not complete", text)
+            for arm in missing:
+                self.assertIn(arm, text)
+        else:
+            self.assertIn("are included", text)
+            self.assertNotIn("absent here", text)
+
+    def test_the_page_claims_only_fields_the_evidence_carries(self) -> None:
+        """It asserted `exit_status` "Submitted", which is in no frozen row."""
+        text = PAGE.read_text(encoding="utf-8")
+        carried = {k for rows in self.document["arms"].values() for k in rows[0]}
+        self.assertNotIn("exit_status", carried)
+        self.assertNotIn("exit_status", text)
 
     def test_the_headline_count_matches_the_arms(self) -> None:
         text = PAGE.read_text(encoding="utf-8")

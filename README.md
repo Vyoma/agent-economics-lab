@@ -23,7 +23,14 @@ make demo
 
 No install, no API key, no account. Zero dependencies beyond the Python standard
 library. It runs in about a second and prints a real decision on bundled example
-data.
+data. Python 3.10 or newer is required; on a machine whose `python3` is older,
+every target says so and tells you what to retry with.
+
+The `agent-economics` command used later in this file needs one more step:
+
+```bash
+pip install -e .
+```
 
 | If you want | Go to |
 |---|---|
@@ -143,11 +150,15 @@ All ten model arms of
 | `minimax-m2.5-high` | 500 | 75.8% | 0 | 75.8% |
 | `gemini-3-pro` | 500 | 100.0% | 500 | **unestablished** |
 
-**One arm's outcome was never scored.** `gemini-3-pro` reads 100% on all 500
+**One arm's outcome was never confirmed.** `gemini-3-pro` reads 100% on all 500
 tasks from `info.resolved`, at $480.01 of published spend over 25,641 API calls,
-while its own cross-check says `"unknown"` for every one. Real runs, unscored
-outcomes, and a field left at its default. A 100% rate on SWE-bench Verified is
-not a result anyone has achieved.
+while its own cross-check says `"unknown"` for every one.
+
+Harder than any argument about plausible rates: **nine of those 500 runs record
+a single API call and no spend, and `info.resolved` is `true` for all nine.**
+Whatever those runs were, they did not resolve a SWE-bench issue. What the field
+is recording for this arm is not established here; that it is not an adjudicated
+outcome, is.
 
 **Two arms are the same runs.** `gpt-5.2-codex` and `gpt-5.2-high` carry
 byte-identical transcripts on all 500 tasks — same messages, same cost to
@@ -167,8 +178,10 @@ established — flaky tests, a non-deterministic environment, and a labelling
 pipeline scoring the copies at different times would all look like this.
 
 **The loop closes, and not in this project's favour.** This package has always
-demanded to know how good an outcome instrument is, and nobody had measured this
-one. The duplication is that measurement, so it is now filed as an attestation:
+demanded to know how good an outcome instrument is. The duplication is a
+measurement of one, filed as an attestation against *this dataset's published
+labels at this revision* — not against the SWE-bench Verified harness, which is
+containerized with pinned tests and did not produce these rows:
 `test-retest-agreement`, 0.912, n=500, in
 [examples/public-swebench/attestations.json](examples/public-swebench/attestations.json).
 
@@ -221,7 +234,7 @@ someone who does not trust the result:
 
 ```bash
 agent-economics verify \
-  --claim research/claims/2026-08-31-swebench-opus-0b3c38bf.claim.json \
+  --claim research/claims/2026-08-31-swebench-opus-attributed-ae7527bc.claim.json \
   --bundle examples/public-swebench/arms/candidate-opus.json
 ```
 
@@ -383,9 +396,11 @@ found those five, not a method. So the method was written down and the target
 list committed *before* any probe: all five defects share a sharper form than
 any single code smell, namely one quantity computed two ways with one way wrong.
 Enumerating those divergences gave 18 sites at pre-registration, against 285 for
-the naive shapes (the regenerated file now reads 288 as the package grew). `research/PROBE_SITES.md` regenerates from current code, so it
-now reads 17 against 285: the fixes removed one. The pre-registered file is the
-git blob at `552323b`, not the working copy.
+the naive shapes. Those are the pre-registered figures, fixed in the git blob
+at `552323b`. `research/PROBE_SITES.md` regenerates from current code and moves
+as the package grows, so read the current counts there rather than here: an
+earlier version of this sentence hand-quoted them and was wrong in both clauses
+by the time anyone read it.
 
 **18 divergences probed, 3 real defects at 3 sites**, or 3/13 counted as
 distinct sites.

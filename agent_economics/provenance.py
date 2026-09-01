@@ -304,7 +304,16 @@ def assess_provenance(
             reasons.append(
                 f"sample of {record.sample_size} below {policy.min_sample_size}"
             )
-        if age > policy.max_age_days:
+        if age < 0:
+            # `age_days` goes negative and the only test was `age > max_age`,
+            # so a certificate issued after the audit date read as freshly
+            # calibrated. A measurement that has not been taken yet is not a
+            # measurement.
+            reasons.append(
+                f"calibrated {-age} days in the future, which is not a "
+                "calibration that has happened"
+            )
+        elif age > policy.max_age_days:
             reasons.append(f"calibrated {age} days ago, limit {policy.max_age_days}")
         statuses.append(
             InstrumentStatus(

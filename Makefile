@@ -1,5 +1,12 @@
 PYTHON ?= python3
 
+# Every target depends on this, not just `reproduce` and `test`. It guarded two
+# of thirty-four, so `make demo` -- the first command in the README, run by
+# someone who has just cloned -- crashed with a TypeError from `mutation.py` on
+# stock macOS Python 3.9 instead of printing the message below. A check that
+# does not run on the path that matters is not a check that passed, which is
+# this project's own thesis applied to its own front door.
+#
 # The package declares requires-python >= 3.10, but `make` cannot enforce that
 # the way pip does. Without this guard a contributor whose default python3 is
 # older gets obscure failures instead of a usable message: on such a machine
@@ -10,7 +17,7 @@ check-python:
 
 .PHONY: check-python lint coverage label-error demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
 
-demo:
+demo: check-python
 	@$(PYTHON) -m agent_economics evaluate \
 		--traces examples/support_trace.csv \
 		--outcomes examples/outcomes.csv \
@@ -18,50 +25,50 @@ demo:
 		--baseline examples/baseline.json \
 		--policy examples/policy.json
 
-modularity:
+modularity: check-python
 	PYTHONPATH=. $(PYTHON) examples/modularity_demo.py
 
-coverage-drift:
+coverage-drift: check-python
 	@$(PYTHON) false_green.py
 
-falsegreen: coverage-drift
+falsegreen: coverage-drift check-python
 
-benchmark:
+benchmark: check-python
 	$(PYTHON) false_green.py \
 		--verify research/results/decision-coverage-drift/results.csv \
 		--summary-verify research/results/SUMMARY.md \
 		--json-verify research/results/decision-coverage-drift/summary.json
 
-evidence-ablation:
+evidence-ablation: check-python
 	@$(PYTHON) evidence_ablation.py \
 		--verify-dir research/results/evidence-ablation
 
-mutation-score:
+mutation-score: check-python
 	@$(PYTHON) mutation_score.py \
 		--summary-verify research/results/mutation-score/summary.md \
 		--json-verify research/results/mutation-score/summary.json
 
-label-error:
+label-error: check-python
 	@$(PYTHON) -m agent_economics.label_error
 
-sensitivity:
+sensitivity: check-python
 	@$(PYTHON) sensitivity_sweep.py \
 		--summary-verify research/results/sensitivity/summary.md \
 		--json-verify research/results/sensitivity/summary.json
 
-completion-vs-verdict:
+completion-vs-verdict: check-python
 	@$(PYTHON) completion_vs_verdict.py \
 		--verify research/results/completion-vs-verdict/report.txt
 
 # Diagnose a Kimi auth failure. Prints key shape and per-region HTTP status,
 # never the key. Makes live calls, so it is excluded from `make reproduce`.
-kimi-doctor:
+kimi-doctor: check-python
 	@$(PYTHON) check_kimi_auth.py
 
 # Live judge eval: scores Kimi labels against the hand-authored eval set.
 # Requires MOONSHOT_API_KEY, so it is excluded from `make reproduce`. The scoring
 # math and eval-set integrity are covered hermetically by `make test`.
-kimi-eval:
+kimi-eval: check-python
 	@if [ -z "$$MOONSHOT_API_KEY" ]; then \
 		echo "Cannot run the live judge eval: MOONSHOT_API_KEY is not set."; \
 		echo "The scoring math and eval set are tested without a key: make test"; \
@@ -74,7 +81,7 @@ kimi-eval:
 
 # Live Kimi call. Opt-in: requires MOONSHOT_API_KEY and is excluded from
 # `make reproduce` so the offline suite stays hermetic.
-kimi-judge:
+kimi-judge: check-python
 	@if [ -z "$$MOONSHOT_API_KEY" ]; then \
 		echo "Cannot run the live Kimi judge: MOONSHOT_API_KEY is not set."; \
 		echo "This is a missing prerequisite, not a build failure."; \
@@ -94,7 +101,7 @@ kimi-judge:
 		--rubric examples/kimi-judge/rubric.json \
 		--out /tmp/agent-economics-kimi-outcomes.csv
 
-frontier:
+frontier: check-python
 	@$(PYTHON) -m agent_economics frontier \
 		examples/compute-frontier/manifest.json \
 		--output-dir /tmp/agent-economics-frontier \
@@ -106,7 +113,7 @@ frontier:
 # there would fail on three of them for a reason that is not a defect. The
 # artifact records the version it was generated on; this regenerates and diffs
 # without asserting, so drift is visible without being fatal.
-held-out:
+held-out: check-python
 	@$(PYTHON) research/held_out.py --check research/HELD_OUT.md
 
 # Append-only. Issues a NEW claim file named by date and revision; it never
@@ -114,7 +121,7 @@ held-out:
 # record. The first version overwrote two files on every reissue, so the
 # "record" was permanently two current claims.
 #   make issue-claim BUNDLE=examples/x/bundle.json SLUG=x ASSERTION="..."
-issue-claim:
+issue-claim: check-python
 	@test -n "$(BUNDLE)" -a -n "$(SLUG)" -a -n "$(ASSERTION)" \
 		|| { echo "need BUNDLE, SLUG and ASSERTION"; exit 2; }
 	@$(PYTHON) -m agent_economics claim \
@@ -127,7 +134,7 @@ issue-claim:
 # Reads two outcome fields across every model arm that could be downloaded and
 # reports where they disagree. Derived from frozen content-free evidence, so it
 # needs no network and no 740MB of trajectories.
-outcome-audit:
+outcome-audit: check-python
 	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
 	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
 
@@ -135,7 +142,7 @@ outcome-audit:
 # malformed one, and on an UNVERIFIED one pinning no revision a reader could
 # check it against. A published falsehood stays a failure until it is retracted
 # rather than quietly regenerated.
-ledger:
+ledger: check-python
 	@$(PYTHON) research/ledger.py --check
 	@$(PYTHON) research/ledger.py > /tmp/agent-economics-ledger.md
 	@cmp /tmp/agent-economics-ledger.md research/claims/LEDGER.md
@@ -143,7 +150,7 @@ ledger:
 # The ledger verifies every claim against the evidence it names. This adds the
 # other direction: handed the wrong evidence a claim must refuse. A verifier
 # that only ever says SUPPORTED is not a verifier.
-claims: ledger
+claims: ledger check-python
 	@set -e; for claim in research/claims/*-claude-code-*.claim.json; do \
 		! $(PYTHON) -m agent_economics verify \
 			--claim "$$claim" \
@@ -152,21 +159,21 @@ claims: ledger
 
 # Regenerates the pre-registered site list. It must not drift from the code it
 # was derived from, or the search it authorises is against a different package.
-probe-sites:
+probe-sites: check-python
 	@$(PYTHON) research/probe_sites.py > /tmp/agent-economics-probe-sites.md
 	@cmp /tmp/agent-economics-probe-sites.md research/PROBE_SITES.md
 
 # Checks out the commit before each catalogued defect's fix, runs the whole
 # suite there, and runs the probe that discriminates. Pinned commits, so the
 # output is deterministic and byte-comparable like any other artifact.
-green-defects:
+green-defects: check-python
 	@$(PYTHON) research/green_defects.py $(PYTHON) > /tmp/agent-economics-green-defects.md
 	@cmp /tmp/agent-economics-green-defects.md research/GREEN_DEFECTS.md
 
 # The same session as the claude-code example, converted under a contract that
 # declares no rate card. Proves the checks-only path is reachable from a real
 # trace through `convert`, not only from the Python API.
-checks-only:
+checks-only: check-python
 	@$(PYTHON) -m agent_economics convert \
 		--from claude-code \
 		--in examples/claude-code/session.jsonl \
@@ -177,13 +184,13 @@ checks-only:
 # The audit is the package's front door and was outside the build gate entirely.
 # --ci exits nonzero on any ground, so these assert the withheld verdicts stay
 # withheld rather than merely that the command runs.
-audit:
+audit: check-python
 	@$(PYTHON) -m agent_economics audit --bundle examples/checks-only/bundle.json >/dev/null
 	@! $(PYTHON) -m agent_economics audit --bundle examples/checks-only/bundle.json --ci >/dev/null 2>&1
 	@! $(PYTHON) -m agent_economics audit --bundle examples/claude-code/bundle.json --ci >/dev/null 2>&1
 	@$(PYTHON) -m agent_economics audit --bundle examples/claude-code/bundle.json --format json >/dev/null
 
-claude-code:
+claude-code: check-python
 	@$(PYTHON) -m agent_economics convert \
 		--from claude-code \
 		--in examples/claude-code/session.jsonl \
@@ -193,7 +200,7 @@ claude-code:
 	@$(PYTHON) -m agent_economics evaluate \
 		--bundle /tmp/agent-economics-claude-code.json
 
-claude-code-tree:
+claude-code-tree: check-python
 	@$(PYTHON) -m agent_economics convert \
 		--from claude-code-tree \
 		--in examples/claude-code-tree/session.jsonl \
@@ -204,7 +211,7 @@ claude-code-tree:
 		--bundle /tmp/agent-economics-claude-code-tree.json \
 		--ci
 
-otel-genai:
+otel-genai: check-python
 	@$(PYTHON) -m agent_economics convert \
 		--from otel-genai \
 		--in examples/otel-genai/langfuse-otlp.json \
@@ -224,7 +231,7 @@ otel-genai:
 		--bundle /tmp/agent-economics-otel-arize.json \
 		--ci
 
-public-case:
+public-case: check-python
 	@PYTHONPATH=. $(PYTHON) examples/public-swebench/build_case.py \
 		--source examples/public-swebench/runs.json \
 		--output-dir /tmp/agent-economics-public-swebench
@@ -242,19 +249,19 @@ public-case:
 
 reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit
 
-lessons:
+lessons: check-python
 # Without set -e the loop reports only the LAST lesson's exit status, so a
 # failing lesson 00-03 is masked whenever 04 succeeds. A check that can
 # silently not run is the exact failure this repository exists to refuse.
 	@set -e; for lesson in lessons/*.py; do PYTHONPATH=. $(PYTHON) "$$lesson"; done
 
-video:
+video: check-python
 	@$(PYTHON) render_video.py
 
-lint:
+lint: check-python
 	@$(PYTHON) -m ruff check .
 
-coverage:
+coverage: check-python
 	@$(PYTHON) -m coverage run --source=agent_economics -m unittest discover -s tests
 	@$(PYTHON) -m coverage report
 

@@ -237,8 +237,12 @@ class ForgeriesFoundByAdversarialReview(unittest.TestCase):
         bundle = _bundle()
         self.assertIs(verify(_claim(bundle), bundle).verdict, Verdict.SUPPORTED)
 
-    def test_a_carried_over_digest_does_not_authenticate_edited_evidence(self) -> None:
-        """`digest` is a stored field; verify must recompute, not read."""
+    def test_edited_evidence_cannot_authenticate_itself(self) -> None:
+        """`digest` used to be a stored field, and this test used to assert the
+        stale value survived an edit. It no longer can: `digest` recomputes on
+        every read, so the hazard is gone at the source rather than caught at
+        the verifier. Both properties are asserted here.
+        """
         honest = _bundle()
         claim = _claim(honest)
         doctored = replace(
@@ -248,11 +252,35 @@ class ForgeriesFoundByAdversarialReview(unittest.TestCase):
                 for task, outcome in honest.outcomes.items()
             },
         )
-        self.assertEqual(
+        self.assertNotEqual(
             doctored.digest, claim.evidence_digest,
-            "the stored field must still look authentic for this to be a test",
+            "a bundle must not be able to advertise a digest of other contents",
         )
         self.assertIs(verify(claim, doctored).verdict, Verdict.REFUTED)
+
+    def test_mutating_a_bundle_in_place_changes_its_digest(self) -> None:
+        """`outcomes` is a plain dict, so this needs no `replace` at all.
+
+        This is what made the README's "tamper-evident" false: flipping one
+        outcome turned an ASSIST into a SCALE while the bundle still advertised
+        the honest digest, and the engine republished it.
+        """
+        from agent_economics.assurance import evaluate_bundle
+        from agent_economics.models import Outcome
+
+        bundle = load_normalized_json_bundle(EXAMPLE)
+        before_digest = bundle.digest
+        before_decision = evaluate_bundle(bundle).decision.value
+        task = next(iter(bundle.outcomes))
+        bundle.outcomes[task] = Outcome(
+            task_id=task, acceptable=True, business_value_usd=100_000.0
+        )
+        self.assertNotEqual(evaluate_bundle(bundle).decision.value, before_decision)
+        self.assertNotEqual(bundle.digest, before_digest)
+        self.assertEqual(
+            evaluate_bundle(bundle).evidence_digest, bundle.digest,
+            "the case must publish the digest of the evidence it actually saw",
+        )
 
     def test_the_prose_is_never_presented_as_verified(self) -> None:
         bundle = _bundle()

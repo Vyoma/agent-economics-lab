@@ -48,10 +48,10 @@ agent_economics/delegation.py:425  f"${report.delegated_cost_usd or 0.0:.4f} del
 agent_economics/delegation.py:435  f"${report.delegated_cost_usd or 0.0:.4f} delegated"
 agent_economics/io.py:57  input_tokens=int(row.get("input_tokens") or 0),
 agent_economics/io.py:58  output_tokens=int(row.get("output_tokens") or 0),
-agent_economics/io.py:89  business_value_usd=float(row.get("business_value_usd") or 0),
-agent_economics/io.py:90  human_minutes=float(row.get("human_minutes") or 0),
-agent_economics/io.py:91  remediation_cost_usd=float(row.get("remediation_cost_usd") or 0),
-agent_economics/io.py:92  incident_loss_usd=float(row.get("incident_loss_usd") or 0),
+agent_economics/io.py:117  business_value_usd=float(row.get("business_value_usd") or 0),
+agent_economics/io.py:118  human_minutes=float(row.get("human_minutes") or 0),
+agent_economics/io.py:119  remediation_cost_usd=float(row.get("remediation_cost_usd") or 0),
+agent_economics/io.py:120  incident_loss_usd=float(row.get("incident_loss_usd") or 0),
 agent_economics/kimi_analyst.py:371  n = metrics.get("attempts", 0)
 agent_economics/kimi_analyst.py:372  ar = metrics.get("acceptable_rate", 0.0)
 agent_economics/kimi_analyst.py:392  f"  total_effective_cost:             ${metrics.get('total_effective_cost_usd', 0):.4f}"
@@ -75,10 +75,10 @@ agent_economics/kimi_judge.py:460  kimi_resp.get("overall_score", 0),
 ### S2 (123)
 
 ```
-agent_economics/audit.py:255  lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated "
-agent_economics/audit.py:256  f"spend is unassessed; closure {report.closure:.0%}."]
-agent_economics/audit.py:262  lines += ["", f"Closure {report.closure:.0%}. The unassessed spend "
-agent_economics/audit.py:283  f"(closure {report.closure:.0%}, measured {basis})."
+agent_economics/audit.py:272  lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated "
+agent_economics/audit.py:273  f"spend is unassessed; closure {report.closure:.0%}."]
+agent_economics/audit.py:279  lines += ["", f"Closure {report.closure:.0%}. The unassessed spend "
+agent_economics/audit.py:306  f"(closure {report.closure:.0%}, measured {basis})."
 agent_economics/checks.py:51  f"acceptable_rate {view.acceptable_rate:.1%} "
 agent_economics/checks.py:52  f"{'<' if failed else '>='} {threshold:.1%}"
 agent_economics/checks.py:64  f"cost_per_acceptable_outcome ${observed:.2f} "
@@ -186,7 +186,7 @@ agent_economics/label_error.py:301  f"{abs(a / (a + d) - 1):>11.2%}")
 agent_economics/label_error.py:324  print(f"  {r:>12.0%} {s:>7.0%} {e:>8.2%} {1 - e:>9.1%}  {verdict:>12}")
 agent_economics/label_error.py:332  print(f"    slack up to {s:>5.0%}:  {running[0]:>2} of {running[1]:>2} sufficient")
 agent_economics/provenance.py:301  f"{record.method} {record.agreement:.2f} below {floor:.2f}"
-agent_economics/provenance.py:360  else f"{s.instrument} at {s.agreement:.2f} on "
+agent_economics/provenance.py:369  else f"{s.instrument} at {s.agreement:.2f} on "
 agent_economics/report.py:62  f"| Acceptable outcomes | {accepted} ({case.acceptable_rate:.1%}) |",
 agent_economics/report.py:63  f"| Total effective cost | ${case.total_effective_cost_usd:.2f} |",
 agent_economics/report.py:66  f"${case.cost_per_acceptable_outcome_usd:.2f} |"
@@ -262,8 +262,8 @@ agent_economics/label_error.py:216  worst = max(worst, abs(empirical - predicted
 agent_economics/label_error.py:278  f"{exact/pred:>7.2f}")
 agent_economics/label_error.py:300  print(f"  {fp:>14} {fn:>14} {1 - (fp + fn) / n:>10.0%} "
 agent_economics/label_error.py:301  f"{abs(a / (a + d) - 1):>11.2%}")
-agent_economics/models.py:109  return (
-agent_economics/models.py:141  return self.cost_per_attempt_usd / self.acceptable_rate
+agent_economics/models.py:110  return (
+agent_economics/models.py:142  return self.cost_per_attempt_usd / self.acceptable_rate
 ```
 
 ### S4 (39)
@@ -307,7 +307,7 @@ agent_economics/kimi_judge.py:547  in _main(): return 2
 agent_economics/label_error.py:190  in epsilon_star(): return 0.0
 agent_economics/label_error.py:233  in _one_answer(): return 0
 agent_economics/label_error.py:333  in main(): return 0
-agent_economics/models.py:102  in cost(): return 0.0
+agent_economics/models.py:103  in cost(): return 0.0
 ```
 
 ### S5 (33)
@@ -315,7 +315,7 @@ agent_economics/models.py:102  in cost(): return 0.0
 ```
 agent_economics/assurance.py:524  make_evidence_bundle(...) omits declared_delegations, dependency_edges, label_source, source_version, task_manifest  [evidence = make_evidence_bundle(]
 agent_economics/assurance.py:300  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [evidence_problems = validate_evidence_bu]
-agent_economics/audit.py:136  assess_bundle_closure(...) omits declared, delegation_tools  [closure = assess_bundle_closure(bundle)]
+agent_economics/audit.py:140  assess_bundle_closure(...) omits declared, delegation_tools  [closure = assess_bundle_closure(bundle)]
 agent_economics/checks.py:144  _result(...) omits task_id  [_result(]
 agent_economics/checks.py:55  _result(...) omits task_id  [results=(_result("gate.acceptable-rate",]
 agent_economics/checks.py:68  _result(...) omits task_id  [results=(_result("gate.unit-economics", ]
@@ -329,7 +329,7 @@ agent_economics/cli.py:368  audit(...) omits policy  [report = audit(]
 agent_economics/cli.py:307  render_normalized_json(...) omits conversion  [render_normalized_json(bundle), encoding]
 agent_economics/cli.py:391  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
 agent_economics/cli.py:587  load_csv_bundle(...) omits label_source  [else load_csv_bundle(**csv_paths)]
-agent_economics/evidence.py:451  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [problems = validate_evidence_bundle(bund]
+agent_economics/evidence.py:439  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [problems = validate_evidence_bundle(bund]
 agent_economics/evidence.py:86  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:120  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
 agent_economics/evidence.py:180  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(f"{label}: rate {]
@@ -340,7 +340,7 @@ agent_economics/evidence.py:263  _numeric_issue(...) omits integer, maximum, min
 agent_economics/evidence.py:291  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
 agent_economics/evidence.py:300  _numeric_issue(...) omits integer, maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:314  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
-agent_economics/io.py:140  make_evidence_bundle(...) omits declared_delegations, task_manifest  [return make_evidence_bundle(]
+agent_economics/io.py:168  make_evidence_bundle(...) omits declared_delegations, task_manifest  [return make_evidence_bundle(]
 agent_economics/kimi_analyst.py:507  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
 agent_economics/kimi_analyst.py:529  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
 agent_economics/kimi_client.py:398  assert_mfjs_compatible(...) omits path  [assert_mfjs_compatible(response_format)]
@@ -396,7 +396,7 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `assess_bundle_closure(..., declared=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/cli.py:391`
-- omits / reads raw (1): `agent_economics/audit.py:136`
+- omits / reads raw (1): `agent_economics/audit.py:140`
 
 ### `load_csv_bundle(..., label_source=)`  (inconsistent-caller)
 
@@ -406,27 +406,27 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/unsupplied.py:75`
-- omits / reads raw (3): `agent_economics/assurance.py:524`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`
+- omits / reads raw (3): `agent_economics/assurance.py:524`, `agent_economics/io.py:168`, `agent_economics/otel_genai.py:808`
 
 ### `make_evidence_bundle(..., dependency_edges=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/io.py:168`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:524`
 
 ### `make_evidence_bundle(..., label_source=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/io.py:168`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:524`
 
 ### `make_evidence_bundle(..., source_version=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/io.py:140`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/io.py:168`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:524`
 
 ### `make_evidence_bundle(..., task_manifest=)`  (inconsistent-caller)
 
 - passes / resolves (4): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1415`, `agent_economics/otel_genai.py:808`, `agent_economics/unsupplied.py:75`
-- omits / reads raw (2): `agent_economics/assurance.py:524`, `agent_economics/io.py:140`
+- omits / reads raw (2): `agent_economics/assurance.py:524`, `agent_economics/io.py:168`
 
 ### `render_normalized_json(..., conversion=)`  (inconsistent-caller)
 
@@ -436,22 +436,22 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `validate_evidence_bundle(..., label=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/claude_code.py:1428`, `agent_economics/frontier.py:621`, `agent_economics/otel_genai.py:820`
-- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:451`
+- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:439`
 
 ### `validate_evidence_bundle(..., require_explicit_costs=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/claude_code.py:1428`, `agent_economics/frontier.py:621`, `agent_economics/otel_genai.py:820`
-- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:451`
+- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:439`
 
 ### `validate_evidence_bundle(..., require_task_manifest=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/claude_code.py:1428`, `agent_economics/frontier.py:621`, `agent_economics/otel_genai.py:820`
-- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:451`
+- omits / reads raw (2): `agent_economics/assurance.py:300`, `agent_economics/evidence.py:439`
 
 ### `direct_cost_usd / .cost()`  (raw-field-vs-resolver)
 
 - passes / resolves (3): `agent_economics/assurance.py:207`, `agent_economics/checks.py:118`, `agent_economics/delegation.py:229`
-- omits / reads raw (6): `agent_economics/delegation.py:223`, `agent_economics/delegation.py:224`, `agent_economics/evidence.py:91`, `agent_economics/evidence.py:121`, `agent_economics/models.py:99`, `agent_economics/models.py:100`
+- omits / reads raw (6): `agent_economics/delegation.py:223`, `agent_economics/delegation.py:224`, `agent_economics/evidence.py:91`, `agent_economics/evidence.py:121`, `agent_economics/models.py:100`, `agent_economics/models.py:101`
 
 ## What this list is not
 

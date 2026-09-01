@@ -58,7 +58,7 @@ def _csv_bundle(directory: pathlib.Path, *, with_edges: bool):
         for row in TRACE_ROWS:
             writer.writerow(row if with_edges else row[:-1])
     (directory / "outcomes.csv").write_text(
-        "task_id,acceptable\nt0,true\n", encoding="utf-8"
+        "task_id,acceptable,business_value_usd,human_minutes,remediation_cost_usd,incident_loss_usd\n" "t0,true,10,,,\n", encoding="utf-8"
     )
     reference = load_normalized_json_bundle(EXAMPLE)
     for name, payload in (

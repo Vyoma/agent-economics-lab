@@ -1,8 +1,8 @@
 # What the outcome field says, and what its cross-check says
 
-Every arm here is a real run: real API calls, real published spend,
-`exit_status` "Submitted". They differ only in whether the outcome was
-scored.
+Every arm here records real API calls and real published spend, both
+of which are in the frozen evidence and checkable. They differ in
+whether the outcome was confirmed.
 
 `naive` reads `info.resolved` alone, which is what a consumer computing
 a leaderboard from this dataset would do. `confirmed` counts only the
@@ -26,6 +26,8 @@ string `"unknown"`.
 
 `gemini-3-pro` reads **100%** from `info.resolved` across all 500 tasks, at $480.01 of published spend over 25,641 API calls. Its cross-check is `"unknown"` on all 500. There is no confirmed rate to report, which is different from a low one.
 
+Harder than any plausibility argument: 9 of those 500 runs record a single API call and no spend, and `info.resolved` is `true` for every one of them. Whatever those runs were, they did not resolve a SWE-bench issue.
+
 ## The same transcripts, published twice, scored differently
 
 One arm pair carries byte-identical transcripts. Same messages,
@@ -41,7 +43,13 @@ Examples where the same transcript was scored both ways: `django__django-11138`,
 
 Across the 9 arms with a confirmed rate, the spread is 21 points (56.2% to 76.8%). The label disagrees with itself by 9. Gaps of a few points between models in this dataset cannot be distinguished from the instrument disagreeing with itself; the largest gaps can.
 
-What causes it is not established here. Flaky tests, a non-deterministic evaluation environment, and a labelling pipeline that scored the two copies at different times would all produce this, and nothing in the frozen evidence separates them. What is established is narrower and enough: the label is not a function of the transcript.
+What causes it is not established here. Flaky tests, a non-deterministic evaluation environment, and a labelling pipeline that scored the two copies at different times would all produce this, and nothing in the frozen evidence separates them.
+
+A fourth possibility undercuts the reading above rather than explaining it: these may have been two genuinely different runs whose transcript files were duplicated during packaging while their labels were joined in separately. That would make this a packaging artifact and not a reading of the label at all, and the figure would not be a test-retest figure.
+
+Two things in the evidence argue against it. The 44 disagreements split exactly 22/22 in each direction, and both arms resolve exactly 364 of 500. Two different configurations would not be expected to produce either. Neither settles it.
+
+What is established is narrower and enough: whatever produced these labels, it did not produce the same label twice for the same transcript.
 
 ## What this is and is not
 
@@ -57,7 +65,5 @@ A consumer reading one field and publishing a rate is the failure.
 It is not a claim about any model's real capability. An unscored arm is
 unscored; nothing here establishes whether it would have done well.
 
-Five further arms exist upstream and are absent here because the
-download was rate-limited. They are omitted rather than recorded as
-empty, since a failed fetch is not evidence.
+All 10 arms published upstream at the pinned revision are included. Nothing was dropped for a failed fetch.
 

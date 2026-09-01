@@ -126,3 +126,60 @@ class TheRecordCarriesTheRealCase(unittest.TestCase):
         for name in referenced:
             with self.subTest(claim=name):
                 self.assertTrue((CLAIMS / name).exists(), f"{name} is not on the record")
+
+
+class TheReadmeCitesAClaimThatVerifies(unittest.TestCase):
+    """The showcase `verify` command exited 4 — the repo's strongest refusal.
+
+    The claim it cited had been superseded when the arms were rebuilt, and
+    nothing bound the README to a claim that still verifies. `make ledger`
+    could not catch it: it reads each claim's own evidence, and never looks at
+    which claim the README points a reader at.
+    """
+
+    def test_every_readme_verify_command_succeeds(self) -> None:
+        import re
+        import subprocess
+        import sys
+
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        pairs = re.findall(
+            r"verify\s*\\?\s*\n?\s*--claim (\S+) \\?\s*\n?\s*--bundle (\S+)",
+            readme,
+        )
+        # Only commands naming a committed claim. The "issue your first claim"
+        # section shows `my.claim.json`, a placeholder for the reader's own
+        # file, which is a template rather than a promise.
+        pairs = [(c, b) for c, b in pairs if c.startswith("research/claims/")]
+        self.assertTrue(pairs, "the README must show a runnable verify command")
+        for claim, bundle in pairs:
+            with self.subTest(claim=claim):
+                finished = subprocess.run(
+                    [sys.executable, "-m", "agent_economics", "verify",
+                     "--claim", claim, "--bundle", bundle],
+                    cwd=ROOT, capture_output=True, text=True,
+                )
+                self.assertEqual(
+                    finished.returncode, 0,
+                    f"{claim} against {bundle} exits {finished.returncode}:\n"
+                    f"{finished.stdout}{finished.stderr}",
+                )
+
+    def test_the_per_resolved_premium_matches_the_arms(self) -> None:
+        """23.3% was correct and guarded by nothing; it appears in no output."""
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        cases = {
+            name: evaluate_bundle(load_normalized_json_bundle(ARMS / f"{name}.json"))
+            for name in ("candidate-opus", "reference-haiku")
+        }
+        opus, haiku = cases["candidate-opus"], cases["reference-haiku"]
+        per_resolved = (
+            opus.cost_per_acceptable_outcome_usd
+            / haiku.cost_per_acceptable_outcome_usd - 1
+        ) * 100
+        per_attempt = (
+            (opus.total_effective_cost_usd / len(opus.tasks))
+            / (haiku.total_effective_cost_usd / len(haiku.tasks)) - 1
+        ) * 100
+        self.assertIn(f"{per_resolved:.1f}% more per resolved task", readme)
+        self.assertIn(f"{per_attempt:.1f}%", readme)
