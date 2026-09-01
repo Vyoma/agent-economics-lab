@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-import hashlib
-import json
 import math
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import asdict
 from numbers import Integral, Real
 from typing import Any
 
@@ -334,48 +331,6 @@ def recompute_digest(bundle: EvidenceBundle) -> str:
     return bundle.digest
 
 
-def _canonical_digest(
-    events: tuple[TraceEvent, ...],
-    outcomes: dict[str, Outcome],
-    rates: dict[str, ModelRate],
-    baseline: Baseline,
-    policy: EconomicPolicy,
-    task_manifest: dict[str, TaskIdentity],
-    dependency_edges: tuple[tuple[str, str], ...],
-    declared_delegations: tuple[str, ...] = (),
-    label_source: str = "",
-) -> str:
-    payload = {
-        "events": [asdict(event) for event in events],
-        "outcomes": [asdict(outcomes[task_id]) for task_id in sorted(outcomes)],
-        "rates": (
-            {"unsupplied": "rates"}
-            if _is_unsupplied(rates)
-            else {name: asdict(rates[name]) for name in sorted(rates)}
-        ),
-        "baseline": (
-            {"unsupplied": "baseline"} if _is_unsupplied(baseline) else asdict(baseline)
-        ),
-        "policy": (
-            {"unsupplied": "policy"} if _is_unsupplied(policy) else asdict(policy)
-        ),
-    }
-    if declared_delegations:
-        payload["declared_delegations"] = list(declared_delegations)
-    if label_source:
-        payload["label_source"] = label_source
-    if task_manifest:
-        payload["task_manifest"] = [
-            asdict(task_manifest[task_id]) for task_id in sorted(task_manifest)
-        ]
-    if dependency_edges:
-        payload["dependency_edges"] = [list(edge) for edge in dependency_edges]
-    encoded = json.dumps(
-        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
-    ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
-
-
 def make_evidence_bundle(
     *,
     events: Sequence[TraceEvent],
@@ -412,17 +367,6 @@ def make_evidence_bundle(
             raise ValueError(
                 f"Task manifest key {task_id!r} does not match {identity.task_id!r}"
             )
-    digest = _canonical_digest(
-        normalized_events,
-        normalized_outcomes,
-        normalized_rates,
-        baseline,
-        policy,
-        normalized_task_manifest,
-        normalized_dependency_edges,
-        tuple(sorted(declared_delegations)),
-        label_source,
-    )
     bundle = EvidenceBundle(
         events=normalized_events,
         outcomes=normalized_outcomes,

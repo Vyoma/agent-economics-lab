@@ -9,8 +9,7 @@ from pathlib import Path
 
 from . import __version__, kimi_client
 from .adapters import load_normalized_json_bundle, render_normalized_json
-from .assurance import AssuranceEngine, evaluate_bundle
-from .audit import audit, render_markdown as render_audit_markdown
+from .audit import audit, decide, render_markdown as render_audit_markdown
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .claim import (
     issue as issue_claim,
@@ -98,6 +97,31 @@ def build_parser() -> argparse.ArgumentParser:
         "--ci",
         action="store_true",
         help="Return decision-specific exit codes: 0 SCALE, 2 INCOMPLETE, 3 ASSIST, 4 STOP.",
+    )
+    evaluate_parser.add_argument(
+        "--label-source",
+        default="",
+        help=(
+            "Name the instrument that produced the outcome labels when "
+            "building from CSV inputs, e.g. judge:kimi-k3. A bundle that "
+            "records no instrument cannot reach SCALE."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--attestations",
+        help=(
+            "JSON file of instrument attestations, as for `audit`. A SCALE is "
+            "only reachable when the audit has no grounds to withhold, so an "
+            "unattested outcome instrument yields INCOMPLETE here, exactly as "
+            "it does there."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--as-of", help="ISO date to age attestations against. Defaults to today."
+    )
+    evaluate_parser.add_argument(
+        "--independently-verified", action="append", default=[], metavar="INSTRUMENT",
+        help="Instrument verified out of band, as for `audit`.",
     )
     evaluate_parser.add_argument("--output")
     frontier_parser = subparsers.add_parser(
@@ -607,8 +631,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             evidence = (
                 load_normalized_json_bundle(args.bundle)
                 if args.bundle
-                else load_csv_bundle(**csv_paths)
+                else load_csv_bundle(**csv_paths, label_source=args.label_source)
             )
+            attestations = _load_attestations(args.attestations)
+            as_of = dt.date.fromisoformat(args.as_of) if args.as_of else None
             if args.check or args.require_coverage:
                 # A contract composed by name. The registry builds the two
                 # factory gates from the evidence itself -- the delegation
@@ -625,11 +651,20 @@ def main(argv: Sequence[str] | None = None) -> int:
                     if args.require_coverage
                     else frozenset(DEFAULT_REQUIRED_COVERAGE)
                 )
-                case = AssuranceEngine(
-                    specs, required_coverage=coverage
-                ).evaluate(evidence)
             else:
-                case = evaluate_bundle(evidence)
+                specs, coverage = None, None
+            # One act, not two commands: the only reachable SCALE is one the
+            # audit has no grounds against. `evaluate` and `audit` returning
+            # opposite answers for the same bundle was the largest hole an
+            # adversarial review found in this package.
+            case, _ = decide(
+                evidence,
+                specs,
+                coverage,
+                attestations=attestations,
+                as_of=as_of,
+                independently_verified=tuple(args.independently_verified),
+            )
         except UnknownCheck as error:
             # A contract naming a check nobody can build is unreadable, not
             # weaker. Refusing beats evaluating whatever remains.

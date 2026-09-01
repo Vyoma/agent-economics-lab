@@ -132,3 +132,47 @@ class TheGatesNowReachADecision(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheProvenanceDigestBindsTheRecords(unittest.TestCase):
+    """A valid certificate and a garbage one may not digest identically.
+
+    The gate's config carried instrument names and policy but not the records,
+    so a decision gated on 0.95/n=500 and one gated on kappa 0.10/n=3 produced
+    byte-identical decision-contract digests, contradicting the gate's own
+    comment that everything it enforces is captured there.
+    """
+
+    def _gate_config(self, agreement: float) -> dict:
+        import datetime as dt
+
+        from agent_economics.provenance import (
+            Attestation,
+            evidence_provenance_gate,
+        )
+
+        record = Attestation(
+            instrument="judge@v1",
+            method="agreement-vs-human-adjudication",
+            agreement=agreement,
+            sample_size=500,
+            reference="human-panel@2026-07",
+            measured_at="2026-08-15",
+        )
+        gate = evidence_provenance_gate(
+            instruments=("judge@v1",),
+            attestations={"judge@v1": record},
+            as_of=dt.date(2026, 9, 1),
+        )
+        return dict(gate.config)
+
+    def test_changing_a_record_changes_the_bound_config(self) -> None:
+        self.assertNotEqual(self._gate_config(0.95), self._gate_config(0.10))
+
+    def test_the_record_content_is_in_the_config(self) -> None:
+        config = self._gate_config(0.95)
+        bound = config["attestations"]["judge@v1"]
+        self.assertEqual(bound["agreement"], 0.95)
+        self.assertEqual(bound["method"], "agreement-vs-human-adjudication")
+        self.assertEqual(bound["sample_size"], 500)
+        self.assertEqual(bound["measured_at"], "2026-08-15")

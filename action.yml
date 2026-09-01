@@ -51,6 +51,27 @@ inputs:
     description: Path to the offline source session for conversion mode
     required: false
     default: ""
+  label-source:
+    description: >-
+      Names the instrument behind the outcome labels when building from CSV
+      inputs (e.g. judge:kimi-k3). A bundle recording no instrument cannot
+      reach SCALE.
+    required: false
+    default: ""
+  as-of:
+    description: >-
+      ISO date to age attestations against, so a pinned workflow stays
+      reproducible. Defaults to the day the workflow runs.
+    required: false
+    default: ""
+  attestations:
+    description: >-
+      Path to a JSON file of instrument attestations, as taken by
+      `agent-economics audit`. A SCALE is only reachable when the audit has no
+      grounds to withhold, so without an attestation for the bundle's outcome
+      instrument the action reports INCOMPLETE. That is the contract working.
+    required: false
+    default: ""
   contract:
     description: Path to the completed conversion contract for conversion mode
     required: false
@@ -137,6 +158,9 @@ runs:
         INPUT_ADAPTER: ${{ inputs.adapter }}
         INPUT_SESSION: ${{ inputs.session }}
         INPUT_CONTRACT: ${{ inputs.contract }}
+        INPUT_ATTESTATIONS: ${{ inputs.attestations }}
+        INPUT_LABEL_SOURCE: ${{ inputs.label-source }}
+        INPUT_AS_OF: ${{ inputs.as-of }}
       run: |
         python -m agent_economics.github_action \
           --bundle "$INPUT_BUNDLE" \
@@ -148,6 +172,9 @@ runs:
           --adapter "$INPUT_ADAPTER" \
           --session "$INPUT_SESSION" \
           --contract "$INPUT_CONTRACT" \
+          --attestations "$INPUT_ATTESTATIONS" \
+          --label-source "$INPUT_LABEL_SOURCE" \
+          --as-of "$INPUT_AS_OF" \
           --report-dir "$RUNNER_TEMP"
 
     - name: Upsert pull request report

@@ -1,0 +1,9 @@
+{
+  "fixture.manual-review": {
+    "agreement": 0.95,
+    "measured_at": "2026-08-15",
+    "method": "agreement-vs-human-adjudication",
+    "reference": "Calibration of the hand-authored labels in this repository's example fixtures, for demonstrating the attestation flow end to end. The labels and this record describe bundled fixtures, not any production judge: to gate real evidence, replace both with a measurement of your own instrument against your own adjudication.",
+    "sample_size": 120
+  }
+}

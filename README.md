@@ -376,6 +376,18 @@ audit withholds, because nothing then says whether the labels were adjudicated
 or defaulted — which is exactly the failure
 [found upstream](#found-in-the-wild).
 
+The audit is not a separate opinion you can decline to ask for. An adversarial
+review put its finger on the hole: `evaluate --ci` returned exit 0 for a
+bundle whose instrument nobody had attested and whose delegation was never
+declared, while `audit --ci` withheld on the identical bundle — the auditor
+refusing evidence the CI gate passed green, with the reassuring answer as the
+default. Every green decision now runs the audit first: a SCALE it refuses is
+returned as `INCOMPLETE` with the grounds, on the CLI and in the GitHub
+Action alike. Supply calibration with `evaluate --attestations` (the same file
+`audit` takes); `ASSIST` and `STOP` pass through, because they are already
+refusals to scale. The two commands answering differently for one bundle is
+now a class of bug the suite rejects by construction.
+
 ## The finding: defects that were live while the suite was green
 
 Every bug benchmark I know of hands you a failing test and asks for a fix.
