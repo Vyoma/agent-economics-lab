@@ -131,6 +131,27 @@ transcripts. Neither is a claim about any model. What causes the 8.8% is not
 established — flaky tests, a non-deterministic environment, and a labelling
 pipeline scoring the copies at different times would all look like this.
 
+**The loop closes, and not in this project's favour.** This package has always
+demanded to know how good an outcome instrument is, and nobody had measured this
+one. The duplication is that measurement, so it is now filed as an attestation:
+`test-retest-agreement`, 0.912, n=500, in
+[examples/public-swebench/attestations.json](examples/public-swebench/attestations.json).
+
+Supplying it does **not** make the case assessable. Test-retest measures whether
+an instrument repeats itself; an instrument that scores identical inputs
+identically every time can be systematically wrong about all of them. The
+package now separates the two, records the figure, and still withholds:
+
+```
+Withheld on: unattested instruments
+  swe-bench-verified.hidden-tests@pinned-upstream:
+    test-retest-agreement measures repeatability, not correctness ...
+    Supply a validity measurement (agreement-vs-human-adjudication, ...)
+```
+
+Measuring repeatability is much easier than measuring correctness, which is
+exactly why the easy number must not be allowed to stand in for the hard one.
+
 [The audit, its limits, and the frozen evidence.](research/OUTCOME_AUDIT.md)
 Reproducible offline from content-free rows that each carry the SHA-256 of the
 upstream trajectory and of its transcript: `make outcome-audit`.

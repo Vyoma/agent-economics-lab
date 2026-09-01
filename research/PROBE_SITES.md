@@ -185,8 +185,8 @@ agent_economics/label_error.py:300  print(f"  {fp:>14} {fn:>14} {1 - (fp + fn) /
 agent_economics/label_error.py:301  f"{abs(a / (a + d) - 1):>11.2%}")
 agent_economics/label_error.py:324  print(f"  {r:>12.0%} {s:>7.0%} {e:>8.2%} {1 - e:>9.1%}  {verdict:>12}")
 agent_economics/label_error.py:332  print(f"    slack up to {s:>5.0%}:  {running[0]:>2} of {running[1]:>2} sufficient")
-agent_economics/provenance.py:275  f"{record.method} {record.agreement:.2f} below {floor:.2f}"
-agent_economics/provenance.py:334  else f"{s.instrument} at {s.agreement:.2f} on "
+agent_economics/provenance.py:301  f"{record.method} {record.agreement:.2f} below {floor:.2f}"
+agent_economics/provenance.py:360  else f"{s.instrument} at {s.agreement:.2f} on "
 agent_economics/report.py:62  f"| Acceptable outcomes | {accepted} ({case.acceptable_rate:.1%}) |",
 agent_economics/report.py:63  f"| Total effective cost | ${case.total_effective_cost_usd:.2f} |",
 agent_economics/report.py:66  f"${case.cost_per_acceptable_outcome_usd:.2f} |"

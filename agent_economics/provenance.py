@@ -95,7 +95,21 @@ METHOD_FLOORS: dict[str, float] = {
     "fleiss-kappa": 0.60,
     "krippendorff-alpha": 0.667,
     "held-out-accuracy": 0.80,
+    # Reliability, not validity. See RELIABILITY_ONLY_METHODS.
+    "test-retest-agreement": 0.80,
 }
+
+#: Methods that measure whether an instrument repeats itself, not whether it is
+#: right. An instrument can score identical inputs identically every time and be
+#: systematically wrong about all of them, so a high figure here is necessary
+#: and nowhere near sufficient.
+#:
+#: This distinction exists because measuring one of these is much easier than
+#: measuring the other, which makes it tempting to report the easy number and
+#: let a reader supply the interpretation. Accepting a test-retest figure where
+#: a validity figure is required is the same error as grading one method on
+#: another's scale, which `floor_for` already refuses.
+RELIABILITY_ONLY_METHODS: frozenset[str] = frozenset({"test-retest-agreement"})
 
 
 @dataclass(frozen=True)
@@ -269,6 +283,18 @@ def assess_provenance(
             continue
         age = record.age_days(as_of)
         reasons = []
+        if record.method in RELIABILITY_ONLY_METHODS:
+            # Recorded, and deliberately not sufficient. This measures whether
+            # the instrument repeats itself, which an instrument that is
+            # consistently wrong also does. Reporting it where a validity
+            # figure is required would let the easy measurement stand in for
+            # the hard one.
+            reasons.append(
+                f"{record.method} measures repeatability, not correctness; "
+                "an instrument can score identical inputs identically and be "
+                "wrong about all of them. Supply a validity measurement "
+                f"({', '.join(sorted(set(METHOD_FLOORS) - RELIABILITY_ONLY_METHODS))})"
+            )
         floor = policy.floor_for(record.method)
         if record.agreement < floor:
             reasons.append(
