@@ -351,6 +351,30 @@ class ChecksOnlyExampleIsReachable(unittest.TestCase):
 
 class VacuousClosureIsNotReportedAsFullMarks(unittest.TestCase):
     def test_a_run_with_no_delegation_says_so(self) -> None:
-        text = render_markdown(audit(_bundle()))
+        """Genuinely no delegation: no delegation-tool call at all.
+
+        This used `_bundle()`, which carries an `Agent` call with no edges.
+        That is not "no delegation", it is delegation whose extent was never
+        recorded, and the audit now distinguishes them. Collapsing the two is
+        the defect the distinction exists to prevent.
+        """
+        undelegating = checks_only_bundle(
+            events=(_event(0, "chat", cost=0.0), _event(1, "Read", "tool", cost=0.0)),
+            outcomes={"t0": Outcome(task_id="t0", acceptable=True)},
+            source_id="s.x",
+        )
+        text = render_markdown(audit(undelegating))
         self.assertIn("delegated no work", text)
         self.assertNotIn("closure 100%", text)
+
+    def test_a_delegation_tool_that_spawned_nothing_is_not_no_delegation(self) -> None:
+        """The audit read only `unaccounted` and said "This run delegated no
+        work" while the shipped gate refused the same bundle. Same evidence,
+        two verdicts, and the audit's was the reassuring one.
+        """
+        report = audit(_bundle())
+        self.assertIn("delegation whose extent was never recorded", report.grounds)
+        self.assertFalse(report.assessable)
+        text = render_markdown(report)
+        self.assertIn("spawned no recorded work", text)
+        self.assertNotIn("delegated no work", text)

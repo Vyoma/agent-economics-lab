@@ -4,11 +4,15 @@ Every arm below is real: real API calls, real published spend, `exit_status`
 "Submitted". They differ only in whether the outcome was scored.
 
 `info.resolved` reads as the adjudicated result. Beside it sits
-`info.scores.resolved`. For four arms they agree. For one they do not: the
+`info.scores.resolved`. For most arms they agree. For one they do not: the
 outcome field is `true` on all 500 tasks while the cross-check is the string
-`"unknown"` on all 500. A 100% resolution rate on SWE-bench Verified is not a
-result anyone has achieved, so that field is a default that scoring never
-overwrote.
+`"unknown"` on all 500.
+
+What that field is recording for that arm is not established here. It is
+observed to be `true` everywhere while nothing confirms it anywhere, and nine
+of those runs record a single API call and no spend, which is not a run that
+resolved a SWE-bench issue. Calling it "a default" would be an inference, and
+the observation is enough without one.
 
 The dataset is not at fault. It ships the cross-check that makes this visible,
 and the maintainers marked the unscored arm honestly. The failure would belong
@@ -49,12 +53,47 @@ def _summarise(rows: list[dict]) -> dict:
     }
 
 
+def _split(document: dict, pair: dict) -> tuple[int, int]:
+    """How the disagreements fall in each direction.
+
+    A symmetric split is evidence against the two arms being different runs:
+    two different configurations would not be expected to trade wins evenly.
+    """
+    first, second = pair["arms"]
+    left = {r["task_id"]: r["resolved"] for r in document["arms"][first]}
+    right = {r["task_id"]: r["resolved"] for r in document["arms"][second]}
+    shared = set(left) & set(right)
+    return (
+        sum(1 for t in shared if left[t] and not right[t]),
+        sum(1 for t in shared if right[t] and not left[t]),
+    )
+
+
+def _resolved_count(document: dict, arm: str) -> int:
+    return sum(1 for r in document["arms"][arm] if r["resolved"] is True)
+
+
+def _idle(document: dict, arm: str) -> int:
+    """Runs claiming success on one API call and no spend.
+
+    A task resolved with a single call and $0.00 of spend is not a task that
+    was resolved. This is checkable in the shipped evidence, unlike an appeal
+    to what resolution rates are plausible.
+    """
+    return sum(
+        1 for row in document["arms"][arm]
+        if (row["api_calls"] or 0) <= 1
+        and (row["instance_cost_usd"] or 0.0) == 0.0
+        and row["resolved"] is True
+    )
+
+
 def duplicate_arms(document: dict) -> list[dict]:
     """Arm pairs publishing the same transcripts under different model labels.
 
     Detected on the transcript hash, not the whole-file hash: the model label
-    and run id live in the same file, so two arms sharing a transcript hash
-    differently. When a pair is found, the outcomes attached to those identical
+    and run id live in the same file, so two arms sharing a transcript still
+    hash differently as whole files. When a pair is found, the outcomes attached to those identical
     transcripts give a direct reading of how repeatable the outcome label is,
     because the same input was scored twice.
     """
@@ -93,9 +132,9 @@ def render(document: dict) -> str:
     lines = [
         "# What the outcome field says, and what its cross-check says",
         "",
-        "Every arm here is a real run: real API calls, real published spend,",
-        "`exit_status` \"Submitted\". They differ only in whether the outcome was",
-        "scored.",
+        "Every arm here records real API calls and real published spend, both",
+        "of which are in the frozen evidence and checkable. They differ in",
+        "whether the outcome was confirmed.",
         "",
         "`naive` reads `info.resolved` alone, which is what a consumer computing",
         "a leaderboard from this dataset would do. `confirmed` counts only the",
@@ -130,6 +169,14 @@ def render(document: dict) -> str:
             f"over {s['api_calls']:,} API calls. Its cross-check is `\"unknown\"` "
             f"on all {s['unknown']}. There is no confirmed rate to report, which "
             "is different from a low one.",
+            "",
+            (
+                f"Harder than any plausibility argument: {_idle(document, arm)} "
+                f"of those {s['n']} runs record a single API call and no spend, "
+                "and `info.resolved` is `true` for every one of them. Whatever "
+                "those runs were, they did not resolve a SWE-bench issue."
+                if _idle(document, arm) else ""
+            ),
             "",
         ]
     duplicates = duplicate_arms(document)
@@ -172,8 +219,26 @@ def render(document: dict) -> str:
                 "non-deterministic evaluation environment, and a labelling "
                 "pipeline that scored the two copies at different times would "
                 "all produce this, and nothing in the frozen evidence "
-                "separates them. What is established is narrower and enough: "
-                "the label is not a function of the transcript.",
+                "separates them.",
+                "",
+                "A fourth possibility undercuts the reading above rather than "
+                "explaining it: these may have been two genuinely different "
+                "runs whose transcript files were duplicated during packaging "
+                "while their labels were joined in separately. That would make "
+                "this a packaging artifact and not a reading of the label at "
+                "all, and the figure would not be a test-retest figure.",
+                "",
+                f"Two things in the evidence argue against it. The "
+                f"{pair['disagree']} disagreements split exactly "
+                f"{_split(document, pair)[0]}/{_split(document, pair)[1]} in "
+                "each direction, and both arms resolve exactly "
+                f"{_resolved_count(document, pair['arms'][0])} of {pair['n']}. "
+                "Two different configurations would not be expected to produce "
+                "either. Neither settles it.",
+                "",
+                "What is established is narrower and enough: whatever produced "
+                "these labels, it did not produce the same label twice for the "
+                "same transcript.",
                 "",
             ]
     lines += [
@@ -191,11 +256,25 @@ def render(document: dict) -> str:
         "It is not a claim about any model's real capability. An unscored arm is",
         "unscored; nothing here establishes whether it would have done well.",
         "",
-        "Five further arms exist upstream and are absent here because the",
-        "download was rate-limited. They are omitted rather than recorded as",
-        "empty, since a failed fetch is not evidence.",
-        "",
     ]
+    missing = document.get("not_obtained") or {}
+    if missing:
+        lines += [
+            f"{len(missing)} arm(s) published upstream are absent here because "
+            "the download did not complete: "
+            + ", ".join(f"`{a}` ({n} of "
+                        f"{document.get('expected_tasks_per_arm', '?')})"
+                        for a, n in sorted(missing.items()))
+            + ". They are omitted rather than recorded as empty, since a "
+            "failed fetch is not evidence of a result.",
+            "",
+        ]
+    else:
+        lines += [
+            f"All {len(arms)} arms published upstream at the pinned revision "
+            "are included. Nothing was dropped for a failed fetch.",
+            "",
+        ]
     return "\n".join(lines)
 
 

@@ -335,10 +335,22 @@ def main(argv: list[str]) -> int:
             f"{row['tests_passing_while_live']} | {mark} |"
         )
     green = sum(bool(r["suite_green_while_live"]) for r in rows)
-    total = sum(r["tests_passing_while_live"] for r in rows if r["suite_green_while_live"])
+    # Distinct commits, not the column sum. Several defects share a commit, so
+    # summing the column counted the same suite run more than once: it produced
+    # 2275 where the distinct total is 1365. The README already called that
+    # figure an error while this generator kept printing it, and the test
+    # guarding it asserted the total exceeded 2000 -- a guard that required the
+    # wrong number and would have failed had the generator been corrected.
+    by_commit = {
+        r["live_at"]: r["tests_passing_while_live"]
+        for r in rows if r["suite_green_while_live"]
+    }
+    total = sum(by_commit.values())
     print(
         f"\n**{green} of {len(rows)} defects were live at a commit where the "
-        f"entire suite passed**, across {total} passing tests in total.\n"
+        f"entire suite passed.** They sit at {len(by_commit)} distinct commits, "
+        f"totalling {total} passing tests; the column above sums to more than "
+        "that because several defects share a commit.\n"
     )
 
     print("## What each probe asked\n")

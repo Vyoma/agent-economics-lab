@@ -3,9 +3,10 @@ from __future__ import annotations
 import functools
 import hashlib
 import inspect
+import json
 import textwrap
-from collections.abc import Callable
-from dataclasses import dataclass, field
+from collections.abc import Callable, Mapping
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any
 
@@ -249,6 +250,23 @@ class CheckSpec:
     covers: frozenset[Coverage]
     run: CheckFn
     failure_route: Decision | None = None
+    #: The configuration this gate enforces, when its behaviour lives in
+    #: captured arguments rather than in its source.
+    #:
+    #: `implementation_digest` hashes the source of `run`, which is the right
+    #: thing for a plain function and blind for a closure. The two most
+    #: consequential gates shipped here are factories: `delegation_closure_gate`
+    #: and `evidence_provenance_gate` close over the thresholds and manifests
+    #: that are their entire enforcement. A gate built with
+    #: `minimum_closure=0.0` and no delegation tools cannot fail, and produced a
+    #: contract digest byte-identical to the strict one -- the failure this
+    #: package names as harder than a missing gate, arriving through closure
+    #: arguments instead of through the gate list.
+    #:
+    #: Empty by default, and omitted from the manifest when empty, so a check
+    #: whose behaviour is fully in its source is unaffected and the shipped
+    #: contract digest does not move.
+    config: Mapping[str, Any] = field(default_factory=dict)
 
     @property
     def manifest_id(self) -> str:
@@ -281,6 +299,53 @@ class EvaluationView:
     incremental_net_value_vs_baseline_usd: float
 
 
+def _bundle_is_unsupplied(value: object) -> bool:
+    """An input the operator explicitly declared absent, not a default."""
+    return isinstance(value, Unsupplied)
+
+
+def bundle_digest_of(
+    events: tuple[TraceEvent, ...],
+    outcomes: dict[str, Outcome],
+    rates: dict[str, ModelRate],
+    baseline: Baseline,
+    policy: EconomicPolicy,
+    task_manifest: dict[str, TaskIdentity],
+    dependency_edges: tuple[tuple[str, str], ...],
+    declared_delegations: tuple[str, ...] = (),
+    label_source: str = "",
+) -> str:
+    payload = {
+        "events": [asdict(event) for event in events],
+        "outcomes": [asdict(outcomes[task_id]) for task_id in sorted(outcomes)],
+        "rates": (
+            {"unsupplied": "rates"}
+            if _bundle_is_unsupplied(rates)
+            else {name: asdict(rates[name]) for name in sorted(rates)}
+        ),
+        "baseline": (
+            {"unsupplied": "baseline"} if _bundle_is_unsupplied(baseline) else asdict(baseline)
+        ),
+        "policy": (
+            {"unsupplied": "policy"} if _bundle_is_unsupplied(policy) else asdict(policy)
+        ),
+    }
+    if declared_delegations:
+        payload["declared_delegations"] = list(declared_delegations)
+    if label_source:
+        payload["label_source"] = label_source
+    if task_manifest:
+        payload["task_manifest"] = [
+            asdict(task_manifest[task_id]) for task_id in sorted(task_manifest)
+        ]
+    if dependency_edges:
+        payload["dependency_edges"] = [list(edge) for edge in dependency_edges]
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 @dataclass(frozen=True)
 class EvidenceBundle:
     events: tuple[TraceEvent, ...]
@@ -290,7 +355,6 @@ class EvidenceBundle:
     policy: EconomicPolicy
     source_id: str
     source_version: str
-    digest: str
     task_manifest: dict[str, TaskIdentity] = field(default_factory=dict)
     dependency_edges: tuple[tuple[str, str], ...] = ()
     # Delegating calls the operator declared in the conversion contract.
@@ -298,6 +362,29 @@ class EvidenceBundle:
     # The instrument that produced the outcome labels. Named, never invoked:
     # the verdict path stays inference-free.
     label_source: str = ""
+
+    @property
+    def digest(self) -> str:
+        """Recomputed from contents on every read, never stored.
+
+        It was a stored field, which made "tamper-evident" false. `outcomes`,
+        `rates` and `task_manifest` are plain dicts, so mutating one in place
+        needed no `dataclasses.replace` and left the digest untouched: flipping
+        a single outcome to acceptable turned an ASSIST into a SCALE while the
+        bundle still advertised the honest evidence's digest, and the engine
+        republished that stale value into the assurance case it issued.
+        """
+        return bundle_digest_of(
+            self.events,
+            self.outcomes,
+            self.rates,
+            self.baseline,
+            self.policy,
+            self.task_manifest,
+            self.dependency_edges,
+            self.declared_delegations,
+            self.label_source,
+        )
 
     @property
     def source_manifest_id(self) -> str:

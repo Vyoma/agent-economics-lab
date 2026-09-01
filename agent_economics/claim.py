@@ -111,6 +111,8 @@ class Verification:
     claim_assertion: str
     reasons: tuple[str, ...] = ()
     checked: tuple[str, ...] = ()
+    #: True of the verification but not grounds to withhold it.
+    caveats: tuple[str, ...] = ()
     #: The decision that was reproduced. This, not the prose, is what a
     #: SUPPORTED verdict is about.
     decision: str = ""
@@ -127,6 +129,7 @@ class Verification:
             "assertion_is_verified": False,
             "reasons": list(self.reasons),
             "checked": list(self.checked),
+            "caveats": list(self.caveats),
         }
 
     def render(self) -> str:
@@ -268,6 +271,25 @@ def issue(
 #: detects a threshold that is *inert*, not one that is merely lenient, because
 #: no normative standard for "strict enough" exists and inventing one here would
 #: be the fabrication this package refuses.
+#: The same test applied to the baseline. `gate.counterfactual` compares the
+#: run against it, so the baseline is a pass mark the audited party supplies
+#: exactly as the policy is. Checking only the policy left the forgery this
+#: guard exists to stop escaping one field over: identical events, identical
+#: labels, a baseline costing a million dollars an attempt, and STOP becomes
+#: SCALE while the verifier printed "no threshold in this evidence is inert".
+#: Only the one value that cannot be an honest declaration. A baseline costing
+#: a million dollars an attempt is not a baseline. The first version of this
+#: also flagged a non-positive `value_per_acceptable_outcome_usd` and a
+#: non-positive `acceptable_rate`, which broke a true published claim: the
+#: public SWE-bench case sets value-per-outcome to zero because resolving a
+#: benchmark task carries no assigned dollar value, and that is a statement
+#: about the domain rather than a rigged pass mark. Flagging an honest zero as
+#: a rigged threshold is the same error as accepting a rigged one, pointed the
+#: other way, and it is worse here because it refuses evidence that was fine.
+_INERT_BASELINE: tuple[tuple[str, str, float], ...] = (
+    ("cost_per_attempt_usd", ">=", 1e6),
+)
+
 _INERT_THRESHOLDS: tuple[tuple[str, str, float], ...] = (
     ("min_acceptable_rate", "<=", 0.0),
     ("max_cost_per_acceptable_outcome_usd", ">=", 1e6),
@@ -277,6 +299,37 @@ _INERT_THRESHOLDS: tuple[tuple[str, str, float], ...] = (
     ("min_expected_net_value_per_attempt_usd", "<=", -1e6),
     ("min_incremental_net_value_vs_baseline_usd", "<=", -1e6),
 )
+
+
+def _inert_against(subject: Any, spec: tuple[tuple[str, str, float], ...]) -> tuple[str, ...]:
+    if isinstance(subject, Unsupplied) or subject is None:
+        return ()
+    found: list[str] = []
+    for name, direction, bound in spec:
+        try:
+            value = float(getattr(subject, name))
+        except (AttributeError, TypeError, ValueError):
+            continue
+        if (direction == "<=" and value <= bound) or (
+            direction == ">=" and value >= bound
+        ):
+            found.append(f"{name}={value:g}")
+    return tuple(found)
+
+
+def inert_baseline(baseline: Any) -> tuple[str, ...]:
+    """Baseline values a counterfactual gate could not fail against."""
+    return _inert_against(baseline, _INERT_BASELINE)
+
+
+def _coverage_key(item: Any) -> str:
+    """A coverage dimension as it appears in a claim.
+
+    `Coverage` subclasses `str`, so a member IS its value; `str()` on one gives
+    "Coverage.BUSINESS_VALUE" and has already produced three separate defects
+    in this package. A plain string dimension passes through unchanged.
+    """
+    return item if isinstance(item, str) else str(item)
 
 
 def inert_thresholds(policy: Any) -> tuple[str, ...]:
@@ -302,14 +355,32 @@ def inert_thresholds(policy: Any) -> tuple[str, ...]:
     return tuple(found)
 
 
-def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
-    """Recompute a claim from evidence. Total: never raises, never fails open."""
+def verify(
+    claim: Claim,
+    bundle: EvidenceBundle,
+    *,
+    checks: Sequence[CheckSpec] = (),
+) -> Verification:
+    """Recompute a claim from evidence. Total: never raises, never fails open.
+
+    `checks` supplies implementations this build does not ship. Without it the
+    verifier resolved only against `default_checks()`, so the claim layer and
+    the custom-gate story were mutually exclusive: a team with a PII gate and a
+    jailbreak gate -- the motivating example in `unsupplied` -- could issue a
+    claim that nobody, including them, could ever verify.
+
+    Supplying a check does not weaken anything. The claim binds each one by
+    `implementation_digest`, so an implementation that differs from the one the
+    claim was issued against is still UNVERIFIED, and a caller cannot smuggle a
+    permissive substitute in through this argument.
+    """
     checked: list[str] = []
     # Read before the try. The handler below reports `assertion`, so reading it
     # there meant a claim that was not a Claim -- a parsed dict, the single most
     # likely caller mistake -- raised AttributeError from inside the handler
     # written to prevent exactly that, in a function documented as total.
     assertion = getattr(claim, "assertion", "<unreadable claim>")
+    caveats: list[str] = []
 
     try:
         # Recomputed, never read off the bundle. `digest` is a stored field, so
@@ -328,7 +399,10 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
             )
         checked.append("evidence digest recomputes from contents and matches")
 
+        # Caller-supplied first, so a build can verify a claim about a gate it
+        # does not ship, then the defaults.
         available = {spec.id: spec for spec in default_checks()}
+        available.update({spec.id: spec for spec in checks})
         specs: list[CheckSpec] = []
         unavailable: list[str] = []
         substituted: list[str] = []
@@ -383,23 +457,55 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
         # internally true -- but it cannot be confirmed against the standard,
         # which is exactly this package's own rule that a requirement does not
         # depart with the gate that served it.
-        dropped = frozenset(DEFAULT_REQUIRED_COVERAGE) - coverage
-        if dropped:
+        # A gate the claim ships whose dimension it does not require is the
+        # weakening that matters, and it holds for any contract, custom or not.
+        provided = frozenset(
+            _coverage_key(item) for spec in specs for item in spec.covers
+        )
+        unrequired = provided - coverage
+        if unrequired:
             return Verification(
                 Verdict.UNVERIFIED, assertion,
                 reasons=(
-                    "this claim requires less than the shipped contract: "
-                    # `Coverage` subclasses str, so the member IS its value.
-                    # str() on it yields "Coverage.BUSINESS_VALUE"; the third
-                    # time that trap fired in this package in one day.
-                    f"{', '.join(sorted(dropped))} "
-                    "is required here and not by the claim. A decision that "
-                    "follows from a weakened contract is not a decision that "
-                    "follows from this one.",
+                    "this claim carries gates covering "
+                    f"{', '.join(sorted(unrequired))} without requiring those "
+                    "dimensions, so removing the gate would not change the "
+                    "verdict. A requirement does not depart with the gate that "
+                    "served it.",
                 ),
                 checked=tuple(checked),
             )
-        checked.append("every dimension the shipped contract requires is required here")
+        checked.append("every dimension this claim's gates cover is required")
+
+        # The shipped floor applies only to a claim built from the shipped
+        # checks. Holding a safety-only contract to the economic dimensions
+        # refused evidence that was never about them, which made the claim
+        # layer and the custom-gate story mutually exclusive.
+        shipped = {spec.id for spec in default_checks()}
+        if all(binding.id in shipped for binding in claim.checks):
+            dropped = frozenset(DEFAULT_REQUIRED_COVERAGE) - coverage
+            if dropped:
+                return Verification(
+                    Verdict.UNVERIFIED, assertion,
+                    reasons=(
+                        "this claim uses the shipped checks and requires less "
+                        f"than the shipped contract: {', '.join(sorted(dropped))} "
+                        "is required here and not by the claim. A decision that "
+                        "follows from a weakened contract is not a decision "
+                        "that follows from this one.",
+                    ),
+                    checked=tuple(checked),
+                )
+            checked.append(
+                "every dimension the shipped contract requires is required here"
+            )
+        else:
+            absent = sorted(frozenset(DEFAULT_REQUIRED_COVERAGE) - coverage)
+            if absent:
+                caveats.append(
+                    "this is a custom contract; the shipped contract also "
+                    f"requires {', '.join(absent)}, which this claim does not"
+                )
 
         # Coverage containment is structural and says nothing about what the
         # gates enforce. The thresholds live in the bundle, which means the
@@ -407,7 +513,9 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
         # labels, every dimension covered, and ASSIST becomes SCALE. The earlier
         # wording here -- "contract is at least as strong as the shipped one" --
         # was false as printed, and vouched for numbers never inspected.
-        inert = inert_thresholds(getattr(bundle, "policy", None))
+        inert = inert_thresholds(getattr(bundle, "policy", None)) + inert_baseline(
+            getattr(bundle, "baseline", None)
+        )
         if inert:
             return Verification(
                 Verdict.UNVERIFIED, assertion,
@@ -420,7 +528,10 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
                 ),
                 checked=tuple(checked),
             )
-        checked.append("no threshold in this evidence is inert")
+        checked.append(
+            "no threshold or baseline in this evidence is inert, against the "
+            "stated bounds"
+        )
         recomputed_contract = decision_contract_digest(tuple(specs), coverage)
         if recomputed_contract != claim.decision_contract_digest:
             return Verification(
@@ -449,7 +560,7 @@ def verify(claim: Claim, bundle: EvidenceBundle) -> Verification:
         checked.append(f"re-evaluation reproduces {claim.decision}")
         return Verification(
             Verdict.SUPPORTED, assertion, checked=tuple(checked),
-            decision=claim.decision,
+            decision=claim.decision, caveats=tuple(caveats),
         )
     except Exception as error:
         # Anything unforeseen is a failure to verify, never a pass and never a

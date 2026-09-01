@@ -326,23 +326,12 @@ def validate_evidence_bundle(
 def recompute_digest(bundle: EvidenceBundle) -> str:
     """Recompute a bundle's digest from its contents.
 
-    `EvidenceBundle.digest` is a stored field, so a bundle can carry a digest
-    that describes something else -- `dataclasses.replace` produces one every
-    time. Anything verifying a claim must recompute rather than read, or the
-    single anchor tying a claim to specific evidence is a value the evidence
-    asserts about itself.
+    Kept as a name because callers use it, but `digest` is now a property that
+    recomputes on every read, so this is simply that. It existed because the
+    digest used to be a stored field a bundle could carry while describing
+    something else.
     """
-    return _canonical_digest(
-        bundle.events,
-        bundle.outcomes,
-        bundle.rates,
-        bundle.baseline,
-        bundle.policy,
-        bundle.task_manifest,
-        bundle.dependency_edges,
-        bundle.declared_delegations,
-        bundle.label_source,
-    )
+    return bundle.digest
 
 
 def _canonical_digest(
@@ -442,7 +431,6 @@ def make_evidence_bundle(
         policy=policy,
         source_id=source_id,
         source_version=source_version,
-        digest=digest,
         task_manifest=normalized_task_manifest,
         dependency_edges=normalized_dependency_edges,
         declared_delegations=tuple(sorted(declared_delegations)),

@@ -70,6 +70,17 @@ def load_traces(path: str | Path) -> list[TraceEvent]:
     return events
 
 
+#: Outcome columns that price the decision. Absence of any of them is refused
+#: rather than defaulted, because a file that is silent about incident loss has
+#: not said there was none.
+_OUTCOME_ECONOMICS = (
+    "business_value_usd",
+    "human_minutes",
+    "remediation_cost_usd",
+    "incident_loss_usd",
+)
+
+
 def load_outcomes(path: str | Path) -> dict[str, Outcome]:
     outcomes: dict[str, Outcome] = {}
     with Path(path).open(newline="", encoding="utf-8") as handle:
@@ -82,6 +93,23 @@ def load_outcomes(path: str | Path) -> dict[str, Outcome]:
                 raise ValueError(
                     f"Invalid acceptable value for task {task_id!r}: "
                     f"{row['acceptable']!r}"
+                )
+            # A column absent from the header is not a stated zero. Every one
+            # of these carries economic weight -- incident loss is the entire
+            # tail-risk term -- and `row.get(...) or 0` made an outcomes file
+            # that never mentions them indistinguishable from one that declares
+            # them all zero. That is the same fabrication refused for token
+            # counts in evidence.py, on the outcome side.
+            #
+            # An empty cell is still allowed and still means zero: that is a
+            # value the file stated. Only silence about the column is refused.
+            missing = [name for name in _OUTCOME_ECONOMICS if name not in row]
+            if missing:
+                raise ValueError(
+                    f"outcomes file is missing column(s) {', '.join(missing)}. "
+                    "A file that does not mention them has not stated they are "
+                    "zero, and they price the decision. Add the column(s), "
+                    "leaving cells empty where the value really is zero."
                 )
             outcomes[task_id] = Outcome(
                 task_id=task_id,

@@ -120,7 +120,7 @@ property every defect in the retrospective corpus also had.
 ## The detector after the fixes
 
 Regenerating the site list against the repaired code drops the divergence count
-from 18 to 17. Only the provenance one disappeared: `io.py:122` now passes
+away from the pre-registered 18. Only the provenance one disappeared: `io.py:122` now passes
 `dependency_edges`, but `assurance.py:524` still omits it, so the divergence
 correctly still points somewhere.
 

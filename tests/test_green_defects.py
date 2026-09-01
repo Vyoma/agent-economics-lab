@@ -15,6 +15,14 @@ import unittest
 from research.green_defects import DEFECTS
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+
+
+def _distinct_total(text: str) -> int:
+    """Sum the tests-passing column once per distinct commit."""
+    by_commit = {}
+    for commit, count in re.findall(r"\| `([0-9a-f]{7})` \| (\d+) \|", text):
+        by_commit[commit] = int(count)
+    return sum(by_commit.values())
 REPORT = ROOT / "research" / "GREEN_DEFECTS.md"
 
 
@@ -44,11 +52,12 @@ class ThePublishedNumbersMatchTheReport(unittest.TestCase):
     def test_the_headline_counts_the_whole_corpus(self) -> None:
         match = re.search(
             r"\*\*(\d+) of (\d+) defects were live at a commit where the "
-            r"entire suite passed\*\*, across ([\d,]+) passing tests",
+            r"entire suite passed\.\*\* They sit at (\d+) distinct commits, "
+            r"totalling ([\d,]+) passing tests",
             self.text,
         )
         self.assertIsNotNone(match, "headline sentence missing or reworded")
-        green, total, tests = match.groups()
+        green, total, _commits, tests = match.groups()
         self.assertEqual(int(total), len(DEFECTS))
         self.assertEqual(
             int(green), len(DEFECTS),
@@ -56,7 +65,13 @@ class ThePublishedNumbersMatchTheReport(unittest.TestCase):
             "claim does not hold for it and the entry must be removed or "
             "the claim narrowed",
         )
-        self.assertGreater(int(tests.replace(",", "")), 2000)
+        # Was `> 2000`, which required the double-counted 2275 the README
+        # calls an error. The distinct total is the sum over distinct commits.
+        self.assertEqual(
+            int(tests.replace(",", "")),
+            _distinct_total(self.text),
+            "the headline must sum distinct commits, not the column",
+        )
 
     def test_every_probe_discriminated(self) -> None:
         """A probe that reports the same thing before and after found nothing."""

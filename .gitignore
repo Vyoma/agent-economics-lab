@@ -7,3 +7,5 @@ dist/
 build/
 *.egg-info/
 /assurance-case.md
+.coverage
+.ruff_cache/

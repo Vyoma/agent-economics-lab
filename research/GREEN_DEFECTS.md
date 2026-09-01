@@ -10,7 +10,7 @@ Each row checks out the commit before the defect's fix, runs the whole suite the
 | D10 | the fix for D09 left the gate unable to price anything | `dbc28e8` | 462 | **yes** |
 | D11 | tool calls asserted free with no rate card to say so | `dbc28e8` | 462 | **yes** |
 
-**5 of 5 defects were live at a commit where the entire suite passed**, across 2275 passing tests in total.
+**5 of 5 defects were live at a commit where the entire suite passed.** They sit at 3 distinct commits, totalling 1365 passing tests; the column above sums to more than that because several defects share a commit.
 
 ## What each probe asked
 

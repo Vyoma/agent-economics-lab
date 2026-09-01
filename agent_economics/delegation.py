@@ -125,6 +125,12 @@ class ClosureReport:
     suspected_delegations: tuple[str, ...] = field(default_factory=tuple)
     #: Delegation-tool calls with no recorded descendants at all.
     unrecorded_delegations: tuple[str, ...] = field(default_factory=tuple)
+    #: Cost of every delegated event, by id. The report-level totals are unions
+    #: over this rather than sums of per-delegation subtrees: nesting made the
+    #: same spend count once per enclosing link, so three nested calls over one
+    #: $500 model call reported $1,500 delegated, and closure tended to (n-1)/n
+    #: with depth however much was actually unaccounted.
+    delegated_event_costs: Mapping[str, float] = field(default_factory=dict)
     basis: str = "cost"
 
     @property
@@ -136,21 +142,50 @@ class ClosureReport:
         return tuple(d for d in self.delegations if not d.accounted)
 
     @property
+    def _delegated_event_ids(self) -> frozenset[str]:
+        return frozenset(
+            event_id
+            for delegation in self.delegations
+            for event_id in delegation.spawned_event_ids
+        )
+
+    @property
+    def _unaccounted_event_ids(self) -> frozenset[str]:
+        """Events reachable from a delegation nobody undertook to assess.
+
+        Conservative on purpose: an event under both a declared and an
+        undeclared delegation counts as unaccounted, so nesting undeclared work
+        inside declared work cannot launder it.
+        """
+        return frozenset(
+            event_id
+            for delegation in self.unaccounted
+            for event_id in delegation.spawned_event_ids
+        )
+
+    @property
     def delegated_cost_usd(self) -> float | None:
         """Total delegated spend, or None when it was never established.
 
-        None rather than 0.0. A caller that formats this into a report gets a
-        TypeError instead of a plausible dollar figure nothing priced.
+        A union over delegated events, not a sum of subtrees. None rather than
+        0.0: a caller formatting this gets a TypeError instead of a plausible
+        dollar figure nothing priced.
         """
         if self.basis != "cost":
             return None
-        return sum(d.spawned_cost_usd for d in self.delegations)
+        return sum(
+            self.delegated_event_costs.get(event_id, 0.0)
+            for event_id in self._delegated_event_ids
+        )
 
     @property
     def unaccounted_cost_usd(self) -> float | None:
         if self.basis != "cost":
             return None
-        return sum(d.spawned_cost_usd for d in self.unaccounted)
+        return sum(
+            self.delegated_event_costs.get(event_id, 0.0)
+            for event_id in self._unaccounted_event_ids
+        )
 
     @property
     def closure(self) -> float:
@@ -294,6 +329,7 @@ def assess_closure(
     declared_set = set(declared)
 
     delegations: list[Delegation] = []
+    delegated_costs: dict[str, float] = {}
     all_priced = True
     for event in events:
         spawns = children.get(event.event_id, ())
@@ -308,6 +344,11 @@ def assess_closure(
             continue
         reachable = _descendants(event.event_id, children)
         costs = [_event_cost(by_id[e], rates) for e in reachable if e in by_id]
+        for event_id, event_cost in zip(
+            [e for e in reachable if e in by_id], costs, strict=True
+        ):
+            if event_cost is not None:
+                delegated_costs[event_id] = event_cost
         priced = None not in costs
         cost = sum(c for c in costs if c is not None) if priced else 0.0
         if not priced:
@@ -364,6 +405,7 @@ def assess_closure(
         declared_manifest=tuple(sorted(declared_set)),
         suspected_delegations=suspected,
         unrecorded_delegations=unrecorded,
+        delegated_event_costs=delegated_costs,
         basis="cost" if all_priced else "count",
     )
 
@@ -457,6 +499,15 @@ def delegation_closure_gate(
         covers=frozenset({DELEGATION_CLOSURE}),
         run=run,
         failure_route=Decision.STOP,
+        # This gate's entire enforcement is here, not in `run`'s source, so
+        # without it a gate built with minimum_closure=0.0 and no delegation
+        # tools -- one that cannot fail -- produced a contract digest identical
+        # to the strict one.
+        config={
+            "minimum_closure": minimum_closure,
+            "delegation_tools": sorted(delegation_tools),
+            "declared": sorted(declared),
+        },
     )
 
 

@@ -57,6 +57,7 @@ class AuditReport:
     instruments_checked: tuple[str, ...] = ()
     conformance_held: bool = True
     no_instrument_recorded: bool = False
+    unrecorded_delegations: tuple[str, ...] = ()
     delegation_count: int = 0
     unpriced_delegation: str = ""
     notes: tuple[str, ...] = field(default_factory=tuple)
@@ -73,6 +74,8 @@ class AuditReport:
             reasons.append("unattested instruments")
         if self.no_instrument_recorded:
             reasons.append("no evidence instrument recorded")
+        if self.unrecorded_delegations:
+            reasons.append("delegation whose extent was never recorded")
         if self.unpriced_delegation:
             reasons.append("delegated spend never established")
         if not self.conformance_held:
@@ -102,6 +105,7 @@ class AuditReport:
             ],
             "instruments_checked": list(self.instruments_checked),
             "no_instrument_recorded": self.no_instrument_recorded,
+            "unrecorded_delegations": list(self.unrecorded_delegations),
             "delegation_count": self.delegation_count,
             "unpriced_delegation": self.unpriced_delegation,
             "fail_closed_conformance": self.conformance_held,
@@ -171,6 +175,18 @@ def audit(
         # tool-manufactured incentive to perform one.
         no_instrument = True
 
+    if closure.unrecorded_delegations:
+        # The shipped gate refuses these; the audit read only `unaccounted`
+        # and reported "This run delegated no work". Same evidence, two
+        # verdicts, and the audit's was the reassuring one. A delegation tool
+        # that spawned nothing recorded means either nothing was delegated or
+        # the graph was never captured, and this cannot tell which.
+        unrecorded = ", ".join(closure.unrecorded_delegations[:4])
+        notes.append(
+            f"{len(closure.unrecorded_delegations)} call(s) to a delegation "
+            f"tool spawned no recorded work ({unrecorded})"
+        )
+
     if closure.suspected_delegations:
         notes.append(
             f"{len(closure.suspected_delegations)} tool call(s) spawned model work "
@@ -195,6 +211,7 @@ def audit(
         instruments_checked=tuple(instruments),
         conformance_held=mutation.fail_closed_conformance,
         no_instrument_recorded=no_instrument,
+        unrecorded_delegations=closure.unrecorded_delegations,
         delegation_count=len(closure.delegations),
         unpriced_delegation=unpriced_delegation,
         notes=tuple(notes),
@@ -263,7 +280,13 @@ def render_markdown(report: AuditReport) -> str:
                       "cannot be stated: no rate card was supplied, so this "
                       "trace was never priced."]
     else:
-        if report.delegation_count == 0:
+        if report.unrecorded_delegations:
+            lines.append(
+                f"{len(report.unrecorded_delegations)} call(s) to a delegation "
+                "tool spawned no recorded work, so whether this run delegated "
+                "cannot be read from this evidence."
+            )
+        elif report.delegation_count == 0:
             # Closure is accounted spend over delegated spend. With no
             # delegation the ratio is 1.0 over an empty set, and printing
             # "closure 100%" invites a reader to take it for verified coverage

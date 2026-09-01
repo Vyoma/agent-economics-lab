@@ -336,3 +336,32 @@ class ReadmeAccuracyTests(unittest.TestCase):
     def test_headline_decision_matches_the_engine(self) -> None:
         self.assertIn("**Decision: ASSIST**", self.demo_report)
         self.assertIn("ASSIST", self.readme)
+
+
+class TheKimiEvalSetCountsAreCurrent(unittest.TestCase):
+    """These were 24/16/seven against an eval set holding 25/17/eight.
+
+    They were unguarded, so the doc drifted when a category was added and the
+    README's own guarded copy (25, eight) sat two files away contradicting it.
+    """
+
+    def test_the_integration_doc_matches_the_eval_set(self) -> None:
+        import collections
+        import json as _json
+
+        root = Path(__file__).resolve().parents[1]
+        cases = _json.loads(
+            (root / "research" / "eval" / "judge-eval-set.json").read_text(
+                encoding="utf-8"
+            )
+        )["cases"]
+        acceptable = sum(1 for c in cases if c.get("expected_acceptable"))
+        categories = sorted(collections.Counter(c["category"] for c in cases))
+        doc = (root / "docs" / "kimi-integration.md").read_text(encoding="utf-8")
+
+        self.assertIn(f"holds {len(cases)}\n", doc)
+        self.assertIn(f"{acceptable} expected-acceptable", doc)
+        self.assertIn(f"{len(cases) - acceptable} expected-unacceptable", doc)
+        for category in categories:
+            with self.subTest(category=category):
+                self.assertIn(category, doc)
