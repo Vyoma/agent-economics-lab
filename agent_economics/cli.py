@@ -146,6 +146,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Exit 1 if any ground for withholding a verdict is present.",
     )
 
+    bundle_parser = subparsers.add_parser(
+        "bundle",
+        help=(
+            "Write CSV evidence out as one normalized bundle, the form every "
+            "other command takes."
+        ),
+    )
+    for name in ("traces", "outcomes", "rates", "baseline", "policy"):
+        bundle_parser.add_argument(f"--{name}", required=True)
+    bundle_parser.add_argument(
+        "--label-source", default="",
+        help=(
+            "What produced the outcome labels: a rubric version, a judge "
+            "model, a test suite. Without it an audit withholds, because "
+            "nothing says whether the labels were adjudicated or defaulted."
+        ),
+    )
+    bundle_parser.add_argument("--out", required=True)
+
     claim_parser = subparsers.add_parser(
         "claim",
         help="Issue a portable claim binding a decision to its evidence.",
@@ -267,6 +286,29 @@ def _load_attestations(path: str | None) -> dict[str, Attestation] | None:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == "bundle":
+        # The missing link. `claim`, `audit` and `verify` all take a bundle,
+        # and until now only the three adapters could produce one, so anyone
+        # holding ordinary CSV evidence could evaluate it but never publish a
+        # claim about it. That is the friction that keeps a record single-issuer.
+        try:
+            bundle = load_csv_bundle(
+                traces=args.traces,
+                outcomes=args.outcomes,
+                rates=args.rates,
+                baseline=args.baseline,
+                policy=args.policy,
+                label_source=args.label_source,
+            )
+        except (OSError, ValueError, KeyError) as error:
+            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+            return 2
+        Path(args.out).write_text(
+            render_normalized_json(bundle), encoding="utf-8"
+        )
+        print(f"Wrote {args.out}")
+        return 0
+
     if args.command == "claim":
         try:
             bundle = load_normalized_json_bundle(Path(args.bundle))
