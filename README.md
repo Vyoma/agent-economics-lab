@@ -84,6 +84,45 @@ stop. Those are in [the honest limits](#the-honest-limits), not buried.
 
 **Your agent passed every enabled check. Did every required check run?**
 
+## End to end, on real agent runs
+
+Not a fixture. 40 public [mini-SWE-agent](https://github.com/SWE-agent/mini-swe-agent)
+trajectories over 20 paired SWE-bench Verified tasks, from an
+[MIT-licensed dataset](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories)
+pinned at a revision. The outcome label is the SWE-bench hidden-test result, so
+whether a task was resolved is adjudicated by running the tests, not
+self-reported by the agent that attempted it.
+
+```bash
+make public-case      # rebuild both arms from the trajectories, byte-compared
+make ledger           # verify every published claim, including these
+```
+
+What the gates say about real deployments:
+
+| | resolved | spend | per resolved | verdict |
+|---|---:|---:|---:|---|
+| `claude-opus-4.6` | 14/20 (70%) | $8.44 | $0.60 | **STOP** |
+| `claude-4.5-haiku-high` | 11/20 (55%) | $5.37 | $0.49 | **STOP** |
+
+Both real arms fail the shipped economic gates. The cheaper model resolves
+fewer tasks and costs less per resolved task, which is the trade the gates exist
+to make explicit rather than to settle.
+
+Three claims about this case are on the record, so the result is refutable by
+someone who does not trust the result:
+
+```bash
+agent-economics verify \
+  --claim research/claims/2026-08-31-swebench-opus-0b3c38bf.claim.json \
+  --bundle examples/public-swebench/arms/candidate-opus.json
+```
+
+The honest limit: 20 tasks, one harness, one benchmark, and the spend is the
+upstream client-side estimate rather than a billing record. This is a worked
+case, not a survey. It establishes that the pipeline runs end to end on data
+nobody here produced, and what it concludes about those 20 tasks.
+
 ## Check this repository without trusting it
 
 Everything below is something *this project* checked. A reader who does not run

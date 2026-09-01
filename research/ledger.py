@@ -53,7 +53,7 @@ def _bundles_by_digest() -> dict[str, pathlib.Path]:
     itself, so a doctored bundle simply fails to match rather than resolving.
     """
     found: dict[str, pathlib.Path] = {}
-    for path in sorted(EXAMPLES.rglob("bundle.json")):
+    for path in sorted(EXAMPLES.rglob("*.json")):
         try:
             found[recompute_digest(load_normalized_json_bundle(path))] = path
         except (OSError, ValueError, LookupError):
