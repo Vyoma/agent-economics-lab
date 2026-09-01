@@ -251,6 +251,12 @@ agent-economics verify --claim research/claims/2026-08-31-claude-code-4768c6df.c
                        --bundle examples/claude-code/bundle.json
 ```
 
+The wild finding is checkable against its source, not just against this
+repository's frozen copy of it: `make verify-upstream` fetches a deterministic
+sample of rows, plus every row the findings stand on, from the upstream dataset
+at its pinned revision, and fails on any hash mismatch. One command, about
+twenty fetches, no 740MB download.
+
 **The record carries the invariant, not just verdicts.** Two claims saying "this
 fixture does not clear the gates" would be safe and nearly unfalsifiable. Six
 more say something a regression would break: *remove this one gate and an

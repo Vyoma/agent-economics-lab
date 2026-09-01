@@ -138,6 +138,12 @@ outcome-audit: check-python
 	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
 	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
 
+# The one research target that needs the network, deliberately outside
+# `reproduce`: spot-check frozen rows against the upstream dataset at its
+# pinned revision, always including the rows the published findings stand on.
+verify-upstream: check-python
+	@$(PYTHON) research/verify_upstream.py --sample 3
+
 # The registry of every public dataset audited, rendered from frozen evidence
 # alone. Fails when the committed document and the evidence disagree.
 corpus: check-python

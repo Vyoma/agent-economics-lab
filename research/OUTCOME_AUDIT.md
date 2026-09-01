@@ -9,6 +9,12 @@ Every arm here records real API calls and real published spend, both
 of which are in the frozen evidence and checkable. They differ in
 whether the outcome was confirmed.
 
+Every row's hashes can be checked against the upstream file at the
+pinned revision without downloading the corpus: `make verify-upstream`
+fetches a deterministic sample plus every row these findings stand on
+and fails on any mismatch. Offline, the audit verifies against the
+frozen evidence; that command is the bridge back to the source.
+
 `naive` reads `info.resolved` alone, which is what a consumer computing
 a leaderboard from this dataset would do. `confirmed` counts only the
 trajectories whose `info.scores.resolved` is a number rather than the
