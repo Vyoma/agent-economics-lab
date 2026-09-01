@@ -15,14 +15,14 @@ found a real fail-open at site #16 -- a site this file had published as
 *probed and correct*. The probe was run and got the wrong answer, which is
 worse than not probing.
 
-2/18 of the pre-registered entries, or 2/13 counted as distinct sites, since
+3/18 of the pre-registered entries, or 3/12 counted as distinct sites, since
 divergences #10-14 name one site and #3-5 are three parameters of one call.
 
 A previous version of this file said three defects and "roughly one site in
 eight". Both were wrong, and they were wrong in the direction that flattered
 the method. F3 below was never a live defect and the detector never pointed at
-it. "One site in eight" is 12.5%, which is not 2/18, not 3/18, and not 2/13; it
-was derivable from nothing.
+it. "One site in eight" is 12.5%, which is not 3/18 and not 3/12; it was
+derivable from nothing.
 
 ## The three
 
@@ -90,7 +90,7 @@ rather than by the method, and it was never live in any commit.
 It does illustrate shape **S2** from the pre-registration. It does not count,
 and counting it inflated the hit rate by half.
 
-## The eleven sites that found nothing
+## The eleven entries that found nothing
 
 | # | divergence | verdict | how |
 |---|---|---|---|
@@ -107,9 +107,11 @@ and counting it inflated the hit rate by half.
 | 17 | `validate_evidence_bundle(require_task_manifest=)` | correct | **probed** |
 | 18 | `direct_cost_usd` read raw vs `.cost()` | correct | inspection |
 
-Counted as sites rather than pre-registration entries: **13 sites, 3 defective,
-10 clean.** The heading of this table previously said sixteen while the table
-held twelve rows.
+The table is keyed by pre-registration entry; entries #3-5 share one call
+site. Counted as sites rather than entries: **12 sites, 3 defective, 9
+clean.** The heading of this table previously said sixteen while the table
+held twelve rows, and an earlier revision of this paragraph said thirteen
+sites by counting the #10-14 site once in the table and once in the prose.
 
 Two were settled by running a probe. Ten were settled by reading the code, which
 is weaker evidence and is marked as such. A reader who thinks one of those ten

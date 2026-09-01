@@ -74,7 +74,7 @@ sixteen decimals, same call count — differing only in `model_label` and run id
 That accident is the useful part: it scored the same input twice.
 **`info.resolved` disagrees with itself on 44 of those 500, so the label agrees
 with itself 91.2% of the time on identical input.** The spread
-across the nine scored arms is 21 points. The label's own disagreement is 9.
+across the nine scored arms is 20.6 points. The label's own disagreement is 8.8.
 Small gaps between models here cannot be distinguished from the instrument
 disagreeing with itself.
 
@@ -187,7 +187,8 @@ Out comes one word:
 ### A worked example, with the real numbers
 
 `make demo` runs on bundled data and returns **`ASSIST`**: keep a human involved. Not
-because the agent felt unreliable, but because two limits were breached:
+because the agent felt unreliable, but because measured limits were breached,
+five of them across four of the six gates. The two that decide the routing:
 
 | measured | policy limit |
 |---|---|
@@ -258,8 +259,8 @@ not depart with the gate that served it. Issue your own with
 `--omit-check GATE_ID`.
 
 Injecting the dynamic-contract fail-open this project argues against, shrinking
-the contract to whatever the enabled checks happen to cover, refutes four of
-those six and fails the build. That is the difference between a record and a
+the contract to whatever the enabled checks happen to cover, refutes all six
+and fails the build. That is the difference between a record and a
 decoration.
 
 The full record is [research/claims/LEDGER.md](research/claims/LEDGER.md).
@@ -436,7 +437,7 @@ as the package grows, so read the current counts there rather than here: an
 earlier version of this sentence hand-quoted them and was wrong in both clauses
 by the time anyone read it.
 
-**18 divergences probed, 3 real defects at 3 sites**, or 3/13 counted as
+**18 divergences probed, 3 real defects at 3 sites**, or 3/12 counted as
 distinct sites.
 
 The count went 3, then 2, then 3, and the movement is worth more than the
@@ -672,7 +673,7 @@ subagent spend, OpenTelemetry GenAI exports, the public SWE-bench case, judging
 outcomes with an external model, composing a contract by name, and putting the
 decision contract in a pull request.
 
-They lived here and made this page 1,171 lines, which buried the finding at the
+They lived here and made this page 1,157 lines, which buried the finding at the
 top under instructions for using the tool. [**docs/recipes.md**](docs/recipes.md).
 
 ## What is actually novel here
