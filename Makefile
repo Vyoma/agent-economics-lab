@@ -124,6 +124,13 @@ issue-claim:
 		--assertion "$(ASSERTION)" \
 		--output "research/claims/$$(date +%Y-%m-%d)-$(SLUG)-$$(git rev-parse --short=8 HEAD).claim.json"
 
+# Reads two outcome fields across every model arm that could be downloaded and
+# reports where they disagree. Derived from frozen content-free evidence, so it
+# needs no network and no 740MB of trajectories.
+outcome-audit:
+	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
+	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
+
 # The ledger is the record. --check fails the build on a REFUTED claim, on a
 # malformed one, and on an UNVERIFIED one pinning no revision a reader could
 # check it against. A published falsehood stays a failure until it is retracted
@@ -233,7 +240,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit
 
 lessons:
 # Without set -e the loop reports only the LAST lesson's exit status, so a

@@ -84,6 +84,39 @@ stop. Those are in [the honest limits](#the-honest-limits), not buried.
 
 **Your agent passed every enabled check. Did every required check run?**
 
+## Found in the wild
+
+Pointing this at a public dataset produced the thing it was built to catch, in
+somebody else's data rather than its own.
+
+The [swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories)
+dataset publishes agent runs across ten model arms. Each trajectory carries
+`info.resolved`, which reads as the adjudicated outcome, and beside it
+`info.scores.resolved`. For five arms downloaded in full:
+
+| arm | n | naive rate | cross-check unknown | confirmed rate |
+|---|---:|---:|---:|---:|
+| `claude-4.5-haiku-high` | 500 | 66.6% | 0 | 66.6% |
+| `claude-4.5-opus-high` | 500 | 76.8% | 0 | 76.8% |
+| `claude-opus-4.6` | 500 | 77.2% | 8 | 76.8% |
+| `gpt-5.2-codex` | 500 | 72.8% | 0 | 72.8% |
+| `gemini-3-pro` | 500 | **100.0%** | **500** | **unestablished** |
+
+`gemini-3-pro` reads 100% on all 500 tasks from `info.resolved`, at $480.01 of
+published spend over 25,641 API calls, while its own cross-check says
+`"unknown"` for every one. Real runs, real spend, unscored outcomes, and a field
+left at its default. A 100% rate on SWE-bench Verified is not a result anyone
+has achieved.
+
+The dataset is not at fault. It ships the cross-check that reveals this and
+marks the unscored arm honestly. The failure belongs to a consumer that reads
+one field and publishes a rate, which is the exact shape this repository is
+about: the information needed to refuse was one field away.
+
+[The audit, its limits, and the frozen evidence.](research/OUTCOME_AUDIT.md)
+Reproducible offline from content-free rows that each carry the SHA-256 of the
+upstream trajectory: `make outcome-audit`.
+
 ## End to end, on real agent runs
 
 Not a fixture. 40 public [mini-SWE-agent](https://github.com/SWE-agent/mini-swe-agent)
