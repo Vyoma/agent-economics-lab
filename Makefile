@@ -138,6 +138,12 @@ outcome-audit: check-python
 	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
 	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
 
+# The registry of every public dataset audited, rendered from frozen evidence
+# alone. Fails when the committed document and the evidence disagree.
+corpus: check-python
+	@$(PYTHON) research/corpus/audit.py > /tmp/agent-economics-corpus.md
+	@cmp /tmp/agent-economics-corpus.md research/CORPUS.md
+
 # The ledger is the record. --check fails the build on a REFUTED claim, on a
 # malformed one, and on an UNVERIFIED one pinning no revision a reader could
 # check it against. A published falsehood stays a failure until it is retracted
@@ -247,7 +253,7 @@ public-case: check-python
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit corpus
 
 lessons: check-python
 # Without set -e the loop reports only the LAST lesson's exit status, so a
