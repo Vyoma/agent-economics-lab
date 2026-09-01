@@ -166,8 +166,17 @@ class TheReadmeCitesAClaimThatVerifies(unittest.TestCase):
                 )
 
     def test_the_per_resolved_premium_matches_the_arms(self) -> None:
-        """23.3% was correct and guarded by nothing; it appears in no output."""
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        """23.3% was correct and guarded by nothing; it appears in no output.
+
+        Read across the documentation surface rather than one file: the worked
+        example moved to docs/recipes.md when the README was restructured to
+        lead with the finding, and a guard keyed to a filename would have gone
+        quiet exactly then.
+        """
+        readme = "\n".join(
+            (ROOT / name).read_text(encoding="utf-8")
+            for name in ("README.md", "docs/recipes.md")
+        )
         cases = {
             name: evaluate_bundle(load_normalized_json_bundle(ARMS / f"{name}.json"))
             for name in ("candidate-opus", "reference-haiku")

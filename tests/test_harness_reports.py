@@ -233,7 +233,14 @@ class ReadmeAccuracyTests(unittest.TestCase):
                 )
             )
         )
-        cls.readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        # The README and the recipes page together. The worked examples moved
+        # to docs/recipes.md so the front page could lead with the finding
+        # instead of with instructions; this guard follows the content rather
+        # than the filename, or moving a block would silently unguard it.
+        cls.readme = "\n".join(
+            (ROOT / name).read_text(encoding="utf-8")
+            for name in ("README.md", "docs/recipes.md")
+        )
 
     def test_quoted_demo_lines_appear_verbatim_in_real_output(self) -> None:
         for line in (
@@ -303,7 +310,9 @@ class ReadmeAccuracyTests(unittest.TestCase):
         any labels at all. Presenting that as a comparison result would invite a
         reader to conclude the engine is rigged.
         """
-        for name in ("README.md", "examples/public-swebench/README.md"):
+        for name in (
+            "README.md", "docs/recipes.md", "examples/public-swebench/README.md",
+        ):
             text = (ROOT / name).read_text(encoding="utf-8")
             with self.subTest(doc=name):
                 self.assertIn("forced", text.lower())
