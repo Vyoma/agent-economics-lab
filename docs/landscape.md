@@ -91,6 +91,33 @@ useful as one transparent lesson, but it is not a defensible category claim.
   refuses incomplete economic evidence and is exercised against two independently
   maintained, content-safe platform fixture shapes.
 
+## Cost-per-outcome is academic mainstream, and five sweeps missed it
+
+A sixth adversarial sweep (September 2026) found the economics lane preempted
+by work none of the earlier five surfaced, which for a document claiming
+adversarial sweeps is itself the finding worth recording:
+
+- *Cost-of-Pass: An Economic Framework for Evaluating Language Models*
+  ([arXiv:2504.13359](https://arxiv.org/abs/2504.13359), April 2025) defines
+  the expected monetary cost of obtaining a correct solution as the evaluation
+  primitive, with a frontier against human-expert cost. That is cost per
+  confirmed outcome, published first.
+- Kapoor et al., *AI Agents That Matter*
+  ([arXiv:2407.01502](https://arxiv.org/abs/2407.01502), 2024) made
+  cost-controlled evaluation and cost-accuracy Pareto frontiers the canonical
+  position a year earlier still.
+- The *Holistic Agent Leaderboard*
+  ([arXiv:2510.11977](https://arxiv.org/abs/2510.11977)) operationalizes
+  cost-aware agent evaluation as shared infrastructure, and FrugalGPT
+  ([arXiv:2305.05176](https://arxiv.org/abs/2305.05176)) and the
+  router/cascade literature optimize the same quantity in deployment.
+- Commercially, per-resolution pricing has existed since 2023.
+
+Nothing in this project's economics framing is a contribution. What it ships
+is the composition: those quantities computed offline from normalized
+evidence, gated fail-closed, under a decision contract. The framing itself is
+theirs.
+
 ## Fail-closed required coverage is not a new idea
 
 An earlier version of this document surveyed the economics and observability lane
@@ -117,6 +144,23 @@ That is prior art, and well-established prior art:
   [OPA](https://www.openpolicyagent.org/) / Conftest deny-by-default policy
   bundles express the same default: absence of an attestation is not a
   satisfied requirement.
+- [InvarLock](https://www.invarlock.ai/docs/assurance/reproducibility)
+  publishes signed evidence packs that SHA-256-bind artifacts, policy files,
+  runtime config, and verdict calculations for ML evaluation, with
+  recipient-controlled acceptance; Red Hat's
+  [EvalHub](https://developers.redhat.com/articles/2026/06/16/store-immutable-ai-evaluation-records-evalhub-oci)
+  stores immutable eval records by OCI digest with a provenance chain. Digest
+  binding of evaluation evidence is shipped industrial practice, not an idea
+  from here; the residual here is the granularity (each check's own run
+  source), and [docs/limitations.md](limitations.md) records that this
+  fingerprint is non-transitive through shared helpers.
+- The *LLM Readiness Harness*
+  ([arXiv:2603.27355](https://arxiv.org/abs/2603.27355)) ships CI gates for
+  LLM applications, and Maiorano's release-gate work
+  ([arXiv:2603.15676](https://arxiv.org/abs/2603.15676), cited in
+  [docs/novelty.md](novelty.md)) ships PROMOTE/HOLD/ROLLBACK decisions where
+  evidence coverage is the primary determinant of rejection. Fail-closed
+  eval-coverage gating for LLM releases specifically is published prior art.
 - Safety-case practice in
   [DO-178C](https://www.rtca.org/) and
   [ISO 26262](https://www.iso.org/standard/68383.html), and Goal Structuring
@@ -270,6 +314,34 @@ with no accounted-fraction and no gate; contract-based design remains
 closed-composition; and no observability or eval product detects that a spawned
 subagent was never declared.
 
+## Auditing benchmark labels and trajectories is a crowded lane
+
+The findings in [research/CORPUS.md](../research/CORPUS.md) and
+[research/OUTCOME_AUDIT.md](../research/OUTCOME_AUDIT.md) sit in a lane with
+substantial neighbors, closer than earlier drafts of this document
+acknowledged:
+
+| Prior art | What it establishes |
+|---|---|
+| SWE-Bench+ ([arXiv:2410.06992](https://arxiv.org/abs/2410.06992)) | 32.67% solution leakage and 31.08% weak tests in SWE-bench. Benchmark-label auditing at scale, before this project existed. |
+| UTBoost ([arXiv:2506.09289](https://arxiv.org/abs/2506.09289)) | 345 mislabeled passes and 36 insufficient-test instances in SWE-bench and Verified, found by augmenting the graded tests. |
+| *The SWE-Bench Illusion* ([arXiv:2506.12286](https://arxiv.org/abs/2506.12286)); [OpenAI on retiring SWE-bench Verified](https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/); [METR on unmergeable passing PRs](https://metr.org/notes/2026-03-10-many-swe-bench-passing-prs-would-not-be-merged-into-main/) | The benchmark's headline number measures less than it reads as measuring, said by three independent parties including its own steward. |
+| SWE-Bench++ ([arXiv:2512.17419](https://arxiv.org/abs/2512.17419)) | Runs 3x determinism checks because label flakiness is a known, quantified hazard. |
+| AgentLens ([arXiv:2605.12925](https://arxiv.org/abs/2605.12925), May 2026) | Process-audits 1,815 SWE-bench Verified trajectories and names the lucky-pass problem. Trajectory-level auditing, published first. |
+| ATBench ([arXiv:2604.02022](https://arxiv.org/abs/2604.02022)) | Publishes 165 fine-grained label corrections across 129 agent trajectories. |
+| *Automated Transcript Analysis for Detecting Flaws in Agentic Benchmarks* ([arXiv:2607.27518](https://arxiv.org/abs/2607.27518), July 2026) | Automated scanners for transcript-level validity defects. |
+
+### What survives
+
+Not the activity, which is a crowded lane, and not the method. What no
+neighbor does: freeze content-free evidence rows keyed to a pinned upstream
+revision so every claim re-verifies offline without redistributing anyone's
+data; record clean bills with the same care as defects, in a registry built to
+accumulate; and refuse fail-open in the auditor itself, where a row the parser
+cannot fully read is excluded and counted rather than guessed at. And, as
+priority rather than method: nobody had audited these specific uploads. The
+findings are first about their objects, not their kind.
+
 ## Attestation for the instruments that produced the evidence
 
 `agent_economics/provenance.py` refuses a verdict when an evidence-producing
@@ -284,6 +356,9 @@ domain.
 | CLIA: 42 CFR 493 subpart H; 42 CFR 493.1255; Westgard QC | Two failed proficiency events and a laboratory must cease reporting that analyte. Calibration verification at least every six months is a literal maximum age. QC failure holds patient results. Analysers refuse to run a test once a calibration curve lapses. The closest complete analogue, expiry included. |
 | ISO/IEC 17025:2017 clauses 6.4.9 and 7.10 | Goes further than this module: equipment found out of calibration triggers review and recall of results already issued. This refuses only forward. |
 | Usami et al., *LLM Judges Have Dark Current*, [arXiv:2606.15610](https://arxiv.org/abs/2606.15610), June 2026 | Argues a judge should be reported as a measurement instrument and gives a metrological protocol for measuring the measuring device. **The metrology framing is theirs and predates this.** It defines no threshold, no expiry and no consequence. |
+| Psychometrics imported into LLM evaluation: [arXiv:2310.16379](https://arxiv.org/abs/2310.16379), the systematic review [arXiv:2505.08245](https://arxiv.org/abs/2505.08245), and *Measuring what Matters* ([arXiv:2511.04703](https://arxiv.org/abs/2511.04703), reviewing 445 benchmarks for construct validity) | Reliability-necessary-but-not-sufficient is a century of measurement theory, repeatedly and explicitly applied to LLM evals before this package existed. The distinction is not a contribution; only its mechanized enforcement as a method-typed floor was not found. |
+| The ABC checklist, *Establishing Best Practices for Building Rigorous Agentic Benchmarks* ([arXiv:2507.02825](https://arxiv.org/abs/2507.02825), NeurIPS 2025 D&B) | Task validity versus outcome validity for agent benchmarks, formalized as 30 criteria. The conceptual separation this package enforces, published as a checklist first. |
+| EvalGen, *Who Validates the Validators?* ([arXiv:2404.12272](https://arxiv.org/abs/2404.12272)) | Requires human alignment before trusting a judge, as a workflow. The requirement is prior art; the fail-closed gate form was not found. |
 | *Eval Factsheets*, [arXiv:2512.04062](https://arxiv.org/abs/2512.04062) | Specifies the attestation record fields, including who made the evaluation and when, and how it is reliable. Reporting only. |
 | *Evaluation Cards*, [arXiv:2606.09809](https://arxiv.org/abs/2606.09809) | Explicitly declines to assign pass/fail thresholds. Evidence that the field's reporting layer deliberately does not gate. |
 | *Trust or Escalate*, [arXiv:2407.18370](https://arxiv.org/abs/2407.18370) | The only thing in the judge literature that refuses, but per instance on runtime confidence, not a deployment decision on a stored calibration record. |
