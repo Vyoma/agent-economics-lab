@@ -46,7 +46,7 @@ a direct reading of how repeatable this outcome label is.
 
 Examples where the same transcript was scored both ways: `django__django-11138`, `django__django-11149`, `django__django-11265`.
 
-Across the 9 arms with a confirmed rate, the spread is 21 points (56.2% to 76.8%). The label disagrees with itself by 9. Gaps of a few points between models in this dataset cannot be distinguished from the instrument disagreeing with itself; the largest gaps can.
+Across the 9 arms with a confirmed rate, the spread is 20.6 points (56.2% to 76.8%). The label disagrees with itself by 8.8. Gaps of a few points between models in this dataset cannot be distinguished from the instrument disagreeing with itself; the largest gaps can.
 
 What causes it is not established here. Flaky tests, a non-deterministic evaluation environment, and a labelling pipeline that scored the two copies at different times would all produce this, and nothing in the frozen evidence separates them.
 

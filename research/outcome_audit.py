@@ -213,10 +213,10 @@ def render(document: dict) -> str:
                 f"{', '.join('`' + t + '`' for t in pair['examples'])}.",
                 "",
                 f"Across the {len(confirmed_rates)} arms with a confirmed "
-                f"rate, the spread is {spread:.0f} points "
+                f"rate, the spread is {spread:.1f} points "
                 f"({min(confirmed_rates):.1%} to {max(confirmed_rates):.1%}). "
                 f"The label disagrees with itself by "
-                f"{(1 - pair['agreement']) * 100:.0f}. Gaps of a few points "
+                f"{(1 - pair['agreement']) * 100:.1f}. Gaps of a few points "
                 "between models in this dataset cannot be distinguished from "
                 "the instrument disagreeing with itself; the largest gaps can.",
                 "",

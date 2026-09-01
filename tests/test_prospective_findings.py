@@ -2,9 +2,9 @@
 
 `research/probe_sites.py` was committed before these probes were written. It
 enumerates divergences: one quantity computed two ways, which is the form all
-five retrospective defects shared. Eighteen divergences, two real defects.
+five retrospective defects shared. Eighteen divergences, three real defects.
 
-Both are regression-tested here. The sixteen that found nothing are recorded in
+They are regression-tested here. The entries that found nothing are recorded in
 research/PROBE_RESULTS.md, because a search that reports only its hits has no
 denominator and cannot be assessed.
 """
