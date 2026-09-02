@@ -22,6 +22,8 @@ vendor published, and nothing here is a measurement of a model.
 | [tarsur385/swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories) | `b55979d6` | 5,000 | 1 of 10 arms never confirmed by its cross-check; one duplicated arm pair, labels 91.2% self-consistent ([full audit](OUTCOME_AUDIT.md)) |
 | [togethercomputer/CoderForge-Preview-32B…](https://huggingface.co/datasets/togethercomputer/CoderForge-Preview-32B-SWE-Bench-Verified-Evaluation-trajectories) | `753f0504` | 500 | clean: reward re-derives from the raw logs on all 434 parseable rows |
 | [SWE-bench/SWE-smith-trajectories](https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) | `08e109b4` | 76,002 | labels self-consistent across every duplicate; the `patch` column is not row-aligned (266 verbatim cross-repository patch groups); 2,255 duplicate rows in one split |
+| [nebius/SWE-agent-trajectories](https://huggingface.co/datasets/nebius/SWE-agent-trajectories) | `68195a14` | 80,036 | clean: every coherence probe passes; resolved rows always carry a patch and evaluation logs; no duplicate transcripts |
+| [nebius/SWE-rebench-openhands-trajectories](https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) | `35455389` | 67,074 | clean labels; its recorded generated-test signal measures kappa 0.06 against adjudication over 31,389 runs |
 | [JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified](https://huggingface.co/datasets/JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified) | `dd79e254` | 1,785 | `resolved` column present, populated on 0 rows |
 
 ## togethercomputer/CoderForge-Preview-32B, SWE-bench Verified, 500 rows
@@ -93,6 +95,72 @@ the training signal or the labels are wrong. Evidence:
 [frozen/swesmith-*.json](corpus/frozen/) and
 [frozen/swesmith-patch-check.json](corpus/frozen/swesmith-patch-check.json);
 reproduce the verification with `python3 research/corpus/patch_check.py`.
+
+## nebius/SWE-agent-trajectories, 80,036 rows
+
+SWE-agent runs over SWE-bench-style tasks with the outcome label,
+the generated patch, and the raw evaluation logs beside every row.
+13,389 of 80,036 rows are marked
+resolved, and every coherence probe this corpus knows passes:
+
+- All 13,389 resolved rows carry a non-empty
+  patch (0 exceptions) and
+  non-empty evaluation logs
+  (0 exceptions). Empty
+  patches (9,478) and empty logs
+  (9,397) occur only on unresolved
+  rows, under exactly the exit statuses that should produce them
+  (context exhaustion, early exit, submitted-no-patch).
+- 0 duplicate transcripts
+  across all 80,036 rows.
+
+A clean bill, with its strength stated precisely: this is
+coherence, weaker than the CoderForge entry's re-adjudication,
+because the dataset does not ship the graded-test lists a
+re-derivation needs. One artifact of ours, recorded so nobody
+mistakes it for a finding: the frozen id is instance::model, which
+repeats 75,817 times because the
+dataset legitimately holds several attempts per pair; the
+transcripts are all distinct.
+
+## nebius/SWE-rebench-openhands-trajectories, 67,074 rows
+
+OpenHands runs where each row records the adjudicated `resolved`
+label and, on some rows, whether the model's own generated tests
+passed. The labels are coherent: only
+56 empty patches, every one unresolved;
+runs that hit the iteration cap resolve at
+18%
+against 48% overall;
+0 duplicate transcripts.
+
+**What the dataset makes measurable is the interesting part.**
+Model-generated tests are widely proposed as a cheap outcome
+instrument. Here both signals sit on the same
+31,389 rows, which is a validity
+measurement at scale:
+
+- Raw agreement 51.4%, Cohen's kappa
+  **0.062** - indistinguishable from guessing.
+- Conditioned on the generated tests themselves being judged
+  correct (9,444 rows): kappa
+  0.101, precision
+  0.729. Better, and still a sixth
+  of the 0.60 kappa floor this package requires of an outcome
+  instrument.
+- Where the generated tests were judged incorrect
+  (21,868 rows): kappa
+  0.020, pure noise - and that is
+  the majority of rows carrying the signal.
+
+Scope, stated exactly: this measures the generated-test *method*,
+not a defect of the dataset - recording both signals side by side
+is what made the measurement possible at all, and the signal is
+absent on 35,685 rows,
+so nothing here extrapolates to them. Evidence:
+[frozen/nebius-sweagent.json](corpus/frozen/) and
+[frozen/nebius-openhands.json](corpus/frozen/); every figure
+recomputes offline.
 
 ## JetBrains-Research, SWE-bench test-minus-verified, 1,785 rows
 

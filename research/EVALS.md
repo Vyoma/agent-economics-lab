@@ -13,7 +13,7 @@ the evidence it summarises.
 | Does deleting raw evidence go unnoticed? | 9 evidence ablations | 4 refused outright; 5 ASSIST->SCALE transitions exposing two documented source-contract gaps | the gaps are boundary cases, recorded in the protocol, not a failure rate |
 | Do the catalogued defects have discriminating probes? | 5 green defects, each re-run at its pinned pre-fix commit | every probe fails before the fix and passes after (`make green-defects`) | catalogued means found once; it is not a census of what remains |
 | Does prospective search find anything? | pre-registered site list, committed before probing | 18 divergences probed, 3 real defects at 3 distinct sites | the count was published wrong twice (in the flattering direction both times); PROBE_RESULTS.md keeps that history |
-| Does it work on data it did not produce? | 4 public datasets audited | 3 with verified findings, 1 clean bill | an arm name identifies runs in a dataset, never a measurement of a model |
+| Does it work on data it did not produce? | 6 public datasets audited | 3 with verified findings, 3 clean bill | an arm name identifies runs in a dataset, never a measurement of a model |
 | Do the published claims still verify? | 14 claims in the ledger | `make ledger` fails the build on any REFUTED or unpinned-UNVERIFIED claim | verification binds evidence digests, not the truth of the world |
 
 ## Reading it honestly
