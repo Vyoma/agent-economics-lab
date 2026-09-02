@@ -241,3 +241,18 @@ review; each fix carries a regression test proven non-vacuous by corruption.
       split; card says 5,017 rows, dataset serves 76,002. The empty-patch
       suspicion died at base rate, which is the pipeline doing its job.
 - [ ] PyPI publication: still a 404, still the user's call.
+
+## The scale layer (2026-09-02): would an NVIDIA engineer look at this?
+
+Today's honest answer: not yet. The repo proves discipline and findings but
+says nothing about throughput, memory, or complexity. An engineer who runs
+fleets asks "what happens at ten million events" first. Build the answer:
+
+- [ ] Audit hot paths for accidental quadratics (digest property recompute,
+      closure unions, audit loops)
+- [ ] Fix what the audit finds, with regression guards
+- [ ] bench/run.py: deterministic synthetic load (labeled as load, not data),
+      engine + end-to-end timings and peak memory at 10k/100k/1M events
+- [ ] Freeze measured results on named hardware; render docs/at-scale.md
+- [ ] CI smoke bench with a ratio guard (quadratic blowup fails, noise passes)
+- [ ] README: the measured envelope, stated like every other number
