@@ -248,11 +248,14 @@ Today's honest answer: not yet. The repo proves discipline and findings but
 says nothing about throughput, memory, or complexity. An engineer who runs
 fleets asks "what happens at ten million events" first. Build the answer:
 
-- [ ] Audit hot paths for accidental quadratics (digest property recompute,
-      closure unions, audit loops)
-- [ ] Fix what the audit finds, with regression guards
-- [ ] bench/run.py: deterministic synthetic load (labeled as load, not data),
-      engine + end-to-end timings and peak memory at 10k/100k/1M events
-- [ ] Freeze measured results on named hardware; render docs/at-scale.md
-- [ ] CI smoke bench with a ratio guard (quadratic blowup fails, noise passes)
-- [ ] README: the measured envelope, stated like every other number
+- [x] Audit hot paths: found the 15x re-evaluation digest multiplier, the
+      asdict serialization tax, two closure quadratics, and one correctness
+      bug: recursive cycle detection died at ~1,000-deep chains and the
+      RecursionError was swallowed into a "could not run" finding
+- [x] Fixed: iterative cycle detection (proven at 50,000 deep), one digest
+      per decision, direct-field serialization (byte-identity guarded),
+      cached closure unions, registry hoisted out of the verify loop;
+      4.5x faster, still exactly linear
+- [x] bench/run.py + RESULTS.json + docs/at-scale.md, all guarded
+- [x] CI bench-smoke ratio guard
+- [x] README routing row: the measured envelope

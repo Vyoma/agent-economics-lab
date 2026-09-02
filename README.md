@@ -27,6 +27,7 @@ that made those visible and the discipline that keeps its own numbers honest.
 | check a claim without trusting me | [Check this repository](#check-this-repository-without-trusting-it) |
 | what it gets wrong | [the honest limits](docs/limitations.md), four claims of ours that did not survive audit |
 | whether it is new | [prior art and the narrow delta](docs/landscape.md) |
+| whether it survives a fleet | [the measured envelope](docs/at-scale.md), linear to a million events |
 
 ## Found in the wild
 
