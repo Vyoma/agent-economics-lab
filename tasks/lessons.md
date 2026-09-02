@@ -124,3 +124,15 @@ before any corrupt-and-restore experiment, either commit the intended state
 first (a WIP commit is fine) or restore by writing back the exact original
 string, never by checkout. The same applies to scripted experiments: hold the
 original bytes in memory and write them back.
+
+## The checkout rule was too narrow, and I paid for it twice (2026-09-02)
+
+Yesterday's lesson said: never `git checkout -- <file>` during a
+corrupt-and-restore experiment. Today I ran `git checkout <branch> -- .` while
+carrying a full day of uncommitted work, and wiped all of it: the rule as
+written was about experiments, and this was "just" branch management. The rule
+as it should have been written: **no `git checkout`, `git switch`, or
+`git restore` of tracked paths while `git status` shows modifications you
+intend to keep. Commit first, every time; a WIP commit costs nothing and
+amend exists.** Rebuilding from session history took an hour that a
+five-second commit would have saved.

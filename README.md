@@ -111,6 +111,13 @@ exactly why the easy number must not be allowed to stand in for the hard one.
 Reproducible offline from content-free rows that each carry the SHA-256 of the
 upstream trajectory and of its transcript: `make outcome-audit`.
 
+This grew into a registry. [research/CORPUS.md](research/CORPUS.md) audits
+public trajectory datasets under one discipline, recording clean bills with
+the same care as defects, and now includes the official SWE-bench
+organisation's own training-trajectory release, where the labels prove
+self-consistent everywhere and the `patch` column proves not to be
+row-aligned.
+
 ## End to end, on real agent runs
 
 Not a fixture. 40 public [mini-SWE-agent](https://github.com/SWE-agent/mini-swe-agent)

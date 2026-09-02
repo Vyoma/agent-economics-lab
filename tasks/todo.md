@@ -234,4 +234,10 @@ review; each fix carries a regression test proven non-vacuous by corruption.
 - [x] PR 18 (stacked): sixth-sweep prior art cited at full strength
       (Cost-of-Pass, Kapoor, HAL; AgentLens, ATBench, UTBoost, SWE-Bench+;
       InvarLock, EvalHub; ABC, EvalGen, psychometrics line).
+- [x] Corpus entry four (2026-09-02): SWE-bench/SWE-smith-trajectories,
+      76,002 rows at 08e109b4. Labels self-consistent across 18,167 duplicate
+      groups; patch column proven not row-aligned (266 cross-repo groups,
+      50/50 sampled non-trivial); 2,255 verbatim duplicate rows in the xml
+      split; card says 5,017 rows, dataset serves 76,002. The empty-patch
+      suspicion died at base rate, which is the pipeline doing its job.
 - [ ] PyPI publication: still a 404, still the user's call.

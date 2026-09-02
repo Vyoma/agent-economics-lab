@@ -39,13 +39,13 @@ _INFO_API = "https://huggingface.co/api/datasets"
 
 def _get(url: str) -> dict:
     last: Exception | None = None
-    for attempt in range(4):
+    for attempt in range(7):
         try:
-            with urllib.request.urlopen(url, timeout=180) as response:
+            with urllib.request.urlopen(url, timeout=300) as response:
                 return json.load(response)
         except Exception as error:  # retried, then re-raised
             last = error
-            time.sleep(6 * (attempt + 1))
+            time.sleep(8 * (attempt + 1))
     raise RuntimeError(f"gave up on {url}") from last
 
 
@@ -53,24 +53,27 @@ def _sha_now(dataset: str) -> str:
     return _get(f"{_INFO_API}/{urllib.parse.quote(dataset, safe='/')}")["sha"]
 
 
-def _rows(dataset: str, config: str, split: str) -> list[dict]:
+def _rows(dataset: str, config: str, split: str, page_length: int = 100) -> list[dict]:
+    # `page_length` and the fetched page must not share a name: a first draft
+    # assigned the response dict over the length parameter, and every request
+    # after the first urlencoded a nine-megabyte page as `length=`.
     fetched: list[dict] = []
     offset = 0
     while True:
         query = urllib.parse.urlencode(
             {"dataset": dataset, "config": config, "split": split,
-             "offset": offset, "length": 100}
+             "offset": offset, "length": page_length}
         )
-        page = _get(f"{_ROWS_API}?{query}")
-        for wrapper in page["rows"]:
+        document = _get(f"{_ROWS_API}?{query}")
+        for wrapper in document["rows"]:
             if wrapper.get("truncated_cells"):
                 raise RuntimeError(
                     f"row {offset} truncated cells {wrapper['truncated_cells']}: "
                     "a hash of a truncated cell would be a hash of nothing"
                 )
             fetched.append(wrapper["row"])
-        offset += len(page["rows"])
-        if offset >= page.get("num_rows_total", 0) or not page["rows"]:
+        offset += len(document["rows"])
+        if offset >= document.get("num_rows_total", 0) or not document["rows"]:
             return fetched
 
 
@@ -120,6 +123,24 @@ def _jetbrains(row: dict) -> dict:
     }
 
 
+def _swesmith(row: dict) -> dict:
+    patch = row.get("patch") or ""
+    return {
+        "id": row.get("traj_id"),
+        "instance_id": row.get("instance_id"),
+        "outcome": row.get("resolved"),
+        "model": row.get("model"),
+        "patch_sha256": _sha256(patch),
+        "patch_empty": patch == "",
+        # Added after the first freeze: hash equality across repositories is
+        # only interesting when the patch is non-trivial, and settling that
+        # took a re-fetch (patch_check.py). Committed swesmith files predate
+        # this field; a re-freeze carries it.
+        "patch_bytes": len(patch.encode()),
+        "transcript_sha256": _sha256(_canonical(row.get("messages"))),
+    }
+
+
 SPECS = {
     "coderforge": {
         "dataset": (
@@ -133,6 +154,43 @@ SPECS = {
         "cross_field": None,
         "extract": _coderforge,
         "license": "apache-2.0",
+    },
+    # The official SWE-bench organisation's training-trajectory release.
+    # Three splits, one per action format; each is frozen as its own file
+    # because the split is part of the row's identity upstream. Pages of 50:
+    # these transcripts are heavy enough that 100-row pages time out.
+    "swesmith-tool": {
+        "dataset": "SWE-bench/SWE-smith-trajectories",
+        "config": "default",
+        "split": "tool",
+        "page_length": 50,
+        "expected_rows": 24100,
+        "outcome_field": "resolved",
+        "cross_field": None,
+        "extract": _swesmith,
+        "license": "mit",
+    },
+    "swesmith-xml": {
+        "dataset": "SWE-bench/SWE-smith-trajectories",
+        "config": "default",
+        "split": "xml",
+        "page_length": 50,
+        "expected_rows": 26076,
+        "outcome_field": "resolved",
+        "cross_field": None,
+        "extract": _swesmith,
+        "license": "mit",
+    },
+    "swesmith-ticks": {
+        "dataset": "SWE-bench/SWE-smith-trajectories",
+        "config": "default",
+        "split": "ticks",
+        "page_length": 50,
+        "expected_rows": 25826,
+        "outcome_field": "resolved",
+        "cross_field": None,
+        "extract": _swesmith,
+        "license": "mit",
     },
     "jetbrains": {
         "dataset": "JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified",
@@ -150,7 +208,10 @@ SPECS = {
 def freeze(slug: str) -> pathlib.Path:
     spec = SPECS[slug]
     sha_before = _sha_now(spec["dataset"])
-    rows = _rows(spec["dataset"], spec["config"], spec["split"])
+    rows = _rows(
+        spec["dataset"], spec["config"], spec["split"],
+        page_length=spec.get("page_length", 100),
+    )
     sha_after = _sha_now(spec["dataset"])
     if sha_before != sha_after:
         raise RuntimeError(

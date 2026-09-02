@@ -94,6 +94,93 @@ def _load(slug: str) -> dict:
     return json.loads((FROZEN / f"{slug}.json").read_text(encoding="utf-8"))
 
 
+SWESMITH_SLUGS = ("swesmith-tool", "swesmith-xml", "swesmith-ticks")
+
+
+def swesmith_summary() -> dict:
+    """Every published number for the SWE-smith entry, from frozen rows alone."""
+    splits = {slug: _load(slug) for slug in SWESMITH_SLUGS}
+    all_rows = [(slug, row) for slug, doc in splits.items() for row in doc["rows"]]
+
+    by_transcript: dict[str, list] = {}
+    for slug, row in all_rows:
+        by_transcript.setdefault(row["transcript_sha256"], []).append((slug, row))
+    duplicate_groups_ = {h: v for h, v in by_transcript.items() if len(v) > 1}
+    label_disagreeing = sum(
+        1 for v in duplicate_groups_.values()
+        if len({json.dumps(r["outcome"]) for _, r in v}) > 1
+    )
+    tool_xml_overlap = sum(
+        1 for v in duplicate_groups_.values()
+        if {s for s, _ in v} >= {"swesmith-tool", "swesmith-xml"}
+    )
+    if any(
+        "swesmith-ticks" in {s for s, _ in v} and len({s for s, _ in v}) > 1
+        for v in duplicate_groups_.values()
+    ):
+        raise AssertionError(
+            "swesmith: ticks now shares transcripts across splits; "
+            "rewrite the duplication paragraph"
+        )
+
+    xml_seen: dict[str, dict] = {}
+    xml_identical_dupes = 0
+    for row in splits["swesmith-xml"]["rows"]:
+        prev = xml_seen.get(row["id"])
+        if prev is not None:
+            if (prev["transcript_sha256"], prev["outcome"]) == (
+                row["transcript_sha256"], row["outcome"]
+            ):
+                xml_identical_dupes += 1
+        else:
+            xml_seen[row["id"]] = row
+
+    def _repo(instance_id: str) -> str:
+        return instance_id.split(".")[0].split("__")[-1]
+
+    by_patch: dict[str, list] = {}
+    for _, row in all_rows:
+        if not row["patch_empty"]:
+            by_patch.setdefault(row["patch_sha256"], []).append(row)
+    cross_repo = {
+        h: v for h, v in by_patch.items()
+        if len({_repo(r["instance_id"]) for r in v}) > 1
+    }
+
+    total = len(all_rows)
+    resolved = sum(1 for _, r in all_rows if r["outcome"] is True)
+    empty = sum(1 for _, r in all_rows if r["patch_empty"])
+    resolved_empty = sum(
+        1 for _, r in all_rows if r["patch_empty"] and r["outcome"] is True
+    )
+    check = json.loads(
+        (FROZEN / "swesmith-patch-check.json").read_text(encoding="utf-8")
+    )
+    widest = max(check["groups"], key=lambda g: len(g["rows"]))
+    return {
+        "revision": splits["swesmith-tool"]["revision"],
+        "rows": total,
+        "split_rows": {slug: len(doc["rows"]) for slug, doc in splits.items()},
+        "resolved": resolved,
+        "duplicate_groups": len(duplicate_groups_),
+        "label_disagreeing_groups": label_disagreeing,
+        "tool_xml_overlap": tool_xml_overlap,
+        "xml_identical_duplicate_rows": xml_identical_dupes,
+        "empty_rate": empty / total,
+        "resolved_empty_rate": resolved_empty / resolved,
+        "cross_repo_patch_groups": len(cross_repo),
+        "cross_repo_patch_rows": sum(len(v) for v in cross_repo.values()),
+        "check_groups": check["groups_checked"],
+        "check_nontrivial": check["groups_nontrivial"],
+        "check_foreign": check["groups_with_a_row_whose_patch_touches_foreign_paths"],
+        "check_failures": len(check["failures"]),
+        "check_total_cross_repo": check["cross_repo_groups_total"],
+        "widest_rows": len(widest["rows"]),
+        "widest_bytes": widest["rows"][0]["patch_bytes"],
+        "widest_repos": sorted({r["repo"] for r in widest["rows"]}),
+    }
+
+
 def _tarsur_summary() -> dict:
     """The registry row for the dataset audited before this module existed.
 
@@ -114,6 +201,7 @@ def render() -> str:
     coderforge = _load("coderforge")
     jetbrains = _load("jetbrains")
     tarsur = _tarsur_summary()
+    smith = swesmith_summary()
 
     cf_re = readjudication(coderforge)
     cf_census = outcome_census(coderforge)
@@ -160,6 +248,16 @@ def render() -> str:
             f"{cf_re['parsed']} parseable rows |"
         ),
         (
+            "| [SWE-bench/SWE-smith-trajectories]"
+            "(https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) "
+            f"| `{smith['revision'][:8]}` | {smith['rows']:,} "
+            f"| labels self-consistent across every duplicate; the `patch` "
+            f"column is not row-aligned ({smith['cross_repo_patch_groups']} "
+            "verbatim cross-repository patch groups); "
+            f"{smith['xml_identical_duplicate_rows']:,} duplicate rows in one "
+            "split |"
+        ),
+        (
             "| [JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified]"
             "(https://huggingface.co/datasets/JetBrains-Research/"
             "agent-trajectories-swe-bench-test-minus-verified) "
@@ -190,6 +288,62 @@ def render() -> str:
         "",
         f"Outcome census: {dict(sorted(cf_census.items()))}. No duplicate",
         "transcripts. No positive outcome on a run of one step or fewer.",
+        "",
+        "## SWE-bench/SWE-smith-trajectories, three splits, "
+        f"{smith['rows']:,} rows",
+        "",
+        "The official SWE-bench organisation's training-trajectory release,",
+        "behind their published SWE-agent-LM-32B. Its card's prose describes",
+        "5,017 trajectories and its size category says 1K-10K; the dataset",
+        f"serves {smith['rows']:,} rows ("
+        + ", ".join(
+            f"{n:,} {slug.split('-')[1]}"
+            for slug, n in sorted(smith["split_rows"].items())
+        )
+        + ").",
+        "",
+        "**What is clean, stated with the same care as the defects.** The",
+        "outcome labels agree with themselves everywhere: across all",
+        f"{smith['duplicate_groups']:,} duplicate-transcript groups,",
+        f"{smith['label_disagreeing_groups']} label disagreements. And the",
+        "\"resolved with an empty patch\" suspicion the first rows raised",
+        "dies at base rate: the patch field is empty on "
+        f"{smith['empty_rate']:.1%} of all rows and "
+        f"{smith['resolved_empty_rate']:.1%} of resolved ones, so emptiness",
+        "is a population artifact of the column, not a property of the label.",
+        "",
+        "**Duplication.** The xml split contains",
+        f"{smith['xml_identical_duplicate_rows']:,} rows that are verbatim",
+        "duplicates of other rows in the same split, identical in id,",
+        f"transcript, and label. {smith['tool_xml_overlap']:,} transcripts",
+        "appear byte-identically in both the tool and xml splits, so",
+        "training on both sees those examples twice. None involve ticks.",
+        "",
+        "**The `patch` column is not row-aligned.**",
+        f"{smith['cross_repo_patch_groups']} distinct non-empty patch",
+        f"contents, covering {smith['cross_repo_patch_rows']:,} rows, each",
+        "appear verbatim under instances from two or more different",
+        "repositories. A hash collision on a trivial diff would explain",
+        "that, so a verification pass re-fetched every row of the first",
+        f"{smith['check_groups']} hash-ranked groups of the",
+        f"{smith['check_total_cross_repo']} and reduced each patch to",
+        f"content-free facts: {smith['check_nontrivial']} of",
+        f"{smith['check_groups']} are non-trivial unified diffs,",
+        f"{smith['check_foreign']} contain rows whose patch touches paths",
+        "foreign to the instance's repository under a deliberately generous",
+        f"matcher, and one {smith['widest_bytes']}-byte patch appears under",
+        f"{smith['widest_rows']} rows spanning "
+        f"{' and '.join(smith['widest_repos'])}",
+        f"({smith['check_failures']} fetch or hash failures). Whatever the",
+        "column records, it is not reliably the fix for its row.",
+        "",
+        "The scope of that claim, stated precisely: the model was fine-tuned",
+        "on `messages`, not `patch`, so this is a defect in an auxiliary",
+        "column a consumer might filter or evaluate by, not evidence that",
+        "the training signal or the labels are wrong. Evidence:",
+        "[frozen/swesmith-*.json](corpus/frozen/) and",
+        "[frozen/swesmith-patch-check.json](corpus/frozen/swesmith-patch-check.json);",
+        "reproduce the verification with `python3 research/corpus/patch_check.py`.",
         "",
         "## JetBrains-Research, SWE-bench test-minus-verified, 1,785 rows",
         "",
