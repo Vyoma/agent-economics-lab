@@ -116,10 +116,14 @@ upstream trajectory and of its transcript: `make outcome-audit`.
 
 This grew into a registry. [research/CORPUS.md](research/CORPUS.md) audits
 public trajectory datasets under one discipline, recording clean bills with
-the same care as defects, and now includes the official SWE-bench
-organisation's own training-trajectory release, where the labels prove
-self-consistent everywhere and the `patch` column proves not to be
-row-aligned.
+the same care as defects. Six entries so far, including the official
+SWE-bench organisation's own training-trajectory release, where the labels
+prove self-consistent everywhere and the `patch` column proves not to be
+row-aligned — and one measurement the whole field has a stake in: a dataset
+recording adjudicated outcomes beside whether the model's own generated
+tests passed, across 31,389 shared runs, puts model-generated tests at
+Cohen's kappa 0.062 against adjudication. The cheap oracle everyone wants
+agrees with the real one at chance level.
 
 ## End to end, on real agent runs
 

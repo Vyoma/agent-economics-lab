@@ -94,6 +94,13 @@ def _drift() -> dict:
     return json.loads(DRIFT.read_text(encoding="utf-8"))
 
 
+def _openhands() -> dict:
+    sys.path.insert(0, str(ROOT / "research" / "corpus"))
+    from audit import nebius_openhands_summary
+
+    return nebius_openhands_summary()
+
+
 _CASE = _demo_case()
 _DISAGREE, _TWIN_N = _twin_disagreements()
 
@@ -146,6 +153,10 @@ COMPUTED: dict[str, str] = {
     "24.9%": f"{clopper_pearson_upper(1, 20, 0.025):.1%}",
     # the prospective search, as accounted in research/PROBE_RESULTS.md
     "3/12": "3/12",  # bound by TheProbeAccountingAgrees below
+    # the registry sentence: the generated-test instrument measurement,
+    # rederived from the frozen nebius-openhands evidence
+    "0.062": f"{_openhands()['kappa']:.3f}",
+    "31,389": f"{_openhands()['cross_present']:,}",
 }
 
 #: Figures in the guarded region that are inputs, not derivations.
@@ -214,6 +225,17 @@ class EveryFigureRecomputes(unittest.TestCase):
             "unregistered numbers in the README finding section: bind each to "
             "evidence in COMPUTED or declare it in STATED_INPUTS with a reason",
         )
+
+
+class TheRegistrySentenceIsBound(unittest.TestCase):
+    def test_six_entries_matches_the_registry(self) -> None:
+        """"Six entries" shares a numeral word with the worked example's six
+        gates, so the walk alone cannot tell them apart; bind the count to
+        the registry table itself."""
+        corpus = (ROOT / "research" / "CORPUS.md").read_text(encoding="utf-8")
+        rows = re.findall(r"^\| \[[^]]+\]\(https://huggingface", corpus, re.M)
+        self.assertEqual(len(rows), 6)
+        self.assertIn("Six entries so far", _readme())
 
 
 class TheProbeAccountingAgrees(unittest.TestCase):
