@@ -138,6 +138,25 @@ outcome-audit: check-python
 	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
 	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
 
+# The instrument's own scorecard, assembled from the frozen eval artifacts.
+evals: check-python
+	@$(PYTHON) research/evals.py > /tmp/agent-economics-evals.md
+	@cmp /tmp/agent-economics-evals.md research/EVALS.md
+
+# The measured envelope: full decision path at three scales, written to
+# bench/RESULTS.json and rendered to docs/at-scale.md. bench-smoke is the CI
+# ratio guard: superlinear scaling on the realistic shape fails the build.
+bench: check-python
+	@$(PYTHON) bench/run.py
+	@$(PYTHON) bench/render.py > docs/at-scale.md
+
+bench-smoke: check-python
+	@$(PYTHON) bench/run.py --smoke
+
+bench-check: check-python
+	@$(PYTHON) bench/render.py > /tmp/agent-economics-at-scale.md
+	@cmp /tmp/agent-economics-at-scale.md docs/at-scale.md
+
 # The one research target that needs the network, deliberately outside
 # `reproduce`: spot-check frozen rows against the upstream dataset at its
 # pinned revision, always including the rows the published findings stand on.
@@ -265,7 +284,7 @@ public-case: check-python
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit corpus
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit corpus evals
 
 lessons: check-python
 # Without set -e the loop reports only the LAST lesson's exit status, so a

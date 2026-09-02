@@ -177,6 +177,8 @@ def mutate(
     bundle: EvidenceBundle,
     checks: tuple[CheckSpec, ...] | None = None,
     required_coverage: frozenset[CoverageLike] | None = None,
+    *,
+    _evidence_digest: str | None = None,
 ) -> MutationReport:
     """
     Remove each required gate in turn and record what the engine does.
@@ -199,9 +201,12 @@ def mutate(
     # Must use the caller's contract, not the shipped one. Evaluating a custom
     # required-coverage set against DEFAULT_REQUIRED_COVERAGE reported INCOMPLETE
     # for every custom harness, which made the whole custom path useless.
+    # One digest for the whole report: every evaluation below sees the same
+    # unchanged bundle; only the check set and required coverage vary.
+    digest = _evidence_digest or bundle.digest
     baseline = (
         AssuranceEngine(checks=checks, required_coverage=required)
-        .evaluate(bundle)
+        .evaluate(bundle, _evidence_digest=digest)
         .decision
     )
 
@@ -217,10 +222,12 @@ def mutate(
             unprovided.append(_name(coverage))
             continue
         reduced = tuple(check for check in checks if check.id not in removed)
-        fixed = AssuranceEngine(checks=reduced, required_coverage=required).evaluate(bundle)
+        fixed = AssuranceEngine(checks=reduced, required_coverage=required).evaluate(
+            bundle, _evidence_digest=digest
+        )
         dynamic = AssuranceEngine(
             checks=reduced, required_coverage=_enabled_coverage(reduced)
-        ).evaluate(bundle)
+        ).evaluate(bundle, _evidence_digest=digest)
         mutations.append(
             Mutation(
                 coverage=_name(coverage),

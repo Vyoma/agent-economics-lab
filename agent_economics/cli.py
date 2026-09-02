@@ -54,6 +54,13 @@ from .provenance import Attestation
 from .registry import UnknownCheck, default_registry
 from .report import render_json, render_markdown
 
+#: The normative CI exit map (SPEC.md clause 1.2): only SCALE exits 0.
+CI_EXIT_CODES = {
+    Decision.SCALE: 0,
+    Decision.INCOMPLETE: 2,
+    Decision.ASSIST: 3,
+    Decision.STOP: 4,
+}
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -697,12 +704,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             Path(args.output).write_text(report, encoding="utf-8")
         print(report)
         if args.ci:
-            return {
-                Decision.SCALE: 0,
-                Decision.INCOMPLETE: 2,
-                Decision.ASSIST: 3,
-                Decision.STOP: 4,
-            }[case.decision]
+            return CI_EXIT_CODES[case.decision]
         return 0
     if args.command == "judge":
         import logging

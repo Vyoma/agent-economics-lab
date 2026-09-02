@@ -141,6 +141,58 @@ def _swesmith(row: dict) -> dict:
     }
 
 
+def _nebius_sweagent(row: dict) -> dict:
+    patch = row.get("generated_patch") or ""
+    logs = row.get("eval_logs") or ""
+    return {
+        "id": f"{row.get('instance_id')}::{row.get('model_name')}",
+        "instance_id": row.get("instance_id"),
+        "model": row.get("model_name"),
+        "outcome": row.get("target"),
+        "exit_status": row.get("exit_status"),
+        "patch_sha256": _sha256(patch),
+        "patch_empty": patch.strip() == "",
+        "patch_bytes": len(patch.encode()),
+        "eval_logs_sha256": _sha256(logs),
+        "eval_logs_bytes": len(logs.encode()),
+        "transcript_sha256": _sha256(_canonical(row.get("trajectory"))),
+    }
+
+
+def _nebius_openhands(row: dict) -> dict:
+    patch = row.get("model_patch") or ""
+    return {
+        "id": row.get("trajectory_id"),
+        "instance_id": row.get("instance_id"),
+        "repo": row.get("repo"),
+        "outcome": row.get("resolved"),
+        "cross": row.get("pred_passes_gen_tests"),
+        "gen_tests_correct": row.get("gen_tests_correct"),
+        "exit_status": row.get("exit_status"),
+        "patch_sha256": _sha256(patch),
+        "patch_empty": patch.strip() == "",
+        "patch_bytes": len(patch.encode()),
+        "transcript_sha256": _sha256(_canonical(row.get("trajectory"))),
+    }
+
+
+def _nvidia_swezero(row: dict) -> dict:
+    patch = row.get("model_patch") or ""
+    return {
+        "id": row.get("trajectory_id"),
+        "instance_id": row.get("instance_id"),
+        "repo": row.get("repo"),
+        "source_dataset": row.get("dataset"),
+        # No outcome field exists upstream; recorded as None so the census
+        # says "unlabelled" rather than silently omitting the dimension.
+        "outcome": row.get("resolved"),
+        "patch_sha256": _sha256(patch),
+        "patch_empty": patch.strip() == "",
+        "patch_bytes": len(patch.encode()),
+        "transcript_sha256": _sha256(_canonical(row.get("trajectory"))),
+    }
+
+
 SPECS = {
     "coderforge": {
         "dataset": (
@@ -191,6 +243,46 @@ SPECS = {
         "cross_field": None,
         "extract": _swesmith,
         "license": "mit",
+    },
+    # Nebius's SWE-agent training trajectories: labels plus the raw
+    # evaluation logs, which permit CoderForge-style re-adjudication.
+    "nebius-sweagent": {
+        "dataset": "nebius/SWE-agent-trajectories",
+        "config": "default",
+        "split": "train",
+        "page_length": 50,
+        "expected_rows": 80036,
+        "outcome_field": "target",
+        "cross_field": None,
+        "extract": _nebius_sweagent,
+        "license": "cc-by-4.0",
+    },
+    # Nebius's OpenHands trajectories over SWE-rebench: a resolved label
+    # beside a generated-test cross-signal, the tarsur385 shape.
+    "nebius-openhands": {
+        "dataset": "nebius/SWE-rebench-openhands-trajectories",
+        "config": "default",
+        "split": "train",
+        "page_length": 50,
+        "expected_rows": 67074,
+        "outcome_field": "resolved",
+        "cross_field": "pred_passes_gen_tests",
+        "extract": _nebius_openhands,
+        "license": "cc-by-4.0",
+    },
+    # NVIDIA's SWE-Zero OpenHands trajectories: 318k rows, no outcome
+    # column, and a per-row `dataset` provenance pointer into other public
+    # training sets. Both facts are the audit.
+    "nvidia-swezero": {
+        "dataset": "nvidia/SWE-Zero-openhands-trajectories",
+        "config": "default",
+        "split": "train",
+        "page_length": 50,
+        "expected_rows": 318115,
+        "outcome_field": "resolved",
+        "cross_field": None,
+        "extract": _nvidia_swezero,
+        "license": "cc-by-4.0",
     },
     "jetbrains": {
         "dataset": "JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified",

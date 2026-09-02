@@ -68,6 +68,21 @@ jobs:
           test "$exit_code" = "3"
           cmp /tmp/installed-wheel-assurance-case.md "$EXPECTED_REPORT"
 
+  bench:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Superlinear-scaling guard
+        # Times the full decision path at two sizes 4x apart and fails if
+        # the larger takes more than 10x longer. Linear is ~4x; a quadratic
+        # regression is ~16x; the gap absorbs runner noise.
+        run: python bench/run.py --smoke
+
   action:
     runs-on: ubuntu-latest
     permissions:

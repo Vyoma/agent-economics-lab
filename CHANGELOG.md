@@ -1,5 +1,49 @@
 # Changelog
 
+## 0.9.0 - 2026-09-02
+
+The SCALE semantics changed, the instrument was pointed at the wild, and the
+engine got a measured envelope.
+
+### Decision contract
+
+- **Breaking:** a `SCALE` the audit refuses is returned as `INCOMPLETE`
+  carrying the audit's grounds, on every shipped surface (`evaluate --ci`,
+  the GitHub Action, `decide()`). The only reachable green is one the audit
+  has no grounds against: outcome instrument attested (validity methods
+  only; test-retest measures repeatability and cannot clear the floor),
+  delegation accounted, spend priced. `ASSIST`, `STOP`, and `INCOMPLETE`
+  pass through untouched.
+- `evaluate` grew `--attestations`, `--as-of`, `--independently-verified`,
+  and `--omit-check`; the Action grew the matching inputs.
+- Check resolution moved to a registry (id -> builder), so gates that need
+  evidence context can be named on every surface, including claims.
+
+### Found in the wild
+
+- `research/CORPUS.md`: a registry of public agent-trajectory datasets
+  audited under one discipline, with content-free frozen evidence. Four
+  entries at 0.9.0: tarsur385 (one arm's 100% never confirmed by its own
+  cross-check; one duplicated arm pair, labels 91.2% self-consistent),
+  CoderForge (clean: rewards re-derive from raw logs), SWE-smith (patch
+  column not row-aligned; 2,255 duplicate rows in one split; labels clean
+  everywhere), JetBrains (`resolved` populated on 0 of 1,785 rows).
+- `make verify-upstream`: frozen rows spot-check against the upstream
+  dataset at its pinned revision, one fetch per row, findings' rows always
+  included.
+- `docs/contributing-an-audit.md`: the contract under which third-party
+  entries merge.
+
+### Scale
+
+- Measured envelope at `docs/at-scale.md`: linear, ~9,600 events/s on the
+  full decision path, 979 MiB peak at one million events; CI ratio guard.
+- Fixed while measuring: recursive cycle detection died at ~1,000-deep
+  chains with the error swallowed as "could not run" (iterative now, proven
+  at 50,000); the evidence was hashed fifteen times per decision (once
+  now); `dataclasses.asdict` serialization replaced by direct field access
+  with a byte-identity guard.
+
 ## 0.8.0 - 2026-07-31
 
 Tightens the decision contract, adds a judge eval, and expands the test suite to

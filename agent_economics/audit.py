@@ -185,7 +185,7 @@ def audit(
     )
 
     verdict = AssuranceEngine(checks=checks, required_coverage=required).evaluate(bundle)
-    mutation = mutate(bundle, checks, required)
+    mutation = mutate(bundle, checks, required, _evidence_digest=verdict.evidence_digest)
     closure = assess_bundle_closure(bundle)
     # Closure falls back to counting delegations where their cost could not be
     # established, and says so. Counted coverage is a real measurement, but it

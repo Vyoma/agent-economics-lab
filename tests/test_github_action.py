@@ -239,9 +239,8 @@ class TheActionCanVerifyAClaim(unittest.TestCase):
 
     #: Read as text, not parsed. This repository ships zero runtime
     #: dependencies and its dev extras are ruff and coverage; importing pyyaml
-    #: here would have passed locally and raised ImportError in CI, which is
-    #: the rule in tasks/lessons.md about verification needing what the
-    #: verifier will not have.
+    #: here would have passed locally and raised ImportError in CI: a
+    #: verification must run with only what the verifier will have.
     def setUp(self) -> None:
         self.metadata = (ROOT / "action.yml").read_text(encoding="utf-8")
 

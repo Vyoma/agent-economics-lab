@@ -1,0 +1,50 @@
+{
+ "machine": {
+  "platform": "macOS-26.6.2-arm64-arm-64bit",
+  "processor": "arm64",
+  "python": "3.12.13"
+ },
+ "max_rss_mib": 2004.7,
+ "runs": [
+  {
+   "audit_grounds": 1,
+   "build_seconds": 0.021,
+   "bundle_digest": "e6833ac3b2a4a66d371d7ba5d0b650372421eef152ffe54e367dd86fe42d6fe0",
+   "decide_events_per_second": 11223,
+   "decide_peak_mib": 10.2,
+   "decide_seconds": 0.891,
+   "decision": "ASSIST",
+   "digest_seconds": 0.017,
+   "events": 10000,
+   "tasks": 500
+  },
+  {
+   "audit_grounds": 1,
+   "build_seconds": 0.216,
+   "bundle_digest": "a1badcfebbe4fd59172deeb907ec077ed10e678509eac58f67229772bc45998f",
+   "decide_events_per_second": 9831,
+   "decide_peak_mib": 99.1,
+   "decide_seconds": 10.172,
+   "decision": "ASSIST",
+   "digest_seconds": 0.171,
+   "events": 100000,
+   "tasks": 5000
+  },
+  {
+   "audit_grounds": 1,
+   "build_seconds": 2.677,
+   "bundle_digest": "e5cf5a1e963d1dd8c7739baca835364e3718ff4dab8825935d2cc7419f3f05c6",
+   "decide_events_per_second": 9553,
+   "decide_peak_mib": 978.7,
+   "decide_seconds": 104.678,
+   "decision": "ASSIST",
+   "digest_seconds": 1.912,
+   "events": 1000000,
+   "tasks": 50000
+  }
+ ],
+ "workload": {
+  "events_per_task": 20,
+  "generator": "bench/run.py build_workload, deterministic, no clock"
+ }
+}
