@@ -9,3 +9,8 @@ build/
 /assurance-case.md
 .coverage
 .ruff_cache/
+
+# Internal working notes; never published. The session log and its
+# strategy content are not part of the product.
+tasks/
+CLAUDE.local.md
