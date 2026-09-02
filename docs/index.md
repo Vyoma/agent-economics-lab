@@ -292,6 +292,10 @@ Everything else the project knows it gets wrong is in
 
 | | |
 |---|---|
+| [Specification](../SPEC.md) | the exact contract, conformance-tested clause by clause |
+| [Product requirements](prd.md) | who it is for, and the refusals that define it |
+| [Roadmap](../ROADMAP.md) | maturity per layer, stage gates to production |
+| [The instrument's scorecard](../research/EVALS.md) | how good the auditor is, blind spots included |
 | [Derivation](label-error.md) | the four propositions and their verification |
 | [Limitations](limitations.md) | every known non-claim |
 | [Methodology](methodology.md) | how a decision is computed |
