@@ -40,9 +40,10 @@ def _numeric_issue(
             return f"{label} must be an integer"
         number = float(value)
     else:
-        if type(value) is not float and type(value) is not int:
-            if not isinstance(value, Real) or isinstance(value, bool):
-                return f"{label} must be a finite number"
+        if type(value) is not float and type(value) is not int and (
+            not isinstance(value, Real) or isinstance(value, bool)
+        ):
+            return f"{label} must be a finite number"
         number = float(value)
     if not math.isfinite(number):
         return f"{label} must be finite"

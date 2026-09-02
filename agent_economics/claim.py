@@ -409,13 +409,12 @@ def verify(
         # produces a different manifest or threshold than the claim was issued
         # under, the recomputed contract will not match and this refuses.
         available = {spec.id: spec for spec in default_checks()}
+        registry = default_registry()
         for binding in claim.checks:
             if binding.id in available:
                 continue
             try:
-                available[binding.id] = default_registry().build(
-                    binding.id, bundle=bundle
-                )
+                available[binding.id] = registry.build(binding.id, bundle=bundle)
             except Exception:  # an unbuildable check is simply absent, not fatal
                 continue
         available.update({spec.id: spec for spec in checks})
@@ -561,9 +560,12 @@ def verify(
             )
         checked.append("decision contract digest recomputes")
 
+        # actual_digest was recomputed from content and proven equal to the
+        # claim's a few lines up; handing it to evaluate spares a second full
+        # pass over the events without weakening what was checked.
         case = AssuranceEngine(
             tuple(specs), required_coverage=coverage
-        ).evaluate(bundle)
+        ).evaluate(bundle, _evidence_digest=actual_digest)
         if case.decision.value != claim.decision:
             return Verification(
                 Verdict.REFUTED, assertion,

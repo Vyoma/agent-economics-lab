@@ -326,7 +326,19 @@ class AssuranceEngine:
         if invalid_routes:
             raise ValueError(f"Invalid declared failure routes: {invalid_routes}")
 
-    def evaluate(self, evidence: EvidenceBundle) -> AssuranceCase:
+    def evaluate(
+        self,
+        evidence: EvidenceBundle,
+        *,
+        _evidence_digest: str | None = None,
+    ) -> AssuranceCase:
+        """`_evidence_digest` is a same-process fast path for the audit's
+        mutation self-test, which re-evaluates one unchanged bundle under
+        many contracts: the digest is content-derived once per decision, and
+        recomputing it fourteen more times on identical evidence was most of
+        the engine's cost at fleet scale. External callers must not pass it;
+        a digest supplied from outside would be an assertion, not evidence.
+        """
         evidence_problems = validate_evidence_bundle(evidence)
         if evidence_problems:
             raise ValueError(
@@ -520,7 +532,7 @@ class AssuranceEngine:
                 sorted(_coverage_name(c) for c in missing_coverage)
             ),
             source_manifest_id=evidence.source_manifest_id,
-            evidence_digest=evidence.digest,
+            evidence_digest=_evidence_digest or evidence.digest,
             decision_contract_digest=contract_digest,
         )
 

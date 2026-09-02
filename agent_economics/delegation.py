@@ -57,6 +57,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import Any
 
 from .models import (
@@ -137,11 +138,11 @@ class ClosureReport:
     def total(self) -> int:
         return len(self.delegations)
 
-    @property
+    @cached_property
     def unaccounted(self) -> tuple[Delegation, ...]:
         return tuple(d for d in self.delegations if not d.accounted)
 
-    @property
+    @cached_property
     def _delegated_event_ids(self) -> frozenset[str]:
         return frozenset(
             event_id
@@ -149,7 +150,7 @@ class ClosureReport:
             for event_id in delegation.spawned_event_ids
         )
 
-    @property
+    @cached_property
     def _unaccounted_event_ids(self) -> frozenset[str]:
         """Events reachable from a delegation nobody undertook to assess.
 
@@ -163,7 +164,7 @@ class ClosureReport:
             for event_id in delegation.spawned_event_ids
         )
 
-    @property
+    @cached_property
     def delegated_cost_usd(self) -> float | None:
         """Total delegated spend, or None when it was never established.
 
@@ -178,7 +179,7 @@ class ClosureReport:
             for event_id in self._delegated_event_ids
         )
 
-    @property
+    @cached_property
     def unaccounted_cost_usd(self) -> float | None:
         if self.basis != "cost":
             return None
@@ -187,7 +188,7 @@ class ClosureReport:
             for event_id in self._unaccounted_event_ids
         )
 
-    @property
+    @cached_property
     def closure(self) -> float:
         """
         Accounted share of delegated compute.
@@ -342,11 +343,16 @@ def assess_closure(
         # never as closure.
         if event.name not in delegation_tools or not spawns:
             continue
+        # Per-delegation subtree walk. Deliberately not shared across nested
+        # delegations: the report stores each delegation's full spawned set,
+        # so on a chain of D nested delegations the *output* is already
+        # quadratic in D and no traversal can beat it. Real traces keep
+        # delegation events sparse, which keeps this sum of subtree sizes
+        # small; the measured envelope in docs/at-scale.md states both.
         reachable = _descendants(event.event_id, children)
-        costs = [_event_cost(by_id[e], rates) for e in reachable if e in by_id]
-        for event_id, event_cost in zip(
-            [e for e in reachable if e in by_id], costs, strict=True
-        ):
+        recorded = [e for e in reachable if e in by_id]
+        costs = [_event_cost(by_id[e], rates) for e in recorded]
+        for event_id, event_cost in zip(recorded, costs, strict=True):
             if event_cost is not None:
                 delegated_costs[event_id] = event_cost
         priced = None not in costs
