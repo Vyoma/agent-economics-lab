@@ -212,10 +212,10 @@ agent_economics/assurance.py:387  expected_net = (realized_value - total_cost) /
 agent_economics/assurance.py:381  cost_per_acceptable = total_cost / accepted if accepted else math.inf
 agent_economics/claude_code.py:1360  token_cost = (
 agent_economics/claude_code_tree.py:452  subagent_dir = parent_path.with_suffix("") / "subagents"
-agent_economics/cli.py:507  subagent_dir = source_path.with_suffix("") / "subagents"
-agent_economics/cli.py:607  (output_dir / name).write_text(content, encoding="utf-8")
-agent_economics/cli.py:599  if not (verify_dir / name).exists()
-agent_economics/cli.py:600  or (verify_dir / name).read_text(encoding="utf-8") != content
+agent_economics/cli.py:514  subagent_dir = source_path.with_suffix("") / "subagents"
+agent_economics/cli.py:614  (output_dir / name).write_text(content, encoding="utf-8")
+agent_economics/cli.py:606  if not (verify_dir / name).exists()
+agent_economics/cli.py:607  or (verify_dir / name).read_text(encoding="utf-8") != content
 agent_economics/delegation.py:211  return (total - (self.unaccounted_cost_usd or 0.0)) / total
 agent_economics/delegation.py:207  return (self.total - len(self.unaccounted)) / self.total
 agent_economics/frontier.py:200  adjusted_alpha = (1 - confidence) / (2 * (len(arms) - 1))
@@ -271,33 +271,33 @@ agent_economics/models.py:142  return self.cost_per_attempt_usd / self.acceptabl
 ### S4 (40)
 
 ```
-agent_economics/cli.py:740  in main(): return 2
-agent_economics/cli.py:353  in main(): return 0
-agent_economics/cli.py:381  in main(): return 0
-agent_economics/cli.py:451  in main(): return 0
-agent_economics/cli.py:494  in main(): return 0
-agent_economics/cli.py:576  in main(): return 0
-agent_economics/cli.py:706  in main(): return 0
-agent_economics/cli.py:739  in main(): return 0
-agent_economics/cli.py:450  in main(): return 1
-agent_economics/cli.py:524  in main(): return 2
-agent_economics/cli.py:584  in main(): return 2
-agent_economics/cli.py:716  in main(): return 0
-agent_economics/cli.py:348  in main(): return 2
-agent_economics/cli.py:360  in main(): return 2
-agent_economics/cli.py:369  in main(): return 2
-agent_economics/cli.py:390  in main(): return 2
-agent_economics/cli.py:404  in main(): return 2
-agent_economics/cli.py:410  in main(): return 2
-agent_economics/cli.py:431  in main(): return 2
-agent_economics/cli.py:574  in main(): return 2
-agent_economics/cli.py:589  in main(): return 2
-agent_economics/cli.py:604  in main(): return 1
-agent_economics/cli.py:672  in main(): return 2
-agent_economics/cli.py:682  in main(): return 2
-agent_economics/cli.py:695  in main(): return 2
-agent_economics/cli.py:719  in main(): return 2
-agent_economics/cli.py:730  in main(): return 2
+agent_economics/cli.py:742  in main(): return 2
+agent_economics/cli.py:360  in main(): return 0
+agent_economics/cli.py:388  in main(): return 0
+agent_economics/cli.py:458  in main(): return 0
+agent_economics/cli.py:501  in main(): return 0
+agent_economics/cli.py:583  in main(): return 0
+agent_economics/cli.py:708  in main(): return 0
+agent_economics/cli.py:741  in main(): return 0
+agent_economics/cli.py:457  in main(): return 1
+agent_economics/cli.py:531  in main(): return 2
+agent_economics/cli.py:591  in main(): return 2
+agent_economics/cli.py:718  in main(): return 0
+agent_economics/cli.py:355  in main(): return 2
+agent_economics/cli.py:367  in main(): return 2
+agent_economics/cli.py:376  in main(): return 2
+agent_economics/cli.py:397  in main(): return 2
+agent_economics/cli.py:411  in main(): return 2
+agent_economics/cli.py:417  in main(): return 2
+agent_economics/cli.py:438  in main(): return 2
+agent_economics/cli.py:581  in main(): return 2
+agent_economics/cli.py:596  in main(): return 2
+agent_economics/cli.py:611  in main(): return 1
+agent_economics/cli.py:679  in main(): return 2
+agent_economics/cli.py:689  in main(): return 2
+agent_economics/cli.py:702  in main(): return 2
+agent_economics/cli.py:721  in main(): return 2
+agent_economics/cli.py:732  in main(): return 2
 agent_economics/delegation.py:264  in _event_cost(): return 0.0
 agent_economics/delegation.py:205  in closure(): return 1.0
 agent_economics/frontier.py:472  in _binomial_cdf(): return 1.0
@@ -328,11 +328,11 @@ agent_economics/checks.py:106  _result(...) omits task_id  [results=(_result("ga
 agent_economics/claude_code.py:768  _inspect_claude_code_jsonl_bytes(...) omits allow_empty_tasks  [return _inspect_claude_code_jsonl_bytes(]
 agent_economics/claude_code.py:520  _normalize_usage(...) omits allow_zero  [usage = _normalize_usage(]
 agent_economics/claude_code_tree.py:494  _inspect_claude_code_jsonl_bytes(...) omits allow_empty_tasks  [parent = _inspect_claude_code_jsonl_byte]
-agent_economics/cli.py:411  audit(...) omits policy  [report = audit(]
-agent_economics/cli.py:437  mutate(...) omits _evidence_digest  [report = mutate(bundle)]
-agent_economics/cli.py:350  render_normalized_json(...) omits conversion  [render_normalized_json(bundle), encoding]
-agent_economics/cli.py:434  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
-agent_economics/cli.py:660  decide(...) omits policy  [case, _ = decide(]
+agent_economics/cli.py:418  audit(...) omits policy  [report = audit(]
+agent_economics/cli.py:444  mutate(...) omits _evidence_digest  [report = mutate(bundle)]
+agent_economics/cli.py:357  render_normalized_json(...) omits conversion  [render_normalized_json(bundle), encoding]
+agent_economics/cli.py:441  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
+agent_economics/cli.py:667  decide(...) omits policy  [case, _ = decide(]
 agent_economics/evidence.py:390  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [problems = validate_evidence_bundle(bund]
 agent_economics/evidence.py:90  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:124  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
@@ -399,13 +399,13 @@ All five known defects share a sharper form than any shape above: the same quant
 
 ### `assess_bundle_closure(..., declared=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/cli.py:434`
+- passes / resolves (1): `agent_economics/cli.py:441`
 - omits / reads raw (1): `agent_economics/audit.py:189`
 
 ### `audit(..., policy=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/audit.py:146`
-- omits / reads raw (1): `agent_economics/cli.py:411`
+- omits / reads raw (1): `agent_economics/cli.py:418`
 
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)
 
@@ -435,12 +435,12 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `mutate(..., _evidence_digest=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/audit.py:188`
-- omits / reads raw (1): `agent_economics/cli.py:437`
+- omits / reads raw (1): `agent_economics/cli.py:444`
 
 ### `render_normalized_json(..., conversion=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/cli.py:563`
-- omits / reads raw (1): `agent_economics/cli.py:350`
+- passes / resolves (1): `agent_economics/cli.py:570`
+- omits / reads raw (1): `agent_economics/cli.py:357`
 
 ### `validate_evidence_bundle(..., label=)`  (inconsistent-caller)
 
