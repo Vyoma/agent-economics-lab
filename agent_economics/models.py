@@ -315,8 +315,30 @@ def bundle_digest_of(
     declared_delegations: tuple[str, ...] = (),
     label_source: str = "",
 ) -> str:
+    # Direct attribute access instead of dataclasses.asdict: at fleet scale
+    # the digest is the hot path (the audit's mutation self-test recomputes it
+    # for every mutated evaluation), and asdict's generic recursion was two
+    # thirds of total decision time at 10^6 events. The payload is
+    # byte-identical to the asdict form: same keys, same values, and
+    # sort_keys orders them regardless of construction order. Every frozen
+    # claim digest is a regression test on that identity.
     payload = {
-        "events": [asdict(event) for event in events],
+        "events": [
+            {
+                "task_id": e.task_id,
+                "event_id": e.event_id,
+                "timestamp": e.timestamp,
+                "event_type": e.event_type,
+                "name": e.name,
+                "model": e.model,
+                "input_tokens": e.input_tokens,
+                "output_tokens": e.output_tokens,
+                "direct_cost_usd": e.direct_cost_usd,
+                "status": e.status,
+                "arguments": e.arguments,
+            }
+            for e in events
+        ],
         "outcomes": [asdict(outcomes[task_id]) for task_id in sorted(outcomes)],
         "rates": (
             {"unsupplied": "rates"}

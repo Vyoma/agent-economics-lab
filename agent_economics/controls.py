@@ -77,6 +77,7 @@ def find_directed_cycles(edges: Iterable[tuple[str, str]]) -> list[tuple[str, ..
 
     cycles: set[tuple[str, ...]] = set()
     visiting: list[str] = []
+    on_stack: dict[str, int] = {}
     visited: set[str] = set()
 
     def canonical(nodes: list[str]) -> tuple[str, ...]:
@@ -84,20 +85,32 @@ def find_directed_cycles(edges: Iterable[tuple[str, str]]) -> list[tuple[str, ..
         rotations = [tuple(body[index:] + body[:index]) for index in range(len(body))]
         return min(rotations)
 
-    def visit(node: str) -> None:
-        if node in visiting:
-            index = visiting.index(node)
-            cycle = visiting[index:] + [node]
-            cycles.add(canonical(cycle))
-            return
-        if node in visited:
-            return
-        visiting.append(node)
-        for target in graph[node]:
-            visit(target)
-        visiting.pop()
-        visited.add(node)
-
-    for node in graph:
-        visit(node)
+    # Iterative, with an index dict beside the stack. The recursive form had
+    # two scale failures: `node in visiting` scanned a list at every visit,
+    # O(depth) each, and Python's recursion limit turned a dependency chain
+    # a thousand events deep into RecursionError — which the engine's
+    # diagnostic guard then reported as "could not run", so cycle detection
+    # silently stopped existing exactly when traces got big.
+    for root in graph:
+        if root in visited:
+            continue
+        work: list[tuple[str, bool]] = [(root, False)]
+        while work:
+            node, leaving = work.pop()
+            if leaving:
+                visiting.pop()
+                del on_stack[node]
+                visited.add(node)
+                continue
+            if node in on_stack:
+                cycle = visiting[on_stack[node]:] + [node]
+                cycles.add(canonical(cycle))
+                continue
+            if node in visited:
+                continue
+            on_stack[node] = len(visiting)
+            visiting.append(node)
+            work.append((node, True))
+            for target in graph[node]:
+                work.append((target, False))
     return sorted(cycles)
