@@ -8,6 +8,11 @@ is a result, recorded with the same care as a defect; an auditor that
 only ever finds problems is indistinguishable from one that
 manufactures them.
 
+Entries are open to third parties under one written contract:
+[contributing an audit](../docs/contributing-an-audit.md). An entry
+that satisfies it gets merged no matter who submits it; one that
+does not gets returned no matter who submits it, including us.
+
 Each dataset is an independent public upload; an arm or model name
 inside one identifies a set of runs in that dataset, not a number any
 vendor published, and nothing here is a measurement of a model.
