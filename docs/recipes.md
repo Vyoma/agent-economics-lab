@@ -448,6 +448,29 @@ attempt manifest. They are boundary cases, not a failure rate.
 [Read the evidence-ablation protocol](../research/EVIDENCE_ABLATION_PROTOCOL.md) ·
 [Inspect the generated rows](../research/results/evidence-ablation/results.csv)
 
+## Decide over more events than memory holds
+
+The engine is linear to a million events in one process
+([the measured envelope](at-scale.md)), and evidence bundles are in-memory
+objects, so the wall past that is memory, not time. The supported answer is
+sharding: split the fleet's window into cohorts, decide each cohort, and
+issue one claim per cohort. Nothing about the contract weakens — each shard
+carries its own evidence digest, its own bounded decision, and its own
+claim, and a reader verifies each shard exactly as they would one bundle.
+
+```bash
+# one decision and one portable claim per week-sized shard
+for shard in evidence/week-*.csv; do
+  agent-economics evaluate --traces "$shard" ... --ci
+  agent-economics claim --bundle "$shard" ...
+done
+```
+
+What sharding does not license: computing a fleet-wide rate by averaging
+shard rates without weighting, or letting a green shard speak for a red one.
+A fleet answer is the set of shard decisions, worst decision governing, the
+same way one bundle's worst gate governs its decision.
+
 ## The kernel
 
 Keep the observability, evaluation, and runtime-control tools you already use.
