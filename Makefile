@@ -138,6 +138,25 @@ outcome-audit: check-python
 	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
 	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
 
+# Regenerate every fast derived artifact in place, then refuse if that
+# changed the tree: the CI failures this repository actually has are stale
+# generated docs and a stale test count, and both are cheaper to fix before
+# the push than after the round-trip. `make hooks` wires this to git push.
+docs-sync: check-python
+	@$(PYTHON) research/probe_sites.py > research/PROBE_SITES.md
+	@$(PYTHON) research/corpus/audit.py > research/CORPUS.md
+	@$(PYTHON) research/evals.py > research/EVALS.md
+	@$(PYTHON) research/outcome_audit.py > research/OUTCOME_AUDIT.md
+	@$(PYTHON) bench/render.py > docs/at-scale.md
+	@$(PYTHON) scripts/sync_test_count.py
+
+gate: docs-sync test ledger
+	@git diff --quiet -- research/PROBE_SITES.md research/CORPUS.md 	  research/EVALS.md research/OUTCOME_AUDIT.md docs/at-scale.md 	  docs/index.md || { 	  echo "docs-sync updated generated artifacts; review and commit them:"; 	  git --no-pager diff --stat -- research/PROBE_SITES.md 	    research/CORPUS.md research/EVALS.md research/OUTCOME_AUDIT.md 	    docs/at-scale.md docs/index.md; exit 1; }
+
+hooks:
+	@git config core.hooksPath .githooks
+	@echo "pre-push now runs: make gate"
+
 # The instrument's own scorecard, assembled from the frozen eval artifacts.
 evals: check-python
 	@$(PYTHON) research/evals.py > /tmp/agent-economics-evals.md

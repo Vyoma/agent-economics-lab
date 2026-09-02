@@ -2,6 +2,9 @@ name: test
 
 on:
   push:
+    # Branch commits are built by their pull request; building the push too
+    # ran every job twice and painted every failure as two red rows.
+    branches: [main]
   pull_request:
   # Lets a maintainer re-run the full matrix against any ref on demand, without
   # pushing a commit to do it.
