@@ -176,6 +176,23 @@ def _nebius_openhands(row: dict) -> dict:
     }
 
 
+def _nvidia_swezero(row: dict) -> dict:
+    patch = row.get("model_patch") or ""
+    return {
+        "id": row.get("trajectory_id"),
+        "instance_id": row.get("instance_id"),
+        "repo": row.get("repo"),
+        "source_dataset": row.get("dataset"),
+        # No outcome field exists upstream; recorded as None so the census
+        # says "unlabelled" rather than silently omitting the dimension.
+        "outcome": row.get("resolved"),
+        "patch_sha256": _sha256(patch),
+        "patch_empty": patch.strip() == "",
+        "patch_bytes": len(patch.encode()),
+        "transcript_sha256": _sha256(_canonical(row.get("trajectory"))),
+    }
+
+
 SPECS = {
     "coderforge": {
         "dataset": (
@@ -251,6 +268,20 @@ SPECS = {
         "outcome_field": "resolved",
         "cross_field": "pred_passes_gen_tests",
         "extract": _nebius_openhands,
+        "license": "cc-by-4.0",
+    },
+    # NVIDIA's SWE-Zero OpenHands trajectories: 318k rows, no outcome
+    # column, and a per-row `dataset` provenance pointer into other public
+    # training sets. Both facts are the audit.
+    "nvidia-swezero": {
+        "dataset": "nvidia/SWE-Zero-openhands-trajectories",
+        "config": "default",
+        "split": "train",
+        "page_length": 50,
+        "expected_rows": 318115,
+        "outcome_field": "resolved",
+        "cross_field": None,
+        "extract": _nvidia_swezero,
         "license": "cc-by-4.0",
     },
     "jetbrains": {
