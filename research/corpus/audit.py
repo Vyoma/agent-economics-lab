@@ -97,6 +97,99 @@ def _load(slug: str) -> dict:
 SWESMITH_SLUGS = ("swesmith-tool", "swesmith-xml", "swesmith-ticks")
 
 
+def nebius_sweagent_summary() -> dict:
+    """Every published number for the SWE-agent-trajectories entry."""
+    doc = _load("nebius-sweagent")
+    rows = doc["rows"]
+    by_transcript: dict[str, list] = {}
+    for row in rows:
+        by_transcript.setdefault(row["transcript_sha256"], []).append(row)
+    dup_groups = {h: v for h, v in by_transcript.items() if len(v) > 1}
+    resolved = [r for r in rows if r["outcome"] is True]
+    return {
+        "revision": doc["revision"],
+        "rows": len(rows),
+        "resolved": len(resolved),
+        "duplicate_transcript_groups": len(dup_groups),
+        "resolved_with_empty_patch": sum(1 for r in resolved if r["patch_empty"]),
+        "resolved_with_empty_logs": sum(
+            1 for r in resolved if r["eval_logs_bytes"] == 0
+        ),
+        "unresolved_empty_patch": sum(
+            1 for r in rows if r["outcome"] is False and r["patch_empty"]
+        ),
+        "unresolved_empty_logs": sum(
+            1 for r in rows if r["outcome"] is False and r["eval_logs_bytes"] == 0
+        ),
+        "repeat_attempt_pairs": sum(
+            c - 1
+            for c in __import__("collections").Counter(
+                r["id"] for r in rows
+            ).values()
+            if c > 1
+        ),
+    }
+
+
+def nebius_openhands_summary() -> dict:
+    """Every published number for the SWE-rebench-openhands entry."""
+    doc = _load("nebius-openhands")
+    rows = doc["rows"]
+
+    def _kappa(subset: list) -> tuple[float, float, float]:
+        agree = sum(
+            1 for r in subset if (r["outcome"] == 1) == (r["cross"] == 1.0)
+        )
+        po = agree / len(subset)
+        rr = sum(1 for r in subset if r["outcome"] == 1) / len(subset)
+        pr = sum(1 for r in subset if r["cross"] == 1.0) / len(subset)
+        pe = rr * pr + (1 - rr) * (1 - pr)
+        positives = [r for r in subset if r["cross"] == 1.0]
+        precision = (
+            sum(1 for r in positives if r["outcome"] == 1) / len(positives)
+        )
+        return po, (po - pe) / (1 - pe), precision
+
+    by_transcript: dict[str, list] = {}
+    for row in rows:
+        by_transcript.setdefault(row["transcript_sha256"], []).append(row)
+    dup_groups = {h: v for h, v in by_transcript.items() if len(v) > 1}
+
+    present = [r for r in rows if r["cross"] is not None]
+    valid = [r for r in present if r["gen_tests_correct"] == 1.0]
+    invalid = [r for r in present if r["gen_tests_correct"] == 0.0]
+    po_all, k_all, prec_all = _kappa(present)
+    po_valid, k_valid, prec_valid = _kappa(valid)
+    _, k_invalid, _ = _kappa(invalid)
+    max_iter = [
+        r for r in rows
+        if str(r.get("exit_status", "")).startswith(
+            "RuntimeError: Agent reached maximum"
+        )
+    ]
+    return {
+        "revision": doc["revision"],
+        "rows": len(rows),
+        "resolved": sum(1 for r in rows if r["outcome"] == 1),
+        "duplicate_transcript_groups": len(dup_groups),
+        "empty_patches": sum(1 for r in rows if r["patch_empty"]),
+        "empty_patch_resolved": sum(
+            1 for r in rows if r["patch_empty"] and r["outcome"] == 1
+        ),
+        "max_iteration_rows": len(max_iter),
+        "max_iteration_resolved": sum(1 for r in max_iter if r["outcome"] == 1),
+        "cross_present": len(present),
+        "agreement": po_all,
+        "kappa": k_all,
+        "precision": prec_all,
+        "valid_n": len(valid),
+        "valid_kappa": k_valid,
+        "valid_precision": prec_valid,
+        "invalid_n": len(invalid),
+        "invalid_kappa": k_invalid,
+    }
+
+
 def swesmith_summary() -> dict:
     """Every published number for the SWE-smith entry, from frozen rows alone."""
     splits = {slug: _load(slug) for slug in SWESMITH_SLUGS}
@@ -202,6 +295,8 @@ def render() -> str:
     jetbrains = _load("jetbrains")
     tarsur = _tarsur_summary()
     smith = swesmith_summary()
+    sweagent = nebius_sweagent_summary()
+    openhands = nebius_openhands_summary()
 
     cf_re = readjudication(coderforge)
     cf_census = outcome_census(coderforge)
@@ -261,6 +356,21 @@ def render() -> str:
             "verbatim cross-repository patch groups); "
             f"{smith['xml_identical_duplicate_rows']:,} duplicate rows in one "
             "split |"
+        ),
+        (
+            "| [nebius/SWE-agent-trajectories]"
+            "(https://huggingface.co/datasets/nebius/SWE-agent-trajectories) "
+            f"| `{sweagent['revision'][:8]}` | {sweagent['rows']:,} "
+            "| clean: every coherence probe passes; resolved rows always "
+            "carry a patch and evaluation logs; no duplicate transcripts |"
+        ),
+        (
+            "| [nebius/SWE-rebench-openhands-trajectories]"
+            "(https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) "
+            f"| `{openhands['revision'][:8]}` | {openhands['rows']:,} "
+            "| clean labels; its recorded generated-test signal measures "
+            f"kappa {openhands['kappa']:.2f} against adjudication over "
+            f"{openhands['cross_present']:,} runs |"
         ),
         (
             "| [JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified]"
@@ -349,6 +459,74 @@ def render() -> str:
         "[frozen/swesmith-*.json](corpus/frozen/) and",
         "[frozen/swesmith-patch-check.json](corpus/frozen/swesmith-patch-check.json);",
         "reproduce the verification with `python3 research/corpus/patch_check.py`.",
+        "",
+        "## nebius/SWE-agent-trajectories, "
+        f"{sweagent['rows']:,} rows",
+        "",
+        "SWE-agent runs over SWE-bench-style tasks with the outcome label,",
+        "the generated patch, and the raw evaluation logs beside every row.",
+        f"{sweagent['resolved']:,} of {sweagent['rows']:,} rows are marked",
+        "resolved, and every coherence probe this corpus knows passes:",
+        "",
+        f"- All {sweagent['resolved']:,} resolved rows carry a non-empty",
+        f"  patch ({sweagent['resolved_with_empty_patch']} exceptions) and",
+        "  non-empty evaluation logs",
+        f"  ({sweagent['resolved_with_empty_logs']} exceptions). Empty",
+        f"  patches ({sweagent['unresolved_empty_patch']:,}) and empty logs",
+        f"  ({sweagent['unresolved_empty_logs']:,}) occur only on unresolved",
+        "  rows, under exactly the exit statuses that should produce them",
+        "  (context exhaustion, early exit, submitted-no-patch).",
+        f"- {sweagent['duplicate_transcript_groups']} duplicate transcripts",
+        f"  across all {sweagent['rows']:,} rows.",
+        "",
+        "A clean bill, with its strength stated precisely: this is",
+        "coherence, weaker than the CoderForge entry's re-adjudication,",
+        "because the dataset does not ship the graded-test lists a",
+        "re-derivation needs. One artifact of ours, recorded so nobody",
+        "mistakes it for a finding: the frozen id is instance::model, which",
+        f"repeats {sweagent['repeat_attempt_pairs']:,} times because the",
+        "dataset legitimately holds several attempts per pair; the",
+        "transcripts are all distinct.",
+        "",
+        "## nebius/SWE-rebench-openhands-trajectories, "
+        f"{openhands['rows']:,} rows",
+        "",
+        "OpenHands runs where each row records the adjudicated `resolved`",
+        "label and, on some rows, whether the model's own generated tests",
+        "passed. The labels are coherent: only",
+        f"{openhands['empty_patches']} empty patches, every one unresolved;",
+        "runs that hit the iteration cap resolve at",
+        f"{openhands['max_iteration_resolved'] / openhands['max_iteration_rows']:.0%}",
+        f"against {openhands['resolved'] / openhands['rows']:.0%} overall;",
+        f"{openhands['duplicate_transcript_groups']} duplicate transcripts.",
+        "",
+        "**What the dataset makes measurable is the interesting part.**",
+        "Model-generated tests are widely proposed as a cheap outcome",
+        "instrument. Here both signals sit on the same",
+        f"{openhands['cross_present']:,} rows, which is a validity",
+        "measurement at scale:",
+        "",
+        f"- Raw agreement {openhands['agreement']:.1%}, Cohen's kappa",
+        f"  **{openhands['kappa']:.3f}** - indistinguishable from guessing.",
+        "- Conditioned on the generated tests themselves being judged",
+        f"  correct ({openhands['valid_n']:,} rows): kappa",
+        f"  {openhands['valid_kappa']:.3f}, precision",
+        f"  {openhands['valid_precision']:.3f}. Better, and still a sixth",
+        "  of the 0.60 kappa floor this package requires of an outcome",
+        "  instrument.",
+        "- Where the generated tests were judged incorrect",
+        f"  ({openhands['invalid_n']:,} rows): kappa",
+        f"  {openhands['invalid_kappa']:.3f}, pure noise - and that is",
+        "  the majority of rows carrying the signal.",
+        "",
+        "Scope, stated exactly: this measures the generated-test *method*,",
+        "not a defect of the dataset - recording both signals side by side",
+        "is what made the measurement possible at all, and the signal is",
+        f"absent on {openhands['rows'] - openhands['cross_present']:,} rows,",
+        "so nothing here extrapolates to them. Evidence:",
+        "[frozen/nebius-sweagent.json](corpus/frozen/) and",
+        "[frozen/nebius-openhands.json](corpus/frozen/); every figure",
+        "recomputes offline.",
         "",
         "## JetBrains-Research, SWE-bench test-minus-verified, 1,785 rows",
         "",

@@ -46,7 +46,7 @@ def render() -> str:
 
     corpus = (ROOT / "research" / "CORPUS.md").read_text(encoding="utf-8")
     registry_rows = re.findall(r"^\| \[[^]]+\]\(https://huggingface", corpus, re.M)
-    clean_rows = len(re.findall(r"\| clean:", corpus))
+    clean_rows = len(re.findall(r"\| clean[ :]", corpus))
 
     claims = sorted((ROOT / "research" / "claims").glob("*.claim.json"))
 

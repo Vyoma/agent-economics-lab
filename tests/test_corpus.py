@@ -358,3 +358,64 @@ class SweSmithNumbersRecompute(unittest.TestCase):
         with mock.patch.object(audit, "_load", corrupted):
             smith = audit.swesmith_summary()
         self.assertGreater(smith["label_disagreeing_groups"], 0)
+
+
+class NebiusNumbersRecompute(unittest.TestCase):
+    """Entries five and six, recomputed from frozen evidence."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        from audit import nebius_openhands_summary, nebius_sweagent_summary
+
+        cls.sweagent = nebius_sweagent_summary()
+        cls.openhands = nebius_openhands_summary()
+
+    def test_the_sweagent_clean_bill(self) -> None:
+        s = self.sweagent
+        self.assertEqual(s["rows"], 80036)
+        self.assertEqual(s["resolved"], 13389)
+        self.assertEqual(s["duplicate_transcript_groups"], 0)
+        self.assertEqual(s["resolved_with_empty_patch"], 0)
+        self.assertEqual(s["resolved_with_empty_logs"], 0)
+        self.assertGreater(s["unresolved_empty_patch"], 9000)
+
+    def test_the_openhands_label_coherence(self) -> None:
+        o = self.openhands
+        self.assertEqual(o["rows"], 67074)
+        self.assertEqual(o["empty_patch_resolved"], 0)
+        self.assertEqual(o["duplicate_transcript_groups"], 0)
+        self.assertLess(
+            o["max_iteration_resolved"] / o["max_iteration_rows"],
+            o["resolved"] / o["rows"],
+        )
+
+    def test_the_generated_test_instrument_measurement(self) -> None:
+        o = self.openhands
+        self.assertEqual(o["cross_present"], 31389)
+        self.assertAlmostEqual(o["kappa"], 0.062, places=3)
+        self.assertAlmostEqual(o["valid_kappa"], 0.101, places=3)
+        self.assertAlmostEqual(o["valid_precision"], 0.729, places=3)
+        # the published framing depends on even the best case missing the
+        # floor by a wide margin; if this ever passes 0.60 the entry is wrong
+        self.assertLess(o["valid_kappa"], 0.60)
+
+    def test_the_measurement_refuses_flipped_labels(self) -> None:
+        """Corrupt the frozen cross-signal; kappa must move, proving the
+        computation reads the evidence rather than echoing a constant."""
+        from unittest import mock
+
+        import audit
+
+        real_load = audit._load
+
+        def corrupted(slug: str) -> dict:
+            document = real_load(slug)
+            if slug == "nebius-openhands":
+                for row in document["rows"]:
+                    if row["cross"] is not None:
+                        row["cross"] = 1.0 if row["outcome"] == 1 else 0.0
+            return document
+
+        with mock.patch.object(audit, "_load", corrupted):
+            perfect = audit.nebius_openhands_summary()
+        self.assertGreater(perfect["kappa"], 0.99)
