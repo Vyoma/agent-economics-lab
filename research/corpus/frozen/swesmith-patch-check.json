@@ -1,0 +1,3986 @@
+{
+ "cross_repo_groups_total": 266,
+ "dataset": "SWE-bench/SWE-smith-trajectories",
+ "failures": [],
+ "groups": [
+  {
+   "patch_sha256": "012fb21a93025f656bbc6cf126d2b02a1aec6bf39a3fc0a3abbed1559a471ae6",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "mozillazg__python-pinyin.e42dede5.lm_rewrite__ae634snb",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1160,
+     "repo": "python-pinyin",
+     "row_index": 2093,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "jawah__charset_normalizer.1fdd6463.lm_rewrite__895ttfle",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1160,
+     "repo": "charset_normalizer",
+     "row_index": 16198,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "mozillazg__python-pinyin.e42dede5.lm_rewrite__ae634snb",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1160,
+     "repo": "python-pinyin",
+     "row_index": 41,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "jawah__charset_normalizer.1fdd6463.lm_rewrite__895ttfle",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1160,
+     "repo": "charset_normalizer",
+     "row_index": 8937,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "jawah__charset_normalizer.1fdd6463.lm_rewrite__895ttfle",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1160,
+     "repo": "charset_normalizer",
+     "row_index": 8758,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "mozillazg__python-pinyin.e42dede5.lm_rewrite__ae634snb",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1160,
+     "repo": "python-pinyin",
+     "row_index": 18088,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "02c4e1bb2b043c93d339c1b87bf21252088a2a64a07577af0ec8bbe5fe2096c7",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.combine_file__fki1yo9w",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1869,
+     "repo": "mistune",
+     "row_index": 9235,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "sloria__environs.73c372df.lm_rewrite__cm1ntr8d",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1869,
+     "repo": "environs",
+     "row_index": 9939,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.combine_file__fki1yo9w",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1869,
+     "repo": "mistune",
+     "row_index": 20170,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "sloria__environs.73c372df.lm_rewrite__cm1ntr8d",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1869,
+     "repo": "environs",
+     "row_index": 4241,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.combine_file__fki1yo9w",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1869,
+     "repo": "mistune",
+     "row_index": 12909,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "sloria__environs.73c372df.lm_rewrite__cm1ntr8d",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1869,
+     "repo": "environs",
+     "row_index": 2436,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.combine_file__fki1yo9w",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1869,
+     "repo": "mistune",
+     "row_index": 19211,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "033d15c692b03702f848a9902a63ea2d8887cb7fd06a4579ae6233b67b70c7aa",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyupio__safety.7654596b.combine_module__5d22wxdn",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1358,
+     "repo": "safety",
+     "row_index": 7453,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.lm_rewrite__tlrs22so",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1358,
+     "repo": "modin",
+     "row_index": 14933,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.lm_rewrite__tlrs22so",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1358,
+     "repo": "modin",
+     "row_index": 7672,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyupio__safety.7654596b.combine_module__5d22wxdn",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1358,
+     "repo": "safety",
+     "row_index": 24736,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyupio__safety.7654596b.combine_module__5d22wxdn",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1358,
+     "repo": "safety",
+     "row_index": 1149,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.lm_rewrite__tlrs22so",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1358,
+     "repo": "modin",
+     "row_index": 20672,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "03883371c01e2540056eb61ebf8413bed31094b0e49c287a8df8a2de594ad683",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "prettytable__prettytable.ca90b055.pr_312",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1679,
+     "repo": "prettytable",
+     "row_index": 5714,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2515",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1679,
+     "repo": "astroid",
+     "row_index": 21091,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "prettytable__prettytable.ca90b055.pr_312",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1679,
+     "repo": "prettytable",
+     "row_index": 2620,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2515",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1679,
+     "repo": "astroid",
+     "row_index": 13830,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "prettytable__prettytable.ca90b055.pr_312",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1679,
+     "repo": "prettytable",
+     "row_index": 7211,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2515",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1679,
+     "repo": "astroid",
+     "row_index": 12906,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "03dcaee9c61fb3b4d3c9232719e052e255ba65d7a25b3c334812c2c467a9b03b",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "oauthlib__oauthlib.1fd52536.combine_file__v89vm72t",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1174,
+     "repo": "oauthlib",
+     "row_index": 7219,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "jsvine__pdfplumber.02ff4313.lm_rewrite__6iq6rpwb",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1174,
+     "repo": "pdfplumber",
+     "row_index": 15140,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "jsvine__pdfplumber.02ff4313.lm_rewrite__6iq6rpwb",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1174,
+     "repo": "pdfplumber",
+     "row_index": 7879,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "oauthlib__oauthlib.1fd52536.combine_file__v89vm72t",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1174,
+     "repo": "oauthlib",
+     "row_index": 24505,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "oauthlib__oauthlib.1fd52536.combine_file__v89vm72t",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1174,
+     "repo": "oauthlib",
+     "row_index": 919,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "jsvine__pdfplumber.02ff4313.lm_rewrite__6iq6rpwb",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1174,
+     "repo": "pdfplumber",
+     "row_index": 20883,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "03f318ac7fa4667204370c988fbedef17b89244608550978a98408086dea9dfd",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "django__daphne.32ac73e1.func_pm_ctrl_invert_if__gelq8pcg",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 619,
+     "repo": "daphne",
+     "row_index": 771,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "django__daphne.32ac73e1.func_pm_ctrl_invert_if__gelq8pcg",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 619,
+     "repo": "daphne",
+     "row_index": 6495,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "django__daphne.32ac73e1.func_pm_ctrl_invert_if__gelq8pcg",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 619,
+     "repo": "daphne",
+     "row_index": 3401,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "scanny__python-pptx.278b47b1.func_pm_ctrl_shuffle__gfvy1zna",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 619,
+     "repo": "python-pptx",
+     "row_index": 17823,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "scanny__python-pptx.278b47b1.func_pm_ctrl_shuffle__gfvy1zna",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 619,
+     "repo": "python-pptx",
+     "row_index": 3345,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "django__daphne.32ac73e1.func_pm_ctrl_invert_if__gelq8pcg",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 619,
+     "repo": "daphne",
+     "row_index": 25393,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "04034c0951fb3e65c938cf7712c9eeac0f0fa47632f0e31d471f240872440d90",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__webargs.dbde72fe.lm_rewrite__k8s69757",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 682,
+     "repo": "webargs",
+     "row_index": 2960,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.pr_792",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 682,
+     "repo": "sqlparse",
+     "row_index": 10652,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.pr_792",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 682,
+     "repo": "sqlparse",
+     "row_index": 12024,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__webargs.dbde72fe.lm_rewrite__k8s69757",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 682,
+     "repo": "webargs",
+     "row_index": 908,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.pr_792",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 682,
+     "repo": "sqlparse",
+     "row_index": 5548,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__webargs.dbde72fe.lm_rewrite__k8s69757",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 682,
+     "repo": "webargs",
+     "row_index": 18949,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.pr_792",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 682,
+     "repo": "sqlparse",
+     "row_index": 21778,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "04f69ab6246a3913cb8e30dd030056ccfb2a547dd88619e4dd159682c5c0c210",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "gawel__pyquery.811cd048.func_pm_ctrl_shuffle__vo690z54",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 978,
+     "repo": "pyquery",
+     "row_index": 14526,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.lm_rewrite__9zfstktu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 978,
+     "repo": "voluptuous",
+     "row_index": 17081,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "gawel__pyquery.811cd048.func_pm_ctrl_shuffle__vo690z54",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 978,
+     "repo": "pyquery",
+     "row_index": 7265,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.lm_rewrite__9zfstktu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 978,
+     "repo": "voluptuous",
+     "row_index": 9820,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.lm_rewrite__9zfstktu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 978,
+     "repo": "voluptuous",
+     "row_index": 9640,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "gawel__pyquery.811cd048.func_pm_ctrl_shuffle__vo690z54",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 978,
+     "repo": "pyquery",
+     "row_index": 20274,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "07b8773b2808ec379727b21b6ab5fb3c2d2354981fa84d51ea60ff47fed043fb",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pydicom__pydicom.7d361b3d.combine_module__1edssz0a",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1730,
+     "repo": "pydicom",
+     "row_index": 9432,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.combine_file__gggwqo96",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1730,
+     "repo": "python-qrcode",
+     "row_index": 9852,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pydicom__pydicom.7d361b3d.combine_module__1edssz0a",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1730,
+     "repo": "pydicom",
+     "row_index": 20360,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.combine_file__gggwqo96",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1730,
+     "repo": "python-qrcode",
+     "row_index": 4154,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pydicom__pydicom.7d361b3d.combine_module__1edssz0a",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1730,
+     "repo": "pydicom",
+     "row_index": 13099,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.combine_file__gggwqo96",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1730,
+     "repo": "python-qrcode",
+     "row_index": 2352,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pydicom__pydicom.7d361b3d.combine_module__1edssz0a",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1730,
+     "repo": "pydicom",
+     "row_index": 19402,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0a235dfc6ff28deda379a546232207dfda50930a6c11832d1281d68e3d84e3dd",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "Cog-Creators__Red-DiscordBot.33e0eac7.combine_module__bjf0rr5u",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "Red-DiscordBot",
+     "row_index": 7226,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.func_pm_remove_cond__ko6c92fn",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 457,
+     "repo": "python-dotenv",
+     "row_index": 10596,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.func_pm_remove_cond__ko6c92fn",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 457,
+     "repo": "python-dotenv",
+     "row_index": 11965,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "matthewwithanm__python-markdownify.6258f5c3.func_pm_remove_loop__r6m5u2xv",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "python-markdownify",
+     "row_index": 14686,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.func_pm_remove_cond__ko6c92fn",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 457,
+     "repo": "python-dotenv",
+     "row_index": 5489,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "matthewwithanm__python-markdownify.6258f5c3.func_pm_remove_loop__r6m5u2xv",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "python-markdownify",
+     "row_index": 7425,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "Cog-Creators__Red-DiscordBot.33e0eac7.combine_module__bjf0rr5u",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "Red-DiscordBot",
+     "row_index": 24513,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "Cog-Creators__Red-DiscordBot.33e0eac7.combine_module__bjf0rr5u",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "Red-DiscordBot",
+     "row_index": 928,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "matthewwithanm__python-markdownify.6258f5c3.func_pm_remove_loop__r6m5u2xv",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "python-markdownify",
+     "row_index": 20431,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.func_pm_remove_cond__ko6c92fn",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 457,
+     "repo": "python-dotenv",
+     "row_index": 21714,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0ba7410a07aa9a570c5491d2cd89f5f1b2bab95ae66580004b443a305a9ff2c6",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Cog-Creators__Red-DiscordBot.33e0eac7.combine_module__mkemzpwf",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 541,
+     "repo": "Red-DiscordBot",
+     "row_index": 7117,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.func_pm_ctrl_shuffle__u48lldlh",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 541,
+     "repo": "python-qrcode",
+     "row_index": 14373,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.func_pm_ctrl_shuffle__u48lldlh",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 541,
+     "repo": "python-qrcode",
+     "row_index": 7112,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Cog-Creators__Red-DiscordBot.33e0eac7.combine_module__mkemzpwf",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 541,
+     "repo": "Red-DiscordBot",
+     "row_index": 24403,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Cog-Creators__Red-DiscordBot.33e0eac7.combine_module__mkemzpwf",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 541,
+     "repo": "Red-DiscordBot",
+     "row_index": 817,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.func_pm_ctrl_shuffle__u48lldlh",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 541,
+     "repo": "python-qrcode",
+     "row_index": 20116,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0c703e1b82e53b02faedfdef314a7b63906705211a3312c85f89bc107c381a4e",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.combine_file__7jjwdtaj",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1268,
+     "repo": "voluptuous",
+     "row_index": 7933,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__05aaiis6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1268,
+     "repo": "python-string-similarity",
+     "row_index": 10469,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__05aaiis6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1268,
+     "repo": "python-string-similarity",
+     "row_index": 11841,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "joke2k__faker.8b401a7d.lm_rewrite__woaxwxaz",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1268,
+     "repo": "faker",
+     "row_index": 15173,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__05aaiis6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1268,
+     "repo": "python-string-similarity",
+     "row_index": 5365,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "joke2k__faker.8b401a7d.lm_rewrite__woaxwxaz",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1268,
+     "repo": "faker",
+     "row_index": 7912,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.combine_file__7jjwdtaj",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1268,
+     "repo": "voluptuous",
+     "row_index": 25216,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.combine_file__7jjwdtaj",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1268,
+     "repo": "voluptuous",
+     "row_index": 1636,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "joke2k__faker.8b401a7d.lm_rewrite__woaxwxaz",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1268,
+     "repo": "faker",
+     "row_index": 20919,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__05aaiis6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1268,
+     "repo": "python-string-similarity",
+     "row_index": 21587,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0cf7615e02d3e636887e0bd6a32a3e10b226fca09f07adcb0fb6c3baf3e11be7",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 3,
+     "instance_id": "iterative__dvc.1d6ea681.pr_10540",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1506,
+     "repo": "dvc",
+     "row_index": 12734,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 3,
+     "instance_id": "pandas-dev__pandas.95280573.pr_49766",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1506,
+     "repo": "pandas",
+     "row_index": 21070,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 3,
+     "instance_id": "pandas-dev__pandas.95280573.pr_49766",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1506,
+     "repo": "pandas",
+     "row_index": 13809,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 3,
+     "instance_id": "iterative__dvc.1d6ea681.pr_10540",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1506,
+     "repo": "dvc",
+     "row_index": 24041,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 3,
+     "instance_id": "iterative__dvc.1d6ea681.pr_10540",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1506,
+     "repo": "dvc",
+     "row_index": 7789,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 3,
+     "instance_id": "pandas-dev__pandas.95280573.pr_49766",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1506,
+     "repo": "pandas",
+     "row_index": 12880,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0ddb2b8ee31c919f1042742ebf67133a8f1f792eb8ba501bc39dc8454332739c",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__c79l98k5",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 610,
+     "repo": "python-string-similarity",
+     "row_index": 10270,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__c79l98k5",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 610,
+     "repo": "python-string-similarity",
+     "row_index": 11633,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.lm_rewrite__gklwunnc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 610,
+     "repo": "python-dotenv",
+     "row_index": 14557,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__marshmallow.9716fc62.lm_rewrite__xi63romu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 610,
+     "repo": "marshmallow",
+     "row_index": 19309,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__c79l98k5",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 610,
+     "repo": "python-string-similarity",
+     "row_index": 5157,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.lm_rewrite__gklwunnc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 610,
+     "repo": "python-dotenv",
+     "row_index": 7296,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__marshmallow.9716fc62.lm_rewrite__xi63romu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 610,
+     "repo": "marshmallow",
+     "row_index": 12048,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__marshmallow.9716fc62.lm_rewrite__xi63romu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 610,
+     "repo": "marshmallow",
+     "row_index": 11871,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.lm_rewrite__gklwunnc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 610,
+     "repo": "python-dotenv",
+     "row_index": 20306,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "luozhouyang__python-string-similarity.115acaac.func_pm_class_rm_funcs__c79l98k5",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 610,
+     "repo": "python-string-similarity",
+     "row_index": 21389,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0e202e3e518e456489884c888036756078c3ad342a51e04e1a433cbaedf330ed",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "HIPS__autograd.ac044f0d.lm_rewrite__xavwbpqa",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 684,
+     "repo": "autograd",
+     "row_index": 14392,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "mahmoud__glom.fb3c4e76.lm_rewrite__n9gfip4z",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 684,
+     "repo": "glom",
+     "row_index": 18104,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "HIPS__autograd.ac044f0d.lm_rewrite__xavwbpqa",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 684,
+     "repo": "autograd",
+     "row_index": 7131,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "mahmoud__glom.fb3c4e76.lm_rewrite__n9gfip4z",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 684,
+     "repo": "glom",
+     "row_index": 10843,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "mahmoud__glom.fb3c4e76.lm_rewrite__n9gfip4z",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 684,
+     "repo": "glom",
+     "row_index": 10671,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "HIPS__autograd.ac044f0d.lm_rewrite__xavwbpqa",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 684,
+     "repo": "autograd",
+     "row_index": 20141,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0e2720391635a991e2c2b64f0c16b15af852c5fcc71ff04e112842ccda823ba8",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pndurette__gTTS.dbcda4f3.combine_file__61kck7q8",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 484,
+     "repo": "gTTS",
+     "row_index": 10252,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pndurette__gTTS.dbcda4f3.combine_file__61kck7q8",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 484,
+     "repo": "gTTS",
+     "row_index": 11622,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "davidhalter__parso.338a5760.lm_rewrite__pbpd6ecx",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 484,
+     "repo": "parso",
+     "row_index": 17182,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pndurette__gTTS.dbcda4f3.combine_file__61kck7q8",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 484,
+     "repo": "gTTS",
+     "row_index": 5146,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "davidhalter__parso.338a5760.lm_rewrite__pbpd6ecx",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 484,
+     "repo": "parso",
+     "row_index": 9921,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "davidhalter__parso.338a5760.lm_rewrite__pbpd6ecx",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 484,
+     "repo": "parso",
+     "row_index": 9744,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "pndurette__gTTS.dbcda4f3.combine_file__61kck7q8",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 484,
+     "repo": "gTTS",
+     "row_index": 21372,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0e49b90f9f94783404206c31d68a90a23df2ff25b186597f01a6b456c878f6fa",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cool-RR__PySnooper.57472b46.lm_rewrite__031xvy9b",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 638,
+     "repo": "PySnooper",
+     "row_index": 2809,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.lm_rewrite__nllv1wmo",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 638,
+     "repo": "python-dotenv",
+     "row_index": 16367,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cool-RR__PySnooper.57472b46.lm_rewrite__031xvy9b",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 638,
+     "repo": "PySnooper",
+     "row_index": 757,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.lm_rewrite__nllv1wmo",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 638,
+     "repo": "python-dotenv",
+     "row_index": 9106,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "theskumar__python-dotenv.2b8635b7.lm_rewrite__nllv1wmo",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 638,
+     "repo": "python-dotenv",
+     "row_index": 8930,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cool-RR__PySnooper.57472b46.lm_rewrite__031xvy9b",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 638,
+     "repo": "PySnooper",
+     "row_index": 18800,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "0ecaeb3d2e187657ddfc12b77331c2705c96121889489ad2e564c4e6c359c2f4",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cantools__cantools.0c6a7871.lm_rewrite__n5exfki2",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 840,
+     "repo": "cantools",
+     "row_index": 14745,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pallets__jinja.ada0a9a6.lm_rewrite__k28bluu3",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 840,
+     "repo": "jinja",
+     "row_index": 17278,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cantools__cantools.0c6a7871.lm_rewrite__n5exfki2",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 840,
+     "repo": "cantools",
+     "row_index": 7484,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pallets__jinja.ada0a9a6.lm_rewrite__k28bluu3",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 840,
+     "repo": "jinja",
+     "row_index": 10017,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pallets__jinja.ada0a9a6.lm_rewrite__k28bluu3",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 840,
+     "repo": "jinja",
+     "row_index": 9838,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cantools__cantools.0c6a7871.lm_rewrite__n5exfki2",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 840,
+     "repo": "cantools",
+     "row_index": 20489,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "100409301469ce3e18bbcd2b3e2f0a2c6c76c0d6f167e9f00751eda3e94ae969",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "cookiecutter__cookiecutter.b4451231.pr_1950",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 935,
+     "repo": "cookiecutter",
+     "row_index": 12518,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "dask__dask.5f61e423.pr_8501",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 935,
+     "repo": "dask",
+     "row_index": 20615,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "dask__dask.5f61e423.pr_8501",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 935,
+     "repo": "dask",
+     "row_index": 13354,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "cookiecutter__cookiecutter.b4451231.pr_1950",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 935,
+     "repo": "cookiecutter",
+     "row_index": 23825,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "cookiecutter__cookiecutter.b4451231.pr_1950",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 935,
+     "repo": "cookiecutter",
+     "row_index": 7576,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "dask__dask.5f61e423.pr_8501",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 935,
+     "repo": "dask",
+     "row_index": 12423,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "114c4bfa5bd0023e2d5d7f96a1ff55abc6daa513a390a3e994d498d461804ff5",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyutils__line_profiler.a646bf0f.combine_file__u1t0q9i8",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1537,
+     "repo": "line_profiler",
+     "row_index": 9169,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "python-hyper__h11.bed0dd4a.combine_file__bxhryayu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1537,
+     "repo": "h11",
+     "row_index": 9869,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyutils__line_profiler.a646bf0f.combine_file__u1t0q9i8",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1537,
+     "repo": "line_profiler",
+     "row_index": 20097,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "python-hyper__h11.bed0dd4a.combine_file__bxhryayu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1537,
+     "repo": "h11",
+     "row_index": 4171,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyutils__line_profiler.a646bf0f.combine_file__u1t0q9i8",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1537,
+     "repo": "line_profiler",
+     "row_index": 12836,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "python-hyper__h11.bed0dd4a.combine_file__bxhryayu",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1537,
+     "repo": "h11",
+     "row_index": 2369,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyutils__line_profiler.a646bf0f.combine_file__u1t0q9i8",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1537,
+     "repo": "line_profiler",
+     "row_index": 19138,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "11bb832a2c8d2c98815b2f98ad071658bd2e2ef2a695b16dc5e3275c0e431e4c",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "paramiko__paramiko.23f92003.lm_rewrite__8zvlwt9d",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1412,
+     "repo": "paramiko",
+     "row_index": 7616,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_17416",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1412,
+     "repo": "conan",
+     "row_index": 18678,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_17416",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1412,
+     "repo": "conan",
+     "row_index": 11417,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "paramiko__paramiko.23f92003.lm_rewrite__8zvlwt9d",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1412,
+     "repo": "paramiko",
+     "row_index": 24911,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "paramiko__paramiko.23f92003.lm_rewrite__8zvlwt9d",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1412,
+     "repo": "paramiko",
+     "row_index": 1320,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_17416",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1412,
+     "repo": "conan",
+     "row_index": 11242,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "139508849e1c8ef32f7df57547d374ed76f76578bd09b52bfb3a30514d305cec",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "getmoto__moto.694ce1f4.pr_5109",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1251,
+     "repo": "moto",
+     "row_index": 5247,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "getmoto__moto.694ce1f4.pr_5109",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1251,
+     "repo": "moto",
+     "row_index": 15156,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "iterative__dvc.1d6ea681.pr_10459",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1251,
+     "repo": "dvc",
+     "row_index": 16148,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "iterative__dvc.1d6ea681.pr_10459",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1251,
+     "repo": "dvc",
+     "row_index": 16247,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "getmoto__moto.694ce1f4.pr_5109",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1251,
+     "repo": "moto",
+     "row_index": 22086,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "14371dad2992c2c905af02a5344e2dfc6c042543a7a3de7f42b256134fa0cb03",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "chardet__chardet.9630f238.func_pm_op_change__0yhdolul",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 536,
+     "repo": "chardet",
+     "row_index": 636,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "chardet__chardet.9630f238.func_pm_op_change__0yhdolul",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 536,
+     "repo": "chardet",
+     "row_index": 6351,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "chardet__chardet.9630f238.func_pm_op_change__0yhdolul",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 536,
+     "repo": "chardet",
+     "row_index": 3257,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_invert_if__6ibgnn8i",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 536,
+     "repo": "pandas",
+     "row_index": 20465,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_invert_if__6ibgnn8i",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 536,
+     "repo": "pandas",
+     "row_index": 5990,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "chardet__chardet.9630f238.func_pm_op_change__0yhdolul",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 536,
+     "repo": "chardet",
+     "row_index": 25248,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "153655af2739ac3ff49d0ae2e4b7ca070aaf9caf3e69d459bd40da9d466189a1",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_15300",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 736,
+     "repo": "conan",
+     "row_index": 18965,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "getmoto__moto.694ce1f4.pr_7331",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 736,
+     "repo": "moto",
+     "row_index": 22150,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "getmoto__moto.694ce1f4.pr_7331",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 736,
+     "repo": "moto",
+     "row_index": 23207,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_15300",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 736,
+     "repo": "conan",
+     "row_index": 11704,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "getmoto__moto.694ce1f4.pr_7331",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 736,
+     "repo": "moto",
+     "row_index": 14836,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_15300",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 736,
+     "repo": "conan",
+     "row_index": 11528,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "getmoto__moto.694ce1f4.pr_7331",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 736,
+     "repo": "moto",
+     "row_index": 14691,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "15b286ae1fe6e795f9380ad5ddaab2b072b34a7309e5d31bfa1455905eb3ae49",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__220a8wgp",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 457,
+     "repo": "deepdiff",
+     "row_index": 15044,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "mozilla__bleach.73871d76.lm_rewrite__akx5eftc",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "bleach",
+     "row_index": 16165,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__220a8wgp",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 457,
+     "repo": "deepdiff",
+     "row_index": 7783,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "mozilla__bleach.73871d76.lm_rewrite__akx5eftc",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "bleach",
+     "row_index": 8904,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "mozilla__bleach.73871d76.lm_rewrite__akx5eftc",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 457,
+     "repo": "bleach",
+     "row_index": 8738,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__220a8wgp",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 457,
+     "repo": "deepdiff",
+     "row_index": 20792,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "1695f9e0589925c2adae9c6c68e47f8d8700aa65f54fe593e3793fb8d3cafe4c",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cknd__stackprinter.219fcc52.func_pm_class_rm_base__p2zchbyw",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 678,
+     "repo": "stackprinter",
+     "row_index": 556,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cknd__stackprinter.219fcc52.func_pm_class_rm_base__p2zchbyw",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 678,
+     "repo": "stackprinter",
+     "row_index": 6281,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cknd__stackprinter.219fcc52.func_pm_class_rm_base__p2zchbyw",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 678,
+     "repo": "stackprinter",
+     "row_index": 3187,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "prettytable__prettytable.ca90b055.func_pm_op_swap__60kh1fzg",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 678,
+     "repo": "prettytable",
+     "row_index": 19784,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "prettytable__prettytable.ca90b055.func_pm_op_swap__60kh1fzg",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 678,
+     "repo": "prettytable",
+     "row_index": 5306,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "cknd__stackprinter.219fcc52.func_pm_class_rm_base__p2zchbyw",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 678,
+     "repo": "stackprinter",
+     "row_index": 25172,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "16bf703c60e119f5f4ca7507aff5efba9405bdc382ce27adb92e33ff8a5dc3f9",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "encode__starlette.db5063c2.pr_2360",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 578,
+     "repo": "starlette",
+     "row_index": 7657,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "kayak__pypika.1c9646f0.lm_rewrite__3pdqryle",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 578,
+     "repo": "pypika",
+     "row_index": 10493,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "kayak__pypika.1c9646f0.lm_rewrite__3pdqryle",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 578,
+     "repo": "pypika",
+     "row_index": 11862,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "kayak__pypika.1c9646f0.lm_rewrite__3pdqryle",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 578,
+     "repo": "pypika",
+     "row_index": 5386,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "encode__starlette.db5063c2.pr_2360",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 578,
+     "repo": "starlette",
+     "row_index": 24939,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "encode__starlette.db5063c2.pr_2360",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 578,
+     "repo": "starlette",
+     "row_index": 1352,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "kayak__pypika.1c9646f0.lm_rewrite__3pdqryle",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 578,
+     "repo": "pypika",
+     "row_index": 21609,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "19c12dc2999cc85d11df49ce09e0e32b549edcbcea06415c0d2792250b3c2702",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "tkrajina__gpxpy.09fc46b3.func_pm_op_change__9ouu0ol3",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 7537,
+     "repo": "gpxpy",
+     "row_index": 9556,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "rubik__radon.54b88e58.combine_file__pghjw1g4",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 7537,
+     "repo": "radon",
+     "row_index": 9776,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "tkrajina__gpxpy.09fc46b3.func_pm_op_change__9ouu0ol3",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 7537,
+     "repo": "gpxpy",
+     "row_index": 20484,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "rubik__radon.54b88e58.combine_file__pghjw1g4",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 7537,
+     "repo": "radon",
+     "row_index": 4078,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "tkrajina__gpxpy.09fc46b3.func_pm_op_change__9ouu0ol3",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 7537,
+     "repo": "gpxpy",
+     "row_index": 13223,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "rubik__radon.54b88e58.combine_file__pghjw1g4",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 7537,
+     "repo": "radon",
+     "row_index": 2276,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "tkrajina__gpxpy.09fc46b3.func_pm_op_change__9ouu0ol3",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 7537,
+     "repo": "gpxpy",
+     "row_index": 19528,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "1bb5bf901e77444f812ed8c5cb8eae56325ed5a46a9c72d9617753678f23234a",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.pr_47504",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 714,
+     "repo": "pandas",
+     "row_index": 6854,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_7897",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 714,
+     "repo": "MONAI",
+     "row_index": 22210,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_7897",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 714,
+     "repo": "MONAI",
+     "row_index": 23255,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_7897",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 714,
+     "repo": "MONAI",
+     "row_index": 14896,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.pr_47504",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 714,
+     "repo": "pandas",
+     "row_index": 16752,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_7897",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 714,
+     "repo": "MONAI",
+     "row_index": 14746,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.pr_47504",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 714,
+     "repo": "pandas",
+     "row_index": 14923,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "1de8b81341b5ea26734856361df65811f6000df67b9b6492a54d686b7e027671",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 3,
+     "instance_id": "agronholm__exceptiongroup.0b4f4937.pr_112",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1699,
+     "repo": "exceptiongroup",
+     "row_index": 14583,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 3,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.lm_rewrite__41jof6c0",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1699,
+     "repo": "voluptuous",
+     "row_index": 18666,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 3,
+     "instance_id": "agronholm__exceptiongroup.0b4f4937.pr_112",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1699,
+     "repo": "exceptiongroup",
+     "row_index": 7322,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 3,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.lm_rewrite__41jof6c0",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1699,
+     "repo": "voluptuous",
+     "row_index": 11405,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 3,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.lm_rewrite__41jof6c0",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1699,
+     "repo": "voluptuous",
+     "row_index": 11223,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 3,
+     "instance_id": "agronholm__exceptiongroup.0b4f4937.pr_112",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1699,
+     "repo": "exceptiongroup",
+     "row_index": 20327,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "1e967df28711f2f8ff834c0538e64bf7329489cccb07a8a55f7e429967649d33",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "HIPS__autograd.ac044f0d.lm_rewrite__ha6ddk9p",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 760,
+     "repo": "autograd",
+     "row_index": 7573,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "oauthlib__oauthlib.1fd52536.lm_rewrite__zb2zwnf4",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 760,
+     "repo": "oauthlib",
+     "row_index": 15124,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "oauthlib__oauthlib.1fd52536.lm_rewrite__zb2zwnf4",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 760,
+     "repo": "oauthlib",
+     "row_index": 7863,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "HIPS__autograd.ac044f0d.lm_rewrite__ha6ddk9p",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 760,
+     "repo": "autograd",
+     "row_index": 24862,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "HIPS__autograd.ac044f0d.lm_rewrite__ha6ddk9p",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 760,
+     "repo": "autograd",
+     "row_index": 1279,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "oauthlib__oauthlib.1fd52536.lm_rewrite__zb2zwnf4",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 760,
+     "repo": "oauthlib",
+     "row_index": 20868,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "1f48d76800d1b4d099bf56a719f8273c9a7329b5096577e17b51f80295394b8a",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pexpect__ptyprocess.1067dbda.func_pm_remove_assign__117v6cvw",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "ptyprocess",
+     "row_index": 283,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pexpect__ptyprocess.1067dbda.func_pm_remove_assign__117v6cvw",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "ptyprocess",
+     "row_index": 6006,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pexpect__ptyprocess.1067dbda.func_pm_remove_assign__117v6cvw",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "ptyprocess",
+     "row_index": 2912,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pydantic__pydantic.acb0f10f.func_pm_remove_cond__hbvsns22",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 667,
+     "repo": "pydantic",
+     "row_index": 18935,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pydantic__pydantic.acb0f10f.func_pm_remove_cond__hbvsns22",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 667,
+     "repo": "pydantic",
+     "row_index": 22025,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pydantic__pydantic.acb0f10f.func_pm_remove_cond__hbvsns22",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 667,
+     "repo": "pydantic",
+     "row_index": 4461,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pydantic__pydantic.acb0f10f.func_pm_remove_cond__hbvsns22",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 667,
+     "repo": "pydantic",
+     "row_index": 15457,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pexpect__ptyprocess.1067dbda.func_pm_remove_assign__117v6cvw",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "ptyprocess",
+     "row_index": 24903,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "1f61cca801ed218f06a54755c18458bed206aedabcedccd6aa1004cc2c4eb8f1",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "iterative__dvc.1d6ea681.pr_3727",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1011,
+     "repo": "dvc",
+     "row_index": 19961,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "iterative__dvc.1d6ea681.pr_3727",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1011,
+     "repo": "dvc",
+     "row_index": 12700,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pandas-dev__pandas.95280573.pr_50988",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1011,
+     "repo": "pandas",
+     "row_index": 23394,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "iterative__dvc.1d6ea681.pr_3727",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1011,
+     "repo": "dvc",
+     "row_index": 13116,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pandas-dev__pandas.95280573.pr_50988",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1011,
+     "repo": "pandas",
+     "row_index": 16845,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "1fb5d7495e40b1332bb1b81a263ca0a66a617a029a19a824075cdfb12c72518d",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "davidhalter__parso.338a5760.combine_file__9ubj9fgh",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 814,
+     "repo": "parso",
+     "row_index": 9404,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_15382",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 814,
+     "repo": "conan",
+     "row_index": 9998,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "davidhalter__parso.338a5760.combine_file__9ubj9fgh",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 814,
+     "repo": "parso",
+     "row_index": 20332,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_15382",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 814,
+     "repo": "conan",
+     "row_index": 4300,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "davidhalter__parso.338a5760.combine_file__9ubj9fgh",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 814,
+     "repo": "parso",
+     "row_index": 13071,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "conan-io__conan.86f29e13.pr_15382",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 814,
+     "repo": "conan",
+     "row_index": 2495,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "davidhalter__parso.338a5760.combine_file__9ubj9fgh",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 814,
+     "repo": "parso",
+     "row_index": 19380,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "20f7ee8fecef13b3604355f1fb16f5923512a4dcd59ca2460ef00fa7de3886f7",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pydata__patsy.a5d16484.lm_rewrite__35zbdp36",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1035,
+     "repo": "patsy",
+     "row_index": 3027,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "matthewwithanm__python-markdownify.6258f5c3.lm_rewrite__lt9yco23",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1035,
+     "repo": "python-markdownify",
+     "row_index": 15206,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2665",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1035,
+     "repo": "astroid",
+     "row_index": 19348,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pydata__patsy.a5d16484.lm_rewrite__35zbdp36",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1035,
+     "repo": "patsy",
+     "row_index": 975,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "matthewwithanm__python-markdownify.6258f5c3.lm_rewrite__lt9yco23",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1035,
+     "repo": "python-markdownify",
+     "row_index": 7945,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2665",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1035,
+     "repo": "astroid",
+     "row_index": 12087,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2665",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1035,
+     "repo": "astroid",
+     "row_index": 11907,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pydata__patsy.a5d16484.lm_rewrite__35zbdp36",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1035,
+     "repo": "patsy",
+     "row_index": 19017,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "matthewwithanm__python-markdownify.6258f5c3.lm_rewrite__lt9yco23",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1035,
+     "repo": "python-markdownify",
+     "row_index": 20950,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "2244de9a1e4207c47f4199f2cb94f8949ccadc2c3aafd44a8cf0ee5ec487d036",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "paramiko__paramiko.23f92003.func_pm_ctrl_invert_if__68cju43w",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1193,
+     "repo": "paramiko",
+     "row_index": 425,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "paramiko__paramiko.23f92003.func_pm_ctrl_invert_if__68cju43w",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1193,
+     "repo": "paramiko",
+     "row_index": 6146,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "paramiko__paramiko.23f92003.func_pm_ctrl_invert_if__68cju43w",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1193,
+     "repo": "paramiko",
+     "row_index": 3052,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "scanny__python-pptx.278b47b1.func_pm_remove_cond__30mvjpmo",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1193,
+     "repo": "python-pptx",
+     "row_index": 20153,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "scanny__python-pptx.278b47b1.func_pm_remove_cond__30mvjpmo",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1193,
+     "repo": "python-pptx",
+     "row_index": 5681,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "paramiko__paramiko.23f92003.func_pm_ctrl_invert_if__68cju43w",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1193,
+     "repo": "paramiko",
+     "row_index": 25049,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "228600fb7f056fc6b3a87998eba26b8d274415ec5a25ad9b4d4fcd60c2e29973",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "facebookresearch__hydra.0f03eb60.lm_rewrite__0y7zdvel",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 519,
+     "repo": "hydra",
+     "row_index": 15167,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "python-trio__trio.cfbbe2c1.lm_rewrite__d8w3osa0",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 519,
+     "repo": "trio",
+     "row_index": 16716,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "facebookresearch__hydra.0f03eb60.lm_rewrite__0y7zdvel",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 519,
+     "repo": "hydra",
+     "row_index": 7906,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "python-trio__trio.cfbbe2c1.lm_rewrite__d8w3osa0",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 519,
+     "repo": "trio",
+     "row_index": 9455,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "python-trio__trio.cfbbe2c1.lm_rewrite__d8w3osa0",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 519,
+     "repo": "trio",
+     "row_index": 9280,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "facebookresearch__hydra.0f03eb60.lm_rewrite__0y7zdvel",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 519,
+     "repo": "hydra",
+     "row_index": 20918,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "22a1ab6f0d930ec425ce79a146d356a88d95963e8f2019a3e97e8117687da760",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__webargs.dbde72fe.combine_file__dlxtcxrk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1859,
+     "repo": "webargs",
+     "row_index": 9594,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.combine_file__kep88kh8",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1859,
+     "repo": "sqlparse",
+     "row_index": 9681,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__webargs.dbde72fe.combine_file__dlxtcxrk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1859,
+     "repo": "webargs",
+     "row_index": 20525,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.combine_file__kep88kh8",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1859,
+     "repo": "sqlparse",
+     "row_index": 3983,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__webargs.dbde72fe.combine_file__dlxtcxrk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1859,
+     "repo": "webargs",
+     "row_index": 13264,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.combine_file__kep88kh8",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1859,
+     "repo": "sqlparse",
+     "row_index": 2186,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "marshmallow-code__webargs.dbde72fe.combine_file__dlxtcxrk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1859,
+     "repo": "webargs",
+     "row_index": 19565,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "22ab26ad7adda807ea689a8cc8d2abc64d8ee655b4441a1c7a75fee6c7199298",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.pr_54189",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 477,
+     "repo": "pandas",
+     "row_index": 6721,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_4344",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 477,
+     "repo": "MONAI",
+     "row_index": 21412,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_4344",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 477,
+     "repo": "MONAI",
+     "row_index": 22463,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_4344",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 477,
+     "repo": "MONAI",
+     "row_index": 14098,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.pr_54189",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 477,
+     "repo": "pandas",
+     "row_index": 16614,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "Project-MONAI__MONAI.a09c1f08.pr_4344",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 477,
+     "repo": "MONAI",
+     "row_index": 13954,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.pr_54189",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 477,
+     "repo": "pandas",
+     "row_index": 14792,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "2310a717c8bb7afcf3c82eea4df6bde73dd2289bbb4f6109652068f4c6c0c26a",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyasn1__pyasn1.0f07d724.lm_rewrite__hf0x0opc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 649,
+     "repo": "pyasn1",
+     "row_index": 7736,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "iterative__dvc.1d6ea681.pr_8306",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 649,
+     "repo": "dvc",
+     "row_index": 21967,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "iterative__dvc.1d6ea681.pr_8306",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 649,
+     "repo": "dvc",
+     "row_index": 23017,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "iterative__dvc.1d6ea681.pr_8306",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 649,
+     "repo": "dvc",
+     "row_index": 14653,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyasn1__pyasn1.0f07d724.lm_rewrite__hf0x0opc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 649,
+     "repo": "pyasn1",
+     "row_index": 25022,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pyasn1__pyasn1.0f07d724.lm_rewrite__hf0x0opc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 649,
+     "repo": "pyasn1",
+     "row_index": 1437,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "iterative__dvc.1d6ea681.pr_8306",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 649,
+     "repo": "dvc",
+     "row_index": 14506,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "24d147e5b75d970369be024faec6b01d11b4f4463ded8ea9c77721257e74a818",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "adrienverge__yamllint.8513d9b9.func_pm_remove_assign__7w6v3juk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "yamllint",
+     "row_index": 74,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "adrienverge__yamllint.8513d9b9.func_pm_remove_assign__7w6v3juk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "yamllint",
+     "row_index": 5798,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "adrienverge__yamllint.8513d9b9.func_pm_remove_assign__7w6v3juk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "yamllint",
+     "row_index": 2704,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_invert_if__9ep19suc",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "pandas",
+     "row_index": 19829,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_invert_if__9ep19suc",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "pandas",
+     "row_index": 22267,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_invert_if__9ep19suc",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "pandas",
+     "row_index": 5355,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_invert_if__9ep19suc",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "pandas",
+     "row_index": 15700,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "adrienverge__yamllint.8513d9b9.func_pm_remove_assign__7w6v3juk",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 828,
+     "repo": "yamllint",
+     "row_index": 24698,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "24dee7cf9338cf067192234a03db37e6ca74cefa0e769de1a1fbf6df945006c1",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.func_pm_ctrl_shuffle__ur90hg4c",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "voluptuous",
+     "row_index": 154,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.func_pm_ctrl_shuffle__ur90hg4c",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "voluptuous",
+     "row_index": 5874,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.func_pm_ctrl_shuffle__ur90hg4c",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "voluptuous",
+     "row_index": 2780,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_shuffle__6en9czwf",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "pandas",
+     "row_index": 17645,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "pandas-dev__pandas.95280573.func_pm_ctrl_shuffle__6en9czwf",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "pandas",
+     "row_index": 3171,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "alecthomas__voluptuous.a7a55f83.func_pm_ctrl_shuffle__ur90hg4c",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 667,
+     "repo": "voluptuous",
+     "row_index": 24774,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "25e47632841d5cfddb3103633fb77c495d7a62a8ba2847812596278023557ec2",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2207",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1743,
+     "repo": "astroid",
+     "row_index": 11250,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2207",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1743,
+     "repo": "astroid",
+     "row_index": 4774,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "modin-project__modin.8c7799fd.pr_7225",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1743,
+     "repo": "modin",
+     "row_index": 23456,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "modin-project__modin.8c7799fd.pr_7225",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1743,
+     "repo": "modin",
+     "row_index": 16912,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2207",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 1743,
+     "repo": "astroid",
+     "row_index": 22430,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "266ac42d364938ac43288394fa9e1b6c6fa3c3dfdad94bf198412c812fb9ae78",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.func_pm_op_break_chains__2ac3f4s6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 630,
+     "repo": "mistune",
+     "row_index": 913,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.func_pm_op_break_chains__2ac3f4s6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 630,
+     "repo": "mistune",
+     "row_index": 6643,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__22l05hrg",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 630,
+     "repo": "deepdiff",
+     "row_index": 7185,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "scanny__python-pptx.278b47b1.lm_rewrite__z1ugw6bc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 630,
+     "repo": "python-pptx",
+     "row_index": 14553,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.func_pm_op_break_chains__2ac3f4s6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 630,
+     "repo": "mistune",
+     "row_index": 3549,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "scanny__python-pptx.278b47b1.lm_rewrite__z1ugw6bc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 630,
+     "repo": "python-pptx",
+     "row_index": 7292,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__22l05hrg",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 630,
+     "repo": "deepdiff",
+     "row_index": 24470,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__22l05hrg",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 630,
+     "repo": "deepdiff",
+     "row_index": 883,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "scanny__python-pptx.278b47b1.lm_rewrite__z1ugw6bc",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 630,
+     "repo": "python-pptx",
+     "row_index": 20301,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "lepture__mistune.bf54ef67.func_pm_op_break_chains__2ac3f4s6",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 630,
+     "repo": "mistune",
+     "row_index": 25532,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "26d2cafebe3521254b1ef5f91c7ebe610388dc1bbce8e2c044e738e373a0b347",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "scanny__python-pptx.278b47b1.lm_rewrite__p124hs3f",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 973,
+     "repo": "python-pptx",
+     "row_index": 7212,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pyasn1__pyasn1.0f07d724.lm_rewrite__j7b54dow",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 973,
+     "repo": "pyasn1",
+     "row_index": 10373,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pyasn1__pyasn1.0f07d724.lm_rewrite__j7b54dow",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 973,
+     "repo": "pyasn1",
+     "row_index": 11741,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pyasn1__pyasn1.0f07d724.lm_rewrite__j7b54dow",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 973,
+     "repo": "pyasn1",
+     "row_index": 5265,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "scanny__python-pptx.278b47b1.lm_rewrite__p124hs3f",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 973,
+     "repo": "python-pptx",
+     "row_index": 24504,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "scanny__python-pptx.278b47b1.lm_rewrite__p124hs3f",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 973,
+     "repo": "python-pptx",
+     "row_index": 917,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 2,
+     "instance_id": "pyasn1__pyasn1.0f07d724.lm_rewrite__j7b54dow",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 973,
+     "repo": "pyasn1",
+     "row_index": 21491,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "2877f862fe637fdc948dcf8c29c50e125d6cb8b9651c65d5fde53a18ece3efb2",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 2,
+     "instance_id": "mahmoud__boltons.3bfcfdd0.combine_file__ozufqtez",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1294,
+     "repo": "boltons",
+     "row_index": 10232,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 2,
+     "instance_id": "mahmoud__boltons.3bfcfdd0.combine_file__ozufqtez",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1294,
+     "repo": "boltons",
+     "row_index": 11596,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2408",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1294,
+     "repo": "astroid",
+     "row_index": 19523,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 2,
+     "instance_id": "mahmoud__boltons.3bfcfdd0.combine_file__ozufqtez",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1294,
+     "repo": "boltons",
+     "row_index": 5120,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2408",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1294,
+     "repo": "astroid",
+     "row_index": 12262,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 2,
+     "instance_id": "pylint-dev__astroid.b114f6b5.pr_2408",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1294,
+     "repo": "astroid",
+     "row_index": 12086,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 2,
+     "instance_id": "mahmoud__boltons.3bfcfdd0.combine_file__ozufqtez",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 1294,
+     "repo": "boltons",
+     "row_index": 21344,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "2943ddfde8a7f2a18412fe6ec762768114b729835ab1e07306c0af3cc80281c5",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.func_pm_remove_cond__bso0lmmj",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 776,
+     "repo": "modin",
+     "row_index": 7702,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "sqlfluff__sqlfluff.50a1c4b6.func_pm_ctrl_invert_if__pkzxl7i8",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 776,
+     "repo": "sqlfluff",
+     "row_index": 20814,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.func_pm_remove_cond__bso0lmmj",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 776,
+     "repo": "modin",
+     "row_index": 24991,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.func_pm_remove_cond__bso0lmmj",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 776,
+     "repo": "modin",
+     "row_index": 1403,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "sqlfluff__sqlfluff.50a1c4b6.func_pm_ctrl_invert_if__pkzxl7i8",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 776,
+     "repo": "sqlfluff",
+     "row_index": 6336,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "2aa212d1b17be52963144f9ec0b1371b03847b304229b496450ea7a3a39d6288",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__vdnxsrqq",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 734,
+     "repo": "deepdiff",
+     "row_index": 3017,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.lm_rewrite__uyj8601q",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 734,
+     "repo": "python-qrcode",
+     "row_index": 19735,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__vdnxsrqq",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 734,
+     "repo": "deepdiff",
+     "row_index": 965,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.lm_rewrite__uyj8601q",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 734,
+     "repo": "python-qrcode",
+     "row_index": 12474,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "lincolnloop__python-qrcode.456b01d4.lm_rewrite__uyj8601q",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 734,
+     "repo": "python-qrcode",
+     "row_index": 12295,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "seperman__deepdiff.ed252022.lm_rewrite__vdnxsrqq",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 734,
+     "repo": "deepdiff",
+     "row_index": 19011,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "2c1498bdd39a907d0d12198963ae730872f68764da83a6c59a9eb3699903f0a4",
+   "rows": [
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.combine_module__zzigv9fs",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 733,
+     "repo": "sqlparse",
+     "row_index": 8091,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.combine_file__v0p3996d",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 733,
+     "repo": "modin",
+     "row_index": 15023,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.combine_file__v0p3996d",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 733,
+     "repo": "modin",
+     "row_index": 7762,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.combine_module__zzigv9fs",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 733,
+     "repo": "sqlparse",
+     "row_index": 25375,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "andialbrecht__sqlparse.e57923b3.combine_module__zzigv9fs",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 733,
+     "repo": "sqlparse",
+     "row_index": 1793,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": true,
+     "files_touched": 1,
+     "instance_id": "modin-project__modin.8c7799fd.combine_file__v0p3996d",
+     "is_unified_diff": true,
+     "outcome": false,
+     "patch_bytes": 733,
+     "repo": "modin",
+     "row_index": 20770,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  },
+  {
+   "patch_sha256": "2fda26a0c8cfae60fa604a7327758b3aa595fe79021b3836eb7708bf21a81cc5",
+   "rows": [
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "bottlepy__bottle.a8dfef30.lm_rewrite__ey000cqy",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 782,
+     "repo": "bottle",
+     "row_index": 2303,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "rubik__radon.54b88e58.combine_module__t9vn7vlz",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 782,
+     "repo": "radon",
+     "row_index": 14637,
+     "split": "tool"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "bottlepy__bottle.a8dfef30.lm_rewrite__ey000cqy",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 782,
+     "repo": "bottle",
+     "row_index": 251,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "rubik__radon.54b88e58.combine_module__t9vn7vlz",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 782,
+     "repo": "radon",
+     "row_index": 7376,
+     "split": "xml"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "bottlepy__bottle.a8dfef30.lm_rewrite__ey000cqy",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 782,
+     "repo": "bottle",
+     "row_index": 18299,
+     "split": "ticks"
+    },
+    {
+     "any_path_matches_repo": false,
+     "files_touched": 1,
+     "instance_id": "rubik__radon.54b88e58.combine_module__t9vn7vlz",
+     "is_unified_diff": true,
+     "outcome": true,
+     "patch_bytes": 782,
+     "repo": "radon",
+     "row_index": 20379,
+     "split": "ticks"
+    }
+   ],
+   "trivial": false
+  }
+ ],
+ "groups_checked": 50,
+ "groups_nontrivial": 50,
+ "groups_with_a_row_whose_patch_touches_foreign_paths": 34,
+ "question": "are the cross-repo shared patches trivial collisions or misaligned rows",
+ "trivial_bytes_threshold": 200
+}

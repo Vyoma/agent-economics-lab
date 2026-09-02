@@ -198,12 +198,16 @@ class FrozenEvidenceMatchesThePublishedRegistry(unittest.TestCase):
 
     def test_frozen_rows_are_content_free(self) -> None:
         """No messages, prompts, patches, or logs may ever be committed."""
+        forbidden = {"messages", "test_output", "output_patch",
+                     "patch", "trajectory", "problem_statement", "paths"}
         for path in sorted(FROZEN.glob("*.json")):
             document = json.loads(path.read_text(encoding="utf-8"))
-            for row in document["rows"]:
+            rows = document.get("rows") or [
+                row for group in document.get("groups", ()) for row in group["rows"]
+            ]
+            self.assertTrue(rows, f"{path.name}: nothing swept for content")
+            for row in rows:
                 with self.subTest(dataset=path.name, row=row.get("id")):
-                    forbidden = {"messages", "test_output", "output_patch",
-                                 "patch", "trajectory", "problem_statement"}
                     self.assertFalse(forbidden & set(row))
 
     def test_registry_leads_every_entry_with_provenance(self) -> None:
@@ -243,3 +247,114 @@ class TheGuardActuallyGuards(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PaginationNeverShadowsItsParameters(unittest.TestCase):
+    """Every page after the first must request an integer length.
+
+    The first draft assigned the response dict over the length parameter, so
+    request two urlencoded a nine-megabyte page as `length=` and the server
+    answered 414. The freeze died after fetching 50 of 76,002 rows.
+    """
+
+    def test_every_request_carries_the_integer_length(self) -> None:
+        from unittest import mock
+
+        import freeze
+
+        seen = []
+
+        def fake_get(url: str) -> dict:
+            seen.append(url)
+            page = len(seen) - 1
+            return {
+                "rows": [
+                    {"row": {"i": page * 2 + n}, "truncated_cells": []}
+                    for n in range(2)
+                ],
+                "num_rows_total": 6,
+            }
+
+        with mock.patch.object(freeze, "_get", fake_get):
+            rows = freeze._rows("d", "c", "s", page_length=2)
+        self.assertEqual(len(rows), 6)
+        self.assertEqual(len(seen), 3)
+        for url in seen:
+            self.assertIn("length=2", url)
+
+
+class SweSmithNumbersRecompute(unittest.TestCase):
+    """Every figure in the SWE-smith entry, recomputed from frozen evidence."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        from audit import swesmith_summary
+
+        cls.smith = swesmith_summary()
+
+    def test_the_split_totals(self) -> None:
+        self.assertEqual(self.smith["rows"], 76002)
+        self.assertEqual(
+            self.smith["split_rows"],
+            {"swesmith-tool": 24100, "swesmith-xml": 26076, "swesmith-ticks": 25826},
+        )
+
+    def test_labels_agree_across_every_duplicate_group(self) -> None:
+        self.assertEqual(self.smith["duplicate_groups"], 18167)
+        self.assertEqual(self.smith["label_disagreeing_groups"], 0)
+
+    def test_the_duplication_figures(self) -> None:
+        self.assertEqual(self.smith["xml_identical_duplicate_rows"], 2255)
+        self.assertEqual(self.smith["tool_xml_overlap"], 14984)
+
+    def test_patch_emptiness_is_outcome_independent(self) -> None:
+        """The gap between overall and resolved emptiness stays under a point;
+        were it large, 'resolved with no patch' would be a label finding and
+        the entry's dismissal of it would be wrong."""
+        gap = abs(self.smith["empty_rate"] - self.smith["resolved_empty_rate"])
+        self.assertLess(gap, 0.01)
+
+    def test_the_misalignment_figures(self) -> None:
+        self.assertEqual(self.smith["cross_repo_patch_groups"], 266)
+        self.assertEqual(self.smith["cross_repo_patch_rows"], 1933)
+        self.assertEqual(self.smith["check_nontrivial"], self.smith["check_groups"])
+        self.assertEqual(self.smith["check_failures"], 0)
+        self.assertGreater(self.smith["check_foreign"], 0)
+
+    def test_the_verification_sidecar_is_internally_consistent(self) -> None:
+        check = json.loads(
+            (FROZEN / "swesmith-patch-check.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(len(check["groups"]), check["groups_checked"])
+        for group in check["groups"]:
+            with self.subTest(group=group["patch_sha256"][:12]):
+                # every row in a group carries the same patch hash by
+                # construction, so equal byte lengths are entailed
+                lengths = {row["patch_bytes"] for row in group["rows"]}
+                self.assertEqual(len(lengths), 1)
+                repos = {row["repo"] for row in group["rows"]}
+                self.assertGreater(len(repos), 1)
+
+    def test_the_registry_refuses_a_label_disagreement(self) -> None:
+        """Corrupt one duplicate row's label; the summary must not stay quiet."""
+        from unittest import mock
+
+        import audit
+
+        real_load = audit._load
+
+        def corrupted(slug: str) -> dict:
+            document = real_load(slug)
+            if slug == "swesmith-xml":
+                by_hash: dict[str, int] = {}
+                for row in document["rows"]:
+                    h = row["transcript_sha256"]
+                    if h in by_hash:
+                        row["outcome"] = not row["outcome"]
+                        return document
+                    by_hash[h] = 1
+            return document
+
+        with mock.patch.object(audit, "_load", corrupted):
+            smith = audit.swesmith_summary()
+        self.assertGreater(smith["label_disagreeing_groups"], 0)
