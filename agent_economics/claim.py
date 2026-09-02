@@ -380,7 +380,14 @@ def verify(
     # there meant a claim that was not a Claim -- a parsed dict, the single most
     # likely caller mistake -- raised AttributeError from inside the handler
     # written to prevent exactly that, in a function documented as total.
-    assertion = getattr(claim, "assertion", "<unreadable claim>")
+    # try/except, not getattr-with-default: getattr only suppresses
+    # AttributeError, and the totality contract says *no* path raises. A
+    # conformance test hands this function an object whose attribute access
+    # raises RuntimeError, which the earlier form let straight through.
+    try:
+        assertion = claim.assertion
+    except Exception:
+        assertion = "<unreadable claim>"
     caveats: list[str] = []
 
     try:
