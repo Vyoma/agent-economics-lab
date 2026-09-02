@@ -136,3 +136,10 @@ as it should have been written: **no `git checkout`, `git switch`, or
 intend to keep. Commit first, every time; a WIP commit costs nothing and
 amend exists.** Rebuilding from session history took an hour that a
 five-second commit would have saved.
+
+## Backticks inside double-quoted shell strings execute (2026-09-02)
+
+A gh pr create --body "..." with markdown backticks ran `RecursionError` and
+`verify` as command substitutions and shipped a mangled body. Markdown bodies
+go through --body-file with a single-quoted heredoc, never inline in double
+quotes.
