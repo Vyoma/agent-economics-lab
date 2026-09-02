@@ -76,7 +76,10 @@ def build_workload(total_events: int):
         parent_for_subtree = None
         for i in range(EVENTS_PER_TASK):
             event_id = f"e-{t:07d}-{i:02d}"
-            timestamp = f"2026-01-01T{(t // 3600) % 24:02d}:{(t // 60) % 60:02d}:{t % 60:02d}.{i:06d}Z"
+            timestamp = (
+                f"2026-01-01T{(t // 3600) % 24:02d}:{(t // 60) % 60:02d}"
+                f":{t % 60:02d}.{i:06d}Z"
+            )
             if i % 5 == 3:
                 name = "delegate.subagent" if delegating and i == 3 else f"tool-{i % 7}"
                 events.append(TraceEvent(

@@ -138,6 +138,20 @@ outcome-audit: check-python
 	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
 	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
 
+# The measured envelope: full decision path at three scales, written to
+# bench/RESULTS.json and rendered to docs/at-scale.md. bench-smoke is the CI
+# ratio guard: superlinear scaling on the realistic shape fails the build.
+bench: check-python
+	@$(PYTHON) bench/run.py
+	@$(PYTHON) bench/render.py > docs/at-scale.md
+
+bench-smoke: check-python
+	@$(PYTHON) bench/run.py --smoke
+
+bench-check: check-python
+	@$(PYTHON) bench/render.py > /tmp/agent-economics-at-scale.md
+	@cmp /tmp/agent-economics-at-scale.md docs/at-scale.md
+
 # The one research target that needs the network, deliberately outside
 # `reproduce`: spot-check frozen rows against the upstream dataset at its
 # pinned revision, always including the rows the published findings stand on.

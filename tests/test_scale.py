@@ -165,5 +165,36 @@ class DepthDoesNotKillTheDiagnostics(unittest.TestCase):
         self.assertEqual(report.closure, 0.0)
 
 
+class TheEnvelopePageRecomputes(unittest.TestCase):
+    """docs/at-scale.md is rendered, never edited; frozen numbers stay sane."""
+
+    def test_the_committed_page_matches_the_renderer(self) -> None:
+        import pathlib
+        import sys
+
+        root = pathlib.Path(__file__).resolve().parents[1]
+        sys.path.insert(0, str(root / "bench"))
+        import render
+
+        committed = (root / "docs" / "at-scale.md").read_text(encoding="utf-8")
+        self.assertEqual(committed, render.render())
+
+    def test_the_frozen_results_scale_linearly(self) -> None:
+        import pathlib
+
+        root = pathlib.Path(__file__).resolve().parents[1]
+        document = json.loads(
+            (root / "bench" / "RESULTS.json").read_text(encoding="utf-8")
+        )
+        runs = sorted(document["runs"], key=lambda r: r["events"])
+        for small, large in zip(runs, runs[1:]):
+            growth = large["events"] / small["events"]
+            ratio = large["decide_seconds"] / small["decide_seconds"]
+            with self.subTest(events=large["events"]):
+                # linear is ratio == growth; the slack absorbs cache effects,
+                # a quadratic term would blow straight through it
+                self.assertLess(ratio, growth * 2.5)
+
+
 if __name__ == "__main__":
     unittest.main()
