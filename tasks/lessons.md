@@ -143,3 +143,11 @@ A gh pr create --body "..." with markdown backticks ran `RecursionError` and
 `verify` as command substitutions and shipped a mangled body. Markdown bodies
 go through --body-file with a single-quoted heredoc, never inline in double
 quotes.
+
+## The pre-push gate is make reproduce, not the test suite (2026-09-02)
+
+Twice in one session CI caught PROBE_SITES.md drift the local unittest run
+could not see, costing a full CI round-trip each time. Any change that
+touches agent_economics/ can move pre-registered sites; the generated-doc
+byte-compares live in `make reproduce`. Run it before every push, not just
+the suite.
