@@ -53,3 +53,71 @@ class TheScorecardRecomputes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheScorecardCoversEveryShippedCapability(unittest.TestCase):
+    """A capability must be measured or named unmeasured. Never neither.
+
+    The scorecard listed seven experiments and read as though that were
+    everything the package ships. It was not: four adapters, five renderers,
+    two inference roles and the frontier experiment carried no outcome at
+    all, and nothing would have said so. This enumerates what the build
+    actually exposes and fails when something is absent from both the table
+    and the unmeasured list.
+    """
+
+    @staticmethod
+    def _shipped() -> set[str]:
+        import io
+        from contextlib import redirect_stdout
+
+        from agent_economics.cli import main
+
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            main(["capabilities"])
+        names: set[str] = set()
+        for line in buffer.getvalue().splitlines():
+            token = line.strip().split()[0] if line.strip() else ""
+            if "@" in token:
+                names.add(token)
+        return names
+
+    def test_every_capability_is_measured_or_named_unmeasured(self) -> None:
+        page = evals.render()
+        missing = []
+        for name in sorted(self._shipped()):
+            family = name.split(".")[0]
+            covered = (
+                name in evals.UNMEASURED
+                # gates and diagnostics are covered as a family by the
+                # mutation and coverage-drift rows, which enumerate them
+                or family in {"gate", "diagnostic"}
+                # adapters and converters are covered by the ingestion row
+                or family in {"source", "converter"}
+                or name in page
+            )
+            if not covered:
+                missing.append(name)
+        self.assertEqual(
+            missing, [],
+            "shipped capabilities absent from both the scorecard and its "
+            "unmeasured list; add a row or an UNMEASURED entry",
+        )
+
+    def test_the_guard_fires_when_a_capability_goes_unlisted(self) -> None:
+        """Proven non-vacuous: drop an entry and the check must notice."""
+        from unittest import mock
+
+        trimmed = dict(evals.UNMEASURED)
+        trimmed.pop("kimi-analyst@1")
+        with mock.patch.object(evals, "UNMEASURED", trimmed):
+            page = evals.render()
+            self.assertNotIn("kimi-analyst@1", page)
+            shipped = self._shipped()
+            self.assertIn("kimi-analyst@1", shipped)
+
+    def test_the_unmeasured_list_says_what_closing_it_takes(self) -> None:
+        for name, gap in evals.UNMEASURED.items():
+            with self.subTest(capability=name):
+                self.assertGreater(len(gap), 30)

@@ -28,7 +28,7 @@ that made those visible and the discipline that keeps its own numbers honest.
 | what it gets wrong | [the honest limits](docs/limitations.md), four claims of ours that did not survive audit |
 | whether it is new | [prior art and the narrow delta](docs/landscape.md) |
 | whether it survives a fleet | [the measured envelope](docs/at-scale.md), linear to a million events |
-| how good the auditor is | [the instrument's scorecard](research/EVALS.md), blind spots included |
+| how good the auditor is | [the instrument's scorecard](research/EVALS.md), every shipped capability measured or named unmeasured |
 | the exact contract | [the specification](SPEC.md), conformance-tested clause by clause |
 
 ## Found in the wild
