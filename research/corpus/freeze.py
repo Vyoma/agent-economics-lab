@@ -27,6 +27,8 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+from collections.abc import Mapping
+from typing import Any
 
 from parse_tests import readjudicate  # type: ignore[import-not-found]
 
@@ -53,16 +55,49 @@ def _sha_now(dataset: str) -> str:
     return _get(f"{_INFO_API}/{urllib.parse.quote(dataset, safe='/')}")["sha"]
 
 
-def _rows(dataset: str, config: str, split: str, page_length: int = 100) -> list[dict]:
+def _extracted_rows(
+    slug: str,
+    spec: Mapping[str, Any],
+    revision: str,
+    page_length: int = 100,
+) -> list[dict]:
+    """Fetch page by page, extract immediately, and checkpoint as we go.
+
+    The largest dataset in this corpus took twenty hours of paging, and this
+    function had no memory: an interruption at hour nineteen was worth
+    exactly as much as one at minute one. The sibling freezer for
+    PostTrainBench was made resumable and this one, which does the same job
+    for every other dataset, was left as it was - the defect this repository
+    keeps naming, committed here by the person naming it.
+
+    Extraction happens per page rather than at the end so the checkpoint
+    holds content-free rows. Checkpointing raw pages would mean writing
+    gigabytes of trajectories to disk, which is the thing the whole freeze
+    exists to avoid.
+    """
+    checkpoint = FROZEN / f"{slug}.partial.json"
+    extracted: list[dict] = []
+    offset = 0
+    if checkpoint.exists():
+        saved = json.loads(checkpoint.read_text(encoding="utf-8"))
+        if saved.get("revision") != revision:
+            raise RuntimeError(
+                f"{checkpoint.name} is for revision "
+                f"{saved.get('revision', '?')[:8]}, upstream is now "
+                f"{revision[:8]}; delete it to refreeze from scratch"
+            )
+        extracted = saved["rows"]
+        offset = saved["offset"]
+        print(f"resuming {slug} at row {offset:,}", flush=True)
+
+    total = spec["expected_rows"]
     # `page_length` and the fetched page must not share a name: a first draft
     # assigned the response dict over the length parameter, and every request
     # after the first urlencoded a nine-megabyte page as `length=`.
-    fetched: list[dict] = []
-    offset = 0
     while True:
         query = urllib.parse.urlencode(
-            {"dataset": dataset, "config": config, "split": split,
-             "offset": offset, "length": page_length}
+            {"dataset": spec["dataset"], "config": spec["config"],
+             "split": spec["split"], "offset": offset, "length": page_length}
         )
         document = _get(f"{_ROWS_API}?{query}")
         for wrapper in document["rows"]:
@@ -71,10 +106,17 @@ def _rows(dataset: str, config: str, split: str, page_length: int = 100) -> list
                     f"row {offset} truncated cells {wrapper['truncated_cells']}: "
                     "a hash of a truncated cell would be a hash of nothing"
                 )
-            fetched.append(wrapper["row"])
+            extracted.append(spec["extract"](wrapper["row"]))
         offset += len(document["rows"])
+        checkpoint.write_text(
+            json.dumps({"revision": revision, "offset": offset,
+                        "rows": extracted}),
+            encoding="utf-8",
+        )
+        if offset % (page_length * 20) == 0 or offset >= total:
+            print(f"  {slug}: {offset:,}/{total:,} rows", flush=True)
         if offset >= document.get("num_rows_total", 0) or not document["rows"]:
-            return fetched
+            return extracted
 
 
 def _sha256(text: str) -> str:
@@ -300,9 +342,8 @@ SPECS = {
 def freeze(slug: str) -> pathlib.Path:
     spec = SPECS[slug]
     sha_before = _sha_now(spec["dataset"])
-    rows = _rows(
-        spec["dataset"], spec["config"], spec["split"],
-        page_length=spec.get("page_length", 100),
+    rows = _extracted_rows(
+        slug, spec, sha_before, page_length=spec.get("page_length", 100)
     )
     sha_after = _sha_now(spec["dataset"])
     if sha_before != sha_after:
@@ -326,11 +367,12 @@ def freeze(slug: str) -> pathlib.Path:
         "license": spec["license"],
         "frozen_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "fetched_via": "datasets-server /rows, revision bracketed by repo SHA",
-        "rows": [spec["extract"](row) for row in rows],
+        "rows": rows,
     }
     FROZEN.mkdir(exist_ok=True)
     path = FROZEN / f"{slug}.json"
     path.write_text(json.dumps(document, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    (FROZEN / f"{slug}.partial.json").unlink(missing_ok=True)
     return path
 
 

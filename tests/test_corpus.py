@@ -275,8 +275,17 @@ class PaginationNeverShadowsItsParameters(unittest.TestCase):
                 "num_rows_total": 6,
             }
 
-        with mock.patch.object(freeze, "_get", fake_get):
-            rows = freeze._rows("d", "c", "s", page_length=2)
+        import tempfile
+        from pathlib import Path
+
+        spec = {
+            "dataset": "d", "config": "c", "split": "s",
+            "expected_rows": 6, "extract": lambda row: row,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch.object(freeze, "_get", fake_get), \
+                    mock.patch.object(freeze, "FROZEN", Path(directory)):
+                rows = freeze._extracted_rows("demo", spec, "rev", page_length=2)
         self.assertEqual(len(rows), 6)
         self.assertEqual(len(seen), 3)
         for url in seen:
@@ -498,3 +507,70 @@ class PostTrainBenchNumbersRecompute(unittest.TestCase):
             collapsed["pooled_difference"],
             places=6,
         )
+
+
+class TheFreezeResumesInsteadOfRestarting(unittest.TestCase):
+    """Twenty hours of paging must survive an interruption.
+
+    The largest freeze in this corpus had no memory: an interruption at hour
+    nineteen was worth exactly as much as one at minute one. The sibling
+    PostTrainBench freezer was made resumable and this one, doing the same
+    job for every other dataset, was left as it was.
+    """
+
+    def _spec(self):
+        import freeze
+
+        return {
+            "dataset": "d", "config": "c", "split": "s",
+            "expected_rows": 6,
+            "extract": lambda row: {"id": row["i"], "outcome": True},
+        }, freeze
+
+    def test_a_resumed_freeze_fetches_only_what_is_missing(self) -> None:
+        import json
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+
+        spec, freeze = self._spec()
+        requested: list[int] = []
+
+        def fake_get(url: str) -> dict:
+            import urllib.parse as up
+
+            offset = int(up.parse_qs(up.urlparse(url).query)["offset"][0])
+            requested.append(offset)
+            rows = [{"row": {"i": offset + n}, "truncated_cells": []}
+                    for n in range(2) if offset + n < 6]
+            return {"rows": rows, "num_rows_total": 6}
+
+        with tempfile.TemporaryDirectory() as directory:
+            frozen = Path(directory)
+            checkpoint = frozen / "demo.partial.json"
+            checkpoint.write_text(json.dumps({
+                "revision": "rev1", "offset": 4,
+                "rows": [{"id": i, "outcome": True} for i in range(4)],
+            }))
+            with mock.patch.object(freeze, "_get", fake_get), \
+                    mock.patch.object(freeze, "FROZEN", frozen):
+                rows = freeze._extracted_rows("demo", spec, "rev1", page_length=2)
+            self.assertEqual(len(rows), 6)
+            self.assertEqual(requested, [4], "a resume must not refetch")
+
+    def test_resuming_across_a_moved_revision_is_refused(self) -> None:
+        """Rows from two revisions must never be mixed."""
+        import json
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+
+        spec, freeze = self._spec()
+        with tempfile.TemporaryDirectory() as directory:
+            frozen = Path(directory)
+            (frozen / "demo.partial.json").write_text(json.dumps({
+                "revision": "old", "offset": 2, "rows": [],
+            }))
+            with mock.patch.object(freeze, "FROZEN", frozen), \
+                    self.assertRaises(RuntimeError):
+                freeze._extracted_rows("demo", spec, "new", page_length=2)
