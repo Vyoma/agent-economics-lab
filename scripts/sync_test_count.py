@@ -40,12 +40,19 @@ def discovered() -> int:
 
 
 def main() -> int:
-    count = discovered()
+    # A floor rounded down to the previous fifty, not the exact count. An
+    # exact figure went stale on every added test: it failed CI twice and
+    # collided when two branches each corrected it, all for a digit no
+    # reader acts on. The floor stays true until the next fifty is passed.
+    count = discovered() // 50 * 50
     page = ROOT / "docs" / "index.md"
     text = page.read_text(encoding="utf-8")
-    updated = re.sub(r"\b\d{3,4}(?= tests on Python 3\.10)", str(count), text)
     updated = re.sub(
-        r"(?<=Neither was caught by )\d{3,4}(?= tests)", str(count), updated
+        r"[Oo]ver \d{3,4}(?= tests on Python 3\.10)", f"Over {count}", text
+    )
+    updated = re.sub(
+        r"(?<=Neither was caught by )over \d{3,4}(?= tests)",
+        f"over {count}", updated
     )
     if updated != text:
         page.write_text(updated, encoding="utf-8")
