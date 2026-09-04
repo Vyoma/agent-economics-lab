@@ -4,7 +4,7 @@ Every audit result this project has published, with a stable
 identifier, the date it was first published, the command that checks
 it, and the scope it does not claim.
 
-**10 standing: 5 defects, 3 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
+**12 standing: 6 defects, 4 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
 an auditor that only ever finds problems is indistinguishable from
 one that manufactures them.
 
@@ -26,6 +26,8 @@ evidence and fails the build if the two ever disagree.
 | `AEL-2026-008` | 2026-09-02 | measurement | `SWE-rebench-openhands-trajectories` | Model-generated tests, measured against adjudicated outcomes on the 31,389 rows carrying both signals, agree at Cohen's kappa 0.062 |
 | `AEL-2026-009` | 2026-09-03 | measurement | `PostTrainBench-Trajectories` | Runs the contamination judge flagged score +0.209 accuracy above clean runs when pooled, which reads as cheating paying twenty points |
 | `AEL-2026-010` | 2026-09-03 | defect | `PostTrainBench-Trajectories` | 260 of 1,842 runs carry no usable outcome: 208 ship no metrics file and 52 ship one that is not valid JSON |
+| `AEL-2026-011` | 2026-09-03 | measurement | `cogym-real-trajectories` | Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time... |
+| `AEL-2026-012` | 2026-09-03 | defect | `cogym-real-trajectories` | The communication rating is present on 50 of 228 sessions and the artifact rating on 191; only overall satisfaction is on every session |
 
 ## The findings in full
 
@@ -128,6 +130,26 @@ Runs the contamination judge flagged score +0.209 accuracy above clean runs when
 **Check it.** `make corpus`
 
 **What it does not claim.** A completeness statement about this revision. Not a claim that the missing runs failed, which is precisely what cannot be determined from an absent or unparseable metrics file.
+
+### AEL-2026-011 - measurement, 2026-09-03
+
+**Dataset.** [`SALT-NLP/cogym-real-trajectories`](https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) at `729096dc`
+
+Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time and reach quadratic-weighted kappa 0.625, disagreeing by two points or more on 9% of sessions. That is barely above the 0.60 kappa floor this package requires of an automated outcome instrument.
+
+**Check it.** `make corpus`
+
+**What it does not claim.** These are different questions, not the same question asked twice, so divergence is expected and this is not a reliability or test-retest measurement. What it bounds is how much a single number called 'the human rating' carries: any instrument validated against human agreement inherits whichever question was asked, and datasets rarely record which. One platform, three tasks, 228 sessions.
+
+### AEL-2026-012 - defect, 2026-09-03
+
+**Dataset.** [`SALT-NLP/cogym-real-trajectories`](https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) at `729096dc`
+
+The communication rating is present on 50 of 228 sessions and the artifact rating on 191; only overall satisfaction is on every session. A consumer computing communication quality from this dataset computes it over 22% of it, and the schema does not distinguish 'not rated' from a rating.
+
+**Check it.** `make corpus`
+
+**What it does not claim.** A completeness statement about optional fields the dataset card documents as optional. Not a claim the absences are unintentional; the finding is that the resulting denominators differ by field and nothing in the data announces it.
 
 ## Citing one
 

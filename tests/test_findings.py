@@ -166,6 +166,23 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertEqual(ten["unusable"], summary["unusable_accuracy"])
         self.assertEqual(ten["unjudged"], summary["unjudged"])
 
+    def test_011_and_012_the_cogym_figures(self) -> None:
+        from audit import cogym_summary
+
+        summary = cogym_summary()
+        pair = summary["pairs"]["outcomeRating|agentRating"]
+        eleven = _figures("AEL-2026-011")
+        self.assertEqual(eleven["n"], pair["n"])
+        self.assertAlmostEqual(eleven["qwk"], pair["qwk"], places=3)
+        self.assertAlmostEqual(eleven["exact"], pair["exact"], places=3)
+
+        twelve = _figures("AEL-2026-012")
+        self.assertEqual(twelve["rows"], summary["rows"])
+        for key, field in (("outcome", "outcomeRating"),
+                           ("agent", "agentRating"),
+                           ("communication", "communicationRating")):
+            self.assertEqual(twelve[key], summary["coverage"][field])
+
     def test_the_recomputation_fires_on_a_doctored_figure(self) -> None:
         """Proven non-vacuous: move one published number, watch it fail."""
         from unittest import mock

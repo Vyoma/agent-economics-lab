@@ -633,3 +633,73 @@ class CheckpointingIsBoundedAndAtomic(unittest.TestCase):
                 path.with_suffix(".tmp").exists(),
                 "the temporary file must not survive a successful write",
             )
+
+class CogymNumbersRecompute(unittest.TestCase):
+    """The human-rated entry, and the limit on what it can claim."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        from audit import cogym_summary
+
+        cls.cogym = cogym_summary()
+
+    def test_the_shape(self) -> None:
+        self.assertEqual(self.cogym["rows"], 228)
+        self.assertEqual(sum(self.cogym["tasks"].values()), 228)
+
+    def test_the_rating_coverage(self) -> None:
+        coverage = self.cogym["coverage"]
+        self.assertEqual(coverage["agentRating"], 228)
+        self.assertEqual(coverage["outcomeRating"], 191)
+        self.assertEqual(coverage["communicationRating"], 50)
+
+    def test_the_published_agreement(self) -> None:
+        pair = self.cogym["pairs"]["outcomeRating|agentRating"]
+        self.assertEqual(pair["n"], 191)
+        self.assertAlmostEqual(pair["exact"], 0.503, places=3)
+        self.assertAlmostEqual(pair["qwk"], 0.625, places=3)
+
+    def test_the_kappa_is_computed_not_asserted(self) -> None:
+        """Perfect agreement must give 1.0, and the entry's claim that 0.625
+        sits near the 0.60 floor depends on the scale being right."""
+        from unittest import mock
+
+        import audit
+
+        real = audit._load
+
+        def perfect(slug: str) -> dict:
+            document = real(slug)
+            if slug == "cogym":
+                import json as _json
+
+                document = _json.loads(_json.dumps(document))
+                for row in document["rows"]:
+                    if row["outcomeRating"] is not None:
+                        row["agentRating"] = row["outcomeRating"]
+            return document
+
+        with mock.patch.object(audit, "_load", perfect):
+            aligned = audit.cogym_summary()
+        self.assertAlmostEqual(
+            aligned["pairs"]["outcomeRating|agentRating"]["qwk"], 1.0, places=6
+        )
+
+    def test_the_short_session_suspicion_stays_dead(self) -> None:
+        """Four sessions establish nothing, and the entry says so. If a
+        re-freeze ever made this a real population, the prose is wrong."""
+        self.assertLess(self.cogym["short_sessions"], 10)
+
+    def test_the_frozen_rows_carry_no_human_text(self) -> None:
+        """These are real people. Ratings and hashes only."""
+        import json as _json
+
+        from audit import FROZEN
+
+        document = _json.loads(
+            (FROZEN / "cogym.json").read_text(encoding="utf-8")
+        )
+        forbidden = {"query", "agentFeedback", "event_log", "feedback"}
+        for row in document["rows"]:
+            with self.subTest(session=row["id"]):
+                self.assertFalse(forbidden & set(row))
