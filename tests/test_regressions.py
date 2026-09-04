@@ -500,3 +500,48 @@ class DocumentationLinksResolve(unittest.TestCase):
         first = next(i for i, line in enumerate(lines) if line.startswith("## "))
         self.assertEqual(lines[first], "## Found in the wild")
         self.assertLess(first, 60, "the finding must be reachable without scrolling")
+
+
+class ContributingMatchesTheBuild(unittest.TestCase):
+    """A contributor guide that names the wrong command is worse than none.
+
+    CONTRIBUTING.md told newcomers to run a verification loop that predated
+    `make gate`, so anyone following it would push work the real gate would
+    have caught. These bind the guide to targets that exist.
+    """
+
+    def _guide(self) -> str:
+        return (ROOT / "CONTRIBUTING.md").read_text(encoding="utf-8")
+
+    def _makefile_targets(self) -> set[str]:
+        import re
+
+        text = (ROOT / "Makefile").read_text(encoding="utf-8")
+        return set(re.findall(r"^([a-z][\w-]*):", text, re.M))
+
+    def test_every_make_target_named_in_the_guide_exists(self) -> None:
+        import re
+
+        named = set(re.findall(r"make (?:PYTHON=\S+ )?([a-z][\w-]*)", self._guide()))
+        missing = named - self._makefile_targets()
+        self.assertEqual(missing, set(), "CONTRIBUTING.md names absent targets")
+
+    def test_the_guide_leads_with_the_real_gate(self) -> None:
+        self.assertIn("make PYTHON=python3.12 gate", self._guide())
+        self.assertIn("make hooks", self._guide())
+
+    def test_the_guide_states_that_the_repository_is_published(self) -> None:
+        """The bar used to live only in an ignored local file, where no
+        contributor could ever read it."""
+        guide = self._guide()
+        self.assertIn("Everything here is published", guide)
+        for phrase in ("commit messages", "customer", "credentials"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, guide)
+
+    def test_the_guide_points_at_the_spec_and_the_audit_protocol(self) -> None:
+        guide = self._guide()
+        for target in ("SPEC.md", "docs/prd.md", "docs/contributing-an-audit.md"):
+            with self.subTest(document=target):
+                self.assertIn(target, guide)
+                self.assertTrue((ROOT / target).exists())
