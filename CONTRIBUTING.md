@@ -117,6 +117,23 @@ real customer identifiers, internal model names, or contract pricing. Aggregate,
 redact, or synthesize evidence before opening an issue or pull request. Contributors
 are responsible for having permission to share their material.
 
+## What review looks for
+
+`make gate` is mechanical and catches most things. Review exists for the
+three it cannot:
+
+- **Does the change claim more than it establishes?** Every measurement in
+  this repository carries what it does *not* show. A pull request that adds
+  a number without its limits is incomplete, however correct the number is.
+- **Was the guard watched failing?** A test that passes is not evidence
+  until it has been shown to fail for the right reason.
+- **Is the hole fixed everywhere?** If a comment explains a defect, the
+  reviewer's job is to ask where else it lives.
+
+Contract surfaces, the findings registry and the frozen evidence carry
+[CODEOWNERS](.github/CODEOWNERS) review, because a quiet mistake there
+invalidates published claims rather than breaking a build.
+
 ## Adding an audit to the corpus
 
 The corpus is open to third parties under one written contract:

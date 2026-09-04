@@ -199,11 +199,17 @@ class EveryFigureRecomputes(unittest.TestCase):
                 self.assertIn(shown, region if shown in region else whole)
 
     def test_the_word_number_sentences_recompute(self) -> None:
-        """Counts spelled as words evade the numeral walk; pin the sentences."""
-        region = _guarded_region(_readme())
-        self.assertIn(f"disagrees\nwith itself on {_DISAGREE} of them", region)
+        """Counts spelled as words evade the numeral walk; pin the sentences.
+
+        Whitespace-normalised before matching. The first version pinned the
+        line wrapping too, so rewording a paragraph failed a test that has
+        nothing to do with wrapping, which teaches a contributor to edit the
+        guard rather than read it.
+        """
+        region = " ".join(_guarded_region(_readme()).split())
+        self.assertIn(f"disagrees with itself on {_DISAGREE} of them", region)
         self.assertIn(
-            f"{_WORDS[_idle_resolved()]} of those {_TWIN_N} runs record\n"
+            f"{_WORDS[_idle_resolved()]} of those {_TWIN_N} runs record "
             "a single API call",
             region,
         )
