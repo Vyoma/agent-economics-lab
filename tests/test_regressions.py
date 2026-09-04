@@ -545,3 +545,33 @@ class ContributingMatchesTheBuild(unittest.TestCase):
             with self.subTest(document=target):
                 self.assertIn(target, guide)
                 self.assertTrue((ROOT / target).exists())
+
+
+class DocumentedExamplesMatchTheShippedFiles(unittest.TestCase):
+    """A doc that prints a manifest a reader will run must print that one.
+
+    docs/frontier.md showed a two-arm manifest under an experiment id that
+    did not exist, directly above the command that runs the four-arm one it
+    ships. A reader comparing their output to the page finds a mismatch
+    they cannot explain.
+    """
+
+    def test_the_frontier_doc_matches_the_shipped_manifest(self) -> None:
+        import json
+        import re
+
+        shipped = json.loads(
+            (ROOT / "examples" / "compute-frontier" / "manifest.json")
+            .read_text(encoding="utf-8")
+        )
+        page = (ROOT / "docs" / "frontier.md").read_text(encoding="utf-8")
+        block = re.search(r"```json\n(\{.*?\n\})\n```", page, re.S)
+        self.assertIsNotNone(block, "the page must show the manifest")
+        documented = json.loads(block.group(1))
+        self.assertEqual(
+            documented["experiment_id"], shipped["experiment_id"]
+        )
+        self.assertEqual(
+            sorted(documented["arms"]), sorted(shipped["arms"]),
+            "the documented arm list must be the shipped one",
+        )

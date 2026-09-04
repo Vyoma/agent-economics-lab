@@ -168,7 +168,7 @@ size. Teams approve model downgrades on evaluations this size routinely.
 The cheaper model resolves fewer tasks and costs less per resolved task, which
 is the trade the gates exist to make explicit rather than to settle.
 
-Three claims about this case are on the record, so the result is refutable by
+Five claims about this case are on the record, so the result is refutable by
 someone who does not trust the result:
 
 ```bash
@@ -516,9 +516,9 @@ et al. (IEEE TSE, 2015). The standard answer is **metamorphic testing** (Chen
 et al., 1998), which asserts a relation between two runs rather than a value for
 one. D07 is a textbook metamorphic relation, and this repository already ships
 three of them in `tests/test_stress_properties.py` — permutation invariance and
-two monotonicity relations. The claim in `GREEN_DEFECTS.md` that such a defect
-is one "no single-case assertion can express" is refuted by a file in the same
-suite. What actually happened is narrower and duller: those relations were
+two monotonicity relations. An earlier version of `GREEN_DEFECTS.md` claimed such a
+defect is one "no single-case assertion can express"; a file in the same suite
+refutes it, and that page now carries the correction rather than the claim. What actually happened is narrower and duller: those relations were
 written for the decision kernel and never applied to `audit()`.
 
 Enumerating call sites that disagree about an optional argument, and ranking by
@@ -719,7 +719,7 @@ top under instructions for using the tool. [**docs/recipes.md**](docs/recipes.md
 
 ## What is actually novel here
 
-Less than earlier drafts of this README claimed. Three novelty claims made
+Less than earlier drafts of this README claimed. Six novelty claims made
 here have been refuted by adversarial prior-art sweeps, and the corrections
 are recorded alongside the citations that narrowed them:
 [what is novel](docs/novelty.md).

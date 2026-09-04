@@ -5,20 +5,29 @@ Everything else in this package answers a narrower question through its own
 entry point, and the effect is that the stance the package takes is spread
 across four commands nobody runs together. This composes them.
 
-The four grounds on which a verdict is withheld, and what each catches:
+The seven grounds on which a verdict is withheld, and what each catches:
 
 1. **Unprovided coverage.** A required dimension no enabled check supplies.
    Statically computable. The contract cannot be met as written.
-2. **Gates that are not load-bearing.** Removing a gate and re-evaluating shows
-   which ones actually carry this run's verdict. Under a fixed contract the
-   engine refuses every removal by construction, so that line is a regression
-   test, not a score. What varies, and what is reported, is which gates are
-   *pivotal* for this bundle.
-3. **Unaccounted delegation.** Work spawned at runtime that no contract
+2. **Unaccounted delegation.** Work spawned at runtime that no contract
    undertook to assess. Measured against the declared manifest, not against the
    trace, so a perfectly-recorded subagent nobody declared still counts.
-4. **Unattested instruments.** Evidence produced by something whose accuracy
+3. **Unattested instruments.** Evidence produced by something whose accuracy
    nobody established, or established too long ago.
+4. **No evidence instrument recorded.** An empty `label_source`, so deleting
+   the field is never the cheapest way to pass.
+5. **Delegation whose extent was never recorded.** A known delegation tool with
+   no children in the dependency graph: the subagent did nothing, or the graph
+   was never captured, and the difference is not knowable from here.
+6. **Delegated spend never established.** Closure measured by counting rather
+   than by cost, because some delegated event could not be priced.
+7. **Fail-closed invariant broken.** A gate removal that did not yield
+   `INCOMPLETE` under the fixed contract.
+
+Reported but never a ground: which gates are *pivotal* for this bundle.
+Removing a gate and re-evaluating shows which ones carry this run's verdict.
+Under a fixed contract the engine refuses every removal by construction, so
+that line is a regression test rather than a score, and it withholds nothing.
 
 None of these is a score. Each is a reason the honest answer is `INCOMPLETE`.
 

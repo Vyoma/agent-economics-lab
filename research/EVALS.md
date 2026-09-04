@@ -13,7 +13,7 @@ the evidence it summarises.
 | Does deleting raw evidence go unnoticed? | 9 evidence ablations | 4 refused outright; 5 ASSIST->SCALE transitions exposing two documented source-contract gaps | the gaps are boundary cases, recorded in the protocol, not a failure rate |
 | Do the catalogued defects have discriminating probes? | 5 green defects, each re-run at its pinned pre-fix commit | every probe fails before the fix and passes after (`make green-defects`) | catalogued means found once; it is not a census of what remains |
 | Does prospective search find anything? | pre-registered site list, committed before probing | 18 divergences probed, 3 real defects at 3 distinct sites | the count was published wrong twice (in the flattering direction both times); PROBE_RESULTS.md keeps that history |
-| Does it work on data it did not produce? | 8 public datasets audited | 5 with verified findings, 3 clean bill | an arm name identifies runs in a dataset, never a measurement of a model |
+| Does it work on data it did not produce? | 8 public datasets audited | 6 with verified findings, 2 clean | an arm name identifies runs in a dataset, never a measurement of a model |
 | Do the published claims still verify? | 14 claims in the ledger | `make ledger` fails the build on any REFUTED or unpinned-UNVERIFIED claim | verification binds evidence digests, not the truth of the world |
 | Does anything vanish on the way in? | every source unit in each of the four ingestion paths, cited by a decoded entity or named as excluded | 0 of 57 units orphaned; session-tree spend reconciles to the bundle with residual 0/0 tokens | the repository's own fixtures, which are small and were written here; it is conservation, not field-level fidelity |
 | How good is the shipped judge (`kimi-judge@1`)? | agreement with hand-authored rubric-derived labels, 25 constructed cases | 95.8% agreement, 0% false-accept (eval-version 1) | not accuracy against production ground truth; constructed cases are easier than real ones, and the later 100% run is excluded here because the set was edited after seeing this judge |
@@ -29,7 +29,7 @@ outcome figure above, named so the coverage claim is total, each
 with what closing it would take:
 
 - **`experiment.paired-budget-frontier@1`** - its statistical kernel is verified against closed forms (row above), but the frozen study is synthetic. Its protocol names the exit criterion: a permissioned matched-task study from a real workflow, three or more configurations, 100+ paired task digests, and an independent reproduction.
-- **`kimi-analyst@1`** - no evaluation at all. It recommends fixes from a decided case, and nothing measures whether the recommendations are sound. Closing it means a labelled set of decided cases with expert remediations to score against - the same shape as the judge eval, which does not exist yet.
+- **`kimi-analyst@1`** - no evaluation at all. It recommends fixes from a decided case, and nothing measures whether the recommendations are sound. Closing it means a labelled set of decided cases with expert remediations to score against - the same shape as the judge eval in research/eval/judge-eval-set.json, which exists and which the row above reports; no equivalent set exists for remediations.
 
 ## Reading it honestly
 

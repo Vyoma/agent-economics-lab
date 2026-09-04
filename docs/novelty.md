@@ -330,7 +330,14 @@ The two later claims have now been swept and both were narrowed; what is left of
 them is stated above and in docs/landscape.md, with the citations that did the
 narrowing. Neither should be described as novel without that context.
 
-Four separate novelty claims have been made in this repository. Three were
-destroyed outright and the fourth pair survived only in narrow, technical
-remainders. Anyone tempted to make a fifth should assume the same outcome and
-write it that way from the start.
+Six separate novelty claims have been made in this repository, and the
+count in this paragraph was itself wrong for two of them: it said four,
+survived the writing of the fifth and sixth sections above, and advised a
+reader against making "a fifth" that this page already documents. A stale
+tally in the closing paragraph of the page about stale claims is the
+correct joke and a real defect, found by a cross-document audit rather than
+by anyone reading it.
+
+Most were destroyed outright and the survivors held only in narrow,
+technical remainders. Anyone tempted to make a seventh should assume the
+same outcome and write it that way from the start.

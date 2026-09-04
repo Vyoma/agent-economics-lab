@@ -70,24 +70,28 @@ framework abstraction, or generalized policy language.
 
 ## Local verification
 
-One command gates a push, and it is the one CI actually fails on:
+One command gates a push, and it is a superset of what CI runs:
 
 ```bash
 make PYTHON=python3.12 gate
 ```
 
 It regenerates every derived document, fails if that changed the tree, runs
-the suite, and verifies the claim ledger. Wire it to `git push` once:
+the suite, and verifies the claim ledger. CI runs `make reproduce`, which
+does not regenerate documents, so a stale generated page passes locally
+under `make test` and fails in CI on the byte-compare - which is exactly the
+round trip the gate exists to save. Wire it to `git push` once:
 
 ```bash
 make hooks
 ```
 
 Generated pages are the usual surprise. `research/CORPUS.md`,
-`research/FINDINGS.md`, `research/EVALS.md`, `research/PROBE_SITES.md`,
-`docs/at-scale.md` and the test count in `docs/index.md` are all rendered
-from code and byte-compared, so editing one by hand fails the build. Change
-the renderer, then commit what it produces.
+`research/FINDINGS.md`, `research/PATTERNS.md`, `research/EVALS.md`,
+`research/ADAPTER_FIDELITY.md`, `research/OUTCOME_AUDIT.md`,
+`research/PROBE_SITES.md`, `docs/at-scale.md` and the test-count floor in
+`docs/index.md` are all rendered from code and byte-compared, so editing one
+by hand fails the build. Change the renderer, then commit what it produces.
 
 `make reproduce` is the fuller run, including the pinned-commit defect
 replays and the network-free research targets. `make verify-upstream` and
