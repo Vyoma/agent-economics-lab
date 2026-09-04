@@ -35,6 +35,11 @@ AssuranceCase ---------------- evidence + contract digests
         +---- renderer.json@1
 ```
 
+The frontier path is a second, parallel surface with its own three
+renderers (`renderer.frontier-markdown@1`, `renderer.frontier-json@1`,
+`renderer.frontier-svg@1`), documented in [the frontier](frontier.md). The
+diagram above is the single-arm decision path only.
+
 The approach complements existing platforms. Galileo already supports
 [custom code-based metrics](https://docs.galileo.ai/concepts/metrics/custom-metrics/custom-metrics-ui-code),
 LangSmith supports [trace export](https://docs.langchain.com/langsmith/export-traces)
@@ -62,7 +67,12 @@ The built-in adapters are:
 source.csv@1
 source.normalized-json@1
 source.claude-code-jsonl@1
+source.claude-code-session-tree@1
+source.otel-genai@1
 ```
+
+`agent-economics capabilities` prints this list from the build rather than
+from this page, and is the authority when the two disagree.
 
 The public SWE-bench demonstration also records
 `source.public-swebench-mini-agent@1`. That mapper is intentionally scoped to one
@@ -215,7 +225,7 @@ python3 -m agent_economics evaluate ... --format json --ci
 | `ASSIST` | 3 |
 | `STOP` | 4 |
 
-## What remains fixed in v0.1
+## What remains fixed within a major version
 
 The task/outcome join, complete effective-cost reconstruction, unit calculations,
 decision reducer, and canonical evidence digest remain a small inspectable kernel.

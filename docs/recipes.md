@@ -127,17 +127,21 @@ could declare every delegation accounted for without the evidence saying so.
 agent-economics audit --bundle bundle.json --ci
 ```
 
-One command, four grounds for withholding a verdict: required coverage no check
-supplies, which gates actually carry this run, delegated work nobody undertook to
-assess, and instruments nobody validated. None of them is a score. Each is a
-reason the honest answer is `INCOMPLETE`.
+One command, seven grounds for withholding a verdict: required coverage no
+check supplies, delegated work nobody undertook to assess, instruments nobody
+validated, no instrument recorded at all, a delegation whose extent was never
+captured, delegated spend that could not be priced, and a broken fail-closed
+invariant. They are enumerated in [the specification](../SPEC.md) clause 4.3.
+None is a score; each is a reason the honest answer is `INCOMPLETE`. Which
+gates are *pivotal* for a bundle is reported alongside them and withholds
+nothing.
 
 `evaluate` asks the same question before it will say `SCALE`: a green decision
 the audit refuses comes back `INCOMPLETE` with the grounds, so this command
 and `evaluate --ci` cannot disagree about one bundle. Pass the calibration
 records to either with the same `--attestations` flag.
 
-The fourth ground asks what validated your evidence instruments. Answer it by
+The instrument ground asks what validated your evidence instruments. Answer it by
 supplying their calibration records; without one, the audit withholds:
 
 ```bash

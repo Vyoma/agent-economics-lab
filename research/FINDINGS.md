@@ -45,7 +45,7 @@ The gemini-3-pro arm reports info.resolved true on all 500 tasks while its own i
 
 **Dataset.** [`tarsur385/swebench-verified-trajectories`](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories) at `b55979d6`
 
-The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, against a 21-point spread across the nine scored arms.
+The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, against a 20.6-point spread across the nine scored arms.
 
 **Check it.** `make outcome-audit && make verify-upstream`
 

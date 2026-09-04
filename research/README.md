@@ -1,7 +1,24 @@
 # Research Artifacts
 
-Agent Economics Lab separates its flagship paired experiment from lower-level engine
+Agent Economics Lab separates its paired experiment from lower-level engine
 conformance so a software invariant is not mistaken for external empirical evidence.
+
+**Start with the audits of third-party data**, which is where this project's
+external evidence lives and what the front page leads with:
+
+- [The corpus](CORPUS.md) — every public dataset audited, one section each.
+- [The findings index](FINDINGS.md) — each result with a stable identifier, a
+  priority date, and the command that checks it.
+- [What the audits say together](PATTERNS.md) — the three things the entries
+  support jointly, and what they refuse to claim.
+- [How good the instrument is](EVALS.md) — the scorecard, including the
+  capabilities nothing yet measures.
+- [What each ingestion path loses](ADAPTER_FIDELITY.md).
+
+The numbered sections below are the internal conformance experiments. They
+run on synthetic or fixture evidence by design, and each states so; they
+establish that the contract behaves as specified, not that the specification
+catches everything that matters.
 
 ## 1. Economic Assurance Frontier
 

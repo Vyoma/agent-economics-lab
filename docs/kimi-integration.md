@@ -312,10 +312,10 @@ component with that leverage needs measuring, not just mocking.
 
 ```bash
 # Smoke-test three cases first. Deep reasoning is slow, so confirm the path
-# works before spending 24 calls.
+# works before spending 25 calls.
 python3 kimi_eval.py --limit 3
 
-make kimi-eval          # all 24 cases, requires MOONSHOT_API_KEY
+make kimi-eval          # all 25 cases, requires MOONSHOT_API_KEY
 make test               # scoring math and eval-set integrity, no key needed
 ```
 

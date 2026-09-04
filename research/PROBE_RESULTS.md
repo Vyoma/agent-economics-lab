@@ -123,7 +123,8 @@ property every defect in the retrospective corpus also had.
 
 Regenerating the site list against the repaired code drops the divergence count
 away from the pre-registered 18. Only the provenance one disappeared: `io.py:122` now passes
-`dependency_edges`, but `assurance.py:524` still omits it, so the divergence
+`dependency_edges`, but the legacy `evaluate()` wrapper in `assurance.py`
+still omits it, so the divergence
 correctly still points somewhere.
 
 That remaining site is `evaluate()`, a compatibility wrapper with the same

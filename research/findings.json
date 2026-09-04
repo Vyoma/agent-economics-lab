@@ -26,11 +26,12 @@
    "kind": "measurement",
    "dataset": "tarsur385/swebench-verified-trajectories",
    "revision": "b55979d6b24850b72ae4d80f912526280cd6058a",
-   "statement": "The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, against a 21-point spread across the nine scored arms.",
+   "statement": "The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, against a 20.6-point spread across the nine scored arms.",
    "figures": {
     "tasks": 500,
     "disagreements": 44,
-    "self_agreement": 0.912
+    "self_agreement": 0.912,
+    "spread_points": 20.6
    },
    "verify": "make outcome-audit && make verify-upstream",
    "scope": "Test-retest, filed as such. Repeatability is not validity: an instrument that scores identical inputs identically every time can be systematically wrong about all of them. What causes the 8.8% is not established here."

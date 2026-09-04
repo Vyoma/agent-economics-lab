@@ -35,8 +35,9 @@ UNMEASURED: dict[str, str] = {
     "kimi-analyst@1": "no evaluation at all. It recommends fixes from a "
     "decided case, and nothing measures whether the recommendations are "
     "sound. Closing it means a labelled set of decided cases with expert "
-    "remediations to score against - the same shape as the judge eval, "
-    "which does not exist yet.",
+    "remediations to score against - the same shape as the judge eval in "
+    "research/eval/judge-eval-set.json, which exists and which the row "
+    "above reports; no equivalent set exists for remediations.",
 }
 
 
@@ -64,7 +65,17 @@ def render() -> str:
 
     corpus = (ROOT / "research" / "CORPUS.md").read_text(encoding="utf-8")
     registry_rows = re.findall(r"^\| \[[^]]+\]\(https://huggingface", corpus, re.M)
-    clean_rows = len(re.findall(r"\| clean[ :]", corpus))
+    # Counted from the findings registry's own `kind`, not by matching the
+    # word "clean" in the corpus prose. The regex version matched "clean
+    # labels" in the row whose finding is kappa 0.062, and so filed this
+    # project's sharpest result as a clean bill - in a generated,
+    # byte-compared page, which shipped it green.
+    registry = json.loads(
+        (ROOT / "research" / "findings.json").read_text(encoding="utf-8")
+    )
+    standing = [f for f in registry["findings"] if f["status"] == "standing"]
+    clean_datasets = {f["dataset"] for f in standing if f["kind"] == "clean"}
+    finding_datasets = {f["dataset"] for f in standing if f["kind"] != "clean"}
 
     claims = sorted((ROOT / "research" / "claims").glob("*.claim.json"))
 
@@ -144,8 +155,8 @@ def render() -> str:
         (
             "| Does it work on data it did not produce? |"
             f" {len(registry_rows)} public datasets audited |"
-            f" {len(registry_rows) - clean_rows} with verified findings,"
-            f" {clean_rows} clean bill | an arm name identifies runs in a"
+            f" {len(finding_datasets)} with verified findings,"
+            f" {len(clean_datasets)} clean | an arm name identifies runs in a"
             " dataset, never a measurement of a model |"
         ),
         (

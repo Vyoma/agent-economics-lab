@@ -74,6 +74,22 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertAlmostEqual(
             published["self_agreement"], 1 - disagreements / len(b), places=3
         )
+        # The index promised every figure recomputes and this one did not,
+        # so it drifted: 21 is the naive-rate spread, 20.6 the confirmed-rate
+        # spread the other two documents publish.
+        # The confirmed rate restricts numerator and denominator to scored
+        # rows. A first draft counted every resolved row over the scored
+        # count, which inflates any arm with unscored rows and gave 22.3.
+        rates = []
+        for rows in arms.values():
+            scored = [r for r in rows if not isinstance(r["scores_resolved"], str)]
+            if scored:
+                rates.append(
+                    sum(1 for r in scored if r["resolved"] is True) / len(scored)
+                )
+        self.assertAlmostEqual(
+            published["spread_points"], (max(rates) - min(rates)) * 100, places=1
+        )
 
     def test_003_the_coderforge_clean_bill(self) -> None:
         document = json.loads(

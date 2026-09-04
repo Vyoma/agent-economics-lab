@@ -33,11 +33,13 @@ The manifest names the complete experiment family before comparison:
 ```json
 {
   "schema_version": 1,
-  "experiment_id": "support-budget-frontier-v1",
+  "experiment_id": "synthetic-support-budget-frontier-v1",
   "reference_arm": "premium-8-step",
   "arms": {
-    "premium-8-step": "arms/premium-8-step.json",
-    "balanced-4-step": "arms/balanced-4-step.json"
+    "balanced-4-step": "arms/balanced-4-step.json",
+    "cheap-2-step": "arms/cheap-2-step.json",
+    "premium-12-step": "arms/premium-12-step.json",
+    "premium-8-step": "arms/premium-8-step.json"
   },
   "max_breakage_rate": 0.05,
   "min_cost_reduction_rate": 0.25,

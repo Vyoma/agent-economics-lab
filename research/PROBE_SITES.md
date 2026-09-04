@@ -77,10 +77,10 @@ agent_economics/kimi_judge.py:460  kimi_resp.get("overall_score", 0),
 ### S2 (123)
 
 ```
-agent_economics/audit.py:321  lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated "
-agent_economics/audit.py:322  f"spend is unassessed; closure {report.closure:.0%}."]
-agent_economics/audit.py:328  lines += ["", f"Closure {report.closure:.0%}. The unassessed spend "
-agent_economics/audit.py:355  f"(closure {report.closure:.0%}, measured {basis})."
+agent_economics/audit.py:330  lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated "
+agent_economics/audit.py:331  f"spend is unassessed; closure {report.closure:.0%}."]
+agent_economics/audit.py:337  lines += ["", f"Closure {report.closure:.0%}. The unassessed spend "
+agent_economics/audit.py:364  f"(closure {report.closure:.0%}, measured {basis})."
 agent_economics/checks.py:51  f"acceptable_rate {view.acceptable_rate:.1%} "
 agent_economics/checks.py:52  f"{'<' if failed else '>='} {threshold:.1%}"
 agent_economics/checks.py:64  f"cost_per_acceptable_outcome ${observed:.2f} "
@@ -318,7 +318,7 @@ agent_economics/models.py:103  in cost(): return 0.0
 ```
 agent_economics/assurance.py:566  make_evidence_bundle(...) omits declared_delegations, dependency_edges, label_source, source_version, task_manifest  [evidence = make_evidence_bundle(]
 agent_economics/assurance.py:342  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [evidence_problems = validate_evidence_bu]
-agent_economics/audit.py:189  assess_bundle_closure(...) omits declared, delegation_tools  [closure = assess_bundle_closure(bundle)]
+agent_economics/audit.py:198  assess_bundle_closure(...) omits declared, delegation_tools  [closure = assess_bundle_closure(bundle)]
 agent_economics/checks.py:144  _result(...) omits task_id  [_result(]
 agent_economics/checks.py:55  _result(...) omits task_id  [results=(_result("gate.acceptable-rate",]
 agent_economics/checks.py:68  _result(...) omits task_id  [results=(_result("gate.unit-economics", ]
@@ -400,11 +400,11 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `assess_bundle_closure(..., declared=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/cli.py:441`
-- omits / reads raw (1): `agent_economics/audit.py:189`
+- omits / reads raw (1): `agent_economics/audit.py:198`
 
 ### `audit(..., policy=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/audit.py:146`
+- passes / resolves (1): `agent_economics/audit.py:155`
 - omits / reads raw (1): `agent_economics/cli.py:418`
 
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)
@@ -434,7 +434,7 @@ All five known defects share a sharper form than any shape above: the same quant
 
 ### `mutate(..., _evidence_digest=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/audit.py:188`
+- passes / resolves (1): `agent_economics/audit.py:197`
 - omits / reads raw (1): `agent_economics/cli.py:444`
 
 ### `render_normalized_json(..., conversion=)`  (inconsistent-caller)

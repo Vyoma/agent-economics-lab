@@ -521,7 +521,7 @@ def render() -> str:
             f"| `{ptb['revision'][:8]}` | {ptb['rows']:,} "
             f"| {ptb['unusable_accuracy']} runs carry no usable outcome; the "
             "contamination judge's apparent effect on scores is "
-            f"{ptb['overstatement']:.0f}x smaller once benchmark composition "
+            f"{ptb['overstatement']:.1f}x smaller once benchmark composition "
             "is held fixed |"
         ),
         (
@@ -670,12 +670,12 @@ def render() -> str:
         "benchmark's easiness to contamination. Holding benchmark fixed and",
         "weighting by size, the difference is",
         f"{ptb['stratified_difference']:+.3f} - smaller by a factor of",
-        f"{ptb['overstatement']:.0f} - and contaminated runs beat clean ones",
+        f"{ptb['overstatement']:.1f} - and contaminated runs beat clean ones",
         f"in only {ptb['benchmarks_where_contamination_helps']} of",
         f"{ptb['comparable_benchmarks']} benchmarks with enough of both to",
         "compare. The honest statement is that this dataset does not show",
         "contamination reliably paying, and that anyone computing the pooled",
-        "number gets an answer eleven times too large.",
+        "number gets an answer an order of magnitude too large.",
         "",
         "**What is missing, counted rather than dropped.**",
         f"{ptb['no_metrics_file']} runs ship no metrics file and",

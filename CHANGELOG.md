@@ -23,7 +23,10 @@ engine got a measured envelope.
 
 - `research/CORPUS.md`: a registry of public agent-trajectory datasets
   audited under one discipline, with content-free frozen evidence. Four
-  entries at 0.9.0: tarsur385 (one arm's 100% never confirmed by its own
+  entries as of this entry, and eight on `main` since; the current count is
+  in the registry itself rather than here, because a changelog records what
+  a release contained and this one kept being read as a present-tense
+  claim: tarsur385 (one arm's 100% never confirmed by its own
   cross-check; one duplicated arm pair, labels 91.2% self-consistent),
   CoderForge (clean: rewards re-derive from raw logs), SWE-smith (patch
   column not row-aligned; 2,255 duplicate rows in one split; labels clean
