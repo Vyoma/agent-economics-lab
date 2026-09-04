@@ -209,6 +209,25 @@
    },
    "verify": "make corpus",
    "scope": "A completeness statement about optional fields the dataset card documents as optional. Not a claim the absences are unintentional; the finding is that the resulting denominators differ by field and nothing in the data announces it."
+  },
+  {
+   "id": "AEL-2026-013",
+   "date": "2026-09-03",
+   "status": "standing",
+   "kind": "measurement",
+   "dataset": "FUSE-verifiers/HLE-Verifications",
+   "revision": "e838b3dd7a12c78c292453e66de15a9c35340c36",
+   "statement": "Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity's Last Exam questions, against correctness established by matching the published answer. Their discrimination ranges from AUC 0.501 to 0.653. Qwen2.5-72B-Instruct's 95% interval, bootstrapped over questions rather than responses, contains 0.5: it is not distinguishable from random on this data. A purpose-built critic model, Skywork-Critic-Llama-3.1-70B, reaches 0.550. This replicates AEL-2026-008 in a different domain, with a different kind of instrument, across seven graders rather than one.",
+   "figures": {
+    "questions": 649,
+    "responses": 32450,
+    "graders": 7,
+    "worst_auc": 0.501,
+    "best_auc": 0.653,
+    "base_rate": 0.514
+   },
+   "verify": "make corpus",
+   "scope": "AUC is threshold-free and therefore the most favourable reading available, since the scoring rubric is not published and any threshold would be a choice about generosity. All responses come from one model, so this measures graders on that model's output rather than in general. Ground truth is exact matching against a published answer with a model used to parse answer formats: checkable, but not untouched by a model. HLE is adversarially hard by construction, and grading hard problems is harder. This is not a claim that model graders are useless everywhere, only that on two datasets in two domains none has cleared the floor this package requires."
   }
  ]
 }

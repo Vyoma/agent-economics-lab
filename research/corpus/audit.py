@@ -190,6 +190,92 @@ def nebius_openhands_summary() -> dict:
     }
 
 
+def _auc(pairs: list) -> float | None:
+    """Rank-based AUC: threshold-free, and invariant to the rubric.
+
+    The graders score 0 to 5 against a rubric the dataset does not publish,
+    so no threshold can be justified from the data. AUC asks only whether a
+    higher score is more often a correct response, which is the weakest
+    assumption under which a grader could be said to work at all.
+    """
+    ordered = sorted(pairs)
+    n = len(ordered)
+    ranks: dict[int, float] = {}
+    index = 0
+    while index < n:
+        stop = index
+        while stop < n and ordered[stop][0] == ordered[index][0]:
+            stop += 1
+        rank = (index + stop - 1) / 2 + 1
+        for k in range(index, stop):
+            ranks[k] = rank
+        index = stop
+    positives = sum(1 for _, y in ordered if y)
+    negatives = n - positives
+    if not positives or not negatives:
+        return None
+    rank_sum = sum(ranks[i] for i, (_, y) in enumerate(ordered) if y)
+    return (rank_sum - positives * (positives + 1) / 2) / (positives * negatives)
+
+
+def hle_verifier_summary() -> dict:
+    """Seven models asked to verify correctness, against a checkable answer."""
+    import random
+
+    document = _load("hle-verifiers")
+    rows = document["rows"]
+    judges = document["judges"]
+
+    by_question: dict[str, list] = {j: [] for j in judges}
+    for row in rows:
+        for judge in judges:
+            values = row["scores"].get(judge)
+            if values is None:
+                continue
+            by_question[judge].append([
+                (float(s), bool(y)) for s, y in zip(values, row["correct"])
+                if s is not None
+            ])
+
+    # Responses are clustered inside questions, so the bootstrap resamples
+    # questions. Treating 32,450 responses as independent would give an
+    # interval several times too tight.
+    random.seed(20260903)
+    graders = []
+    for judge in sorted(judges):
+        clusters = by_question[judge]
+        flat = [pair for cluster in clusters for pair in cluster]
+        point = _auc(flat)
+        draws = []
+        for _ in range(400):
+            pool = []
+            for _ in range(len(clusters)):
+                pool.extend(clusters[random.randrange(len(clusters))])
+            value = _auc(pool)
+            if value is not None:
+                draws.append(value)
+        draws.sort()
+        low = draws[int(0.025 * len(draws))]
+        high = draws[int(0.975 * len(draws))]
+        graders.append({
+            "judge": judge, "pairs": len(flat), "auc": point,
+            "low": low, "high": high,
+            "indistinguishable_from_random": low <= 0.5 <= high,
+        })
+
+    correct = [y for row in rows for y in row["correct"]]
+    return {
+        "revision": document["revision"],
+        "questions": len(rows),
+        "responses": len(correct),
+        "base_rate": sum(correct) / len(correct),
+        "graders": graders,
+        "excluded_pairs": sum(len(r["misaligned_graders"]) for r in rows),
+        "best": max(graders, key=lambda g: g["auc"]),
+        "worst": min(graders, key=lambda g: g["auc"]),
+    }
+
+
 RATINGS = ("outcomeRating", "agentRating", "communicationRating")
 
 
@@ -447,6 +533,7 @@ def render() -> str:
     smith = swesmith_summary()
     ptb = posttrainbench_summary()
     cogym = cogym_summary()
+    hle = hle_verifier_summary()
     sweagent = nebius_sweagent_summary()
     openhands = nebius_openhands_summary()
 
@@ -505,6 +592,14 @@ def render() -> str:
             f"| `{coderforge['revision'][:8]}` | {len(coderforge['rows'])} "
             "| clean: reward re-derives from the raw logs on all "
             f"{cf_re['parsed']} parseable rows |"
+        ),
+        (
+            "| [FUSE-verifiers/HLE-Verifications]"
+            "(https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) "
+            f"| `{hle['revision'][:8]}` | {hle['questions']} "
+            f"| seven models asked to verify correctness reach AUC "
+            f"{hle['worst']['auc']:.3f} to {hle['best']['auc']:.3f} against a "
+            f"checkable answer over {hle['responses']:,} responses |"
         ),
         (
             "| [SALT-NLP/cogym-real-trajectories]"
@@ -580,6 +675,66 @@ def render() -> str:
         "",
         f"Outcome census: {dict(sorted(cf_census.items()))}. No duplicate",
         "transcripts. No positive outcome on a run of one step or fewer.",
+        "",
+        "## FUSE-verifiers/HLE-Verifications, "
+        f"{hle['questions']} questions and {hle['responses']:,} graded responses",
+        "",
+        "The corpus's sharpest result, that a proposed correctness signal",
+        "agrees with adjudication at chance, rested on one dataset, one",
+        "scaffold and one model family. The obvious objection is generality.",
+        "This entry is the replication, and it is a harder test: a different",
+        "domain, a different kind of instrument, and seven graders instead",
+        "of one.",
+        "",
+        "649 Humanity's Last Exam questions, 50 candidate responses each.",
+        "Every response is marked correct or not by matching the published",
+        "answer, and every response is scored 0 to 5 by seven models the",
+        f"dataset calls verifiers. The base rate is {hle['base_rate']:.1%},",
+        "so this is a near-balanced problem rather than one where a constant",
+        "answer scores well.",
+        "",
+        "| verifier | responses | AUC | 95% CI |",
+        "|---|---:|---:|---|",
+    ]
+    for grader in hle["graders"]:
+        note = " *" if grader["indistinguishable_from_random"] else ""
+        lines.append(
+            f"| `{grader['judge']}` | {grader['pairs']:,} "
+            f"| {grader['auc']:.3f}{note} | [{grader['low']:.3f}, "
+            f"{grader['high']:.3f}] |"
+        )
+    lines += [
+        "",
+        "\\* interval contains 0.5, so that grader is not distinguishable",
+        "from random on this data.",
+        "",
+        "**Why AUC and not an accuracy.** The graders score against a rubric",
+        "the dataset does not publish, so no threshold can be justified from",
+        "the data, and picking one would be choosing how generous to be. AUC",
+        "asks only whether a higher score is more often a correct response,",
+        "which is the weakest assumption under which a grader could be said",
+        "to work at all. Every figure here is therefore the most favourable",
+        "reading available.",
+        "",
+        "**Why the intervals are wide.** 32,450 responses sit inside 649",
+        "questions and are not independent, so the bootstrap resamples",
+        "questions rather than responses. Treating the responses as",
+        "independent would give intervals several times too tight and would",
+        "be the error this corpus most often finds elsewhere.",
+        "",
+        "**What it does not establish.** Every response was generated by one",
+        "model, so this measures graders on that model's output rather than",
+        "on output in general. The ground truth is exact matching against a",
+        "published answer, with a model used to parse answer formats, so it",
+        "is checkable but not untouched by a model. HLE is adversarially",
+        f"hard by construction. And one (question, grader) pair of {hle['excluded_pairs'] + 4542}",
+        "was excluded because that grader scored 47 of 50 responses and",
+        "nothing in the data says which 47; the alignment is unknowable, so",
+        "it is dropped and counted rather than zipped, which would have",
+        "silently truncated to the shorter list.",
+        "",
+        "Evidence: [frozen/hle-verifiers.json](corpus/frozen/hle-verifiers.json),",
+        "content-free, carrying the SHA-256 of the source file it read.",
         "",
         "## SALT-NLP/cogym-real-trajectories, "
         f"{cogym['rows']} human-agent sessions",

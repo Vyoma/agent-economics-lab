@@ -257,3 +257,18 @@ class TheIndexIsWellFormed(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def test_013_the_hle_verifier_replication(self) -> None:
+        from audit import hle_verifier_summary
+
+        summary = hle_verifier_summary()
+        published = _figures("AEL-2026-013")
+        self.assertEqual(published["questions"], summary["questions"])
+        self.assertEqual(published["responses"], summary["responses"])
+        self.assertEqual(published["graders"], len(summary["graders"]))
+        self.assertAlmostEqual(published["worst_auc"], summary["worst"]["auc"], places=3)
+        self.assertAlmostEqual(published["best_auc"], summary["best"]["auc"], places=3)
+        # The published claim is that no grader clears the floor, so if one
+        # ever does the entry is wrong and this must fail rather than let
+        # the prose stand.
+        self.assertLess(summary["best"]["auc"], 0.75)

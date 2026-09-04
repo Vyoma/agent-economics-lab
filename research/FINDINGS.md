@@ -4,7 +4,7 @@ Every audit result this project has published, with a stable
 identifier, the date it was first published, the command that checks
 it, and the scope it does not claim.
 
-**12 standing: 6 defects, 4 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
+**13 standing: 6 defects, 5 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
 an auditor that only ever finds problems is indistinguishable from
 one that manufactures them.
 
@@ -28,6 +28,7 @@ evidence and fails the build if the two ever disagree.
 | `AEL-2026-010` | 2026-09-03 | defect | `PostTrainBench-Trajectories` | 260 of 1,842 runs carry no usable outcome: 208 ship no metrics file and 52 ship one that is not valid JSON |
 | `AEL-2026-011` | 2026-09-03 | measurement | `cogym-real-trajectories` | Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time... |
 | `AEL-2026-012` | 2026-09-03 | defect | `cogym-real-trajectories` | The communication rating is present on 50 of 228 sessions and the artifact rating on 191; only overall satisfaction is on every session |
+| `AEL-2026-013` | 2026-09-03 | measurement | `HLE-Verifications` | Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity's Last Exam questions, against correctness established by... |
 
 ## The findings in full
 
@@ -150,6 +151,16 @@ The communication rating is present on 50 of 228 sessions and the artifact ratin
 **Check it.** `make corpus`
 
 **What it does not claim.** A completeness statement about optional fields the dataset card documents as optional. Not a claim the absences are unintentional; the finding is that the resulting denominators differ by field and nothing in the data announces it.
+
+### AEL-2026-013 - measurement, 2026-09-03
+
+**Dataset.** [`FUSE-verifiers/HLE-Verifications`](https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) at `e838b3dd`
+
+Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity's Last Exam questions, against correctness established by matching the published answer. Their discrimination ranges from AUC 0.501 to 0.653. Qwen2.5-72B-Instruct's 95% interval, bootstrapped over questions rather than responses, contains 0.5: it is not distinguishable from random on this data. A purpose-built critic model, Skywork-Critic-Llama-3.1-70B, reaches 0.550. This replicates AEL-2026-008 in a different domain, with a different kind of instrument, across seven graders rather than one.
+
+**Check it.** `make corpus`
+
+**What it does not claim.** AUC is threshold-free and therefore the most favourable reading available, since the scoring rubric is not published and any threshold would be a choice about generosity. All responses come from one model, so this measures graders on that model's output rather than in general. Ground truth is exact matching against a published answer with a model used to parse answer formats: checkable, but not untouched by a model. HLE is adversarially hard by construction, and grading hard problems is harder. This is not a claim that model graders are useless everywhere, only that on two datasets in two domains none has cleared the floor this package requires.
 
 ## Citing one
 
