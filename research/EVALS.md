@@ -17,6 +17,7 @@ the evidence it summarises.
 | Do the published claims still verify? | 14 claims in the ledger | `make ledger` fails the build on any REFUTED or unpinned-UNVERIFIED claim | verification binds evidence digests, not the truth of the world |
 | Does anything vanish on the way in? | every source unit in each of the four ingestion paths, cited by a decoded entity or named as excluded | 0 of 57 units orphaned; session-tree spend reconciles to the bundle with residual 0/0 tokens | the repository's own fixtures, which are small and were written here; it is conservation, not field-level fidelity |
 | How good is the shipped judge (`kimi-judge@1`)? | agreement with hand-authored rubric-derived labels, 25 constructed cases | 95.8% agreement, 0% false-accept (eval-version 1) | not accuracy against production ground truth; constructed cases are easier than real ones, and the later 100% run is excluded here because the set was edited after seeing this judge |
+| Does the rendered case keep what decided it? | completeness of `renderer.markdown@1` and `renderer.json@1` against a case with simultaneous breaches | every breach, check id, status, failure route and both digests reach the page; proven non-vacuous by stripping both carriers | the information is present, not that a reader draws the right conclusion from it; and it is one constructed case, not every shape a case can take |
 | Are the frontier statistics right? | Clopper-Pearson bound against its closed form, plus distribution and monotonicity properties | exact to 9 decimal places across every tested trial size and alpha (`tests/test_frontier_statistics.py`) | the statistical kernel only; the frozen frontier study itself is synthetic and labelled so in its protocol |
 
 ## What is not measured
@@ -31,8 +32,6 @@ with what closing it would take:
 - **`renderer.frontier-json@1`** - byte-compared only. Closing it means a schema assertion over the emitted document, not one fixture diff.
 - **`renderer.frontier-markdown@1`** - byte-compared only. Closing it means asserting the rendered comparison names every arm the case decided over.
 - **`renderer.frontier-svg@1`** - byte-compared only. An SVG that renders misleadingly would pass.
-- **`renderer.json@1`** - same as the markdown renderer; the JSON shape is asserted field by field in tests, but nothing measures whether it carries everything a consumer needs.
-- **`renderer.markdown@1`** - byte-compared against checked-in fixtures, which proves the output has not changed, not that it is right. Closing it means a property test: every figure in the rendered case appears in the case object, and every breach appears in the prose.
 
 ## Reading it honestly
 

@@ -183,6 +183,29 @@ def _swesmith(row: dict) -> dict:
     }
 
 
+def _kwai_klear(row: dict) -> dict:
+    """A SWE-smith derivative that kept the transcripts and dropped the rest.
+
+    Two columns survive: instance_id and messages. No outcome label, so a
+    consumer cannot filter this training set by whether the trajectory
+    succeeded, and no patch, so the misalignment recorded against the parent
+    dataset cannot be checked here at all. Both absences are the audit.
+    """
+    messages = row.get("messages") or []
+    return {
+        "id": row.get("instance_id"),
+        "instance_id": row.get("instance_id"),
+        # Present so the census can say "absent", rather than the schema
+        # quietly not mentioning outcomes at all.
+        "outcome": row.get("resolved"),
+        "message_count": len(messages),
+        "transcript_sha256": _sha256(_canonical(messages)),
+        "roles_sha256": _sha256(
+            _canonical([m.get("role") for m in messages])
+        ),
+    }
+
+
 def _nebius_sweagent(row: dict) -> dict:
     patch = row.get("generated_patch") or ""
     logs = row.get("eval_logs") or ""
@@ -325,6 +348,20 @@ SPECS = {
         "cross_field": None,
         "extract": _nvidia_swezero,
         "license": "cc-by-4.0",
+    },
+    # A widely-used training set derived from SWE-smith trajectories. The
+    # question this corpus can ask that the dataset cannot answer for
+    # itself: what survives derivation, and what silently does not.
+    "kwai-klear": {
+        "dataset": "Kwai-Klear/SWE-smith-mini_swe_agent_plus-trajectories-66k",
+        "config": "default",
+        "split": "train",
+        "page_length": 20,
+        "expected_rows": 65994,
+        "outcome_field": "resolved",
+        "cross_field": None,
+        "extract": _kwai_klear,
+        "license": "mit",
     },
     "jetbrains": {
         "dataset": "JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified",
