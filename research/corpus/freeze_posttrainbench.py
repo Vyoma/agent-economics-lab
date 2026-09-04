@@ -113,18 +113,36 @@ def _run_row(group: str, run: str) -> dict | None:
         if entry.get("type") == "file"
     }
 
+    # A malformed file is recorded as malformed. Not as missing, which would
+    # understate how many runs lack a usable outcome, and not as zero, which
+    # would invent one. The first freeze crashed on a metrics.json that is
+    # not valid JSON, which is itself a fact about this dataset.
     metrics_raw = _file(f"{group}/{run}/metrics.json") if "metrics.json" in names else None
-    metrics = json.loads(metrics_raw) if metrics_raw else {}
+    metrics: dict = {}
+    metrics_malformed = False
+    if metrics_raw:
+        try:
+            parsed = json.loads(metrics_raw)
+            metrics = parsed if isinstance(parsed, dict) else {}
+            metrics_malformed = not isinstance(parsed, dict)
+        except ValueError:
+            metrics_malformed = True
 
     judge_name = next(
         (n for n in sorted(names) if n.startswith("judgement_") and n.endswith(".json")),
         None,
     )
     judge: dict = {}
+    judge_malformed = False
     if judge_name:
         judge_raw = _file(f"{group}/{run}/{judge_name}")
         if judge_raw:
-            judge = json.loads(judge_raw)
+            try:
+                parsed = json.loads(judge_raw)
+                judge = parsed if isinstance(parsed, dict) else {}
+                judge_malformed = not isinstance(parsed, dict)
+            except ValueError:
+                judge_malformed = True
 
     duration = None
     if "time_taken.txt" in names:
@@ -145,6 +163,8 @@ def _run_row(group: str, run: str) -> dict | None:
         "accuracy": metrics.get("accuracy"),
         "stderr": metrics.get("stderr"),
         "has_metrics": bool(metrics_raw),
+        "metrics_malformed": metrics_malformed,
+        "judge_malformed": judge_malformed,
         # the judge's integrity verdict, and whether one exists at all
         "judge_file": judge_name or "",
         "contamination": judge.get("contamination"),
