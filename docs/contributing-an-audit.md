@@ -15,6 +15,20 @@ dataset does not need to look defective; a clean bill is a result, recorded
 with the same care as a defect, and an auditor that only ever finds problems
 is indistinguishable from one that manufactures them.
 
+## Start with a census, not a blank file
+
+```bash
+python3 research/corpus/audit_any.py <owner/dataset> --rows 1000
+```
+
+Points the corpus's own checks at any dataset served by the Hugging Face
+rows API: outcome coverage, duplicate transcripts, positives at minimum
+effort, and agreement between two outcome signals where a dataset carries
+them. It proposes column roles rather than deciding them, and prints a
+census rather than findings, because the steps below are what turn one
+into the other. Directory-structured datasets need a bespoke freezer;
+`research/corpus/freeze_cogym.py` is the smallest worked example.
+
 ## The freeze: content-free, complete, refusing
 
 Add a spec to [research/corpus/freeze.py](../research/corpus/freeze.py) and

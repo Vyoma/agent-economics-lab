@@ -298,6 +298,7 @@ Everything else the project knows it gets wrong is in
 | [The instrument's scorecard](../research/EVALS.md) | how good the auditor is, blind spots included |
 | [Derivation](label-error.md) | the four propositions and their verification |
 | [Limitations](limitations.md) | every known non-claim |
+| [Corrections](corrections.md) | every time this project was wrong, and how it found out |
 | [Methodology](methodology.md) | how a decision is computed |
 | [Landscape](landscape.md) | prior art and the narrow delta |
 | [Modularity](modularity.md) | explicit composition and source adapters |
