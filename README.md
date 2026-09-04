@@ -117,7 +117,7 @@ upstream trajectory and of its transcript: `make outcome-audit`.
 
 This grew into a registry. [research/CORPUS.md](research/CORPUS.md) audits
 public trajectory datasets under one discipline, recording clean bills with
-the same care as defects. Six entries so far, including the official
+the same care as defects. Seven entries so far, including the official
 SWE-bench organisation's own training-trajectory release, where the labels
 prove self-consistent everywhere and the `patch` column proves not to be
 row-aligned — and one measurement the whole field has a stake in: a dataset

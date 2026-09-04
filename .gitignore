@@ -14,3 +14,5 @@ build/
 # strategy content are not part of the product.
 tasks/
 CLAUDE.local.md
+
+research/corpus/frozen/*.partial.json

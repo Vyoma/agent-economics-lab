@@ -145,6 +145,27 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
             published["invalid_kappa"], summary["invalid_kappa"], places=3
         )
 
+    def test_009_and_010_the_posttrainbench_figures(self) -> None:
+        from audit import posttrainbench_summary
+
+        summary = posttrainbench_summary()
+        nine = _figures("AEL-2026-009")
+        self.assertAlmostEqual(nine["pooled"], summary["pooled_difference"], places=3)
+        self.assertAlmostEqual(
+            nine["stratified"], summary["stratified_difference"], places=3
+        )
+        self.assertAlmostEqual(nine["overstatement"], summary["overstatement"], places=1)
+        self.assertEqual(
+            nine["helps_in"], summary["benchmarks_where_contamination_helps"]
+        )
+
+        ten = _figures("AEL-2026-010")
+        self.assertEqual(ten["rows"], summary["rows"])
+        self.assertEqual(ten["no_metrics_file"], summary["no_metrics_file"])
+        self.assertEqual(ten["malformed_metrics"], summary["malformed_metrics"])
+        self.assertEqual(ten["unusable"], summary["unusable_accuracy"])
+        self.assertEqual(ten["unjudged"], summary["unjudged"])
+
     def test_the_recomputation_fires_on_a_doctored_figure(self) -> None:
         """Proven non-vacuous: move one published number, watch it fail."""
         from unittest import mock

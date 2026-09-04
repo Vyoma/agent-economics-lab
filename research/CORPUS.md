@@ -25,6 +25,7 @@ vendor published, and nothing here is a measurement of a model.
 |---|---|---:|---|
 | [tarsur385/swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories) | `b55979d6` | 5,000 | 1 of 10 arms never confirmed by its cross-check; one duplicated arm pair, labels 91.2% self-consistent ([full audit](OUTCOME_AUDIT.md)) |
 | [togethercomputer/CoderForge-Preview-32B…](https://huggingface.co/datasets/togethercomputer/CoderForge-Preview-32B-SWE-Bench-Verified-Evaluation-trajectories) | `753f0504` | 500 | clean: reward re-derives from the raw logs on all 434 parseable rows |
+| [aisa-group/PostTrainBench-Trajectories](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) | `39d3fcd7` | 1,842 | 260 runs carry no usable outcome; the contamination judge's apparent effect on scores is 12x smaller once benchmark composition is held fixed |
 | [SWE-bench/SWE-smith-trajectories](https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) | `08e109b4` | 76,002 | labels self-consistent across every duplicate; the `patch` column is not row-aligned (266 verbatim cross-repository patch groups); 2,255 duplicate rows in one split |
 | [nebius/SWE-agent-trajectories](https://huggingface.co/datasets/nebius/SWE-agent-trajectories) | `68195a14` | 80,036 | clean: every coherence probe passes; resolved rows always carry a patch and evaluation logs; no duplicate transcripts |
 | [nebius/SWE-rebench-openhands-trajectories](https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) | `35455389` | 67,074 | clean labels; its recorded generated-test signal measures kappa 0.06 against adjudication over 31,389 runs |
@@ -52,6 +53,62 @@ UNPARSED, never a finding.
 
 Outcome census: {'0.0': 203, '1.0': 297}. No duplicate
 transcripts. No positive outcome on a run of one step or fewer.
+
+## aisa-group/PostTrainBench-Trajectories, 1,842 autonomous runs
+
+The most-downloaded agent-trajectory dataset on the hub, and the
+only entry here that is not a table. Each row is a run in which an
+agent was given a base model, an evaluation script and ten hours on
+an H100, and had to make the model better: the open-ended shape the
+field keeps proposing as the successor to benchmarks. Three
+independent signals per run make it auditable - a measured accuracy
+from the evaluation script, an LLM judge's verdict on whether the
+agent contaminated its training data, and a wall clock against a
+priced budget.
+
+**A finding that does not survive its own stratification.**
+Contaminated runs score far better than clean ones:
+a pooled difference of +0.209 accuracy.
+Published as it stands, that is a headline about cheating paying
+twenty points. It is mostly composition. Contamination is not
+spread evenly: 39% of `bfcl`
+runs are flagged, 47% of all
+contamination sits there, and `bfcl` has a
+clean-run mean of 0.673 against a corpus
+where most benchmarks sit near 0.2. Pooling therefore credits that
+benchmark's easiness to contamination. Holding benchmark fixed and
+weighting by size, the difference is
++0.018 - smaller by a factor of
+12 - and contaminated runs beat clean ones
+in only 2 of
+5 benchmarks with enough of both to
+compare. The honest statement is that this dataset does not show
+contamination reliably paying, and that anyone computing the pooled
+number gets an answer eleven times too large.
+
+**What is missing, counted rather than dropped.**
+208 runs ship no metrics file and
+52 ship one that is not valid JSON, so
+260 of 1,842 runs
+(14.1%) carry no usable
+outcome at all. A further 331 runs carry no
+contamination verdict, so they are neither clean nor flagged; a
+leaderboard built from this dataset has to decide what to do with
+them, and the dataset does not say.
+
+**The judge is an instrument, and nothing here validates it.**
+It flags 176 of 1,511 judged runs as
+contaminated and 2 as having trained a
+disallowed base model. Those verdicts govern whether a run counts.
+No agreement measurement against human adjudication ships with the
+dataset, so the flags are unvalidated in exactly the way
+[AEL-2026-008](FINDINGS.md) measured elsewhere. This is a gap in
+what can be established, not a claim that the judge is wrong.
+
+Median run length is 7.3 hours of H100 time
+against a ten-hour cap. Evidence:
+[frozen/posttrainbench.json](corpus/frozen/posttrainbench.json);
+every figure recomputes offline with `make corpus`.
 
 ## SWE-bench/SWE-smith-trajectories, three splits, 76,002 rows
 

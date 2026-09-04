@@ -228,14 +228,22 @@ class EveryFigureRecomputes(unittest.TestCase):
 
 
 class TheRegistrySentenceIsBound(unittest.TestCase):
-    def test_six_entries_matches_the_registry(self) -> None:
-        """"Six entries" shares a numeral word with the worked example's six
-        gates, so the walk alone cannot tell them apart; bind the count to
-        the registry table itself."""
+    #: Spelled counts evade the numeral walk, so the registry sentence is
+    #: bound by name instead. Derived, not hardcoded: pinning the constant
+    #: meant every new audit failed this test for saying something true.
+    _WORDS = {
+        5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten",
+    }
+
+    def test_the_entry_count_matches_the_registry(self) -> None:
         corpus = (ROOT / "research" / "CORPUS.md").read_text(encoding="utf-8")
         rows = re.findall(r"^\| \[[^]]+\]\(https://huggingface", corpus, re.M)
-        self.assertEqual(len(rows), 6)
-        self.assertIn("Six entries so far", _readme())
+        expected = f"{self._WORDS[len(rows)]} entries so far"
+        self.assertIn(
+            expected, _readme(),
+            f"CORPUS.md lists {len(rows)} datasets; the README's registry "
+            "sentence must say so",
+        )
 
 
 class TheProbeAccountingAgrees(unittest.TestCase):
