@@ -18,6 +18,7 @@ the evidence it summarises.
 | Does anything vanish on the way in? | every source unit in each of the four ingestion paths, cited by a decoded entity or named as excluded | 0 of 57 units orphaned; session-tree spend reconciles to the bundle with residual 0/0 tokens | the repository's own fixtures, which are small and were written here; it is conservation, not field-level fidelity |
 | How good is the shipped judge (`kimi-judge@1`)? | agreement with hand-authored rubric-derived labels, 25 constructed cases | 95.8% agreement, 0% false-accept (eval-version 1) | not accuracy against production ground truth; constructed cases are easier than real ones, and the later 100% run is excluded here because the set was edited after seeing this judge |
 | Does the rendered case keep what decided it? | completeness of `renderer.markdown@1` and `renderer.json@1` against a case with simultaneous breaches | every breach, check id, status, failure route and both digests reach the page; proven non-vacuous by stripping both carriers | the information is present, not that a reader draws the right conclusion from it; and it is one constructed case, not every shape a case can take |
+| Does a comparison report keep every arm and refusal? | completeness of `renderer.frontier-markdown@1`, `renderer.frontier-json@1` and `renderer.frontier-svg@1` against the frozen four-arm case | every arm named, every refusal carrying its reason, both digests per arm, the post-selection caveat intact, and the chart plotting exactly as many points as there are arms | structural presence only: whether a chart misleads a human eye is not something a test decides |
 | Are the frontier statistics right? | Clopper-Pearson bound against its closed form, plus distribution and monotonicity properties | exact to 9 decimal places across every tested trial size and alpha (`tests/test_frontier_statistics.py`) | the statistical kernel only; the frozen frontier study itself is synthetic and labelled so in its protocol |
 
 ## What is not measured
@@ -29,9 +30,6 @@ with what closing it would take:
 
 - **`experiment.paired-budget-frontier@1`** - its statistical kernel is verified against closed forms (row above), but the frozen study is synthetic. Its protocol names the exit criterion: a permissioned matched-task study from a real workflow, three or more configurations, 100+ paired task digests, and an independent reproduction.
 - **`kimi-analyst@1`** - no evaluation at all. It recommends fixes from a decided case, and nothing measures whether the recommendations are sound. Closing it means a labelled set of decided cases with expert remediations to score against - the same shape as the judge eval, which does not exist yet.
-- **`renderer.frontier-json@1`** - byte-compared only. Closing it means a schema assertion over the emitted document, not one fixture diff.
-- **`renderer.frontier-markdown@1`** - byte-compared only. Closing it means asserting the rendered comparison names every arm the case decided over.
-- **`renderer.frontier-svg@1`** - byte-compared only. An SVG that renders misleadingly would pass.
 
 ## Reading it honestly
 
