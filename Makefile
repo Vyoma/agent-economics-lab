@@ -147,17 +147,23 @@ docs-sync: check-python
 	@$(PYTHON) research/corpus/audit.py > research/CORPUS.md
 	@$(PYTHON) research/adapter_fidelity.py > research/ADAPTER_FIDELITY.md
 	@$(PYTHON) research/findings.py > research/FINDINGS.md
+	@$(PYTHON) research/patterns.py > research/PATTERNS.md
 	@$(PYTHON) research/evals.py > research/EVALS.md
 	@$(PYTHON) research/outcome_audit.py > research/OUTCOME_AUDIT.md
 	@$(PYTHON) bench/render.py > docs/at-scale.md
 	@$(PYTHON) scripts/sync_test_count.py
 
 gate: docs-sync test ledger
-	@git diff --quiet -- research/PROBE_SITES.md research/CORPUS.md 	  research/EVALS.md research/OUTCOME_AUDIT.md docs/at-scale.md research/ADAPTER_FIDELITY.md research/FINDINGS.md 	  docs/index.md || { 	  echo "docs-sync updated generated artifacts; review and commit them:"; 	  git --no-pager diff --stat -- research/PROBE_SITES.md 	    research/CORPUS.md research/EVALS.md research/OUTCOME_AUDIT.md 	    docs/at-scale.md research/ADAPTER_FIDELITY.md research/FINDINGS.md docs/index.md; exit 1; }
+	@git diff --quiet -- research/PROBE_SITES.md research/CORPUS.md 	  research/EVALS.md research/OUTCOME_AUDIT.md docs/at-scale.md research/ADAPTER_FIDELITY.md research/FINDINGS.md research/PATTERNS.md 	  docs/index.md || { 	  echo "docs-sync updated generated artifacts; review and commit them:"; 	  git --no-pager diff --stat -- research/PROBE_SITES.md 	    research/CORPUS.md research/EVALS.md research/OUTCOME_AUDIT.md 	    docs/at-scale.md research/ADAPTER_FIDELITY.md research/FINDINGS.md research/PATTERNS.md docs/index.md; exit 1; }
 
 hooks:
 	@git config core.hooksPath .githooks
 	@echo "pre-push now runs: make gate"
+
+# What eight audits say together: computed, and refusing to generalise.
+patterns: check-python
+	@$(PYTHON) research/patterns.py > /tmp/agent-economics-patterns.md
+	@cmp /tmp/agent-economics-patterns.md research/PATTERNS.md
 
 # The citable index of what the audits found: stable ids, priority dates.
 findings: check-python
@@ -320,7 +326,7 @@ public-case: check-python
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit corpus findings adapter-fidelity evals
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit corpus findings patterns adapter-fidelity evals
 
 lessons: check-python
 # Without set -e the loop reports only the LAST lesson's exit status, so a
