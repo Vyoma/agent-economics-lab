@@ -8,6 +8,10 @@ is a result, recorded with the same care as a defect; an auditor that
 only ever finds problems is indistinguishable from one that
 manufactures them.
 
+Every result here is also in the [findings index](FINDINGS.md), one
+citable line each with a stable identifier, a priority date, and the
+command that checks it.
+
 Entries are open to third parties under one written contract:
 [contributing an audit](../docs/contributing-an-audit.md). An entry
 that satisfies it gets merged no matter who submits it; one that
