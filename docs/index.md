@@ -235,7 +235,7 @@ against 588 `INCOMPLETE`s from a fixed contract. That is a deterministic fixture
 make demo
 ```
 
-Zero dependencies beyond the standard library. Apache-2.0. 766 tests on Python 3.10
+Zero dependencies beyond the standard library. Apache-2.0. 773 tests on Python 3.10
 through 3.13.
 
 ## Measurements that cannot fail
@@ -257,7 +257,7 @@ The same system reports p95 task cost. On the bundled demo it prints a p95 of $1
 maximum of $14.25, because `ceil(0.95n)` is `n` for any workload under twenty tasks. One
 number wearing two names, failing a tail-risk gate.
 
-Neither was caught by 766 tests. Tests check that code does what you specified; they say
+Neither was caught by 773 tests. Tests check that code does what you specified; they say
 nothing about whether what you specified can produce a bad number. The check that would
 have caught both takes seconds:
 

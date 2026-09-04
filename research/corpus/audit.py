@@ -190,6 +190,71 @@ def nebius_openhands_summary() -> dict:
     }
 
 
+RATINGS = ("outcomeRating", "agentRating", "communicationRating")
+
+
+def cogym_summary() -> dict:
+    """Human ratings: coverage, and how far apart one person's answers run."""
+    import itertools
+    import statistics
+    from collections import Counter
+
+    document = _load("cogym")
+    rows = document["rows"]
+
+    def agreement(first: str, second: str) -> dict:
+        both = [
+            (r[first], r[second]) for r in rows
+            if r[first] is not None and r[second] is not None
+        ]
+        categories = sorted({v for pair in both for v in pair})
+        n = len(both)
+        observed = Counter(both)
+        marginal_a = Counter(a for a, _ in both)
+        marginal_b = Counter(b for _, b in both)
+        span = (max(categories) - min(categories)) ** 2
+        numerator = sum(
+            ((i - j) ** 2 / span) * observed.get((i, j), 0)
+            for i in categories for j in categories
+        )
+        denominator = sum(
+            ((i - j) ** 2 / span) * marginal_a[i] * marginal_b[j] / n
+            for i in categories for j in categories
+        )
+        return {
+            "n": n,
+            "exact": sum(1 for a, b in both if a == b) / n,
+            "mean_absolute_difference": statistics.mean(
+                abs(a - b) for a, b in both
+            ),
+            "two_or_more_apart": sum(1 for a, b in both if abs(a - b) >= 2) / n,
+            # Quadratic-weighted, the standard for ordinal ratings: a
+            # one-point gap should not count the same as a four-point one.
+            "qwk": 1 - numerator / denominator if denominator else float("nan"),
+        }
+
+    pairs = {
+        f"{a}|{b}": agreement(a, b)
+        for a, b in itertools.combinations(RATINGS, 2)
+    }
+    short = [
+        r for r in rows if r["event_count"] <= 3 and r["agentRating"] is not None
+    ]
+    return {
+        "revision": document["revision"],
+        "rows": len(rows),
+        "tasks": dict(Counter(r["task"] for r in rows)),
+        "coverage": {
+            key: sum(1 for r in rows if r[key] is not None) for key in RATINGS
+        },
+        "pairs": pairs,
+        "short_sessions": len(short),
+        "short_mean_rating": (
+            statistics.mean(r["agentRating"] for r in short) if short else None
+        ),
+    }
+
+
 def posttrainbench_summary() -> dict:
     """Every published number for the PostTrainBench entry."""
     import statistics
@@ -381,6 +446,7 @@ def render() -> str:
     tarsur = _tarsur_summary()
     smith = swesmith_summary()
     ptb = posttrainbench_summary()
+    cogym = cogym_summary()
     sweagent = nebius_sweagent_summary()
     openhands = nebius_openhands_summary()
 
@@ -436,6 +502,15 @@ def render() -> str:
             f"| `{coderforge['revision'][:8]}` | {len(coderforge['rows'])} "
             "| clean: reward re-derives from the raw logs on all "
             f"{cf_re['parsed']} parseable rows |"
+        ),
+        (
+            "| [SALT-NLP/cogym-real-trajectories]"
+            "(https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) "
+            f"| `{cogym['revision'][:8]}` | {cogym['rows']} "
+            "| the only human-rated entry: one person's ratings of one "
+            f"session agree exactly {cogym['pairs']['outcomeRating|agentRating']['exact']:.0%} "
+            "of the time, and the communication rating exists on "
+            f"{cogym['coverage']['communicationRating'] / cogym['rows']:.0%} of sessions |"
         ),
         (
             "| [aisa-group/PostTrainBench-Trajectories]"
@@ -502,6 +577,69 @@ def render() -> str:
         "",
         f"Outcome census: {dict(sorted(cf_census.items()))}. No duplicate",
         "transcripts. No positive outcome on a run of one step or fewer.",
+        "",
+        "## SALT-NLP/cogym-real-trajectories, "
+        f"{cogym['rows']} human-agent sessions",
+        "",
+        "Every other entry here audits a coding agent, and every outcome",
+        "instrument in them is automated: a cross-check column, a",
+        "re-adjudication from logs, model-generated tests, an LLM judge.",
+        "This is neither. 228 real human-agent collaboration sessions across",
+        f"{', '.join(sorted(cogym['tasks']))}, where the outcome labels were",
+        "typed by the person who was in the session. It is the one entry",
+        "whose instrument is the thing every other instrument gets validated",
+        "against.",
+        "",
+        "**What a rating covers.** Overall satisfaction is on every session,",
+        "the artifact rating on "
+        f"{cogym['coverage']['outcomeRating'] / cogym['rows']:.0%}, and the",
+        "communication rating on only "
+        f"{cogym['coverage']['communicationRating'] / cogym['rows']:.0%} - "
+        f"{cogym['coverage']['communicationRating']} sessions, not 228. A",
+        "reader computing communication quality from this dataset is",
+        "computing it over a fifth of it, and the schema does not say so.",
+        "",
+        "**How far apart one person's answers run.** These are different",
+        "questions, so they are not expected to match, and this is emphatically",
+        "not a test-retest measurement: nobody was asked the same thing twice.",
+        "What it bounds is how much a single number labelled \"the human",
+        "rating\" can carry.",
+        "",
+        "| pair | n | exact | mean gap | 2+ apart | quadratic-weighted kappa |",
+        "|---|---:|---:|---:|---:|---:|",
+    ]
+    for key, stats in cogym["pairs"].items():
+        first, second = key.split("|")
+        lines.append(
+            f"| {first} vs {second} | {stats['n']} "
+            f"| {stats['exact']:.0%} | {stats['mean_absolute_difference']:.2f} "
+            f"| {stats['two_or_more_apart']:.0%} | {stats['qwk']:.3f} |"
+        )
+    lines += [
+        "",
+        "The artifact rating and overall satisfaction, the two closest of the",
+        "three, land at quadratic-weighted kappa "
+        f"{cogym['pairs']['outcomeRating|agentRating']['qwk']:.3f} - just",
+        "above the 0.60 floor this package demands of an automated outcome",
+        "instrument before it will issue a green decision, and they disagree",
+        "by two points or more on "
+        f"{cogym['pairs']['outcomeRating|agentRating']['two_or_more_apart']:.0%}",
+        "of sessions. The point is not that people are unreliable. It is that",
+        "human judgement of one session is several numbers rather than one,",
+        "so any instrument validated against \"human agreement\" inherits",
+        "whichever question was asked, and datasets rarely record which.",
+        "",
+        "**A suspicion that died at base rate**, recorded because the",
+        "pipeline is supposed to kill these before they are published: very",
+        "short sessions rated highly would suggest satisfaction untethered",
+        f"from work done. There are {cogym['short_sessions']} sessions of",
+        "three events or fewer, mean rating "
+        f"{cogym['short_mean_rating']:.1f}. Four sessions establish nothing.",
+        "",
+        "Evidence: [frozen/cogym.json](corpus/frozen/cogym.json), content-free",
+        "and more carefully than usual because these are real people - "
+        "ratings, counts and hashes, never the query, the feedback text, or",
+        "the event log.",
         "",
         "## aisa-group/PostTrainBench-Trajectories, "
         f"{ptb['rows']:,} autonomous runs",

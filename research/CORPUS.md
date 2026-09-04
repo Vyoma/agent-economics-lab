@@ -25,6 +25,7 @@ vendor published, and nothing here is a measurement of a model.
 |---|---|---:|---|
 | [tarsur385/swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories) | `b55979d6` | 5,000 | 1 of 10 arms never confirmed by its cross-check; one duplicated arm pair, labels 91.2% self-consistent ([full audit](OUTCOME_AUDIT.md)) |
 | [togethercomputer/CoderForge-Preview-32B…](https://huggingface.co/datasets/togethercomputer/CoderForge-Preview-32B-SWE-Bench-Verified-Evaluation-trajectories) | `753f0504` | 500 | clean: reward re-derives from the raw logs on all 434 parseable rows |
+| [SALT-NLP/cogym-real-trajectories](https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) | `729096dc` | 228 | the only human-rated entry: one person's ratings of one session agree exactly 50% of the time, and the communication rating exists on 22% of sessions |
 | [aisa-group/PostTrainBench-Trajectories](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) | `39d3fcd7` | 1,842 | 260 runs carry no usable outcome; the contamination judge's apparent effect on scores is 12x smaller once benchmark composition is held fixed |
 | [SWE-bench/SWE-smith-trajectories](https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) | `08e109b4` | 76,002 | labels self-consistent across every duplicate; the `patch` column is not row-aligned (266 verbatim cross-repository patch groups); 2,255 duplicate rows in one split |
 | [nebius/SWE-agent-trajectories](https://huggingface.co/datasets/nebius/SWE-agent-trajectories) | `68195a14` | 80,036 | clean: every coherence probe passes; resolved rows always carry a patch and evaluation logs; no duplicate transcripts |
@@ -53,6 +54,55 @@ UNPARSED, never a finding.
 
 Outcome census: {'0.0': 203, '1.0': 297}. No duplicate
 transcripts. No positive outcome on a run of one step or fewer.
+
+## SALT-NLP/cogym-real-trajectories, 228 human-agent sessions
+
+Every other entry here audits a coding agent, and every outcome
+instrument in them is automated: a cross-check column, a
+re-adjudication from logs, model-generated tests, an LLM judge.
+This is neither. 228 real human-agent collaboration sessions across
+related_work, tabular_analysis, travel_planning, where the outcome labels were
+typed by the person who was in the session. It is the one entry
+whose instrument is the thing every other instrument gets validated
+against.
+
+**What a rating covers.** Overall satisfaction is on every session,
+the artifact rating on 84%, and the
+communication rating on only 22% - 50 sessions, not 228. A
+reader computing communication quality from this dataset is
+computing it over a fifth of it, and the schema does not say so.
+
+**How far apart one person's answers run.** These are different
+questions, so they are not expected to match, and this is emphatically
+not a test-retest measurement: nobody was asked the same thing twice.
+What it bounds is how much a single number labelled "the human
+rating" can carry.
+
+| pair | n | exact | mean gap | 2+ apart | quadratic-weighted kappa |
+|---|---:|---:|---:|---:|---:|
+| outcomeRating vs agentRating | 191 | 50% | 0.60 | 9% | 0.625 |
+| outcomeRating vs communicationRating | 50 | 52% | 0.68 | 14% | 0.515 |
+| agentRating vs communicationRating | 50 | 42% | 0.70 | 12% | 0.639 |
+
+The artifact rating and overall satisfaction, the two closest of the
+three, land at quadratic-weighted kappa 0.625 - just
+above the 0.60 floor this package demands of an automated outcome
+instrument before it will issue a green decision, and they disagree
+by two points or more on 9%
+of sessions. The point is not that people are unreliable. It is that
+human judgement of one session is several numbers rather than one,
+so any instrument validated against "human agreement" inherits
+whichever question was asked, and datasets rarely record which.
+
+**A suspicion that died at base rate**, recorded because the
+pipeline is supposed to kill these before they are published: very
+short sessions rated highly would suggest satisfaction untethered
+from work done. There are 4 sessions of
+three events or fewer, mean rating 3.0. Four sessions establish nothing.
+
+Evidence: [frozen/cogym.json](corpus/frozen/cogym.json), content-free
+and more carefully than usual because these are real people - ratings, counts and hashes, never the query, the feedback text, or
+the event log.
 
 ## aisa-group/PostTrainBench-Trajectories, 1,842 autonomous runs
 
