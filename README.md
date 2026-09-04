@@ -34,7 +34,8 @@ and the discipline that keeps its own numbers honest.
 | what eight audits say together | [the patterns](research/PATTERNS.md), and what they do not establish |
 | run it in one second | [Start here](#start-here) |
 | check a claim without trusting me | [Check this repository](#check-this-repository-without-trusting-it) |
-| what it gets wrong | [the honest limits](docs/limitations.md), four claims of ours that did not survive audit |
+| what it gets wrong | [the honest limits](docs/limitations.md), what the tool cannot claim |
+| when it was wrong | [every correction](docs/corrections.md), including the suspicions killed before publication |
 | whether it is new | [prior art and the narrow delta](docs/landscape.md) |
 | whether it survives a fleet | [the measured envelope](docs/at-scale.md), linear to a million events |
 | how good the auditor is | [the instrument's scorecard](research/EVALS.md), every shipped capability measured or named unmeasured |

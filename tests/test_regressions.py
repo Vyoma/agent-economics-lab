@@ -575,3 +575,50 @@ class DocumentedExamplesMatchTheShippedFiles(unittest.TestCase):
             sorted(documented["arms"]), sorted(shipped["arms"]),
             "the documented arm list must be the shipped one",
         )
+
+
+class TheCorrectionsPageStaysHonest(unittest.TestCase):
+    """A page of self-criticism is worth exactly its verifiability.
+
+    Every entry names a file so the reader does not have to take it on
+    trust; a dead pointer turns the most credibility-sensitive page in the
+    repository into an unfalsifiable claim about the author's honesty.
+    """
+
+    def _page(self) -> str:
+        return (ROOT / "docs" / "corrections.md").read_text(encoding="utf-8")
+
+    def test_every_referenced_file_exists(self) -> None:
+        import re
+
+        page = self._page()
+        targets = re.findall(r"\]\((\.\./[^)#]+|[A-Za-z][\w./-]+\.md)\)", page)
+        self.assertGreater(len(targets), 8, "the page must cite its sources")
+        for target in targets:
+            with self.subTest(target=target):
+                self.assertTrue(
+                    (ROOT / "docs" / target).resolve().exists(),
+                    f"corrections.md points at {target}, which does not exist",
+                )
+
+    def test_every_inline_code_path_exists(self) -> None:
+        """Backticked paths are claims too."""
+        import re
+
+        for path in re.findall(r"`((?:tests|research|docs)/[\w./-]+\.py)`",
+                               self._page()):
+            with self.subTest(path=path):
+                self.assertTrue((ROOT / path).exists())
+
+    def test_it_states_what_it_does_not_establish(self) -> None:
+        """Without this the page reads as a reliability claim, which is
+        the opposite of what a list of caught errors supports."""
+        page = self._page()
+        self.assertIn("What this page does not do", page)
+        self.assertIn("not about what remains uncaught", page)
+
+    def test_it_keeps_the_killed_suspicions(self) -> None:
+        """Findings that died before publication are the calibration
+        evidence; a page of only-defects reads as a confession."""
+        self.assertIn("Suspicions killed before they were published",
+                      self._page())
