@@ -4,7 +4,7 @@ Every audit result this project has published, with a stable
 identifier, the date it was first published, the command that checks
 it, and the scope it does not claim.
 
-**13 standing: 6 defects, 5 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
+**14 standing: 6 defects, 6 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
 an auditor that only ever finds problems is indistinguishable from
 one that manufactures them.
 
@@ -29,6 +29,7 @@ evidence and fails the build if the two ever disagree.
 | `AEL-2026-011` | 2026-09-03 | measurement | `cogym-real-trajectories` | Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time... |
 | `AEL-2026-012` | 2026-09-03 | defect | `cogym-real-trajectories` | The communication rating is present on 50 of 228 sessions and the artifact rating on 191; only overall satisfaction is on every session |
 | `AEL-2026-013` | 2026-09-03 | measurement | `HLE-Verifications` | Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity's Last Exam questions, against correctness established by... |
+| `AEL-2026-014` | 2026-09-04 | measurement | `OpenR1-Math-220k` | The default split ships two verification columns on the same generations: correctness_math_verify, a symbolic check against the published answer,... |
 
 ## The findings in full
 
@@ -161,6 +162,16 @@ Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity
 **Check it.** `make corpus`
 
 **What it does not claim.** AUC is threshold-free and therefore the most favourable reading available, since the scoring rubric is not published and any threshold would be a choice about generosity. All responses come from one model, so this measures graders on that model's output rather than in general. Ground truth is exact matching against a published answer with a model used to parse answer formats: checkable, but not untouched by a model. HLE is adversarially hard by construction, and grading hard problems is harder. This is not a claim that model graders are useless everywhere, only that on two datasets in two domains none has cleared the floor this package requires.
+
+### AEL-2026-014 - measurement, 2026-09-04
+
+**Dataset.** [`open-r1/OpenR1-Math-220k`](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) at `e4e141ec`
+
+The default split ships two verification columns on the same generations: correctness_math_verify, a symbolic check against the published answer, and correctness_llama, a 70B model judge. They cannot be compared with each other, because the judge was run only on rows where the symbolic check had already found nothing correct: across all 28,627 rows carrying both columns, not one has a single symbolically correct generation. The filtering field correctness_count equals the judge's count on every one of those rows and the symbolic count on every one of the other 65,106, without exception. So 28,627 problems, 30.5% of this published training set, are present only because a model judge overruled a checker that had rejected every candidate, and the shipped columns leave no way to audit that judgment against the checkable signal sitting beside it. The judge accepted 75.7% of the generations the symbolic check rejected, a rate flat across every source stratum.
+
+**Check it.** `make corpus`
+
+**What it does not claim.** This is a claim about provenance, not about accuracy. It does not establish that the judge is wrong. A symbolic checker that cannot parse a valid answer and a judge that waves through an invalid one produce identical columns, and separating them needs the answers themselves. A verification pass re-fetched 398 admitted generations at the pinned revision, every shard checked against the freeze's own SHA-256, and found only 18 where the boxed answer and the published answer both reduce to a single unambiguous number and disagree. Most of the remaining gap is answer-format heterogeneity, a boxed multiple-choice letter against a published value or a published answer carrying several roots at once, which is itself the likeliest reason the symbolic check failed on these rows. That parser is a third instrument in the room, and this project has already published a re-adjudicator whose 186 disagreements were every one its own blindness, so its mismatches are reported as unresolved and never as judge errors. The fallback design is documented by the dataset's authors and is a reasonable answer to a checker that cannot parse every valid form; what is measured here is that its result is unauditable from the columns as shipped.
 
 ## Citing one
 

@@ -29,6 +29,7 @@ vendor published, and nothing here is a measurement of a model.
 | [tarsur385/swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories) | `b55979d6` | 5,000 | 1 of 10 arms never confirmed by its cross-check; one duplicated arm pair, labels 91.2% self-consistent ([full audit](OUTCOME_AUDIT.md)) |
 | [togethercomputer/CoderForge-Preview-32B…](https://huggingface.co/datasets/togethercomputer/CoderForge-Preview-32B-SWE-Bench-Verified-Evaluation-trajectories) | `753f0504` | 500 | clean: reward re-derives from the raw logs on all 434 parseable rows |
 | [FUSE-verifiers/HLE-Verifications](https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) | `e838b3dd` | 649 | seven models asked to verify correctness reach AUC 0.501 to 0.653 against a checkable answer over 32,450 responses |
+| [open-r1/OpenR1-Math-220k](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) | `e4e141ec` | 93,733 | 28,627 problems entered the published training set on a model judge's word alone, on rows where the symbolic checker had found nothing correct |
 | [SALT-NLP/cogym-real-trajectories](https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) | `729096dc` | 228 | the only human-rated entry: one person's ratings of one session agree exactly 50% of the time, and the communication rating exists on 22% of sessions |
 | [aisa-group/PostTrainBench-Trajectories](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) | `39d3fcd7` | 1,842 | 260 runs carry no usable outcome; the contamination judge's apparent effect on scores is 11.5x smaller once benchmark composition is held fixed |
 | [SWE-bench/SWE-smith-trajectories](https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) | `08e109b4` | 76,002 | labels self-consistent across every duplicate; the `patch` column is not row-aligned (266 verbatim cross-repository patch groups); 2,255 duplicate rows in one split |
@@ -115,6 +116,75 @@ silently truncated to the shorter list.
 
 Evidence: [frozen/hle-verifiers.json](corpus/frozen/hle-verifiers.json),
 content-free, carrying the SHA-256 of the source file it read.
+
+## open-r1/OpenR1-Math-220k, 93,733 problems in a published training set
+
+The two entries above needed a rare kind of dataset, one shipping a
+proxy signal and a checkable one on the same rows. This dataset
+appears to be a third. It carries `correctness_math_verify`, a
+symbolic check against the published answer, and
+`correctness_llama`, a 70B model asked the same question, both
+attached to the same generations.
+
+They cannot be compared. The judge was run only where the symbolic
+check had already found nothing correct, and the freeze bears that
+out exactly: across the 28,627 rows carrying both columns, the
+number with even one symbolically correct generation is
+0. The symbolic column is constant there, and a constant
+agrees with everything at chance. A first pass computed Cohen's
+kappa over these rows, got -0.000, and nearly published it.
+
+What survives is structural, and it matters more than the statistic
+would have. This is training data, not an evaluation. The filtering
+field `correctness_count` equals the judge's count on all
+28,627 dual-signal rows and the symbolic count on all
+65,106 others, without exception. So 28,627 problems,
+30.5% of the published set, are present only because the
+judge overruled a checker that had rejected every candidate. The
+judge accepted 42,271 of 55,808 rejected generations,
+75.7% (95% CI 75.4% to 76.0%, bootstrapped over
+problems, since generations cluster inside them). The rate is flat
+across every source stratum, 74.9% to 79.5%, so it is not one
+problem set's quirk.
+
+This is not evidence that the judge is wrong. A symbolic checker
+that cannot parse a valid answer and a judge that waves through an
+invalid one produce the same two columns. Distinguishing them needs
+the answers themselves, so a verification pass re-fetched
+398 admitted generations, selected by hash rank,
+every shard checked against the SHA-256 the freeze recorded, and
+compared the final boxed answer with the published one:
+
+- choice letter against value: 158
+- published answer multivalued: 133
+- unresolved other: 86
+- both numeric and differ: 18
+- matches published answer: 2
+- no boxed answer: 1
+
+It does not settle the question, and it is reported as failing to.
+Most of the gap is shape rather than substance: a generation boxing
+a multiple-choice letter against a published value, or a published
+answer carrying several roots at once. Only 18 of
+398, 4.5%, put an unambiguous number on both
+sides and disagree, and answer-format heterogeneity is itself the
+likeliest reason the symbolic check failed here to begin with.
+Only where both sides reduce
+to a single unambiguous number and differ does the comparison bear
+on the judge, and this project has already published a
+re-adjudicator whose 186 disagreements were every one its own
+parser's blindness, so the parser here is treated as the third
+instrument in the room rather than the referee.
+
+The finding is therefore about provenance, not accuracy: the
+correctness of a third of a widely used training set rests on an
+unaudited model judgment, and the shipped columns are arranged so
+that no one downloading it can audit that judgment against the
+checkable signal sitting beside it.
+
+Evidence: [frozen/openr1-math.json](corpus/frozen/openr1-math.json)
+and [frozen/openr1-math-answers.json](corpus/frozen/openr1-math-answers.json), content-free, carrying the
+SHA-256 of every parquet shard read.
 
 ## SALT-NLP/cogym-real-trajectories, 228 human-agent sessions
 

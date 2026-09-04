@@ -1,0 +1,1611 @@
+{
+  "dataset": "open-r1/OpenR1-Math-220k",
+  "parquet_revision": "b8459a71b5abbb41ea5904b3501d5ecf446e3290",
+  "selection": "sha256(uuid) rank, first judge-accepted generation",
+  "requested": 400,
+  "checked": 398,
+  "not_found": 0,
+  "verdicts": {
+    "both_numeric_and_differ": 18,
+    "choice_letter_against_value": 158,
+    "matches_published_answer": 2,
+    "no_boxed_answer": 1,
+    "published_answer_multivalued": 133,
+    "unresolved_other": 86
+  },
+  "rows": [
+    {
+      "id": "4f7fcb44-6ebf-569d-b702-d0b344feeef0",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "bf845144-6888-5d42-a853-bbf1f67086b1",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "46aba8ce-946d-5f21-854e-5e092883c7f4",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "75a3c347-b7d7-5064-ab17-c6895b558311",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "784a1a76-0e98-570a-b51d-c0f634b94767",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "c270630d-0aaa-5443-89f6-87435da6f261",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "6a6eb63a-ee09-5d8c-8ea1-b787519aeec5",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c6d4f82d-b2ac-5ec0-b8fc-97f6e7a52a77",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "9a2c5691-b28a-5716-878f-4529a5fd6a9b",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "ccd364ab-c049-56f0-ab3b-d033d3efd2f6",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "b2824b0e-d286-57c2-bac4-b04ca7d7387c",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "5ec2aaf5-bb0b-5065-b70d-7902c608277f",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "1d186f25-88cc-5c85-8a41-337840022ecc",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "9971786d-05d5-5284-826f-c53015b6ce95",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "5097c8f5-5d34-522f-9c33-f12fcd0af5ab",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "18ba6619-e0c9-5b08-a63a-afa81c2492bb",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "d7a599ee-ecc3-5619-bf66-90a3d27a6d0f",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "3979819b-9a21-5478-8415-407ac3c47cec",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "b2a30165-8f23-5573-baf6-2431a25dbbb6",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "6f1758f7-92aa-57ca-8d00-49b63de30146",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "45901d23-9760-5cd0-b262-8e85b17d9f24",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "cfae49b0-e00e-528e-90e7-8c848390da9e",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "38c32951-eabe-5045-bde6-f9f9e59652f8",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "31b05936-8a6e-51f4-9a26-101fcfb48ff6",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "66f2f85c-a256-5175-9d21-a965e8c032f7",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3bec9346-a52a-5bd5-bf27-5e51b4023389",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "836a258e-42e7-5a98-b4f5-f4d12ed4686e",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "9b081d9a-f8e2-5e1c-9043-f6741f980b3d",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "6dd9407c-c1a2-5d53-a1d5-6369761a0b26",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8d4f4ca1-0e5a-5d72-aa07-aedd8a134865",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "4209989c-0d6e-5c64-b614-52c3d07727b6",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "28c9d648-d93f-50b2-936b-7a2800f493ce",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "8be2f0a5-ae93-519a-ac03-147c3b3ecab1",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "5b08b00c-0c97-5dd6-8953-1e92fd06b108",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "d7fb4272-2084-5009-8b07-770552c188f7",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "d1dac546-521f-5c11-af29-df37c2ef60ac",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "1ba781a6-7822-5a94-be93-6bcfb4c11226",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "f1dc0ffb-1faa-513c-92ee-b4ae04bfaa28",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c7f5fac3-9dad-5e58-a27d-c8f4a891f833",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c7447f28-30be-5cca-bc67-20b68debcc19",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "4bb6fda1-26c0-580a-8af4-72fc2edc7a4c",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "998a7b60-4168-5065-a70b-7bf586c20335",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "aa26e962-2cea-5404-accc-d2508dc7c4ab",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "f008c326-26ba-5efe-87b2-70f88212000b",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "e0924b49-35b1-5b51-8a28-1c54b21f0f95",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "e74a7dfd-aadf-5e91-8441-2142c62cf953",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "1435e660-8ff9-51e5-82d7-5bf15133c1ed",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "2d361fef-ca97-57fa-884d-cfa6ae3ff29b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "dacb1c94-680b-547f-91d7-7f114164309b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0ce45b72-6f8e-521a-9a09-7408ac587810",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "839b5f5b-5289-55f0-a9a3-d99bfe85dea8",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3e7c4e7c-ce12-5fbb-a4e3-94233e13ee95",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "9f444e2d-612a-5b96-8267-8d934b13689a",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "a04c6029-3925-578d-be56-11995811a726",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "61fa7da9-5bc9-59ab-84ca-a7d9e05bf060",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "56891972-22c9-56cb-a9b1-9814d28dee75",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "a1d53824-80b1-5d72-afa8-01f0030167fe",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "276a5c3c-07e1-576f-81b2-b5364432ecb8",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "bd9fdfa6-3c77-57ee-9935-881b6496033b",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "079539fa-7b15-5adb-a232-c0b28643b1ce",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "fa670b5f-cb64-551e-99d5-5c082b499cd1",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "b4cafcb0-9912-5f32-bc7a-d8d332631832",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "78a0a3a3-ac34-52aa-9a10-20115b2f828a",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "459e3a26-46a1-5772-b4a6-21d4488e4fbc",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "4892977f-aebb-57ab-8a96-b24b68076733",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "146279ff-d43d-5d6a-b0e0-6cfb740f7df9",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "f48f23dc-2e77-5d95-af76-d9068bb61af1",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "18b52c78-f76f-51e8-ab13-c30efeecc136",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "e82f3e3d-3529-52d9-b8cc-bd2aea98c923",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "f302e7fc-627d-56f0-930b-c68d01b07af9",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c6587f4c-6d2c-5692-8351-00747f3051f6",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "edfba46e-4e79-52e9-b5fc-da9c184e105e",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "00e58d70-3b74-56db-8195-2e5ecc43487f",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "6ad42273-7e12-5fb9-94b6-87a6a3abfea0",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "14741271-bd9e-51f5-bc66-34cabb068f97",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c7eebef4-f329-5700-ae98-3a77240431db",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "321c91bb-ce02-5840-bf04-d14b5523ca4b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "b7c355bb-148c-5ed0-a415-7139dae92bbf",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "bce9cc1e-9748-5802-a0d4-c035824501d7",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "738f6cc5-f686-5b08-85e1-1f034b38f0e5",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8e82b67b-ded1-5c3d-9dd8-ffe59def1227",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "e0a095d8-65a2-566c-8a1c-88a66b632d18",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "fa8a114f-5f4b-567d-8310-ff3a8c33b985",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "3f9d69fb-bbdd-5c0e-8a93-81388e8d3bdd",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "d8720de1-ed65-597d-9d41-93a78e6036c6",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "15dee3ef-287e-5e52-97ef-181563753ef4",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "629a2c01-1618-5359-8bcd-e44aea3db9fd",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "fa6bd25e-efc8-504b-803c-c4f1bb9652de",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "a457e64e-af1f-53b9-b0c4-89c8bdf7098f",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "31c2e855-5187-55e2-8ab9-3f5395b248fd",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "e38b8f2d-1b9b-5ca6-afb0-4a7aba038129",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "ff9dbc51-76a4-56d8-9240-cd59a6c77d4b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "71c6a556-eb86-556f-89ae-6ddf06c49b62",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3100c6ef-8320-56c4-b5a5-89f5d7401748",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "4b2e329d-f538-567b-802c-6935a0c35bac",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "01f7862a-adea-512b-b8ce-e72b9a752678",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "ac40cbf3-b23c-5c0f-8032-5c11a578e028",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c5b977e7-49aa-58a2-9790-e11729bb75af",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "8f853505-4c47-5018-b4a2-07cc6b31c169",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c2b27039-fc90-537a-9a4c-3f6f67b5538a",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "7aefaea1-28e2-55e0-a601-c4be9aaf68ee",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "8b42686a-a877-5ccf-96cd-d7372f551b88",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "d4d82cb7-cf20-5ab8-97c1-b64bfbd6051d",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "eb059098-1db5-56e3-b9a1-3eafb1bd004b",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "d5a54962-f1a8-5dd2-ac59-ce48e48bdc40",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "03c9cd54-aaed-50f9-9599-20b05df22617",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "2ae74bda-e7c9-5ff3-8a92-6b254ed56047",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "fe68bb8e-b8e0-5612-8984-54969b44af46",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "e1327663-6025-5adc-822a-336608ae66fe",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "9904c121-8e69-537c-9aa8-6bca1c1387c5",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "f5e6ca34-0318-5039-ab0c-b5a041a441a0",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "4e1cf0bc-4854-5c6e-a2e2-ae880ef756c7",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "89bad861-66c0-5d3d-acf9-16513ad1cdce",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "b9cd41b8-fb53-5e68-ae45-7ecaede52305",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "58a0454f-cac4-5abb-9cdc-5d5ed8ad0bb4",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "1f8b6700-7495-55b7-ba96-a7127850751c",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "94138c59-0f95-5575-befe-619453b27cc4",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "833f2873-1a03-55fd-94e2-b37b494bffe4",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "a47ecb43-5eab-575f-98c5-87d3568977cc",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "f4d49213-b237-556c-8b04-0ce74e5a0d98",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "43baf736-95bc-5893-b4d3-77c84964ea30",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0d0d1451-f6e5-5e0c-bcf9-c88d94ca829d",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "bdd91591-d5ca-5566-ae66-2fbe038b59c5",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "2acd3424-be3c-5671-a0ac-168635409bab",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "af7c1d19-239e-5687-be14-9a5b950d927b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "1b091c30-7779-53ab-9932-b22546303730",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "0eead9cb-f818-52f9-8ca1-05e0b436aa50",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "542789a3-7725-5ea8-b199-04139f8dc650",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "98239bdc-94ca-5e78-b175-f93190e9a73e",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "a0f4b20d-cf67-53b6-be0e-cb511a5bd604",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c14aa135-c8db-5fb1-95c6-cdb58056ad56",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "b635564c-8b0f-5036-b95c-ca7d1fe6244d",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "1c4e0a79-e749-547d-afcd-aebd3aa402c2",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "b0e0a49f-3823-59c3-84ba-5c99c223c98c",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "d0552732-7cc9-5266-a1e4-3f6da183956c",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "9d903ea6-401a-52f9-80d3-813f2577e8ac",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "adc7d1ed-0518-544b-889d-b6fa2493125a",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "b6410ed4-7a67-5378-ac73-3d3807f6e7a5",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "4da5423a-8289-5940-b5e6-348e443082f1",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "93875591-c15a-5618-8ee7-16af04eba53a",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "fd6a7626-94a4-53e1-8572-c0ecec69a262",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "f7c28162-9abb-5fcf-a0eb-5deb800b7589",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3777bbd1-6f17-5453-a584-e6d754557fe8",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "a1461730-bc20-5582-9cbc-3936b3ab1822",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "6efa413e-b68c-57d7-b0e0-14586aeac4a3",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "b7111558-6719-563a-8f11-76fe0a6abff3",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "d8b60db0-5300-5aa5-a7bd-82bb19a4f70e",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "be6c1b6b-7b95-50cd-a6a7-9e012bf29edd",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "ae74d864-3c87-55b5-9bb1-e85ba11076e7",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "02e40ea0-4848-56ad-834b-053aa7379254",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0f893011-29b3-5741-bf22-8bc40d22a7dc",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "2c4251f2-210e-5279-b860-8573f75e9426",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "d22bcb99-5bf1-5bf8-b5ed-ca79634f6c6b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "12220546-f57d-565b-8d3e-665bf6e30cb7",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "5738e66d-4e2f-587e-8b05-f7afcb7a79be",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0966db24-467f-53ca-b71d-44f3ba75c15b",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "0ddab639-ff22-569b-8400-5ddee07ec155",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "5299815b-2771-5242-88c7-4551812bd511",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "05d6ced0-70f6-529f-970d-23f9d6493549",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "7f7e63bf-d6a4-569d-baf8-333bae97c6f8",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "82f88461-6c9d-5849-9998-533d5a656451",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "2e388856-182f-52a0-9642-8b6766ec6072",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c07cc27c-c952-5e0d-bc7a-e2d75c9545f7",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "7f813c65-531c-534e-902b-6fc668041836",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "9c3e984f-3cc2-5b59-bc26-abe3fe4cfff9",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "229fd4fc-c19c-5253-93ea-97249f791753",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "1f0ad94f-412e-5817-bc29-1fca2fe86f85",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "b49512fa-14ab-5199-906e-2b72ccc0254f",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8059e501-7af8-5684-9e9d-601e798317d9",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "ef39fba9-3a75-5230-b713-7505a667831b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "dff81a44-4d8f-57b3-bde0-e2a514a53fba",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "ff3387f9-374e-5d3c-933f-157b146eef47",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8016b56d-96d2-5003-b8f4-81cb1c47329b",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c0fa6fac-0721-5234-9ba2-1f8b8af6f26d",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "762c5a57-e99b-5ba3-9ef0-260e92871f95",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "b3766cd9-1be2-5bbf-93fe-3a08f8a4ee34",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "71794282-df8a-5f37-8e88-4355ae15a129",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "cb003429-e557-5dc0-a65b-96b6da8fc3a1",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "547e09f9-d260-5dc5-969a-91103908e729",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c60ecbf8-b53e-5b2d-9dc4-38b19a280647",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "e7269d44-8df6-5c93-8b9a-fb2c9c4ed13c",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "84bc66d6-0834-516e-aed4-ba1e68df0df8",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "cfc82d25-981b-5738-af72-1b6963711afd",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "0cae58bb-5b19-505a-b244-5ef7a527b88a",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "81d13c8f-cbf6-5646-89b8-3ac757892649",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "77daf154-b8f9-5ef7-9236-a582d2b703fd",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "315e9d3c-b4a4-5d9c-a882-cd795e47f093",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3d09f599-c8ce-541a-bbe3-c35b0916c4ce",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "f01a1b4f-a71c-568e-b4d9-f2aff8968cec",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "3705936a-f45a-531d-a111-55d7a6f0bc64",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "364ccfd2-fdfd-5d05-87a4-f68debaddc07",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "7f21a827-8d98-5cc6-8df6-4803a48e8dc5",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "77d5d436-cef2-5477-8b83-a6577124c047",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "cc50b080-e7e4-57e0-a039-1e8fe6f66987",
+      "verdict": "matches_published_answer"
+    },
+    {
+      "id": "98f24a62-46e3-5a3a-b3ef-85d1f7d3a57d",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "f6743d4f-3593-510f-8826-408c9897826a",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "96595fb3-8796-5e7a-9a51-8c78611de8f0",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0e5d49e1-e8b1-5e5b-9f40-eb36451fd0d0",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "26564632-d6dd-5af1-9c9c-01d87d79e020",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "5c212aa5-23c8-5336-973b-81efe7b016e4",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "ca6b3f5e-82ec-503d-abc8-9df2698cf3c1",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "6e4bd45d-108c-50a1-b46b-2467c9cd0cb7",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "cba80b82-7229-5b03-b651-15ac1e89f943",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "3461ef4b-e756-5b34-a591-1c6dacf47c81",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "598ee5ef-cb9a-5ea0-8725-78e875678b58",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "359f2631-afce-56e1-975d-19ab577cbbb6",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "4f7bdbec-5001-57a9-ad32-fd40de564060",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "42730bdd-73c2-5906-88a4-6d1d23b60086",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "04efdf89-e444-5d2b-8bd6-dc9430dfbdc1",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "a422014b-f350-5b04-b369-81907a8f2c13",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "10bde830-2dd0-5b9d-845f-ce89e6ce74fb",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "91439e76-fec6-52a3-b7ab-10b8d0c56228",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "1a5a0e7d-371b-5c2e-b932-ade223010b7a",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "9e1fba6e-16b6-5879-95e4-1fdac15d35eb",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "5d3ab400-ca77-5d0c-93cd-ee11ff22ce28",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "ec70de1d-975f-581c-8435-d1e6bad255c7",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "c4d425cd-96ce-5dbb-80e2-ed92762bdc03",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0028f02a-9ae9-5cb7-8b3e-2cf6b15aea53",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "36d71ee7-0696-5116-81a4-7ece1739b7e2",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "ea3aab66-64f0-53dd-a847-24afe6073252",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "ebb8acb9-7a6b-5229-94a1-1fb33e92bc2f",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "92028548-9fbf-58b5-a61b-8643be2e30aa",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "efc4377e-62e3-537d-999e-da63d850f39f",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "48c1aa76-3879-5435-aef2-acd32a43ce1b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "63499cdb-c6cd-5c2f-a23e-54fe37eb405f",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "386003c7-a873-5928-90e8-646202d6c522",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "4e18eb21-1c50-5b73-af35-067bd73d5bcd",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "a510d46b-fb91-5f65-9c29-c300508afc8a",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "58c978bb-95b5-58ab-bbc8-906d1904acd3",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "585b5d88-d053-5d50-9c63-3fce2ff2d036",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "82f11294-b127-5d33-8999-2ec69fd78587",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "11642df5-8e9c-5e42-a53d-7a6d63e133af",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "884f95b8-a7ea-526a-b246-a310caad5e56",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "a88ab059-e3ff-5b6b-ba5c-a67c55d53419",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "6d20814f-d706-5d1d-b6dd-023163f757e4",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "cd00e625-5f9b-54df-8e94-0d9f93af363a",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0b383303-e1d2-5bf5-93ec-844426fe2c38",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "70ee1704-cf75-5b72-9338-ffb85799777d",
+      "verdict": "no_boxed_answer"
+    },
+    {
+      "id": "0bfede1b-9c36-5ce4-8a53-85a11390f088",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "e6cccd25-37f2-5cca-b54c-44c9aaf34ed6",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "79bb0614-a5d3-59cc-983e-4fc41d1e5675",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "89d52d71-d21c-50aa-a36e-77e63bd1e9e0",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "2d1d7b72-de1b-5f41-87b3-957a748e2ae8",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "a882e9d8-1bd3-5ed4-bf52-b441ff32b7f0",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "9b888827-447f-5092-bfa0-2bc9252a5481",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "592562d5-3819-53a3-af73-2e059699a4d8",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "a0b4a91e-038b-5eba-9417-96ed4fedb718",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c6cf45bc-71fb-54ba-b29b-ebc6a2265e42",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "4ef14127-2df2-582e-a13b-21656535be67",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "5925e62a-61fd-58f7-9bcd-df7b35d92adf",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "08df4dc6-0037-57b5-b7ba-fffb9ab391c4",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c3f7c8fe-c2fb-590b-a878-eeee9aa9bdd5",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "f8664cfc-3f1f-55b8-b9ee-0afdd1f26254",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "bc450f28-e5d2-5632-9ed9-54b11ecc1c8a",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "de328497-df67-56f6-9bce-576209824d4f",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "f0f1b7f9-c715-5124-bb71-8dcc83dc1087",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "50a54708-f2cb-5fdf-8659-d201aeb866c7",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "8ad478b5-5ca4-5588-a876-1b6224d7174d",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "1f95e096-dcb6-587f-b2f1-34b344b5ddcb",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "296a2393-1802-558e-b3eb-18c47df30c93",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "16be8af3-4131-5ecb-92af-9567d6555eb2",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "5b21a7c3-8efe-5cb3-9866-5e450ae11e94",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "ca9d7dd1-a4b2-5f3e-8bd3-481aec939b3c",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "45f91021-feb3-5566-b276-5938406f981a",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "af27c3d8-c8df-5bdb-841f-d53f9f713103",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "bdd33340-d861-52a7-a98f-de471d17efc3",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "fa1e94dc-d962-5764-b7f7-28fa3294a46a",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "396d8093-cae7-5660-b18c-9f2db1243bcb",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "4c88a654-3de4-5780-b527-7e68c2dea5de",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8ae87433-0272-5161-b776-918201a3e316",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "f9dd4c90-7c5e-5572-b51c-39a12d7ced4c",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "eac02bd3-dbec-51e1-ab3d-dffc38c4d514",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "ceeb970b-b701-51b1-9603-9b2c08370c1b",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "062315e9-effd-57fa-9f08-00e799027595",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "bbadbe7c-d07e-5a7c-b00c-64ab6b73b374",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "03742163-da0d-5701-8e53-b8d7f6e8d0b6",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "9661f999-4974-56b2-8e04-88041524a099",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8a8377dc-2ff1-5de6-8260-42ef9b9e884a",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "d42fc442-747a-50dd-96e0-975c7d380c99",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "ece3abfc-9403-593d-97a9-5aba04adc3ae",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "46dda068-bd28-51a3-992c-b3b8bd8a503f",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "d0bf7f83-7fce-50f7-8ceb-1a9ea40951e2",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "85fd85ad-b64f-5c0b-b871-858fc87f9d8f",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3acbbf22-b98b-51de-9ce0-7dd70a1d6982",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "48281d10-e1c1-595f-862e-25b463346024",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8046261c-0467-51e1-9d63-f393af4f2ca3",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "64a3d67a-8815-5cdb-9ed9-a84ced4a3e31",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "27c4d3c6-4336-5877-8c73-0fd67b4facdd",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "d10d20e2-e4c7-51e9-a616-af2446a093ec",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "6ad57ee4-1b43-5f2c-8dfe-b2450be4824e",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "922061dd-c55f-5c7d-9ff8-2104cf84ae61",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c1874530-3ad3-56bd-8e18-1604d459ee8f",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "738460f6-c75b-578e-b020-8782d9da2604",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "999bb70f-d58b-5e26-9bc3-c18940dcff4c",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "d84f38e3-e132-5473-addc-d9e0101dbf61",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "fb121457-1ba6-582e-b601-afa71a3ad368",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "07cd51e8-be02-540b-a7bf-780c8821ed48",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "9ee411ff-9d98-5948-bacf-c3a1d621ee2d",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "427608d7-f56f-5e21-b9c6-ae36c54d61ed",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "1a1d2067-202a-55c1-a6fa-8d7d4f92fbc0",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "7489e051-b0a0-52b1-97d4-ebff90d24955",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "8294fc35-58dc-59ab-a487-476dd3c6e5c4",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "46f24d5a-6688-59e1-82bb-97f2281c0cb5",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "f99cc6bc-20dd-5666-a0f2-3e3bf076510b",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "16687083-a632-5657-b5b6-d3f6117b9fdf",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "ab73a732-f100-59a7-9fe6-7550cb38ecc0",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8d0aec71-bd50-518e-962f-f0291c7bc381",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "8a500be4-be2b-52fb-89e1-eb286e95d411",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "754c349f-6241-5437-8931-15a3dbeb17dd",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "9890bfac-3ea3-50b0-8aa1-400cceea1554",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3abd5154-912f-5d69-98bd-9ada765af784",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "44297980-1da2-596e-af3b-0292247785e8",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "397ab042-dabb-5797-97cc-88c58d285cdb",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "58f976e7-6ed1-57cd-a5cb-2622f31436b0",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "cf0f62a8-88d6-5c17-a86f-b8400d9051e3",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8de54e5a-8e0e-5787-a95d-5902ea2e5369",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "1ff19e2b-b80b-5a6f-a1c2-56474e999ba0",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "484b10ff-63a8-5b1f-9f11-4ef5e892b480",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "f3e8d34b-2487-5c60-86ea-cf36596e4fc1",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "56fe2041-8900-5e38-a440-5e2d2cfac1ad",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "f9e5702c-0e54-589a-990e-b78416c9bba7",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "f8036325-1c66-5d28-af9c-6d23fd79ec49",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "16a3dede-494e-54b6-b561-f9a2d24cdd00",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c383cfb2-9260-531a-b94d-93d96bb9e745",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "82f7844e-ad8c-58c5-894c-bc188dbb57f1",
+      "verdict": "matches_published_answer"
+    },
+    {
+      "id": "1b4592e1-109c-5992-93b2-2a66d84cf131",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "c619074e-b0f5-5bc5-84c2-1e0fae5905f3",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "2e7b5b54-5214-5229-a711-bc266aa8a677",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "b0d0e13c-b1f1-59c2-98a2-cc500a79c77e",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "e4b9d875-6efa-5771-9195-97c03927c421",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c6a38468-1dd6-57d0-a20c-c1df5b7dc55d",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "0ba63f56-fc53-5a97-96be-381317f05ef0",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "66cd07f0-acb4-5a0c-b55a-72ef72eb2f1f",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "18c3bbc1-3d7a-5895-883a-016d482d8450",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "ed4e34ad-fd4f-5f8b-b477-e9ad082f6e72",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "5097743e-1abe-5921-bf82-3de937567d02",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "cfcde05b-c5ed-5c67-a4c5-2070d2df1d1a",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "bf6a540f-0ad2-59b4-bcde-04a2108e4e04",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "b91df7df-0918-58d8-bfa4-10dd9b4a1a93",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "3adef53e-a2c1-5bfd-aac6-bbf6a83e2ab2",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "8eb12c49-eb85-5211-9342-6dd000dc677a",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "ea6ec1e3-015d-519a-aef4-95802fa9f3b5",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "527f4048-12d9-5f5a-b790-49fe7300da2a",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "66eb250e-bf1b-5ca3-a8c3-86d3a938819f",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "7f5d987e-e434-5a31-bcd7-988ccc83e174",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "c2ffc985-4f32-5ace-91cc-0828e7a00875",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "3ddf6225-d700-50ce-a2d6-f4723adf0bfd",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "afa1244c-e2e8-5b65-9d74-84e69251f149",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "2363e483-7939-5f8d-b506-a0c8ca344805",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "10e9622f-1a3c-59e3-afd9-2e364e28e5da",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "a363a660-e041-5256-bb94-9a13f4f97787",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "033c7a0f-2611-5050-b60f-efbb01d846d5",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "7591c9f7-344a-5364-b67f-29e690bc4ff7",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "bf6335db-6fa4-5311-b24c-ed556c9bb965",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "6c12ccc8-42c3-5049-bd23-2fcb43598182",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "0e8ff280-e227-5f81-b638-4f1e13c03491",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "2ff74748-5701-50e5-8ec6-e87b18309db3",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "91792119-5837-5779-a47e-6cb008da9f4f",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "d9758482-16b1-5b52-81c5-e14bf1c0e93f",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "d1bd7db3-c18a-5ee1-8a88-308952e1744d",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "1802e9e8-879a-5fc3-a0da-f2376cf7ca12",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "3fd9ffc0-cc06-5086-8379-c34024d4ecf9",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "6e05fefc-ff38-5dd1-a377-b436f74f5a10",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "fb26f5dd-ca1a-541b-97ea-d67e7b7206db",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "809da8d2-a5ff-55ff-88ac-e5725f2303f8",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "e6c1248d-377e-5631-81ba-72ee06f41405",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "59ba8b3c-91d7-5c0c-a5cf-a3b349087e5d",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "be41c0c6-c690-5525-a83d-12beef3287fd",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "a3984ea0-5d13-5d43-9129-26127c8645bc",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8074923b-94e2-53e8-aba0-e95b465d1951",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "530cc3d3-9153-5cf8-8e7d-488f49d2cb1b",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "9c0dd818-820c-5695-bd11-2fccb2f30424",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "27f23857-8c71-5c9b-95a3-91a8edf30d70",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "9760c5c5-bb47-5fbc-9c73-9b7fe265b003",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "737dc889-cd9c-595e-9e61-cf72fbd20954",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "891cc3e1-fd42-5520-a50e-b16cea80fe98",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "989ececd-51ec-55dd-9e44-27a641ea2d65",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c79d7c8b-a353-5886-ac82-b557123b3bf3",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "62e7bc6a-7307-575a-a006-16586f2ee816",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "97e4d86e-2fa2-5eaa-800b-3b33857c92a4",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "82f81f88-9cf1-5b8f-a3ed-051a5d453d27",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "5cd77a11-0b5d-55f5-9da3-0530fd8ad2aa",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "5ca52bd6-c6b0-5d1c-8770-0d2e2373329c",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "ec9255e8-6c2f-560a-bd85-50713e377d49",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "7f14c36d-f708-5363-8c11-2271389914a6",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "c66b0c9e-5d15-5052-8627-4b2c64619af9",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "943c607b-e192-5f4a-8adc-2046c8a16e6d",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "46825d1d-d186-5307-8f2c-e45a84b717a9",
+      "verdict": "unresolved_other"
+    },
+    {
+      "id": "61bccec1-3ad9-5f76-ac84-638421b96519",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "8bb32c43-d78e-53d5-94d5-5926b02afccf",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "3ba8dd72-8ba0-5d81-bf1e-379891a43b62",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "e2fd85af-56cb-5636-89a6-cbe39dab758a",
+      "verdict": "both_numeric_and_differ"
+    },
+    {
+      "id": "3eab962a-ed6f-567f-b170-f9dff56b2ebf",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "72354e0f-41fb-543c-96bc-11febb82fab7",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "8a739382-c9fe-5c76-a6bf-1bff71547608",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "ef2ab808-9cb6-5a6e-9ab0-c1d2e09fe090",
+      "verdict": "published_answer_multivalued"
+    },
+    {
+      "id": "5c7bba21-2661-52da-be7b-f1f0e777161e",
+      "verdict": "choice_letter_against_value"
+    },
+    {
+      "id": "46e15cf8-2cc1-598e-9f85-d0024bb12ac1",
+      "verdict": "choice_letter_against_value"
+    }
+  ],
+  "sample_ids_sha256": "1cbbb1c31d9fcd965e019817b81b9c29622a90dcc3369e56f3ef157921956e82"
+}

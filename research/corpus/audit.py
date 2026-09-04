@@ -526,6 +526,85 @@ def _tarsur_summary() -> dict:
     return {"rows": rows, "arms": len(arms), "unconfirmed_arms": unconfirmed}
 
 
+def openr1_math_summary() -> dict:
+    """Two verification columns arranged so they can never be compared."""
+    import random
+
+    document = _load("openr1-math")
+    rows = document["rows"]
+
+    aligned = [r for r in rows if not r["misaligned"]]
+    dual = [r for r in aligned if r["judge"] is not None]
+    solo = [r for r in aligned if r["judge"] is None]
+
+    # The selection that makes a paired statistic impossible: on every row
+    # carrying both columns the symbolic checker found nothing correct, so
+    # it has no variance there. A first pass computed Cohen's kappa over
+    # these rows and got -0.000, which is what a constant always scores.
+    violations = sum(1 for r in dual if any(r["symbolic"]))
+
+    dual_generations = sum(len(r["judge"]) for r in dual)
+    accepted = sum(sum(r["judge"]) for r in dual)
+    solo_generations = sum(len(r["symbolic"]) for r in solo)
+    solo_correct = sum(sum(r["symbolic"]) for r in solo)
+
+    # Problems cluster their generations, so the bootstrap resamples
+    # problems. Treating generations as independent would give an interval
+    # roughly half as wide as the data supports.
+    random.seed(20260904)
+    clusters = [(sum(r["judge"]), len(r["judge"])) for r in dual]
+    draws = []
+    for _ in range(400):
+        picked = [clusters[random.randrange(len(clusters))] for _ in clusters]
+        total = sum(d for _, d in picked)
+        if total:
+            draws.append(sum(n for n, _ in picked) / total)
+    draws.sort()
+
+    by_source: dict[str, list[int]] = {}
+    for row in dual:
+        bucket = by_source.setdefault(row["source"], [0, 0])
+        bucket[0] += sum(row["judge"])
+        bucket[1] += len(row["judge"])
+    strata = sorted(
+        (
+            {"source": s, "generations": d, "accepted": n, "rate": n / d}
+            for s, (n, d) in by_source.items() if d >= 200
+        ),
+        key=lambda s: -s["generations"],
+    )
+
+    answers = json.loads(
+        (FROZEN / "openr1-math-answers.json").read_text(encoding="utf-8")
+    )
+
+    return {
+        "rows": len(rows),
+        "misaligned": len(rows) - len(aligned),
+        "answer_check": answers,
+        "dual_signal_rows": len(dual),
+        "symbolic_only_rows": len(solo),
+        "selection_violations": violations,
+        "count_tracks_judge": sum(
+            1 for r in dual if sum(r["judge"]) == r["count"]
+        ),
+        "count_tracks_symbolic": sum(
+            1 for r in solo if sum(r["symbolic"]) == r["count"]
+        ),
+        "dual_generations": dual_generations,
+        "judge_accepted": accepted,
+        "judge_acceptance_rate": accepted / dual_generations,
+        "acceptance_ci": [draws[int(0.025 * len(draws))],
+                          draws[int(0.975 * len(draws))]],
+        "symbolic_only_rate": solo_correct / solo_generations,
+        "admitted_on_judge_alone": sum(1 for r in dual if r["count"] > 0),
+        "strata": strata,
+        "revision": document["revision"],
+        "parquet_revision": document["parquet_revision"],
+        "license": document["license"],
+    }
+
+
 def render() -> str:
     coderforge = _load("coderforge")
     jetbrains = _load("jetbrains")
@@ -534,6 +613,7 @@ def render() -> str:
     ptb = posttrainbench_summary()
     cogym = cogym_summary()
     hle = hle_verifier_summary()
+    openr1 = openr1_math_summary()
     sweagent = nebius_sweagent_summary()
     openhands = nebius_openhands_summary()
 
@@ -600,6 +680,14 @@ def render() -> str:
             f"| seven models asked to verify correctness reach AUC "
             f"{hle['worst']['auc']:.3f} to {hle['best']['auc']:.3f} against a "
             f"checkable answer over {hle['responses']:,} responses |"
+        ),
+        (
+            "| [open-r1/OpenR1-Math-220k]"
+            "(https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) "
+            f"| `{openr1['revision'][:8]}` | {openr1['rows']:,} "
+            f"| {openr1['dual_signal_rows']:,} problems entered the published "
+            "training set on a model judge's word alone, on rows where the "
+            "symbolic checker had found nothing correct |"
         ),
         (
             "| [SALT-NLP/cogym-real-trajectories]"
@@ -735,6 +823,81 @@ def render() -> str:
         "",
         "Evidence: [frozen/hle-verifiers.json](corpus/frozen/hle-verifiers.json),",
         "content-free, carrying the SHA-256 of the source file it read.",
+        "",
+        "## open-r1/OpenR1-Math-220k, "
+        f"{openr1['rows']:,} problems in a published training set",
+        "",
+        "The two entries above needed a rare kind of dataset, one shipping a",
+        "proxy signal and a checkable one on the same rows. This dataset",
+        "appears to be a third. It carries `correctness_math_verify`, a",
+        "symbolic check against the published answer, and",
+        "`correctness_llama`, a 70B model asked the same question, both",
+        "attached to the same generations.",
+        "",
+        "They cannot be compared. The judge was run only where the symbolic",
+        "check had already found nothing correct, and the freeze bears that",
+        f"out exactly: across the {openr1['dual_signal_rows']:,} rows carrying both columns, the",
+        "number with even one symbolically correct generation is",
+        f"{openr1['selection_violations']}. The symbolic column is constant there, and a constant",
+        "agrees with everything at chance. A first pass computed Cohen's",
+        "kappa over these rows, got -0.000, and nearly published it.",
+        "",
+        "What survives is structural, and it matters more than the statistic",
+        "would have. This is training data, not an evaluation. The filtering",
+        "field `correctness_count` equals the judge's count on all",
+        f"{openr1['count_tracks_judge']:,} dual-signal rows and the symbolic count on all",
+        f"{openr1['count_tracks_symbolic']:,} others, without exception. So"
+        f" {openr1['admitted_on_judge_alone']:,} problems,",
+        f"{openr1['admitted_on_judge_alone'] / openr1['rows']:.1%} of the published set, are present only because the",
+        "judge overruled a checker that had rejected every candidate. The",
+        f"judge accepted {openr1['judge_accepted']:,} of {openr1['dual_generations']:,} rejected generations,",
+        f"{openr1['judge_acceptance_rate']:.1%} (95% CI"
+        f" {openr1['acceptance_ci'][0]:.1%} to {openr1['acceptance_ci'][1]:.1%}, bootstrapped over",
+        "problems, since generations cluster inside them). The rate is flat",
+        f"across every source stratum, {min(s['rate'] for s in openr1['strata']):.1%} to"
+        f" {max(s['rate'] for s in openr1['strata']):.1%}, so it is not one",
+        "problem set's quirk.",
+        "",
+        "This is not evidence that the judge is wrong. A symbolic checker",
+        "that cannot parse a valid answer and a judge that waves through an",
+        "invalid one produce the same two columns. Distinguishing them needs",
+        "the answers themselves, so a verification pass re-fetched",
+        f"{sum(openr1['answer_check']['verdicts'].values()):,} admitted generations, selected by hash rank,",
+        "every shard checked against the SHA-256 the freeze recorded, and",
+        "compared the final boxed answer with the published one:",
+        "",
+    ]
+    for verdict, count in sorted(
+        openr1["answer_check"]["verdicts"].items(), key=lambda kv: -kv[1]
+    ):
+        lines.append(f"- {verdict.replace('_', ' ')}: {count}")
+    lines += [
+        "",
+        "It does not settle the question, and it is reported as failing to.",
+        "Most of the gap is shape rather than substance: a generation boxing",
+        "a multiple-choice letter against a published value, or a published",
+        f"answer carrying several roots at once. Only {openr1['answer_check']['verdicts'].get('both_numeric_and_differ', 0)} of",
+        f"{sum(openr1['answer_check']['verdicts'].values())},"
+        f" {openr1['answer_check']['verdicts'].get('both_numeric_and_differ', 0) / sum(openr1['answer_check']['verdicts'].values()):.1%}, put an unambiguous number on both",
+        "sides and disagree, and answer-format heterogeneity is itself the",
+        "likeliest reason the symbolic check failed here to begin with.",
+        "Only where both sides reduce",
+        "to a single unambiguous number and differ does the comparison bear",
+        "on the judge, and this project has already published a",
+        "re-adjudicator whose 186 disagreements were every one its own",
+        "parser's blindness, so the parser here is treated as the third",
+        "instrument in the room rather than the referee.",
+        "",
+        "The finding is therefore about provenance, not accuracy: the",
+        "correctness of a third of a widely used training set rests on an",
+        "unaudited model judgment, and the shipped columns are arranged so",
+        "that no one downloading it can audit that judgment against the",
+        "checkable signal sitting beside it.",
+        "",
+        "Evidence: [frozen/openr1-math.json](corpus/frozen/openr1-math.json)",
+        "and [frozen/openr1-math-answers.json]"
+        "(corpus/frozen/openr1-math-answers.json), content-free, carrying the",
+        "SHA-256 of every parquet shard read.",
         "",
         "## SALT-NLP/cogym-real-trajectories, "
         f"{cogym['rows']} human-agent sessions",

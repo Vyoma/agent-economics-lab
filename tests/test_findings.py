@@ -199,6 +199,74 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
                            ("communication", "communicationRating")):
             self.assertEqual(twelve[key], summary["coverage"][field])
 
+    def test_013_the_hle_verifier_replication(self) -> None:
+        from audit import hle_verifier_summary
+
+        summary = hle_verifier_summary()
+        published = _figures("AEL-2026-013")
+        self.assertEqual(published["questions"], summary["questions"])
+        self.assertEqual(published["responses"], summary["responses"])
+        self.assertEqual(published["graders"], len(summary["graders"]))
+        self.assertAlmostEqual(published["worst_auc"], summary["worst"]["auc"], places=3)
+        self.assertAlmostEqual(published["best_auc"], summary["best"]["auc"], places=3)
+        # The published claim is that no grader clears the floor, so if one
+        # ever does the entry is wrong and this must fail rather than let
+        # the prose stand.
+        self.assertLess(summary["best"]["auc"], 0.75)
+
+    def test_014_the_unauditable_training_set(self) -> None:
+        from audit import openr1_math_summary
+
+        summary = openr1_math_summary()
+        published = _figures("AEL-2026-014")
+        for key in ("rows", "dual_signal_rows", "symbolic_only_rows",
+                    "selection_violations", "admitted_on_judge_alone"):
+            self.assertEqual(published[key], summary[key], key)
+        self.assertAlmostEqual(
+            published["judge_acceptance_rate"],
+            summary["judge_acceptance_rate"], places=3,
+        )
+        verdicts = summary["answer_check"]["verdicts"]
+        self.assertEqual(published["verified_sample"], sum(verdicts.values()))
+        self.assertEqual(
+            published["both_numeric_and_differ"],
+            verdicts["both_numeric_and_differ"],
+        )
+        # The entry rests on the judge having run only where the symbolic
+        # check found nothing. If that ever stops holding, the columns
+        # become comparable and this is a different finding, so it fails
+        # here rather than letting the published prose stand.
+        self.assertEqual(summary["selection_violations"], 0)
+        # And on correctness_count tracking each signal exactly, not
+        # approximately: the provenance claim is an identity or it is
+        # nothing.
+        self.assertEqual(
+            summary["count_tracks_judge"], summary["dual_signal_rows"]
+        )
+        self.assertEqual(
+            summary["count_tracks_symbolic"], summary["symbolic_only_rows"]
+        )
+
+    def test_the_selection_guard_fires_on_doctored_evidence(self) -> None:
+        """Non-vacuous against the evidence rather than the registry: flip
+        one symbolic bit on a row that carries both columns, and the
+        selection claim the whole entry rests on must stop holding."""
+        from unittest import mock
+
+        import audit
+
+        document = audit._load("openr1-math")
+        for row in document["rows"]:
+            if row["judge"] is not None and not row["misaligned"]:
+                row["symbolic"][0] = True
+                break
+        else:
+            self.fail("no dual-signal row to doctor")
+        with mock.patch.object(audit, "_load", lambda slug: document):
+            self.assertGreater(
+                audit.openr1_math_summary()["selection_violations"], 0
+            )
+
     def test_the_recomputation_fires_on_a_doctored_figure(self) -> None:
         """Proven non-vacuous: move one published number, watch it fail."""
         from unittest import mock
@@ -250,6 +318,26 @@ class TheIndexIsWellFormed(unittest.TestCase):
             "a dataset is audited in CORPUS.md but has no findings entry",
         )
 
+    def test_every_finding_has_a_recomputation_test(self) -> None:
+        """AEL-2026-013's test was written below `unittest.main()`, where
+        Python parses it, never binds it to the class, and never runs it.
+        The suite reported OK on 15 tests while the newest entry's published
+        figures were checked by nothing, in a file whose docstring promises
+        every figure recomputes. A method name is the only evidence that a
+        figure is actually recomputed, so the names are checked against the
+        index rather than trusted."""
+        import re
+
+        covered: set[str] = set()
+        for name in dir(EveryPublishedFigureRecomputes):
+            if name.startswith("test_"):
+                covered.update(re.findall(r"\d{3}", name))
+        missing = sorted(
+            finding["id"] for finding in findings_module.load()["findings"]
+            if finding["id"].rsplit("-", 1)[1] not in covered
+        )
+        self.assertEqual(missing, [], "findings with no recomputation test")
+
     def test_the_page_recomputes(self) -> None:
         committed = (ROOT / "research" / "FINDINGS.md").read_text(encoding="utf-8")
         self.assertEqual(committed, findings_module.render())
@@ -257,18 +345,3 @@ class TheIndexIsWellFormed(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-    def test_013_the_hle_verifier_replication(self) -> None:
-        from audit import hle_verifier_summary
-
-        summary = hle_verifier_summary()
-        published = _figures("AEL-2026-013")
-        self.assertEqual(published["questions"], summary["questions"])
-        self.assertEqual(published["responses"], summary["responses"])
-        self.assertEqual(published["graders"], len(summary["graders"]))
-        self.assertAlmostEqual(published["worst_auc"], summary["worst"]["auc"], places=3)
-        self.assertAlmostEqual(published["best_auc"], summary["best"]["auc"], places=3)
-        # The published claim is that no grader clears the floor, so if one
-        # ever does the entry is wrong and this must fail rather than let
-        # the prose stand.
-        self.assertLess(summary["best"]["auc"], 0.75)
