@@ -1,0 +1,19 @@
+# Review is required where a mistake is expensive and quiet.
+#
+# The contract and its conformance suite: a change here alters what a green
+# decision means, and every published claim digest depends on it.
+/SPEC.md                        @Vyoma
+/tests/test_conformance.py      @Vyoma
+/agent_economics/assurance.py   @Vyoma
+/agent_economics/models.py      @Vyoma
+/agent_economics/audit.py       @Vyoma
+/agent_economics/claim.py       @Vyoma
+
+# The record. Findings carry priority dates and are never edited in place,
+# so an edit here is either a new entry, a supersession, or a retraction.
+/research/findings.json         @Vyoma
+/research/corpus/frozen/        @Vyoma
+
+# What the repository promises in public.
+/README.md                      @Vyoma
+/CONTRIBUTING.md                @Vyoma
