@@ -10,7 +10,12 @@
    "dataset": "tarsur385/swebench-verified-trajectories",
    "revision": "b55979d6b24850b72ae4d80f912526280cd6058a",
    "statement": "The gemini-3-pro arm reports info.resolved true on all 500 tasks while its own info.scores.resolved reads \"unknown\" on all 500, so its 100% resolution rate is confirmed by nothing in the dataset. Nine of those runs record at most one API call and no spend.",
-   "figures": {"tasks": 500, "cross_check_unknown": 500, "naive_rate": 1.0, "idle_resolved": 9},
+   "figures": {
+    "tasks": 500,
+    "cross_check_unknown": 500,
+    "naive_rate": 1.0,
+    "idle_resolved": 9
+   },
    "verify": "make outcome-audit && make verify-upstream",
    "scope": "A statement about this third-party upload at this revision. Not a measurement of any model, and not a claim that the dataset is wrong: the cross-check field the dataset itself ships is what reveals it."
   },
@@ -22,7 +27,11 @@
    "dataset": "tarsur385/swebench-verified-trajectories",
    "revision": "b55979d6b24850b72ae4d80f912526280cd6058a",
    "statement": "The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, against a 21-point spread across the nine scored arms.",
-   "figures": {"tasks": 500, "disagreements": 44, "self_agreement": 0.912},
+   "figures": {
+    "tasks": 500,
+    "disagreements": 44,
+    "self_agreement": 0.912
+   },
    "verify": "make outcome-audit && make verify-upstream",
    "scope": "Test-retest, filed as such. Repeatability is not validity: an instrument that scores identical inputs identically every time can be systematically wrong about all of them. What causes the 8.8% is not established here."
   },
@@ -34,7 +43,11 @@
    "dataset": "togethercomputer/CoderForge-Preview-32B-SWE-Bench-Verified-Evaluation-trajectories",
    "revision": "753f0504",
    "statement": "Clean bill. The published reward re-derives from the raw evaluation logs on every one of the 434 rows the parser could fully read, with no disagreements.",
-   "figures": {"rows": 500, "parsed": 434, "disagreements": 0},
+   "figures": {
+    "rows": 500,
+    "parsed": 434,
+    "disagreements": 0
+   },
    "verify": "make corpus",
    "scope": "The strongest check in this corpus, because the dataset ships the graded-test lists and raw logs a re-derivation needs. It says nothing about the 66 rows the parser could not fully read, which are excluded and counted rather than assumed."
   },
@@ -46,7 +59,14 @@
    "dataset": "SWE-bench/SWE-smith-trajectories",
    "revision": "08e109b4a59eaeebf80e4675cd125d42e7ac99a4",
    "statement": "The patch column is not row-aligned. 266 distinct non-empty patch contents, covering 1,933 rows, each appear verbatim under instances from two or more different repositories; a re-fetch of every row in the first 50 hash-ranked groups found 50 of 50 are non-trivial unified diffs and 34 contain rows whose patch touches paths foreign to the instance's repository.",
-   "figures": {"rows": 76002, "cross_repo_groups": 266, "affected_rows": 1933, "sampled": 50, "nontrivial": 50, "foreign_path_groups": 34},
+   "figures": {
+    "rows": 76002,
+    "cross_repo_groups": 266,
+    "affected_rows": 1933,
+    "sampled": 50,
+    "nontrivial": 50,
+    "foreign_path_groups": 34
+   },
    "verify": "make corpus && python3 research/corpus/patch_check.py",
    "scope": "An auxiliary-column defect in the official SWE-bench organisation's training-trajectory release. The model was fine-tuned on messages, not patch, so this is not evidence against the training signal or the labels, which are clean across all 18,167 duplicate-transcript groups."
   },
@@ -58,7 +78,12 @@
    "dataset": "SWE-bench/SWE-smith-trajectories",
    "revision": "08e109b4a59eaeebf80e4675cd125d42e7ac99a4",
    "statement": "The xml split contains 2,255 rows that are verbatim duplicates of other rows in the same split, identical in id, transcript and label, and 14,984 transcripts appear byte-identically in both the tool and xml splits, so training on both sees those examples twice. The dataset card's prose describes 5,017 trajectories where the dataset serves 76,002 rows.",
-   "figures": {"xml_duplicate_rows": 2255, "tool_xml_overlap": 14984, "card_rows": 5017, "served_rows": 76002},
+   "figures": {
+    "xml_duplicate_rows": 2255,
+    "tool_xml_overlap": 14984,
+    "card_rows": 5017,
+    "served_rows": 76002
+   },
    "verify": "make corpus",
    "scope": "Duplication and a card-versus-content discrepancy. Not a claim that either is unintentional."
   },
@@ -70,7 +95,10 @@
    "dataset": "JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified",
    "revision": "dd79e254",
    "statement": "The resolved column is present and populated on none of the 1,785 rows, so a consumer computing a resolution rate from this dataset gets no signal from the field that names one.",
-   "figures": {"rows": 1785, "populated": 0},
+   "figures": {
+    "rows": 1785,
+    "populated": 0
+   },
    "verify": "make corpus",
    "scope": "A statement about this revision. Labels may exist elsewhere; the finding is that this column carries none."
   },
@@ -82,7 +110,13 @@
    "dataset": "nebius/SWE-agent-trajectories",
    "revision": "68195a1450865274106246d0d0296a1d6807b88e",
    "statement": "Clean bill across 80,036 rows. Every resolved row carries a non-empty patch and non-empty evaluation logs; empty patches and empty logs occur only on unresolved rows, under exactly the exit statuses that should produce them; no duplicate transcripts.",
-   "figures": {"rows": 80036, "resolved": 13389, "resolved_empty_patch": 0, "resolved_empty_logs": 0, "duplicate_transcripts": 0},
+   "figures": {
+    "rows": 80036,
+    "resolved": 13389,
+    "resolved_empty_patch": 0,
+    "resolved_empty_logs": 0,
+    "duplicate_transcripts": 0
+   },
    "verify": "make corpus",
    "scope": "Coherence, weaker than AEL-2026-003's re-adjudication, because this dataset does not ship the graded-test lists a re-derivation would need."
   },
@@ -94,9 +128,52 @@
    "dataset": "nebius/SWE-rebench-openhands-trajectories",
    "revision": "35455389ab51bf5e2306bfd436ef72d0f98bf882",
    "statement": "Model-generated tests, measured against adjudicated outcomes on the 31,389 rows carrying both signals, agree at Cohen's kappa 0.062. Conditioned on the generated tests themselves being judged correct, kappa is 0.101 with precision 0.729 on 9,444 rows; where they were judged incorrect, kappa is 0.020. The best case is a sixth of the 0.60 kappa floor this package requires of an outcome instrument.",
-   "figures": {"n": 31389, "kappa": 0.062, "valid_n": 9444, "valid_kappa": 0.101, "valid_precision": 0.729, "invalid_kappa": 0.020},
+   "figures": {
+    "n": 31389,
+    "kappa": 0.062,
+    "valid_n": 9444,
+    "valid_kappa": 0.101,
+    "valid_precision": 0.729,
+    "invalid_kappa": 0.02
+   },
    "verify": "make corpus",
    "scope": "A measurement of the generated-test method as an outcome instrument on this dataset, not a defect of the dataset: recording both signals side by side is what made the measurement possible. The signal is absent on 35,685 rows, so nothing here extrapolates to them, and this is one dataset in one domain."
+  },
+  {
+   "id": "AEL-2026-009",
+   "date": "2026-09-03",
+   "status": "standing",
+   "kind": "measurement",
+   "dataset": "aisa-group/PostTrainBench-Trajectories",
+   "revision": "39d3fcd794df51c062c8bd3b7f8523ba707aaeb3",
+   "statement": "Runs the contamination judge flagged score +0.209 accuracy above clean runs when pooled, which reads as cheating paying twenty points. Holding benchmark fixed and weighting by size, the difference is +0.018, smaller by a factor of 11.5, and contaminated runs beat clean ones in only 2 of the 5 benchmarks with enough of both to compare. Contamination concentrates on bfcl, which carries 39% of its own runs flagged, 47% of all contamination, and a clean-run mean of 0.673 against a corpus where most benchmarks sit near 0.2.",
+   "figures": {
+    "pooled": 0.209,
+    "stratified": 0.018,
+    "overstatement": 11.5,
+    "helps_in": 2,
+    "comparable": 5
+   },
+   "verify": "make corpus",
+   "scope": "A statement about a confound in this dataset, not about whether contamination helps in general: the stratified estimate is observational, benchmarks are not randomised across runs, and the flags come from an unvalidated judge. It does establish that the pooled comparison anyone would compute first is an order of magnitude too large."
+  },
+  {
+   "id": "AEL-2026-010",
+   "date": "2026-09-03",
+   "status": "standing",
+   "kind": "defect",
+   "dataset": "aisa-group/PostTrainBench-Trajectories",
+   "revision": "39d3fcd794df51c062c8bd3b7f8523ba707aaeb3",
+   "statement": "260 of 1,842 runs carry no usable outcome: 208 ship no metrics file and 52 ship one that is not valid JSON. A further 331 runs carry no contamination verdict, so they are neither clean nor flagged, and the dataset does not say how a consumer should treat them.",
+   "figures": {
+    "rows": 1842,
+    "no_metrics_file": 208,
+    "malformed_metrics": 52,
+    "unusable": 260,
+    "unjudged": 331
+   },
+   "verify": "make corpus",
+   "scope": "A completeness statement about this revision. Not a claim that the missing runs failed, which is precisely what cannot be determined from an absent or unparseable metrics file."
   }
  ]
 }

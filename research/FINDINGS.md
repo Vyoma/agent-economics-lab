@@ -4,7 +4,7 @@ Every audit result this project has published, with a stable
 identifier, the date it was first published, the command that checks
 it, and the scope it does not claim.
 
-**8 standing: 4 defects, 2 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
+**10 standing: 5 defects, 3 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
 an auditor that only ever finds problems is indistinguishable from
 one that manufactures them.
 
@@ -24,6 +24,8 @@ evidence and fails the build if the two ever disagree.
 | `AEL-2026-006` | 2026-09-01 | defect | `agent-trajectories-swe-bench-test-minus-verified` | The resolved column is present and populated on none of the 1,785 rows, so a consumer computing a resolution rate from this dataset gets no signal... |
 | `AEL-2026-007` | 2026-09-02 | clean bill | `SWE-agent-trajectories` | Clean bill across 80,036 rows |
 | `AEL-2026-008` | 2026-09-02 | measurement | `SWE-rebench-openhands-trajectories` | Model-generated tests, measured against adjudicated outcomes on the 31,389 rows carrying both signals, agree at Cohen's kappa 0.062 |
+| `AEL-2026-009` | 2026-09-03 | measurement | `PostTrainBench-Trajectories` | Runs the contamination judge flagged score +0.209 accuracy above clean runs when pooled, which reads as cheating paying twenty points |
+| `AEL-2026-010` | 2026-09-03 | defect | `PostTrainBench-Trajectories` | 260 of 1,842 runs carry no usable outcome: 208 ship no metrics file and 52 ship one that is not valid JSON |
 
 ## The findings in full
 
@@ -106,6 +108,26 @@ Model-generated tests, measured against adjudicated outcomes on the 31,389 rows 
 **Check it.** `make corpus`
 
 **What it does not claim.** A measurement of the generated-test method as an outcome instrument on this dataset, not a defect of the dataset: recording both signals side by side is what made the measurement possible. The signal is absent on 35,685 rows, so nothing here extrapolates to them, and this is one dataset in one domain.
+
+### AEL-2026-009 - measurement, 2026-09-03
+
+**Dataset.** [`aisa-group/PostTrainBench-Trajectories`](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) at `39d3fcd7`
+
+Runs the contamination judge flagged score +0.209 accuracy above clean runs when pooled, which reads as cheating paying twenty points. Holding benchmark fixed and weighting by size, the difference is +0.018, smaller by a factor of 11.5, and contaminated runs beat clean ones in only 2 of the 5 benchmarks with enough of both to compare. Contamination concentrates on bfcl, which carries 39% of its own runs flagged, 47% of all contamination, and a clean-run mean of 0.673 against a corpus where most benchmarks sit near 0.2.
+
+**Check it.** `make corpus`
+
+**What it does not claim.** A statement about a confound in this dataset, not about whether contamination helps in general: the stratified estimate is observational, benchmarks are not randomised across runs, and the flags come from an unvalidated judge. It does establish that the pooled comparison anyone would compute first is an order of magnitude too large.
+
+### AEL-2026-010 - defect, 2026-09-03
+
+**Dataset.** [`aisa-group/PostTrainBench-Trajectories`](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) at `39d3fcd7`
+
+260 of 1,842 runs carry no usable outcome: 208 ship no metrics file and 52 ship one that is not valid JSON. A further 331 runs carry no contamination verdict, so they are neither clean nor flagged, and the dataset does not say how a consumer should treat them.
+
+**Check it.** `make corpus`
+
+**What it does not claim.** A completeness statement about this revision. Not a claim that the missing runs failed, which is precisely what cannot be determined from an absent or unparseable metrics file.
 
 ## Citing one
 

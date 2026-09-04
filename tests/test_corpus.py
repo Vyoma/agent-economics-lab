@@ -419,3 +419,82 @@ class NebiusNumbersRecompute(unittest.TestCase):
         with mock.patch.object(audit, "_load", corrupted):
             perfect = audit.nebius_openhands_summary()
         self.assertGreater(perfect["kappa"], 0.99)
+
+
+class PostTrainBenchNumbersRecompute(unittest.TestCase):
+    """Entry eight: the most-downloaded dataset, and a finding that died."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        from audit import posttrainbench_summary
+
+        cls.ptb = posttrainbench_summary()
+
+    def test_the_shape(self) -> None:
+        self.assertEqual(self.ptb["rows"], 1842)
+        self.assertEqual(self.ptb["groups"], 62)
+
+    def test_what_carries_no_usable_outcome(self) -> None:
+        p = self.ptb
+        self.assertEqual(p["no_metrics_file"], 208)
+        self.assertEqual(p["malformed_metrics"], 52)
+        self.assertEqual(p["unusable_accuracy"], 260)
+        self.assertEqual(p["unjudged"], 331)
+
+    def test_the_judge_verdict_counts(self) -> None:
+        self.assertEqual(self.ptb["judged"], 1511)
+        self.assertEqual(self.ptb["contaminated"], 176)
+        self.assertEqual(self.ptb["disallowed_model"], 2)
+
+    def test_the_pooled_figure_overstates_by_an_order_of_magnitude(self) -> None:
+        """The published claim is the ratio, so pin the ratio.
+
+        If a re-freeze ever made pooled and stratified agree, the entry's
+        whole argument would be wrong and this must fail rather than let the
+        prose stand.
+        """
+        p = self.ptb
+        self.assertAlmostEqual(p["pooled_difference"], 0.209, places=3)
+        self.assertAlmostEqual(p["stratified_difference"], 0.018, places=3)
+        self.assertGreater(p["overstatement"], 10)
+
+    def test_the_confound_is_where_the_entry_says_it_is(self) -> None:
+        p = self.ptb
+        self.assertEqual(p["worst_benchmark"], "bfcl")
+        self.assertGreater(p["worst_rate"], 0.35)
+        self.assertGreater(p["worst_share_of_contamination"], 0.45)
+        self.assertGreater(p["worst_clean_mean"], 0.6)
+
+    def test_contamination_does_not_help_in_most_benchmarks(self) -> None:
+        p = self.ptb
+        self.assertLess(
+            p["benchmarks_where_contamination_helps"],
+            p["comparable_benchmarks"] - 1,
+        )
+
+    def test_the_stratification_is_proven_to_matter(self) -> None:
+        """Non-vacuity: collapse every run onto one benchmark and the
+        stratified figure must converge on the pooled one, which is the
+        confound this entry exists to describe."""
+        import json
+        from unittest import mock
+
+        import audit
+
+        real = audit._load
+
+        def flattened(slug: str) -> dict:
+            document = real(slug)
+            if slug == "posttrainbench":
+                document = json.loads(json.dumps(document))
+                for row in document["rows"]:
+                    row["benchmark"] = "only"
+            return document
+
+        with mock.patch.object(audit, "_load", flattened):
+            collapsed = audit.posttrainbench_summary()
+        self.assertAlmostEqual(
+            collapsed["stratified_difference"],
+            collapsed["pooled_difference"],
+            places=6,
+        )

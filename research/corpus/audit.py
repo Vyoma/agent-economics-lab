@@ -190,6 +190,91 @@ def nebius_openhands_summary() -> dict:
     }
 
 
+def posttrainbench_summary() -> dict:
+    """Every published number for the PostTrainBench entry."""
+    import statistics
+    from collections import defaultdict
+
+    document = _load("posttrainbench")
+    rows = document["rows"]
+
+    def accuracy(row: dict) -> float | None:
+        value = row["accuracy"]
+        return value if isinstance(value, (int, float)) else None
+
+    usable = [r for r in rows if accuracy(r) is not None]
+    judged = [r for r in rows if r["contamination"] is not None]
+
+    by_benchmark: dict[str, dict[str, list]] = defaultdict(
+        lambda: {"clean": [], "dirty": []}
+    )
+    for row in rows:
+        value = accuracy(row)
+        if value is None or row["contamination"] is None:
+            continue
+        by_benchmark[row["benchmark"]][
+            "dirty" if row["contamination"] else "clean"
+        ].append(value)
+
+    clean_all = [v for b in by_benchmark.values() for v in b["clean"]]
+    dirty_all = [v for b in by_benchmark.values() for v in b["dirty"]]
+    pooled = statistics.mean(dirty_all) - statistics.mean(clean_all)
+
+    # Weighted within-benchmark difference. The pooled figure is confounded
+    # by composition: contamination concentrates on the benchmark with the
+    # second-highest clean baseline, so pooling attributes that benchmark's
+    # difficulty to contamination.
+    comparable = [
+        (name, buckets)
+        for name, buckets in by_benchmark.items()
+        if len(buckets["clean"]) >= 5 and len(buckets["dirty"]) >= 5
+    ]
+    numerator = sum(
+        (statistics.mean(b["dirty"]) - statistics.mean(b["clean"]))
+        * (len(b["clean"]) + len(b["dirty"]))
+        for _, b in comparable
+    )
+    denominator = sum(len(b["clean"]) + len(b["dirty"]) for _, b in comparable)
+    stratified = numerator / denominator
+
+    worst = max(
+        comparable,
+        key=lambda item: len(item[1]["dirty"])
+        / (len(item[1]["clean"]) + len(item[1]["dirty"])),
+    )
+    worst_name, worst_buckets = worst
+    worst_n = len(worst_buckets["clean"]) + len(worst_buckets["dirty"])
+
+    return {
+        "revision": document["revision"],
+        "rows": len(rows),
+        "groups": document["groups"],
+        "no_metrics_file": sum(1 for r in rows if not r["has_metrics"]),
+        "malformed_metrics": sum(1 for r in rows if r["metrics_malformed"]),
+        "unusable_accuracy": len(rows) - len(usable),
+        "unjudged": len(rows) - len(judged),
+        "judged": len(judged),
+        "contaminated": sum(1 for r in judged if r["contamination"]),
+        "disallowed_model": sum(1 for r in judged if r["disallowed_model"]),
+        "pooled_difference": pooled,
+        "stratified_difference": stratified,
+        "overstatement": pooled / stratified,
+        "comparable_benchmarks": len(comparable),
+        "benchmarks_where_contamination_helps": sum(
+            1 for _, b in comparable
+            if statistics.mean(b["dirty"]) > statistics.mean(b["clean"])
+        ),
+        "worst_benchmark": worst_name,
+        "worst_rate": len(worst_buckets["dirty"]) / worst_n,
+        "worst_share_of_contamination": len(worst_buckets["dirty"]) / len(dirty_all),
+        "worst_clean_mean": statistics.mean(worst_buckets["clean"]),
+        "median_hours": statistics.median(
+            r["duration_seconds"] for r in rows
+            if isinstance(r["duration_seconds"], int)
+        ) / 3600,
+    }
+
+
 def swesmith_summary() -> dict:
     """Every published number for the SWE-smith entry, from frozen rows alone."""
     splits = {slug: _load(slug) for slug in SWESMITH_SLUGS}
@@ -295,6 +380,7 @@ def render() -> str:
     jetbrains = _load("jetbrains")
     tarsur = _tarsur_summary()
     smith = swesmith_summary()
+    ptb = posttrainbench_summary()
     sweagent = nebius_sweagent_summary()
     openhands = nebius_openhands_summary()
 
@@ -352,6 +438,15 @@ def render() -> str:
             f"{cf_re['parsed']} parseable rows |"
         ),
         (
+            "| [aisa-group/PostTrainBench-Trajectories]"
+            "(https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) "
+            f"| `{ptb['revision'][:8]}` | {ptb['rows']:,} "
+            f"| {ptb['unusable_accuracy']} runs carry no usable outcome; the "
+            "contamination judge's apparent effect on scores is "
+            f"{ptb['overstatement']:.0f}x smaller once benchmark composition "
+            "is held fixed |"
+        ),
+        (
             "| [SWE-bench/SWE-smith-trajectories]"
             "(https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) "
             f"| `{smith['revision'][:8]}` | {smith['rows']:,} "
@@ -407,6 +502,63 @@ def render() -> str:
         "",
         f"Outcome census: {dict(sorted(cf_census.items()))}. No duplicate",
         "transcripts. No positive outcome on a run of one step or fewer.",
+        "",
+        "## aisa-group/PostTrainBench-Trajectories, "
+        f"{ptb['rows']:,} autonomous runs",
+        "",
+        "The most-downloaded agent-trajectory dataset on the hub, and the",
+        "only entry here that is not a table. Each row is a run in which an",
+        "agent was given a base model, an evaluation script and ten hours on",
+        "an H100, and had to make the model better: the open-ended shape the",
+        "field keeps proposing as the successor to benchmarks. Three",
+        "independent signals per run make it auditable - a measured accuracy",
+        "from the evaluation script, an LLM judge's verdict on whether the",
+        "agent contaminated its training data, and a wall clock against a",
+        "priced budget.",
+        "",
+        "**A finding that does not survive its own stratification.**",
+        "Contaminated runs score far better than clean ones:",
+        f"a pooled difference of {ptb['pooled_difference']:+.3f} accuracy.",
+        "Published as it stands, that is a headline about cheating paying",
+        "twenty points. It is mostly composition. Contamination is not",
+        f"spread evenly: {ptb['worst_rate']:.0%} of `{ptb['worst_benchmark']}`",
+        f"runs are flagged, {ptb['worst_share_of_contamination']:.0%} of all",
+        f"contamination sits there, and `{ptb['worst_benchmark']}` has a",
+        f"clean-run mean of {ptb['worst_clean_mean']:.3f} against a corpus",
+        "where most benchmarks sit near 0.2. Pooling therefore credits that",
+        "benchmark's easiness to contamination. Holding benchmark fixed and",
+        "weighting by size, the difference is",
+        f"{ptb['stratified_difference']:+.3f} - smaller by a factor of",
+        f"{ptb['overstatement']:.0f} - and contaminated runs beat clean ones",
+        f"in only {ptb['benchmarks_where_contamination_helps']} of",
+        f"{ptb['comparable_benchmarks']} benchmarks with enough of both to",
+        "compare. The honest statement is that this dataset does not show",
+        "contamination reliably paying, and that anyone computing the pooled",
+        "number gets an answer eleven times too large.",
+        "",
+        "**What is missing, counted rather than dropped.**",
+        f"{ptb['no_metrics_file']} runs ship no metrics file and",
+        f"{ptb['malformed_metrics']} ship one that is not valid JSON, so",
+        f"{ptb['unusable_accuracy']} of {ptb['rows']:,} runs",
+        f"({ptb['unusable_accuracy'] / ptb['rows']:.1%}) carry no usable",
+        f"outcome at all. A further {ptb['unjudged']} runs carry no",
+        "contamination verdict, so they are neither clean nor flagged; a",
+        "leaderboard built from this dataset has to decide what to do with",
+        "them, and the dataset does not say.",
+        "",
+        "**The judge is an instrument, and nothing here validates it.**",
+        f"It flags {ptb['contaminated']} of {ptb['judged']:,} judged runs as",
+        f"contaminated and {ptb['disallowed_model']} as having trained a",
+        "disallowed base model. Those verdicts govern whether a run counts.",
+        "No agreement measurement against human adjudication ships with the",
+        "dataset, so the flags are unvalidated in exactly the way",
+        "[AEL-2026-008](FINDINGS.md) measured elsewhere. This is a gap in",
+        "what can be established, not a claim that the judge is wrong.",
+        "",
+        f"Median run length is {ptb['median_hours']:.1f} hours of H100 time",
+        "against a ten-hour cap. Evidence:",
+        "[frozen/posttrainbench.json](corpus/frozen/posttrainbench.json);",
+        "every figure recomputes offline with `make corpus`.",
         "",
         "## SWE-bench/SWE-smith-trajectories, three splits, "
         f"{smith['rows']:,} rows",
