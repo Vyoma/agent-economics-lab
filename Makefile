@@ -188,6 +188,11 @@ bench-check: check-python
 	@$(PYTHON) bench/render.py > /tmp/agent-economics-at-scale.md
 	@cmp /tmp/agent-economics-at-scale.md docs/at-scale.md
 
+# Every frozen corpus dataset re-derived from its source, not from our copy.
+# Network, so deliberately outside `reproduce`.
+verify-corpus: check-python
+	@$(PYTHON) research/corpus/verify_corpus.py
+
 # The one research target that needs the network, deliberately outside
 # `reproduce`: spot-check frozen rows against the upstream dataset at its
 # pinned revision, always including the rows the published findings stand on.

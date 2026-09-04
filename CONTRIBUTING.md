@@ -90,9 +90,10 @@ from code and byte-compared, so editing one by hand fails the build. Change
 the renderer, then commit what it produces.
 
 `make reproduce` is the fuller run, including the pinned-commit defect
-replays and the network-free research targets. `make verify-upstream` is the
-only target that needs the network; it spot-checks frozen corpus rows
-against the upstream datasets.
+replays and the network-free research targets. `make verify-upstream` and
+`make verify-corpus` are the only targets that need the network; they
+re-derive frozen corpus rows from the upstream datasets, so the evidence is
+checkable against its source rather than only against our copy of it.
 
 The project supports Python 3.10+ and keeps the core dependency-free. New runtime
 dependencies require an issue explaining why the assurance claim cannot be made
