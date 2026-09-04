@@ -27,12 +27,6 @@ RESULTS = ROOT / "research" / "results"
 #: actually exposes and fails when one is neither measured nor listed here,
 #: so a new capability cannot arrive unmeasured and unmentioned.
 UNMEASURED: dict[str, str] = {
-    "renderer.frontier-markdown@1": "byte-compared only. Closing it means "
-    "asserting the rendered comparison names every arm the case decided over.",
-    "renderer.frontier-json@1": "byte-compared only. Closing it means a "
-    "schema assertion over the emitted document, not one fixture diff.",
-    "renderer.frontier-svg@1": "byte-compared only. An SVG that renders "
-    "misleadingly would pass.",
     "experiment.paired-budget-frontier@1": "its statistical kernel is "
     "verified against closed forms (row above), but the frozen study is "
     "synthetic. Its protocol names the exit criterion: a permissioned "
@@ -192,6 +186,17 @@ def render() -> str:
             " information is present, not that a reader draws the right"
             " conclusion from it; and it is one constructed case, not every"
             " shape a case can take |"
+        ),
+        (
+            "| Does a comparison report keep every arm and refusal? |"
+            " completeness of `renderer.frontier-markdown@1`,"
+            " `renderer.frontier-json@1` and"
+            " `renderer.frontier-svg@1` against the"
+            " frozen four-arm case | every arm named, every refusal carrying"
+            " its reason, both digests per arm, the post-selection caveat"
+            " intact, and the chart plotting exactly as many points as there"
+            " are arms | structural presence only: whether a chart misleads"
+            " a human eye is not something a test decides |"
         ),
         (
             "| Are the frontier statistics right? | Clopper-Pearson bound"
