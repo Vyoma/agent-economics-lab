@@ -181,26 +181,55 @@ def _run_row(group: str, run: str) -> dict | None:
 
 
 def freeze() -> dict:
+    """Resumable by group, because this job outlives the shell that starts it.
+
+    Thousands of small fetches take hours, and a process that long gets
+    killed - by a session ending, a laptop sleeping, a network drop that
+    exhausts the retries. Two earlier attempts died partway and threw away
+    everything they had fetched. Each completed group is now appended to a
+    checkpoint, and a restart skips what is already there, so progress is
+    monotonic no matter how many times it is interrupted. The checkpoint
+    holds the revision it was started against and refuses to resume across a
+    different one, because rows from two revisions must never be mixed.
+    """
     before = _revision()
+    checkpoint = FROZEN / "posttrainbench.partial.json"
+    done: dict[str, list[dict]] = {}
+    if checkpoint.exists():
+        saved = json.loads(checkpoint.read_text(encoding="utf-8"))
+        if saved.get("revision") != before:
+            raise RuntimeError(
+                f"checkpoint is for revision {saved.get('revision', '?')[:8]}, "
+                f"upstream is now {before[:8]}; delete "
+                f"{checkpoint.name} to refreeze from scratch"
+            )
+        done = saved["groups_done"]
+        print(f"resuming: {len(done)} groups already frozen", flush=True)
+
     groups = [
         entry["path"]
         for entry in _tree()
         if entry.get("type") == "directory" and entry["path"] not in SKIP_GROUPS
     ]
-    rows: list[dict] = []
     for index, group in enumerate(sorted(groups), start=1):
+        if group in done:
+            continue
         runs = [
             entry["path"].split("/")[-1]
             for entry in _tree(group)
             if entry.get("type") == "directory"
         ]
-        for run in sorted(runs):
-            rows.append(_run_row(group, run))
+        done[group] = [_run_row(group, run) for run in sorted(runs)]
+        checkpoint.write_text(
+            json.dumps({"revision": before, "groups_done": done}, sort_keys=True),
+            encoding="utf-8",
+        )
         print(
             f"[{index}/{len(groups)}] {group}: {len(runs)} runs "
-            f"({len(rows)} total)",
+            f"({sum(len(v) for v in done.values())} total)",
             flush=True,
         )
+    rows = [row for group in sorted(done) for row in done[group]]
     after = _revision()
     if before != after:
         raise RuntimeError(
@@ -225,6 +254,7 @@ def main() -> int:
     OUT.write_text(
         json.dumps(document, indent=1, sort_keys=True) + "\n", encoding="utf-8"
     )
+    (FROZEN / "posttrainbench.partial.json").unlink(missing_ok=True)
     print(
         f"froze {len(document['rows'])} runs across {document['groups']} groups "
         f"-> {OUT.relative_to(ROOT)}"
