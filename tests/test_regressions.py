@@ -622,3 +622,80 @@ class TheCorrectionsPageStaysHonest(unittest.TestCase):
         evidence; a page of only-defects reads as a confession."""
         self.assertIn("Suspicions killed before they were published",
                       self._page())
+
+
+class TheGenericAuditorIsHonestByConstruction(unittest.TestCase):
+    """It runs on datasets nobody wrote code for, so its refusals matter more.
+
+    A hand-written corpus entry is reviewed before it is published. This is
+    not: it prints whatever it computed, to whoever ran it, about a dataset
+    this project has never seen. Its restraint has to be structural.
+    """
+
+    def _module(self):
+        import sys
+
+        sys.path.insert(0, str(ROOT / "research" / "corpus"))
+        import audit_any
+
+        return audit_any
+
+    def test_a_string_where_a_verdict_belongs_is_absent_not_data(self) -> None:
+        """The defect that started this corpus: a 100% rate from a column
+        reading "unknown" on every row."""
+        usable = self._module()._usable
+        self.assertFalse(usable("unknown"))
+        self.assertFalse(usable(None))
+        self.assertTrue(usable(True))
+        self.assertTrue(usable(0))
+
+    def test_kappa_refuses_a_sample_too_small_to_carry_one(self) -> None:
+        module = self._module()
+        self.assertIsNone(module._kappa([(1, 1), (0, 0)] * 5))
+        self.assertIsNotNone(module._kappa([(1, 1), (0, 0)] * 40))
+
+    def test_kappa_is_one_on_perfect_agreement(self) -> None:
+        module = self._module()
+        pairs = [(i % 2, i % 2) for i in range(60)]
+        self.assertAlmostEqual(module._kappa(pairs), 1.0, places=6)
+
+    def test_the_report_calls_itself_a_census_not_a_finding(self) -> None:
+        module = self._module()
+        rendered = module.render({
+            "dataset": "x/y", "revision": "a" * 40, "license": "mit",
+            "config": "default", "split": "train", "rows_read": 10,
+            "rows_upstream": 100, "sampled": True,
+            "proposed_roles": {"outcome": [], "transcript": [], "effort": []},
+            "coverage": {}, "duplicates": {}, "agreement": [],
+            "degenerate": {}, "notes": [],
+        })
+        self.assertIn("A census, not a finding", rendered)
+        self.assertIn("A SAMPLE", rendered)
+
+    def test_an_undeclared_licence_is_reported_as_a_blocker(self) -> None:
+        """The corpus contract does not permit derived metadata from a
+        dataset with no stated licence, and two candidates hit this."""
+        module = self._module()
+        rendered = module.render({
+            "dataset": "x/y", "revision": "a" * 40, "license": None,
+            "config": "default", "split": "train", "rows_read": 10,
+            "rows_upstream": 10, "sampled": False,
+            "proposed_roles": {"outcome": [], "transcript": [], "effort": []},
+            "coverage": {}, "duplicates": {}, "agreement": [],
+            "degenerate": {}, "notes": ["no license is declared; the corpus "
+                                        "contract does not permit publishing "
+                                        "derived metadata"],
+        })
+        self.assertIn("UNDECLARED", rendered)
+
+
+class TheSkillPointsAtCommandsThatExist(unittest.TestCase):
+    def test_the_skill_names_a_real_script_and_real_docs(self) -> None:
+        import re
+
+        skill = (ROOT / ".claude" / "skills" / "audit-agent-dataset"
+                 / "SKILL.md").read_text(encoding="utf-8")
+        self.assertTrue(skill.startswith("---"), "skills need frontmatter")
+        for path in re.findall(r"`((?:research|docs)/[\w./-]+)`", skill):
+            with self.subTest(path=path):
+                self.assertTrue((ROOT / path).exists(), f"{path} is missing")

@@ -33,6 +33,7 @@ and the discipline that keeps its own numbers honest.
 | every finding, citable | [the findings index](research/FINDINGS.md), stable ids and priority dates |
 | what eight audits say together | [the patterns](research/PATTERNS.md), and what they do not establish |
 | run it in one second | [Start here](#start-here) |
+| audit your own dataset | `python3 research/corpus/audit_any.py <hf-dataset>`, no code to write |
 | check a claim without trusting me | [Check this repository](#check-this-repository-without-trusting-it) |
 | what it gets wrong | [the honest limits](docs/limitations.md), what the tool cannot claim |
 | when it was wrong | [every correction](docs/corrections.md), including the suspicions killed before publication |
