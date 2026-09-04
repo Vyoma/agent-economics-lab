@@ -70,10 +70,20 @@ def _extracted_rows(
     for every other dataset, was left as it was - the defect this repository
     keeps naming, committed here by the person naming it.
 
-    Extraction happens per page rather than at the end so the checkpoint
-    holds content-free rows. Checkpointing raw pages would mean writing
-    gigabytes of trajectories to disk, which is the thing the whole freeze
-    exists to avoid.
+    Extraction happens per page rather than at the end, and that turns out
+    to matter more for memory than for the checkpoint. The previous version
+    accumulated every raw row and extracted once at the end, so a freeze
+    held the entire dataset resident: the 318k-row, 12GB nvidia-swezero
+    freeze reached 2GB of RSS after twenty hours, put the machine into
+    heavy swap, and was still nowhere near the 12GB it would have needed to
+    finish. Measured against this version doing the same class of work on a
+    comparable dataset: 23MB. The restructure was written for resumability
+    and silently fixed an unbounded accumulation that could never have
+    completed on the largest entry in the corpus.
+
+    It also keeps the checkpoint content-free, since checkpointing raw pages
+    would write gigabytes of trajectories to disk - the thing the whole
+    freeze exists to avoid.
     """
     checkpoint = FROZEN / f"{slug}.partial.json"
     extracted: list[dict] = []
