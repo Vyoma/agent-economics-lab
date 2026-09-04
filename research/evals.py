@@ -27,13 +27,6 @@ RESULTS = ROOT / "research" / "results"
 #: actually exposes and fails when one is neither measured nor listed here,
 #: so a new capability cannot arrive unmeasured and unmentioned.
 UNMEASURED: dict[str, str] = {
-    "renderer.markdown@1": "byte-compared against checked-in fixtures, which "
-    "proves the output has not changed, not that it is right. Closing it "
-    "means a property test: every figure in the rendered case appears in the "
-    "case object, and every breach appears in the prose.",
-    "renderer.json@1": "same as the markdown renderer; the JSON shape is "
-    "asserted field by field in tests, but nothing measures whether it "
-    "carries everything a consumer needs.",
     "renderer.frontier-markdown@1": "byte-compared only. Closing it means "
     "asserting the rendered comparison names every arm the case decided over.",
     "renderer.frontier-json@1": "byte-compared only. Closing it means a "
@@ -189,6 +182,16 @@ def render() -> str:
             " cases are easier than real ones, and the later 100% run is"
             " excluded here because the set was edited after seeing this"
             " judge |"
+        ),
+        (
+            "| Does the rendered case keep what decided it? |"
+            " completeness of `renderer.markdown@1` and `renderer.json@1`"
+            " against a case with simultaneous breaches | every breach,"
+            " check id, status, failure route and both digests reach the"
+            " page; proven non-vacuous by stripping both carriers | the"
+            " information is present, not that a reader draws the right"
+            " conclusion from it; and it is one constructed case, not every"
+            " shape a case can take |"
         ),
         (
             "| Are the frontier statistics right? | Clopper-Pearson bound"
