@@ -168,8 +168,11 @@ COMPUTED: dict[str, str] = {
     "10.0%": _pct(_net_value_threshold(6.00), 1),
     "1.0%": _pct(_net_value_threshold(6.90), 1),
     "0.5%": _pct(_net_value_threshold(6.95), 1),
-    # the suite size the page quotes
-    str(_discovered_tests()): str(_discovered_tests()),
+    # The floor the page quotes, rounded down to the previous fifty. The
+    # page states a floor rather than an exact count because an exact one
+    # goes stale every time a test is added, which cost two CI failures and
+    # a merge conflict without telling a reader anything.
+    str(_discovered_tests() // 50 * 50): str(_discovered_tests() // 50 * 50),
 }
 
 # Numbers that are inputs, parameters or citations rather than derived results.
@@ -386,21 +389,40 @@ class ErrorsThatAlreadyHappened(unittest.TestCase):
         # The simulated figure must be within a few percent of the closed form.
         self.assertLess(abs(0.01349 - closed) / closed, 0.05)
 
-    def test_test_count_on_the_page_is_current(self) -> None:
-        quoted = re.search(r"(\d{3}) tests", self.page)
-        self.assertIsNotNone(quoted, "the page must state a test count")
-        # An earlier version of this compared the difference against the total, which
-        # holds for almost any input: a check that cannot fail, in the file written to
-        # catch exactly that. It now has to match what unittest discovers.
+    def test_test_count_on_the_page_is_a_true_floor(self) -> None:
+        """The page states a floor, not an exact count, and it must hold.
+
+        An earlier version of this compared the difference against the
+        total, which holds for almost any input: a check that cannot fail,
+        in the file written to catch exactly that. Replacing it with an
+        exact match overcorrected. The suite gains tests most days, and an
+        exact figure meant a stale number in a rendered page failed CI
+        twice and produced a merge conflict when two branches each
+        corrected it - friction spent on a digit no reader acts on.
+
+        A floor keeps the claim honest, fails when it is overstated, and
+        only moves when the next round number is passed.
+        """
+        quoted = re.search(r"[Oo]ver (\d{3}) tests", self.page)
+        self.assertIsNotNone(
+            quoted, "the page must state a test-count floor as 'over N tests'"
+        )
+        floor = int(quoted.group(1))
+        self.assertEqual(floor % 50, 0, "the floor should be a round number")
         collected = 0
         for path in sorted((ROOT / "tests").glob("test_*.py")):
             collected += len(re.findall(r"^\s+def test_", path.read_text(), re.M))
         self.assertGreater(collected, 300, "test discovery looks broken")
-        self.assertEqual(
-            int(quoted.group(1)),
-            collected,
-            f"docs/index.md quotes {quoted.group(1)} tests; the suite discovers "
-            f"{collected}. Re-run and update the page.",
+        self.assertLess(
+            floor, collected,
+            f"docs/index.md claims over {floor} tests; the suite has "
+            f"{collected}. The floor is overstated.",
+        )
+        self.assertGreaterEqual(
+            floor, collected - 100,
+            f"docs/index.md claims over {floor} tests against {collected}; "
+            "the floor has fallen far enough behind to be uninformative. "
+            "Raise it to the next fifty.",
         )
 
 
