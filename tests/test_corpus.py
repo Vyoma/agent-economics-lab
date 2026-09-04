@@ -282,10 +282,10 @@ class PaginationNeverShadowsItsParameters(unittest.TestCase):
             "dataset": "d", "config": "c", "split": "s",
             "expected_rows": 6, "extract": lambda row: row,
         }
-        with tempfile.TemporaryDirectory() as directory:
-            with mock.patch.object(freeze, "_get", fake_get), \
-                    mock.patch.object(freeze, "FROZEN", Path(directory)):
-                rows = freeze._extracted_rows("demo", spec, "rev", page_length=2)
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(freeze, "_get", fake_get), \
+                mock.patch.object(freeze, "FROZEN", Path(directory)):
+            rows = freeze._extracted_rows("demo", spec, "rev", page_length=2)
         self.assertEqual(len(rows), 6)
         self.assertEqual(len(seen), 3)
         for url in seen:
@@ -575,6 +575,64 @@ class TheFreezeResumesInsteadOfRestarting(unittest.TestCase):
                     self.assertRaises(RuntimeError):
                 freeze._extracted_rows("demo", spec, "new", page_length=2)
 
+
+class CheckpointingIsBoundedAndAtomic(unittest.TestCase):
+    """A checkpoint rewrites everything fetched so far, so its frequency is
+    a cost, and the moment it is most likely to be killed is mid-write."""
+
+    def test_checkpoints_are_not_written_every_page(self) -> None:
+        import tempfile
+        from pathlib import Path
+        from unittest import mock
+
+        import freeze
+
+        writes: list[int] = []
+        real_write = freeze._write_checkpoint
+
+        def counting(path, revision, offset, rows):
+            writes.append(offset)
+            real_write(path, revision, offset, rows)
+
+        def fake_get(url: str) -> dict:
+            import urllib.parse as up
+
+            offset = int(up.parse_qs(up.urlparse(url).query)["offset"][0])
+            rows = [{"row": {"i": offset + n}, "truncated_cells": []}
+                    for n in range(2) if offset + n < 200]
+            return {"rows": rows, "num_rows_total": 200}
+
+        spec = {"dataset": "d", "config": "c", "split": "s",
+                "expected_rows": 200, "extract": lambda row: row}
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch.object(freeze, "_get", fake_get), \
+                mock.patch.object(freeze, "_write_checkpoint", counting), \
+                mock.patch.object(freeze, "FROZEN", Path(directory)):
+            rows = freeze._extracted_rows("demo", spec, "rev", page_length=2)
+        self.assertEqual(len(rows), 200)
+        # 100 pages at 25-page intervals: 4 interval writes plus the final one
+        self.assertLessEqual(len(writes), 6)
+        self.assertIn(200, writes, "the final state must always be written")
+
+    def test_a_checkpoint_is_written_atomically(self) -> None:
+        """A kill during the write must not leave a resume half-parsed."""
+        import json
+        import tempfile
+        from pathlib import Path
+
+        import freeze
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "demo.partial.json"
+            freeze._write_checkpoint(path, "rev", 10, [{"id": "a"}])
+            self.assertEqual(
+                json.loads(path.read_text())["offset"], 10,
+                "a checkpoint must be readable the instant it exists",
+            )
+            self.assertFalse(
+                path.with_suffix(".tmp").exists(),
+                "the temporary file must not survive a successful write",
+            )
 
 class CogymNumbersRecompute(unittest.TestCase):
     """The human-rated entry, and the limit on what it can claim."""
