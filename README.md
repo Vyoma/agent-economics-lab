@@ -31,6 +31,7 @@ and the discipline that keeps its own numbers honest.
 |---|---|
 | the finding | [Found in the wild](#found-in-the-wild) |
 | every finding, citable | [the findings index](research/FINDINGS.md), stable ids and priority dates |
+| what eight audits say together | [the patterns](research/PATTERNS.md), and what they do not establish |
 | run it in one second | [Start here](#start-here) |
 | check a claim without trusting me | [Check this repository](#check-this-repository-without-trusting-it) |
 | what it gets wrong | [the honest limits](docs/limitations.md), four claims of ours that did not survive audit |

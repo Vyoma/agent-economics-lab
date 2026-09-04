@@ -8,6 +8,9 @@ is a result, recorded with the same care as a defect; an auditor that
 only ever finds problems is indistinguishable from one that
 manufactures them.
 
+What the entries say jointly, rather than one at a time, is in
+[what the audits say together](PATTERNS.md).
+
 Every result here is also in the [findings index](FINDINGS.md), one
 citable line each with a stable identifier, a priority date, and the
 command that checks it.
