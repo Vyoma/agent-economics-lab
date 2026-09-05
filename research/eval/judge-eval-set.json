@@ -215,7 +215,8 @@
       "disagreements": [
         "ok-06 (false reject)"
       ],
-      "note": "Measured on version 1, before the destructive-operation scenario was split. The strongest evidence available, because this set predates any observation of the judge under test."
+      "note": "Measured on version 1, before the destructive-operation scenario was split. The strongest evidence available, because this set predates any observation of the judge under test.",
+      "cases_scored": 24
     },
     {
       "eval_version": "2",

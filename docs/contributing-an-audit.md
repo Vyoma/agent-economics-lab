@@ -22,7 +22,7 @@ commit the frozen output. The rules are mechanical and each is enforced by a
 test or by the freeze itself:
 
 - **Content-free.** Frozen rows carry hashes, byte lengths, labels,
-  identifiers, and small scalars — never messages, patches, logs, prompts, or
+  identifiers, and small scalars, never messages, patches, logs, prompts, or
   problem text. The content-sweep test fails the build on a forbidden key.
   If a check needs content, the check re-fetches at the pinned revision and
   reduces to content-free facts before anything is committed
@@ -31,7 +31,7 @@ test or by the freeze itself:
   A partial arm is recorded as not-obtained, not silently included: a rate
   computed over a partial population is a different number wearing the same
   name.
-- **Refusing.** A truncated cell aborts the freeze — a hash of a truncated
+- **Refusing.** A truncated cell aborts the freeze: a hash of a truncated
   cell is a hash of nothing. An expected row count is declared up front and
   a mismatch is an error.
 - **Pinned.** Record the dataset revision and license in the spec. Hashes
@@ -39,8 +39,8 @@ test or by the freeze itself:
 
 ## The checks: base rates before accusations
 
-Run the shared family in [research/corpus/audit.py](../research/corpus/audit.py)
-— outcome census, cross-check agreement where the dataset carries two outcome
+Run the shared family in [research/corpus/audit.py](../research/corpus/audit.py):
+outcome census, cross-check agreement where the dataset carries two outcome
 signals, duplicate-transcript groups with label agreement, degenerate
 positives. Then, before any suspicion becomes a finding:
 
@@ -59,7 +59,7 @@ positives. Then, before any suspicion becomes a finding:
 ## The rendering: numbers that recompute
 
 Every published figure is computed by the entry's section in `audit.py` from
-the frozen evidence — no hand-typed numbers. `make corpus` byte-compares the
+the frozen evidence, no hand-typed numbers. `make corpus` byte-compares the
 committed [research/CORPUS.md](../research/CORPUS.md) against a fresh render.
 Each figure gets a recomputation test, and at least one guard must be proven
 non-vacuous by corrupting the evidence and watching it fire; this repository

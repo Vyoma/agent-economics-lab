@@ -26,7 +26,7 @@ derivable from nothing.
 
 ## The three
 
-### F1 — the CSV evidence path could not see delegation at all
+### F1: the CSV evidence path could not see delegation at all
 
 `load_csv_bundle` never passed `dependency_edges`, and the CSV schema had no
 column able to carry them. A trace with two `Agent` calls and $500 of subagent
@@ -47,7 +47,7 @@ captured" are different claims and this evidence cannot tell them apart.
 Found by divergence #10-14: `make_evidence_bundle` called without
 `dependency_edges` at `io.py:122` while three other callers passed it.
 
-### F4 — blank token columns priced at $0.00, at a site published as clean
+### F4: blank token columns priced at $0.00, at a site published as clean
 
 `load_csv_bundle` goes through `validate_evidence_bundle` without
 `require_explicit_costs`, so a model event with no stated cost and no recorded
@@ -65,7 +65,7 @@ correct*. The probe used a bundle whose events carried explicit costs, so the
 guard had nothing to catch and the site looked clean. A probe that cannot
 observe the defect it is aimed at reports a miss and looks like diligence.
 
-### F2 — the audit reported no grounds where the gate refused
+### F2: the audit reported no grounds where the gate refused
 
 `evidence_provenance_gate` never accepted `independently_verified`, so the
 sole-provider carve-out was reachable from `audit()` and from `assess_provenance`
@@ -77,7 +77,7 @@ as a prediction of what enforcement will do, and it was not one.
 
 Found by divergence #9.
 
-### Not-a-finding — the success path crash that was never reachable
+### Not-a-finding: the success path crash that was never reachable
 
 This was published as a third finding. It is not one.
 
@@ -131,7 +131,7 @@ That remaining site is `evaluate()`, a compatibility wrapper with the same
 inability to express a graph that produced F1. Probed: the default engine does
 not run the closure gate, so nothing there consumes the edges, and any consumer
 that does compose the gate hits the F1 refusal for delegation tools with no
-recorded work. **Mitigated by F1, not a separate defect** — the same fix covers
+recorded work. **Mitigated by F1, not a separate defect**: the same fix covers
 both sites, which is the outcome you want from a structural repair and not one
 that was designed for.
 

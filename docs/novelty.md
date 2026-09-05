@@ -119,14 +119,14 @@ A September 2026 referee pass, run with instructions to reject, took the
 economics lane whole: cost per confirmed outcome as an evaluation primitive is
 *Cost-of-Pass* ([arXiv:2504.13359](https://arxiv.org/abs/2504.13359)) and
 Kapoor et al. ([arXiv:2407.01502](https://arxiv.org/abs/2407.01502)), neither
-of which five prior sweeps had surfaced — for a document claiming adversarial
+of which five prior sweeps had surfaced. For a document claiming adversarial
 sweeps, missing the two canonical citations of its own lane is the finding.
 It also found the trajectory-audit lane populated (AgentLens, ATBench,
 automated transcript scanners; see
 [the landscape entry](landscape.md#auditing-benchmark-labels-and-trajectories-is-a-crowded-lane)).
 
 Its verdict on what would earn a citation, recorded at full strength: for the
-machinery, nothing — a researcher would cite in-toto, Inspect, ABC,
+machinery, nothing: a researcher would cite in-toto, Inspect, ABC,
 Cost-of-Pass, and the psychometrics line instead. Two narrow claims survive:
 the documented defect record for the specific public datasets audited in
 [research/CORPUS.md](../research/CORPUS.md), whose arm names circulate as

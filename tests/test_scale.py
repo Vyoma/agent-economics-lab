@@ -4,7 +4,7 @@ Every optimization in the scale pass claimed to change nothing observable.
 These tests hold each claim to that: the hand-rolled digest serialization is
 byte-identical to the generic form it replaced, the audit's digest reuse
 yields the same digest the bundle derives from content, and cycle detection
-survives dependency chains far past Python's recursion limit — the depth at
+survives dependency chains far past Python's recursion limit: the depth at
 which the old detector died and had its corpse reported as "diagnostic could
 not run".
 """

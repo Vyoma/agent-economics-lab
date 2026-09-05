@@ -4,27 +4,27 @@ Derived mechanically from the shapes of five defects that were live while the su
 
 ## The shapes, and the defect each was abstracted from
 
-### S1 — numeric default absorbing an absence  (38 sites)
+### S1: numeric default absorbing an absence  (38 sites)
 
 - **Learned from:** D09
 - **Why it hides:** `x or 0.0` and `d.get(k, 0)` cannot distinguish 'zero' from 'not established'. Where the result is summed or divided, an unknown becomes a confident zero and the total understates.
 
-### S2 — formatted number with no check that it is known  (123 sites)
+### S2: formatted number with no check that it is known  (123 sites)
 
 - **Learned from:** D08
 - **Why it hides:** A format spec renders whatever it is handed. If the value can be absent, unestablished, or a placeholder, the renderer converts it into a figure with decimal places, which reads as a measurement.
 
-### S3 — ratio whose denominator can be empty  (61 sites)
+### S3: ratio whose denominator can be empty  (61 sites)
 
 - **Learned from:** the vacuous closure line
 - **Why it hides:** A ratio over nothing is 1.0 or a guarded constant. Printed as a percentage it reads as full marks for work that never happened.
 
-### S4 — early return that answers before consulting its qualifier  (40 sites)
+### S4: early return that answers before consulting its qualifier  (40 sites)
 
 - **Learned from:** D11
 - **Why it hides:** A branch that returns a value before reading the parameter that would qualify it is right in the configuration the tests build and unsupported in the one they do not.
 
-### S5 — caller omitting an optional parameter it could supply  (34 sites)
+### S5: caller omitting an optional parameter it could supply  (34 sites)
 
 - **Learned from:** D10
 - **Why it hides:** A helper takes an optional input and a caller with that input in hand does not pass it. The helper then degrades, correctly, to a weaker answer nobody asked for.
@@ -77,10 +77,10 @@ agent_economics/kimi_judge.py:460  kimi_resp.get("overall_score", 0),
 ### S2 (123)
 
 ```
-agent_economics/audit.py:330  lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated "
-agent_economics/audit.py:331  f"spend is unassessed; closure {report.closure:.0%}."]
-agent_economics/audit.py:337  lines += ["", f"Closure {report.closure:.0%}. The unassessed spend "
-agent_economics/audit.py:364  f"(closure {report.closure:.0%}, measured {basis})."
+agent_economics/audit.py:334  lines += ["", f"${report.delegated_spend_unassessed:.4f} of delegated "
+agent_economics/audit.py:335  f"spend is unassessed; closure {report.closure:.0%}."]
+agent_economics/audit.py:341  lines += ["", f"Closure {report.closure:.0%}. The unassessed spend "
+agent_economics/audit.py:368  f"(closure {report.closure:.0%}, measured {basis})."
 agent_economics/checks.py:51  f"acceptable_rate {view.acceptable_rate:.1%} "
 agent_economics/checks.py:52  f"{'<' if failed else '>='} {threshold:.1%}"
 agent_economics/checks.py:64  f"cost_per_acceptable_outcome ${observed:.2f} "
@@ -318,7 +318,7 @@ agent_economics/models.py:103  in cost(): return 0.0
 ```
 agent_economics/assurance.py:566  make_evidence_bundle(...) omits declared_delegations, dependency_edges, label_source, source_version, task_manifest  [evidence = make_evidence_bundle(]
 agent_economics/assurance.py:342  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [evidence_problems = validate_evidence_bu]
-agent_economics/audit.py:198  assess_bundle_closure(...) omits declared, delegation_tools  [closure = assess_bundle_closure(bundle)]
+agent_economics/audit.py:202  assess_bundle_closure(...) omits declared, delegation_tools  [closure = assess_bundle_closure(bundle)]
 agent_economics/checks.py:144  _result(...) omits task_id  [_result(]
 agent_economics/checks.py:55  _result(...) omits task_id  [results=(_result("gate.acceptable-rate",]
 agent_economics/checks.py:68  _result(...) omits task_id  [results=(_result("gate.unit-economics", ]
@@ -400,11 +400,11 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `assess_bundle_closure(..., declared=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/cli.py:441`
-- omits / reads raw (1): `agent_economics/audit.py:198`
+- omits / reads raw (1): `agent_economics/audit.py:202`
 
 ### `audit(..., policy=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/audit.py:155`
+- passes / resolves (1): `agent_economics/audit.py:159`
 - omits / reads raw (1): `agent_economics/cli.py:418`
 
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)
@@ -434,7 +434,7 @@ All five known defects share a sharper form than any shape above: the same quant
 
 ### `mutate(..., _evidence_digest=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/audit.py:197`
+- passes / resolves (1): `agent_economics/audit.py:201`
 - omits / reads raw (1): `agent_economics/cli.py:444`
 
 ### `render_normalized_json(..., conversion=)`  (inconsistent-caller)

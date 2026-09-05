@@ -32,14 +32,14 @@ Rubric schema (rubric.json):
     }
 
 task_results.csv columns:
-    task_id   — matches task IDs in traces CSV
-    output    — the agent's final response or output
-    context   — (optional) brief task description for the judge
+    task_id   - matches task IDs in traces CSV
+    output    - the agent's final response or output
+    context   - (optional) brief task description for the judge
 
 Requires:
     MOONSHOT_API_KEY env var (https://platform.kimi.ai)
 
-Zero external dependencies — uses stdlib urllib only.
+Zero external dependencies: uses stdlib urllib only.
 """
 from __future__ import annotations
 
@@ -130,7 +130,7 @@ For each agent output you receive, score every criterion from 0.0 to 1.0 indepen
 Compute overall_score = sum(score_i * weight_i) for all criteria.
 Set acceptable = overall_score >= {rubric["acceptable_threshold"]}.
 
-Respond with valid JSON only — no markdown, no commentary, exactly this structure:
+Respond with valid JSON only, no markdown, no commentary, exactly this structure:
 {{
   "task_id": "<echoed from input>",
   "criterion_scores": {{{", ".join(f'"{c["id"]}": <float>' for c in rubric["criteria"])}}},
@@ -337,7 +337,7 @@ def _build_outcome_row(
 
 
 def _error_outcome_row(task_id: str, rubric: dict, error: str) -> tuple[dict, dict]:
-    """Safe fallback when Kimi call fails — counts as unacceptable."""
+    """Safe fallback when Kimi call fails: counts as unacceptable."""
     # No outcomes row. A task the judge never evaluated has produced no
     # evidence about its outcome, and "acceptable: false" is a verdict, not an
     # absence. Writing one folds a judge outage into the acceptable rate, where

@@ -6,8 +6,8 @@ One command per dataset, network required once, everything downstream offline:
     python3 research/corpus/freeze.py jetbrains
 
 Per row it keeps identifiers, outcome fields, step counts, SHA-256 hashes of
-the content it refuses to copy, and — where the dataset ships raw test logs
-beside graded-test lists — the re-adjudication verdict those logs support.
+the content it refuses to copy, and, where the dataset ships raw test logs
+beside graded-test lists, the re-adjudication verdict those logs support.
 No prompts, no responses, no patches, no logs are stored.
 
 Rows come from the Hugging Face datasets-server, which serves the dataset's

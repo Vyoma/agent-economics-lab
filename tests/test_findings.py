@@ -290,13 +290,18 @@ class TheIndexIsWellFormed(unittest.TestCase):
                 self.assertRegex(finding["id"], r"^AEL-\d{4}-\d{3}$")
                 self.assertRegex(finding["date"], r"^\d{4}-\d{2}-\d{2}$")
 
-    def test_every_finding_names_a_check_and_a_limit(self) -> None:
+    def test_every_finding_names_a_check_a_limit_and_an_action(self) -> None:
         """A finding with no command is an assertion; a finding with no
-        scope is an overclaim waiting to be quoted out of context."""
+        scope is an overclaim waiting to be quoted out of context; a finding
+        with no action is a fact filed for the record."""
         for finding in findings_module.load()["findings"]:
             with self.subTest(finding=finding["id"]):
                 self.assertTrue(finding["verify"].strip())
                 self.assertGreater(len(finding["scope"]), 40)
+                # A finding that never says what to do about it is a fact
+                # filed for the record. Fourteen shipped that way before
+                # anyone noticed the index had no such field at all.
+                self.assertGreater(len(finding["action"]), 30)
                 self.assertIn(finding["kind"], findings_module.KIND_LABEL)
 
     def test_clean_bills_are_present(self) -> None:
@@ -337,6 +342,42 @@ class TheIndexIsWellFormed(unittest.TestCase):
             if finding["id"].rsplit("-", 1)[1] not in covered
         )
         self.assertEqual(missing, [], "findings with no recomputation test")
+
+    def test_prose_dataset_counts_match_the_index(self) -> None:
+        """PATTERNS.md said "Eight datasets" while the corpus held ten, and
+        ROADMAP.md said eight too. PATTERNS.md is generated and byte-compared,
+        which caught nothing, because the count was typed into the generator's
+        prose and so both sides went stale together. Counted here against the
+        index instead of trusted to a build that compares a file with itself."""
+        import re
+
+        expected = len({
+            f["dataset"] for f in findings_module.load()["findings"]
+        })
+        words = {
+            "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+            "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+            "twelve": 12,
+        }
+        for name in ("research/PATTERNS.md", "ROADMAP.md", "research/CORPUS.md"):
+            text = (ROOT / name).read_text(encoding="utf-8")
+            # Only phrasings that denote the corpus total. A sub-count such
+            # as "three datasets record two outcome signals" is a different
+            # quantity and is computed by its own generator.
+            for match in re.finditer(
+                r"\b(\w+)\s+(?:audited|public)\s+datasets\b"
+                r"|\b(\w+)\s+datasets, chosen partly\b", text, re.I
+            ):
+                token = (match.group(1) or match.group(2)).lower()
+                value = words.get(token, int(token) if token.isdigit() else None)
+                if value is None or value > 20:
+                    continue
+                with self.subTest(file=name, phrase=match.group(0)):
+                    self.assertEqual(
+                        value, expected,
+                        f"{name} says {match.group(0)!r}; the index has "
+                        f"{expected} datasets",
+                    )
 
     def test_the_page_recomputes(self) -> None:
         committed = (ROOT / "research" / "FINDINGS.md").read_text(encoding="utf-8")

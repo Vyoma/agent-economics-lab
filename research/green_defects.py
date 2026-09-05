@@ -355,7 +355,7 @@ def main(argv: list[str]) -> int:
 
     print("## What each probe asked\n")
     for row in rows:
-        print(f"### {row['id']} — {row['title']}\n")
+        print(f"### {row['id']}: {row['title']}\n")
         print(f"- **File:** `{row['file']}`")
         print(f"- **Live at** `{row['live_at']}`, **fixed by** `{row['fixed_by']}`")
         if row["introduced_by"]:

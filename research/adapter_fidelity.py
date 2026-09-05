@@ -10,18 +10,18 @@ The property measured here is conservation with a named remainder: every
 record in the source is either **cited** by a decoded economic entity, or it
 falls in an explicitly named bucket the adapter accounts for. A record that
 is neither has vanished, and vanishing is the adapter failure that no
-downstream check can see — a bundle missing a model call is a valid bundle
+downstream check can see: a bundle missing a model call is a valid bundle
 with a smaller cost.
 
 For each path this reports:
 
-* `source` — units in the raw export, counted from the raw bytes here, not
+* `source`: units in the raw export, counted from the raw bytes here, not
   from anything the adapter says about itself.
-* `cited` — units named by at least one decoded entity through its
+* `cited`: units named by at least one decoded entity through its
   traceability fields (record uuids, span ids, csv row ids).
-* `accounted` — units the adapter explicitly classifies as carrying no
+* `accounted`: units the adapter explicitly classifies as carrying no
   economics (OTLP structural spans, for instance). Named, not assumed.
-* `orphaned` — the remainder. **This must be zero**, and the guard in
+* `orphaned`: the remainder. **This must be zero**, and the guard in
   tests/test_adapter_fidelity.py fails the build when it is not.
 
 It also reports cost conservation: the bundle's total effective cost equals

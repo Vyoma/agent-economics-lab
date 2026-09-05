@@ -28,13 +28,13 @@ vendor published, and nothing here is a measurement of a model.
 |---|---|---:|---|
 | [tarsur385/swebench-verified-trajectories](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories) | `b55979d6` | 5,000 | 1 of 10 arms never confirmed by its cross-check; one duplicated arm pair, labels 91.2% self-consistent ([full audit](OUTCOME_AUDIT.md)) |
 | [togethercomputer/CoderForge-Preview-32B…](https://huggingface.co/datasets/togethercomputer/CoderForge-Preview-32B-SWE-Bench-Verified-Evaluation-trajectories) | `753f0504` | 500 | clean: reward re-derives from the raw logs on all 434 parseable rows |
-| [FUSE-verifiers/HLE-Verifications](https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) | `e838b3dd` | 649 | seven models asked to verify correctness reach AUC 0.501 to 0.653 against a checkable answer over 32,450 responses |
+| [FUSE-verifiers/HLE-Verifications](https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) | `e838b3dd` | 649 | seven models asked to verify correctness reach within-question AUC 0.491 to 0.581 against a checkable answer; four of the seven have intervals containing 0.5 |
 | [open-r1/OpenR1-Math-220k](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) | `e4e141ec` | 93,733 | 28,627 problems entered the published training set on a model judge's word alone, on rows where the symbolic checker had found nothing correct |
 | [SALT-NLP/cogym-real-trajectories](https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) | `729096dc` | 228 | the only human-rated entry: one person's ratings of one session agree exactly 50% of the time, and the communication rating exists on 22% of sessions |
 | [aisa-group/PostTrainBench-Trajectories](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) | `39d3fcd7` | 1,842 | 260 runs carry no usable outcome; the contamination judge's apparent effect on scores is 11.5x smaller once benchmark composition is held fixed |
 | [SWE-bench/SWE-smith-trajectories](https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) | `08e109b4` | 76,002 | labels self-consistent across every duplicate; the `patch` column is not row-aligned (266 verbatim cross-repository patch groups); 2,255 duplicate rows in one split |
 | [nebius/SWE-agent-trajectories](https://huggingface.co/datasets/nebius/SWE-agent-trajectories) | `68195a14` | 80,036 | clean: every coherence probe passes; resolved rows always carry a patch and evaluation logs; no duplicate transcripts |
-| [nebius/SWE-rebench-openhands-trajectories](https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) | `35455389` | 67,074 | clean labels; its recorded generated-test signal measures kappa 0.06 against adjudication over 31,389 runs |
+| [nebius/SWE-rebench-openhands-trajectories](https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) | `35455389` | 67,074 | clean labels; its recorded generated-test signal measures kappa 0.06 against adjudication over 31,389 runs, and agree 2.9 points less often than the majority-class baseline |
 | [JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified](https://huggingface.co/datasets/JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified) | `dd79e254` | 1,785 | `resolved` column present, populated on 0 rows |
 
 ## togethercomputer/CoderForge-Preview-32B, SWE-bench Verified, 500 rows
@@ -62,12 +62,15 @@ transcripts. No positive outcome on a run of one step or fewer.
 
 ## FUSE-verifiers/HLE-Verifications, 649 questions and 32,450 graded responses
 
-The corpus's sharpest result, that a proposed correctness signal
-agrees with adjudication at chance, rested on one dataset, one
-scaffold and one model family. The obvious objection is generality.
-This entry is the replication, and it is a harder test: a different
-domain, a different kind of instrument, and seven graders instead
-of one.
+A second negative result on an outcome instrument, and deliberately
+not called a replication of AEL-2026-008. That entry measured
+whether an agent's own generated tests passing predicts hidden-test
+resolution: an execution signal, scored by agreement. This measures
+whether a model's quality score ranks answer-key correctness: a
+graded judgment, scored by rank. Different construct, different
+instrument class, different statistic. Two weak results about two
+different things are two results, not one confirmed twice, and the
+generality of the corpus rests on that distinction being kept.
 
 649 Humanity's Last Exam questions, 50 candidate responses each.
 Every response is marked correct or not by matching the published
@@ -76,43 +79,75 @@ dataset calls verifiers. The base rate is 51.4%,
 so this is a near-balanced problem rather than one where a constant
 answer scores well.
 
-| verifier | responses | AUC | 95% CI |
-|---|---:|---:|---|
-| `Qwen2.5-72B-Instruct` | 32,450 | 0.501 * | [0.486, 0.514] |
-| `Skywork-Critic-Llama-3.1-70B` | 32,442 | 0.550 | [0.531, 0.570] |
-| `deepseek_reasoner` | 32,417 | 0.586 | [0.565, 0.609] |
-| `gemini-3-flash` | 13,166 | 0.587 | [0.572, 0.603] |
-| `gpt-oss-120b` | 32,437 | 0.537 | [0.514, 0.562] |
-| `gpt5.2-high` | 32,297 | 0.653 | [0.623, 0.681] |
-| `gptmini-high` | 32,450 | 0.578 | [0.554, 0.605] |
+| verifier | scored | questions | within-question AUC | 95% CI | pooled |
+|---|---:|---:|---:|---|---:|
+| `gpt-oss-120b` | 32,437 | 538 | 0.491 * | [0.472, 0.510] | 0.537 |
+| `Qwen2.5-72B-Instruct` | 32,450 | 538 | 0.500 * | [0.488, 0.512] | 0.501 |
+| `Skywork-Critic-Llama-3.1-70B` | 32,442 | 538 | 0.505 * | [0.491, 0.520] | 0.550 |
+| `gptmini-high` | 32,450 | 538 | 0.515 * | [0.493, 0.536] | 0.578 |
+| `deepseek_reasoner` | 32,417 | 538 | 0.535 | [0.517, 0.553] | 0.586 |
+| `gpt5.2-high` | 32,297 | 536 | 0.547 | [0.522, 0.571] | 0.653 |
+| `gemini-3-flash` | 13,166 | 441 | 0.581 | [0.563, 0.598] | 0.587 |
 
 \* interval contains 0.5, so that grader is not distinguishable
-from random on this data.
+from random at ranking within a question. Four of seven are.
+
+**Why within question, and why the pooled column is worse.** These
+graders exist to pick the right response among fifty candidates to
+the same question, so the question is the unit and the statistic is
+how well a grader ranks inside one. Pooling all responses into a
+single ranking lets a grader score well by detecting that a question
+is easy, which is not the job. This entry published the pooled
+figure first, and it flattered every grader: the range was 0.501 to 0.653 pooled and is 0.491 to 0.581 within question, with `Qwen2.5-72B-Instruct` crossing below chance. The gap between the two columns is the size of the
+between-question difficulty effect, which is why both are shown.
 
 **Why AUC and not an accuracy.** The graders score against a rubric
 the dataset does not publish, so no threshold can be justified from
 the data, and picking one would be choosing how generous to be. AUC
 asks only whether a higher score is more often a correct response,
 which is the weakest assumption under which a grader could be said
-to work at all. Every figure here is therefore the most favourable
-reading available.
+to work at all. It is not comparable to the agreement floors in
+SPEC section 7.2, which govern chance-corrected agreement
+coefficients and held-out accuracy; there is no AUC floor in that
+contract, and reading one across metric families is the category
+error this project has already published once.
 
 **Why the intervals are wide.** 32,450 responses sit inside 649
 questions and are not independent, so the bootstrap resamples
 questions rather than responses. Treating the responses as
 independent would give intervals several times too tight and would
-be the error this corpus most often finds elsewhere.
+be the error this corpus most often finds elsewhere. The draw count
+is 6,000, set by the resample-adequacy rule the frontier protocol
+already applies to a family this size; an earlier 400 put Monte
+Carlo noise in the published third decimal.
+
+**Prior work.** That model judges are imperfect is established: MT-Bench measured judge agreement with human preference,
+RewardBench scores reward models against it, and position,
+verbosity and self-preference bias each have a literature. What
+those measure is a judge against human preference on a curated set.
+This measures a shipped dataset's own scoring columns against an
+answer key, per question, at a pinned revision, and reports what a
+consumer of that dataset would get. The result is a census of
+published data, not a leaderboard entry, and it is not evidence
+that model grading cannot work.
 
 **What it does not establish.** Every response was generated by one
 model, so this measures graders on that model's output rather than
 on output in general. The ground truth is exact matching against a
 published answer, with a model used to parse answer formats, so it
 is checkable but not untouched by a model. HLE is adversarially
-hard by construction. And one (question, grader) pair of 4543
+hard by construction. And one (question, grader) pair of 4,543
 was excluded because that grader scored 47 of 50 responses and
 nothing in the data says which 47; the alignment is unknowable, so
 it is dropped and counted rather than zipped, which would have
 silently truncated to the shorter list.
+
+**One grader is mostly absent, and it is the top row.** `gemini-3-flash` carries no score on 19,284 of the 32,450 responses, scoring 441 of 538 rankable questions. Its figure is computed on the subset it
+did score, the missingness is not random with respect to outcome,
+and the direction of the resulting bias is unknown. It is left in
+the table with its coverage stated rather than dropped, because
+dropping the highest scorer without saying so would be the more
+flattering choice.
 
 Evidence: [frozen/hle-verifiers.json](corpus/frozen/hle-verifiers.json),
 content-free, carrying the SHA-256 of the source file it read.
@@ -165,10 +200,7 @@ compared the final boxed answer with the published one:
 It does not settle the question, and it is reported as failing to.
 Most of the gap is shape rather than substance: a generation boxing
 a multiple-choice letter against a published value, or a published
-answer carrying several roots at once. Only 18 of
-398, 4.5%, put an unambiguous number on both
-sides and disagree, and answer-format heterogeneity is itself the
-likeliest reason the symbolic check failed here to begin with.
+answer carrying several roots at once. Of the 398 checked, only 20 reduce to an unambiguous number on both sides at all, and of those 18 disagree: 90% of the comparable cases, not the 4.5% a reader gets by dividing into everything. This entry published the second figure first, which mixes "could not compare" into "compared and agreed" and is the denominator error the corpus finds elsewhere. The honest reading is that the comparable subset is small and mostly disagrees, and that answer-format heterogeneity is itself the likeliest reason the symbolic check failed here to begin with.
 Only where both sides reduce
 to a single unambiguous number and differ does the comparison bear
 on the judge, and this project has already published a
@@ -382,8 +414,8 @@ instrument. Here both signals sit on the same
 31,389 rows, which is a validity
 measurement at scale:
 
-- Raw agreement 51.4%, Cohen's kappa
-  **0.062** - indistinguishable from guessing.
+- Raw agreement 51.4%, against a majority-class baseline of 54.2%: consulting the proxy is **-2.9 points** against always answering with the commoner label.
+- Cohen's kappa **0.062**, 95% CI [0.047, 0.077] bootstrapped over 5,870 instances. Reliably above zero and far too small to act on. This entry said "indistinguishable from guessing" before the interval existed, which was wrong in the direction of overstating: chance is zero and this excludes zero. The useful statement is the line above it, that the signal is worse than the baseline it has to beat.
 - Conditioned on the generated tests themselves being judged
   correct (9,444 rows): kappa
   0.101, precision
@@ -409,7 +441,7 @@ recomputes offline.
 The `resolved` column is null on all 1,785 rows. 1,221 runs report
 `exit_status` "Submitted" and 564
 "LimitsExceeded"; none carries an
-adjudicated outcome. That is not an accusation — publishing
+adjudicated outcome. That is not an accusation: publishing
 trajectories without scoring them is a legitimate choice, and the
 column is honestly null rather than defaulted to a flattering value.
 It is a warning to consumers: a resolution rate computed from this
@@ -424,7 +456,7 @@ No duplicate transcripts. Outcome census: {'null': 1785}.
 the repository SHA (refusing a snapshot that moved mid-fetch, a
 partial arm, or a truncated cell), keeps identifiers, outcome fields,
 step counts, and SHA-256 hashes of the content it refuses to copy,
-and — where raw logs ship beside graded-test lists — the
+and, where raw logs ship beside graded-test lists, the
 re-adjudication verdict. `research/corpus/audit.py` renders this
 document from the frozen evidence alone; `make corpus` fails when the
 two disagree. No prompts, responses, patches, or logs are stored.

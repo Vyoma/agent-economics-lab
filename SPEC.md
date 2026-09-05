@@ -15,7 +15,7 @@ reason is stated inline. Clause numbers are stable; the conformance tests in
 **1.2** In CI mode (`evaluate --ci`, the GitHub Action), the exit code
 mapping is `SCALE: 0`, `INCOMPLETE: 2`, `ASSIST: 3`, `STOP: 4`. **Exit 0
 MUST be reachable only by `SCALE`.** Operational failures (unreadable
-evidence, invalid attestations, unknown checks) exit 2 — indistinguishable
+evidence, invalid attestations, unknown checks) exit 2, indistinguishable
 from `INCOMPLETE` by design: a decision that could not be computed is an
 incomplete decision, not a new success code.
 
@@ -42,7 +42,7 @@ declare empty coverage and MUST NOT carry a failure route.
 (constant `routing_semantics` in the contract manifest).
 
 **3.2** `missing_coverage = required − enabled` (gate-mode checks only).
-When non-empty, the answer is `INCOMPLETE` and **no check runs at all** —
+When non-empty, the answer is `INCOMPLETE` and **no check runs at all**:
 running checks under an unmet contract would manufacture partial confidence.
 
 **3.3** A gate that raises is converted to a synthetic `FAIL` routed to its
@@ -59,7 +59,7 @@ outranks any `ASSIST`. No failures and no missing coverage → `SCALE`.
 function that evaluates and audits as one act. A `SCALE` the audit refuses
 is returned as `INCOMPLETE` with each audit ground appended to
 `missing_coverage` as `"audit: <ground>"`. All other fields of the case are
-unchanged, so a demoted case still shows its all-PASS check results — the
+unchanged, so a demoted case still shows its all-PASS check results: the
 refusal is about admissibility, not about the checks.
 
 **4.2** `ASSIST`, `STOP`, and `INCOMPLETE` pass through untouched: they are
@@ -86,17 +86,17 @@ ensure_ascii=False)`.
 **5.2** The manifest carries: the schema constant
 (`assurance.decision-contract@2`), the engine implementation constant, the
 routing-semantics constant, the sorted required-coverage names, and one
-entry per check **in evaluation order** — reordering checks changes the
+entry per check **in evaluation order**: reordering checks changes the
 digest, and claims deliberately record evaluation order. Each entry:
 `manifest_id` (`id@version`), `mode`, `covers` (sorted names),
 `failure_route` (the route's value; the literal `"dynamic"` for a gate with
 no declared route; `null` for diagnostics), `implementation_digest`, and
-`config` **only when non-empty** — an absent key and an empty mapping are
+`config` **only when non-empty**: an absent key and an empty mapping are
 the same contract, so old digests survive the field's introduction.
 
 **5.3** `implementation_digest` is SHA-256 of the check's `run` source:
 `inspect.getsource`, dedented, per-line right-stripped, joined with `"\n"`,
-stripped. It is **non-transitive** — helpers and closure state are not
+stripped. It is **non-transitive**: helpers and closure state are not
 captured, and this limit is documented rather than papered over. A check
 whose source cannot be retrieved MUST be refused, not admitted unbound.
 
@@ -131,7 +131,7 @@ floor (`agreement-vs-human-adjudication` 0.80, `raw-agreement` 0.80,
 `cohens-kappa` 0.60, `fleiss-kappa` 0.60, `krippendorff-alpha` 0.667,
 `held-out-accuracy` 0.80), whose sample size meets the policy minimum
 (default 100), and whose age at the supplied `as_of` date is within the
-policy window (default 180 days) and not negative — a future-dated
+policy window (default 180 days) and not negative: a future-dated
 calibration is not a calibration that has happened.
 
 **7.3** `test-retest-agreement` carries a floor (0.80) but is
@@ -152,15 +152,15 @@ the required coverage, `issued_at`, optional issuer and source commit.
 **8.2** Verification is **total**: it returns exactly `SUPPORTED`,
 `REFUTED`, or `UNVERIFIED` and MUST NOT raise. The verdict semantics:
 
-- `REFUTED` — the evidence digest does not recompute; or the contract
+- `REFUTED`: the evidence digest does not recompute; or the contract
   digest does not recompute; or re-evaluation yields a different decision.
-- `UNVERIFIED` — a bound check is unknown, version-mismatched, or
+- `UNVERIFIED`: a bound check is unknown, version-mismatched, or
   source-substituted; the claim ships a gate covering a dimension it does
   not require (a requirement does not depart with the gate that served it);
   a shipped-contract claim requires less than the shipped coverage; the
   policy or baseline is inert (thresholds no evidence could fail); or
   verification could not complete for any other reason.
-- `SUPPORTED` — everything above passed. Caveats may attach; they never
+- `SUPPORTED`: everything above passed. Caveats may attach; they never
   upgrade or downgrade the verdict.
 
 **8.3** A refuted published claim MUST fail the build until retracted, never

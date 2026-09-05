@@ -1,8 +1,8 @@
 """The corpus: every public agent-trajectory dataset this project has audited.
 
 One dataset with findings is an anecdote. A registry of datasets each audited
-the same way — same checks, same content-free frozen evidence, same refusal to
-guess — is an instrument with a track record. This renders that registry from
+the same way (same checks, same content-free frozen evidence, same refusal to
+guess) is an instrument with a track record. This renders that registry from
 the frozen evidence and nothing else; `make corpus` fails if the committed
 document and the evidence disagree.
 
@@ -123,7 +123,7 @@ def nebius_sweagent_summary() -> dict:
         ),
         "repeat_attempt_pairs": sum(
             c - 1
-            for c in __import__("collections").Counter(
+            for c in Counter(
                 r["id"] for r in rows
             ).values()
             if c > 1
@@ -167,10 +167,58 @@ def nebius_openhands_summary() -> dict:
             "RuntimeError: Agent reached maximum"
         )
     ]
+    # The majority-class baseline, which is the number the agreement figure
+    # has to beat to be worth consulting. It is not beaten. Reporting an
+    # agreement rate without it is the omission this corpus keeps finding
+    # elsewhere, and it stood here unremarked for four entries.
+    resolved_n = sum(1 for r in present if r["outcome"] == 1)
+    majority = max(resolved_n, len(present) - resolved_n) / len(present)
+
+    # An interval on the kappa, clustered over instances because the same
+    # instance appears under several runs. Published as "chance" before this
+    # existed, which is wrong: chance is zero and this interval excludes it.
+    # The number is reliably non-zero and far too small to act on, and those
+    # are different statements.
+    import random as _random
+    _random.seed(20260905)
+    # Per-instance 2x2 sufficient statistics, so a draw sums four integers
+    # per cluster instead of rescanning 31,389 rows. A first version did the
+    # latter and put 60 seconds into every test run that touched this entry.
+    cells: dict[str, list[int]] = {}
+    for row in present:
+        cell = cells.setdefault(row["instance_id"], [0, 0, 0, 0])
+        cell[(0 if row["outcome"] == 1 else 2) + (0 if row["cross"] == 1.0 else 1)] += 1
+    table = list(cells.values())
+    n11 = [c[0] for c in table]
+    n10 = [c[1] for c in table]
+    n01 = [c[2] for c in table]
+    n00 = [c[3] for c in table]
+    size = len(table)
+    draws = []
+    for _ in range(2000):
+        idx = [_random.randrange(size) for _ in range(size)]
+        a = sum(n11[i] for i in idx)
+        b = sum(n10[i] for i in idx)
+        c = sum(n01[i] for i in idx)
+        d = sum(n00[i] for i in idx)
+        total = a + b + c + d
+        if not total:
+            continue
+        po = (a + d) / total
+        pe = ((a + b) * (a + c) + (c + d) * (b + d)) / (total * total)
+        if pe < 1:
+            draws.append((po - pe) / (1 - pe))
+    draws.sort()
+
     return {
         "revision": doc["revision"],
         "rows": len(rows),
         "resolved": sum(1 for r in rows if r["outcome"] == 1),
+        "majority_baseline": majority,
+        "agreement_minus_majority": po_all - majority,
+        "kappa_low": draws[int(0.025 * len(draws))],
+        "kappa_high": draws[int(0.975 * len(draws))],
+        "kappa_clusters": size,
         "duplicate_transcript_groups": len(dup_groups),
         "empty_patches": sum(1 for r in rows if r["patch_empty"]),
         "empty_patch_resolved": sum(
@@ -219,47 +267,69 @@ def _auc(pairs: list) -> float | None:
 
 
 def hle_verifier_summary() -> dict:
-    """Seven models asked to verify correctness, against a checkable answer."""
+    """Seven models asked to verify correctness, against a checkable answer.
+
+    Reported within question, not pooled. The graders' job on this dataset is
+    to pick the right response among fifty candidates to the same question,
+    so the statistic that matters is how well a grader ranks inside a
+    question. Pooling all 32,450 responses into one ranking lets a grader
+    score well by noticing that a question is easy, which is not the task.
+    This entry published the pooled figure first, and pooling flattered every
+    grader: the best fell from 0.653 to 0.547 and one crossed from 0.537 to
+    below chance. The pooled number is kept beside it, because the gap
+    between them is the size of the between-question effect and is worth
+    seeing, but the within-question figure is the claim.
+    """
     import random
 
     document = _load("hle-verifiers")
     rows = document["rows"]
     judges = document["judges"]
 
-    by_question: dict[str, list] = {j: [] for j in judges}
-    for row in rows:
-        for judge in judges:
-            values = row["scores"].get(judge)
-            if values is None:
-                continue
-            by_question[judge].append([
-                (float(s), bool(y)) for s, y in zip(values, row["correct"])
-                if s is not None
-            ])
-
-    # Responses are clustered inside questions, so the bootstrap resamples
-    # questions. Treating 32,450 responses as independent would give an
-    # interval several times too tight.
     random.seed(20260903)
     graders = []
     for judge in sorted(judges):
-        clusters = by_question[judge]
-        flat = [pair for cluster in clusters for pair in cluster]
-        point = _auc(flat)
-        draws = []
-        for _ in range(400):
-            pool = []
-            for _ in range(len(clusters)):
-                pool.extend(clusters[random.randrange(len(clusters))])
-            value = _auc(pool)
+        per_question, pooled, nulls = [], [], 0
+        for row in rows:
+            values = row["scores"].get(judge)
+            if values is None:
+                continue
+            nulls += sum(1 for v in values if v is None)
+            pairs = [
+                (float(s), bool(y))
+                for s, y in zip(values, row["correct"]) if s is not None
+            ]
+            pooled.extend(pairs)
+            # A question whose responses are all correct or all wrong cannot
+            # rank anything, so it carries no information about a grader and
+            # is dropped rather than scored 0.5, which would pull every
+            # grader toward the middle by an amount set by the dataset.
+            value = _auc(pairs)
             if value is not None:
-                draws.append(value)
-        draws.sort()
+                per_question.append(value)
+
+        point = sum(per_question) / len(per_question)
+        # Resampling questions, which are the independent unit. The mean of
+        # per-question AUCs is cheap to resample once each question's AUC is
+        # computed, so this runs the 6,000 draws the frontier protocol's own
+        # adequacy rule requires of a seven-member family, rather than the
+        # 400 that put Monte Carlo noise in the published third decimal.
+        draws = sorted(
+            sum(per_question[random.randrange(len(per_question))]
+                for _ in per_question) / len(per_question)
+            for _ in range(6000)
+        )
         low = draws[int(0.025 * len(draws))]
         high = draws[int(0.975 * len(draws))]
         graders.append({
-            "judge": judge, "pairs": len(flat), "auc": point,
-            "low": low, "high": high,
+            "judge": judge,
+            "pairs": len(pooled),
+            "null_scores": nulls,
+            "questions_scored": len(per_question),
+            "auc": point,
+            "low": low,
+            "high": high,
+            "pooled_auc": _auc(pooled),
             "indistinguishable_from_random": low <= 0.5 <= high,
         })
 
@@ -273,17 +343,38 @@ def hle_verifier_summary() -> dict:
         "excluded_pairs": sum(len(r["misaligned_graders"]) for r in rows),
         "best": max(graders, key=lambda g: g["auc"]),
         "worst": min(graders, key=lambda g: g["auc"]),
+        "below_chance": [g["judge"] for g in graders if g["auc"] < 0.5],
+        "pooled_best": max(g["pooled_auc"] for g in graders),
+        "pooled_worst": min(g["pooled_auc"] for g in graders),
     }
 
 
 RATINGS = ("outcomeRating", "agentRating", "communicationRating")
 
 
+def _qwk(observed: list[tuple[int, int]]) -> float:
+    """Quadratic-weighted kappa on (rating, rating) pairs."""
+    n = len(observed)
+    if not n:
+        return float("nan")
+    categories = sorted({v for pair in observed for v in pair})
+    if len(categories) < 2:
+        return float("nan")
+    span = (categories[-1] - categories[0]) ** 2
+    marginal_a = {c: sum(1 for a, _ in observed if a == c) for c in categories}
+    marginal_b = {c: sum(1 for _, b in observed if b == c) for c in categories}
+    numerator = sum(((a - b) ** 2 / span) for a, b in observed) / n
+    denominator = sum(
+        ((i - j) ** 2 / span) * marginal_a[i] * marginal_b[j] / n
+        for i in categories for j in categories
+    ) / n
+    return 1 - numerator / denominator if denominator else float("nan")
+
+
 def cogym_summary() -> dict:
     """Human ratings: coverage, and how far apart one person's answers run."""
     import itertools
     import statistics
-    from collections import Counter
 
     document = _load("cogym")
     rows = document["rows"]
@@ -323,6 +414,34 @@ def cogym_summary() -> dict:
         f"{a}|{b}": agreement(a, b)
         for a, b in itertools.combinations(RATINGS, 2)
     }
+
+    # An interval on each QWK. The summary page graded 0.625 against a 0.60
+    # floor and printed "yes", which is deciding pass or fail from a point
+    # estimate at n=191: the failure mode this package exists to refuse,
+    # executed on its own summary of itself.
+    import random as _random
+    _random.seed(20260905)
+    for key, (first, second) in (
+        (f"{a}|{b}", (a, b)) for a, b in itertools.combinations(RATINGS, 2)
+    ):
+        observed = [
+            (r[first], r[second]) for r in rows
+            if r[first] is not None and r[second] is not None
+        ]
+        if len(observed) < 30:
+            continue
+        draws = []
+        for _ in range(2000):
+            sample = [
+                observed[_random.randrange(len(observed))]
+                for _ in observed
+            ]
+            value = _qwk(sample)
+            if value == value:
+                draws.append(value)
+        draws.sort()
+        pairs[key]["qwk_low"] = draws[int(0.025 * len(draws))]
+        pairs[key]["qwk_high"] = draws[int(0.975 * len(draws))]
     short = [
         r for r in rows if r["event_count"] <= 3 and r["agentRating"] is not None
     ]
@@ -526,6 +645,14 @@ def _tarsur_summary() -> dict:
     return {"rows": rows, "arms": len(arms), "unconfirmed_arms": unconfirmed}
 
 
+def _comparable(openr1: dict) -> int:
+    """Cases where both sides reduce to one unambiguous number, which is the
+    only subset the boxed-answer comparison can speak about."""
+    verdicts = openr1["answer_check"]["verdicts"]
+    return (verdicts.get("both_numeric_and_differ", 0)
+            + verdicts.get("matches_published_answer", 0))
+
+
 def openr1_math_summary() -> dict:
     """Two verification columns arranged so they can never be compared."""
     import random
@@ -677,9 +804,10 @@ def render() -> str:
             "| [FUSE-verifiers/HLE-Verifications]"
             "(https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) "
             f"| `{hle['revision'][:8]}` | {hle['questions']} "
-            f"| seven models asked to verify correctness reach AUC "
-            f"{hle['worst']['auc']:.3f} to {hle['best']['auc']:.3f} against a "
-            f"checkable answer over {hle['responses']:,} responses |"
+            f"| seven models asked to verify correctness reach"
+            f" within-question AUC {hle['worst']['auc']:.3f} to"
+            f" {hle['best']['auc']:.3f} against a checkable answer; four of"
+            " the seven have intervals containing 0.5 |"
         ),
         (
             "| [open-r1/OpenR1-Math-220k]"
@@ -730,7 +858,9 @@ def render() -> str:
             f"| `{openhands['revision'][:8]}` | {openhands['rows']:,} "
             "| clean labels; its recorded generated-test signal measures "
             f"kappa {openhands['kappa']:.2f} against adjudication over "
-            f"{openhands['cross_present']:,} runs |"
+            f"{openhands['cross_present']:,} runs, and agree"
+            f" {abs(openhands['agreement_minus_majority']) * 100:.1f} points"
+            " less often than the majority-class baseline |"
         ),
         (
             "| [JetBrains-Research/agent-trajectories-swe-bench-test-minus-verified]"
@@ -767,12 +897,15 @@ def render() -> str:
         "## FUSE-verifiers/HLE-Verifications, "
         f"{hle['questions']} questions and {hle['responses']:,} graded responses",
         "",
-        "The corpus's sharpest result, that a proposed correctness signal",
-        "agrees with adjudication at chance, rested on one dataset, one",
-        "scaffold and one model family. The obvious objection is generality.",
-        "This entry is the replication, and it is a harder test: a different",
-        "domain, a different kind of instrument, and seven graders instead",
-        "of one.",
+        "A second negative result on an outcome instrument, and deliberately",
+        "not called a replication of AEL-2026-008. That entry measured",
+        "whether an agent's own generated tests passing predicts hidden-test",
+        "resolution: an execution signal, scored by agreement. This measures",
+        "whether a model's quality score ranks answer-key correctness: a",
+        "graded judgment, scored by rank. Different construct, different",
+        "instrument class, different statistic. Two weak results about two",
+        "different things are two results, not one confirmed twice, and the",
+        "generality of the corpus rests on that distinction being kept.",
         "",
         "649 Humanity's Last Exam questions, 50 candidate responses each.",
         "Every response is marked correct or not by matching the published",
@@ -781,45 +914,91 @@ def render() -> str:
         "so this is a near-balanced problem rather than one where a constant",
         "answer scores well.",
         "",
-        "| verifier | responses | AUC | 95% CI |",
-        "|---|---:|---:|---|",
+        "| verifier | scored | questions | within-question AUC | 95% CI"
+        " | pooled |",
+        "|---|---:|---:|---:|---|---:|",
     ]
-    for grader in hle["graders"]:
+    for grader in sorted(hle["graders"], key=lambda g: g["auc"]):
         note = " *" if grader["indistinguishable_from_random"] else ""
         lines.append(
             f"| `{grader['judge']}` | {grader['pairs']:,} "
+            f"| {grader['questions_scored']} "
             f"| {grader['auc']:.3f}{note} | [{grader['low']:.3f}, "
-            f"{grader['high']:.3f}] |"
+            f"{grader['high']:.3f}] | {grader['pooled_auc']:.3f} |"
         )
     lines += [
         "",
         "\\* interval contains 0.5, so that grader is not distinguishable",
-        "from random on this data.",
+        "from random at ranking within a question. Four of seven are.",
+        "",
+        "**Why within question, and why the pooled column is worse.** These",
+        "graders exist to pick the right response among fifty candidates to",
+        "the same question, so the question is the unit and the statistic is",
+        "how well a grader ranks inside one. Pooling all responses into a",
+        "single ranking lets a grader score well by detecting that a question",
+        "is easy, which is not the job. This entry published the pooled",
+        f"figure first, and it flattered every grader: the range was"
+        f" {hle['pooled_worst']:.3f} to {hle['pooled_best']:.3f}"
+        f" pooled and is {hle['worst']['auc']:.3f} to"
+        f" {hle['best']['auc']:.3f} within question, with"
+        f" `{hle['below_chance'][0] if hle['below_chance'] else ''}` crossing"
+        " below chance. The gap between the two columns is the size of the",
+        "between-question difficulty effect, which is why both are shown.",
         "",
         "**Why AUC and not an accuracy.** The graders score against a rubric",
         "the dataset does not publish, so no threshold can be justified from",
         "the data, and picking one would be choosing how generous to be. AUC",
         "asks only whether a higher score is more often a correct response,",
         "which is the weakest assumption under which a grader could be said",
-        "to work at all. Every figure here is therefore the most favourable",
-        "reading available.",
+        "to work at all. It is not comparable to the agreement floors in",
+        "SPEC section 7.2, which govern chance-corrected agreement",
+        "coefficients and held-out accuracy; there is no AUC floor in that",
+        "contract, and reading one across metric families is the category",
+        "error this project has already published once.",
         "",
         "**Why the intervals are wide.** 32,450 responses sit inside 649",
         "questions and are not independent, so the bootstrap resamples",
         "questions rather than responses. Treating the responses as",
         "independent would give intervals several times too tight and would",
-        "be the error this corpus most often finds elsewhere.",
+        "be the error this corpus most often finds elsewhere. The draw count",
+        "is 6,000, set by the resample-adequacy rule the frontier protocol",
+        "already applies to a family this size; an earlier 400 put Monte",
+        "Carlo noise in the published third decimal.",
+        "",
+        "**Prior work.** That model judges are imperfect is established:"
+        " MT-Bench measured judge agreement with human preference,",
+        "RewardBench scores reward models against it, and position,",
+        "verbosity and self-preference bias each have a literature. What",
+        "those measure is a judge against human preference on a curated set.",
+        "This measures a shipped dataset's own scoring columns against an",
+        "answer key, per question, at a pinned revision, and reports what a",
+        "consumer of that dataset would get. The result is a census of",
+        "published data, not a leaderboard entry, and it is not evidence",
+        "that model grading cannot work.",
         "",
         "**What it does not establish.** Every response was generated by one",
         "model, so this measures graders on that model's output rather than",
         "on output in general. The ground truth is exact matching against a",
         "published answer, with a model used to parse answer formats, so it",
         "is checkable but not untouched by a model. HLE is adversarially",
-        f"hard by construction. And one (question, grader) pair of {hle['excluded_pairs'] + 4542}",
+        f"hard by construction. And one (question, grader) pair of"
+        f" {hle['questions'] * len(hle['graders']):,}",
         "was excluded because that grader scored 47 of 50 responses and",
         "nothing in the data says which 47; the alignment is unknowable, so",
         "it is dropped and counted rather than zipped, which would have",
         "silently truncated to the shorter list.",
+        "",
+        "**One grader is mostly absent, and it is the top row.**"
+        f" `gemini-3-flash` carries no score on"
+        f" {next(g['null_scores'] for g in hle['graders'] if g['judge'] == 'gemini-3-flash'):,}"
+        " of the 32,450 responses, scoring"
+        f" {next(g['questions_scored'] for g in hle['graders'] if g['judge'] == 'gemini-3-flash')}"
+        " of 538 rankable questions. Its figure is computed on the subset it",
+        "did score, the missingness is not random with respect to outcome,",
+        "and the direction of the resulting bias is unknown. It is left in",
+        "the table with its coverage stated rather than dropped, because",
+        "dropping the highest scorer without saying so would be the more",
+        "flattering choice.",
         "",
         "Evidence: [frozen/hle-verifiers.json](corpus/frozen/hle-verifiers.json),",
         "content-free, carrying the SHA-256 of the source file it read.",
@@ -876,11 +1055,21 @@ def render() -> str:
         "It does not settle the question, and it is reported as failing to.",
         "Most of the gap is shape rather than substance: a generation boxing",
         "a multiple-choice letter against a published value, or a published",
-        f"answer carrying several roots at once. Only {openr1['answer_check']['verdicts'].get('both_numeric_and_differ', 0)} of",
-        f"{sum(openr1['answer_check']['verdicts'].values())},"
-        f" {openr1['answer_check']['verdicts'].get('both_numeric_and_differ', 0) / sum(openr1['answer_check']['verdicts'].values()):.1%}, put an unambiguous number on both",
-        "sides and disagree, and answer-format heterogeneity is itself the",
-        "likeliest reason the symbolic check failed here to begin with.",
+        "answer carrying several roots at once. Of the"
+        f" {sum(openr1['answer_check']['verdicts'].values())} checked, only"
+        f" {_comparable(openr1)} reduce to an unambiguous number on both"
+        " sides at all, and of those"
+        f" {openr1['answer_check']['verdicts'].get('both_numeric_and_differ', 0)}"
+        f" disagree: {openr1['answer_check']['verdicts'].get('both_numeric_and_differ', 0) / _comparable(openr1):.0%}"
+        " of the comparable cases, not the"
+        f" {openr1['answer_check']['verdicts'].get('both_numeric_and_differ', 0) / sum(openr1['answer_check']['verdicts'].values()):.1%}"
+        " a reader gets by dividing into everything. This entry published"
+        " the second figure first, which mixes \"could not compare\" into"
+        " \"compared and agreed\" and is the denominator error the corpus"
+        " finds elsewhere. The honest reading is that the comparable subset"
+        " is small and mostly disagrees, and that answer-format"
+        " heterogeneity is itself the likeliest reason the symbolic check"
+        " failed here to begin with.",
         "Only where both sides reduce",
         "to a single unambiguous number and differ does the comparison bear",
         "on the judge, and this project has already published a",
@@ -1121,8 +1310,19 @@ def render() -> str:
         f"{openhands['cross_present']:,} rows, which is a validity",
         "measurement at scale:",
         "",
-        f"- Raw agreement {openhands['agreement']:.1%}, Cohen's kappa",
-        f"  **{openhands['kappa']:.3f}** - indistinguishable from guessing.",
+        f"- Raw agreement {openhands['agreement']:.1%}, against a"
+        f" majority-class baseline of"
+        f" {openhands['majority_baseline']:.1%}: consulting the proxy is"
+        f" **{openhands['agreement_minus_majority'] * 100:+.1f} points**"
+        " against always answering with the commoner label.",
+        f"- Cohen's kappa **{openhands['kappa']:.3f}**, 95% CI"
+        f" [{openhands['kappa_low']:.3f}, {openhands['kappa_high']:.3f}]"
+        f" bootstrapped over {openhands['kappa_clusters']:,} instances."
+        " Reliably above zero and far too small to act on. This entry said"
+        " \"indistinguishable from guessing\" before the interval existed,"
+        " which was wrong in the direction of overstating: chance is zero"
+        " and this excludes zero. The useful statement is the line above"
+        " it, that the signal is worse than the baseline it has to beat.",
         "- Conditioned on the generated tests themselves being judged",
         f"  correct ({openhands['valid_n']:,} rows): kappa",
         f"  {openhands['valid_kappa']:.3f}, precision",
@@ -1149,7 +1349,7 @@ def render() -> str:
         f"{jb_cross.get('Submitted', 0):,} runs report",
         f"`exit_status` \"Submitted\" and {jb_cross.get('LimitsExceeded', 0)}",
         "\"LimitsExceeded\"; none carries an",
-        "adjudicated outcome. That is not an accusation — publishing",
+        "adjudicated outcome. That is not an accusation: publishing",
         "trajectories without scoring them is a legitimate choice, and the",
         "column is honestly null rather than defaulted to a flattering value.",
         "It is a warning to consumers: a resolution rate computed from this",
@@ -1165,7 +1365,7 @@ def render() -> str:
         "the repository SHA (refusing a snapshot that moved mid-fetch, a",
         "partial arm, or a truncated cell), keeps identifiers, outcome fields,",
         "step counts, and SHA-256 hashes of the content it refuses to copy,",
-        "and — where raw logs ship beside graded-test lists — the",
+        "and, where raw logs ship beside graded-test lists, the",
         "re-adjudication verdict. `research/corpus/audit.py` renders this",
         "document from the frozen evidence alone; `make corpus` fails when the",
         "two disagree. No prompts, responses, patches, or logs are stored.",

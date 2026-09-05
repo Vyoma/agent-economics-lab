@@ -7,8 +7,8 @@ stable handle, no priority date, and no fixed wording to quote, so every
 reference to it has to re-explain it and every re-explanation drifts.
 
 This is the index. One line per finding, each with an identifier that never
-changes, the date it was first published, the command that checks it, and
-the scope it does not claim. The numbers are duplicated into findings.json
+changes, the date it was first published, the command that checks it, what
+to do about it if you use the dataset, and the scope it does not claim. The numbers are duplicated into findings.json
 deliberately, so a citation is stable text rather than a moving computation,
 and tests/test_findings.py recomputes every one of them from the frozen
 evidence and fails the build when the two disagree.
@@ -49,7 +49,8 @@ def render() -> str:
         "",
         "Every audit result this project has published, with a stable",
         "identifier, the date it was first published, the command that checks",
-        "it, and the scope it does not claim.",
+        "it, what to do about it if you use the dataset, and the scope it does",
+        "not claim.",
         "",
         f"**{len(standing)} standing: {kinds['defect']} defects, "
         f"{kinds['measurement']} measurements, {kinds['clean']} clean bills.** "
@@ -89,6 +90,8 @@ def render() -> str:
             finding["statement"],
             "",
             f"**Check it.** `{finding['verify']}`",
+            "",
+            f"**If you use this dataset.** {finding['action']}",
             "",
             f"**What it does not claim.** {finding['scope']}",
             "",

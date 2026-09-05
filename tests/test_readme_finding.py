@@ -1,8 +1,8 @@
 """Every numeral in the README's finding section, bound to frozen evidence.
 
-An adversarial audit corrupted the README's most-quoted figures — the 44
+An adversarial audit corrupted the README's most-quoted figures: the 44
 disagreements, the 91.2%, the spread, the nine idle runs, the GIF alt text's
-23-across-588 — and the entire suite stayed green, under a front page claiming
+23-across-588, and the entire suite stayed green, under a front page claiming
 every published number is verified in CI. The quotable sentences were exactly
 the unguarded ones: the same figures inside generated documents were
 byte-compared, and their hand-typed README copies were not.
@@ -156,6 +156,9 @@ COMPUTED: dict[str, str] = {
     # the registry sentence: the generated-test instrument measurement,
     # rederived from the frozen nebius-openhands evidence
     "0.062": f"{_openhands()['kappa']:.3f}",
+    # The number that makes the kappa actionable: the proxy scores this many
+    # points below always answering with the commoner label.
+    "2.9": f"{abs(_openhands()['agreement_minus_majority']) * 100:.1f}",
     "31,389": f"{_openhands()['cross_present']:,}",
 }
 

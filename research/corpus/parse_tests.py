@@ -97,9 +97,9 @@ def readjudicate(log: str, f2p: list[str], p2p: list[str]) -> dict:
     """Re-derive resolution from the raw log, or refuse.
 
     verdict is one of:
-      RESOLVED / UNRESOLVED — both grading conventions agree.
-      AMBIGUOUS             — the conventions disagree; excluded downstream.
-      UNPARSED              — a graded test never appeared in the log.
+      RESOLVED / UNRESOLVED - both grading conventions agree.
+      AMBIGUOUS             - the conventions disagree; excluded downstream.
+      UNPARSED              - a graded test never appeared in the log.
     """
     statuses = parse_statuses(log)
     unlocated = [t for t in f2p + p2p if t not in statuses]

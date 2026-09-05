@@ -1,11 +1,20 @@
-"""Check every frozen corpus dataset against its source, not against itself.
+"""Check frozen corpus datasets against their source, not against themselves.
 
 `make verify-upstream` re-derives the tarsur385 findings from the upstream
 files, which is the strongest form of check this project offers and covered
-exactly one of the seven datasets in the corpus. For the other six a reader
-could confirm the published figures recompute from the frozen evidence, and
-nothing more: if the freeze had misread the source, every check would agree
-with every other check and all of them would be wrong together.
+exactly one dataset. For the others a reader could confirm the published
+figures recompute from the frozen evidence, and nothing more: if the freeze
+had misread the source, every check would agree with every other check and
+all of them would be wrong together.
+
+Coverage is partial and this file says so. Datasets frozen by a standalone
+`freeze_*.py` have no entry in `freeze.SPECS` and therefore no upstream
+verifier, and for a while this script simply skipped them and printed the
+count of what it had checked, which read as the count of what exists. That
+is the exact failure this module was written to prevent, committed by the
+module. The gap is now declared in UNVERIFIED_UPSTREAM, printed on every
+run, and a frozen dataset that appears without either a verifier or an
+entry there fails the build rather than joining a silent majority.
 
 This closes that. For each tabular dataset it re-fetches whole pages from
 the upstream rows API at the revision the freeze recorded, runs the same
@@ -129,6 +138,25 @@ def verify(slug: str, pages: int) -> tuple[int, list[str], list[str]]:
     return checked, failures, sorted(drifted)
 
 
+#: Frozen datasets with no upstream re-derivation, and why. Each was frozen
+#: by a standalone freeze_*.py whose transport has no freeze.SPECS entry, so
+#: `verify` cannot walk it. Named here so the coverage gap is printed on
+#: every run rather than inferred from a count that omits them.
+UNVERIFIED_UPSTREAM: dict[str, str] = {
+    "cogym": "frozen by freeze_cogym.py; HF tree transport, no SPECS entry",
+    "hle-verifiers": "frozen from a local JSONL the datasets-server cannot page",
+    "openr1-math": "frozen from the parquet mirror, which verify cannot walk",
+    "posttrainbench": "frozen by freeze_posttrainbench.py; HF tree transport",
+    "kwai-klear.partial": "incomplete freeze, not published as an entry",
+}
+
+#: Not datasets: derived sidecars produced by a check, verified by the test
+#: that recomputes the figure they carry.
+SIDECARS: frozenset[str] = frozenset({
+    "openr1-math-answers", "swesmith-patch-check",
+})
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--pages", type=int, default=1,
@@ -138,6 +166,12 @@ def main(argv: list[str] | None = None) -> int:
 
     slugs = [args.slug] if args.slug else sorted(
         s for s in SPECS if (FROZEN / f"{s}.json").exists()
+    )
+    unregistered = sorted(
+        path.stem for path in FROZEN.glob("*.json")
+        if path.stem not in SPECS
+        and path.stem not in UNVERIFIED_UPSTREAM
+        and path.stem not in SIDECARS
     )
     total_checked = 0
     all_failures: list[str] = []
@@ -153,8 +187,23 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{state:4s} {slug:22s} {checked:3d} rows re-derived from source{note}",
               flush=True)
 
+    frozen_datasets = sorted(
+        p.stem for p in FROZEN.glob("*.json") if p.stem not in SIDECARS
+    )
     print(f"\n{total_checked} rows checked against upstream across "
-          f"{len(slugs)} datasets")
+          f"{len(slugs)} of {len(frozen_datasets)} frozen datasets")
+    for slug in sorted(UNVERIFIED_UPSTREAM):
+        if (FROZEN / f"{slug}.json").exists():
+            print(f"UNVERIFIED {slug:20s} {UNVERIFIED_UPSTREAM[slug]}")
+    if unregistered:
+        # A dataset that is neither verifiable nor declared unverifiable is
+        # the silent skip this module exists to refuse.
+        for slug in unregistered:
+            print(
+                f"FAIL {slug}: frozen with no upstream verifier and no entry "
+                "in UNVERIFIED_UPSTREAM", file=sys.stderr,
+            )
+        all_failures.extend(unregistered)
     for failure in all_failures:
         print(f"FAIL {failure}", file=sys.stderr)
     return 1 if all_failures else 0

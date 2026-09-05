@@ -5,9 +5,9 @@ million events. This page is the measured answer, reproducible with
 `make bench`, and it states what stays expensive as plainly as what
 got fast.
 
-Every number is the **full shipped decision path** — engine
+Every number is the **full shipped decision path**: engine
 evaluation, the audit's fourteen-variation mutation self-test,
-delegation closure, cycle detection, and instrument attestation —
+delegation closure, cycle detection, and instrument attestation,
 not a stripped-down core. The workload is synthetic *load*, never
 synthetic *evidence*: deterministic, clock-free, digest-pinned, and
 nothing it produces is presented as a finding about any agent.
@@ -35,7 +35,7 @@ was a correctness bug, not a slowdown:
 
 - **Cycle detection died at depth and the death was reported as a
   finding.** The detector was recursive, so a dependency chain
-  about a thousand events deep raised `RecursionError` — which the
+  about a thousand events deep raised `RecursionError`, which the
   diagnostic guard converted into a "could not run" control
   finding. Cycle detection silently stopped existing exactly when
   traces got big. It is iterative now and proven on a 50,000-deep
@@ -63,7 +63,7 @@ Delegation closure stores each delegation's full spawned-event set,
 because the report and its serialization promise that detail. On a
 pathological trace where *every* event is a delegating tool call in
 one nested chain, the total size of those sets is quadratic in the
-chain length — that is the size of the *output*, and no traversal
+chain length: that is the size of the *output*, and no traversal
 can beat the size of its own answer. Real traces keep delegation
 events sparse; measured at one delegator per fifty events, closure
 over 400,000 events costs about a fifth of a second. The honest
@@ -73,5 +73,5 @@ sizes, which the depth cap in the default policy already bounds.
 Peak memory is the harder wall than time. Evidence bundles are
 in-memory Python objects, so ten million events costs tens of
 gigabytes before a digest is taken. The supported answer at that
-scale is sharding by window or by task cohort — decide per shard,
-issue a claim per shard — not a bigger machine.
+scale is sharding by window or by task cohort: decide per shard,
+issue a claim per shard, not a bigger machine.

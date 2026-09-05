@@ -9,11 +9,11 @@ rather than rounded up.
 
 | layer | stage | evidence | gap to next stage |
 |---|---|---|---|
-| Decision engine + contract | **Production-candidate** | over 750 tests, mutation self-test on every run, measured linear to 10⁶ events, byte-stable digests across 3.10–3.13 in CI | no external production deployment has run it in anger; no semver stability promise yet |
+| Decision engine + contract | **Production-candidate** | over 790 tests, mutation self-test on every run, measured linear to 10⁶ events, byte-stable digests across 3.10–3.13 in CI | no external production deployment has run it in anger; no semver stability promise yet |
 | Claim / verify / ledger | **Production-candidate** | totality contract (SUPPORTED/REFUTED/UNVERIFIED, never a crash), ledger gates CI, refuted claims fail the build | claim schema not yet frozen as `1.0`; needs a written compatibility promise |
 | Adapters (CSV, Claude Code, session-tree, OTel GenAI) | **Beta** | pinned conversion contracts, byte-compared example cases | field coverage tracks specific emitter versions; drift is caught, not absorbed |
-| Corpus + audit discipline | **Operational** | eight audited datasets across two domains, findings reproducible from upstream, contribution contract written | zero third-party entries so far; the contract is untested by a stranger |
-| Distribution | **PoC** | public repo, one-command reproduce | not on PyPI (name unclaimed — deliberate, owner's call); no versioned releases/tags |
+| Corpus + audit discipline | **Operational** | 10 audited datasets across two domains, findings reproducible from upstream, contribution contract written | zero third-party entries so far; the contract is untested by a stranger |
+| Distribution | **PoC** | public repo, one-command reproduce | not published to PyPI; no versioned releases or tags |
 
 ## Stage gates to production
 
