@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -42,6 +43,13 @@ def http_get(url: str, *, raw: bool = False, missing_ok: bool = False):
     freezers ask whether an optional sidecar exists. Every other failure is
     retried and then raised: a freezer that swallowed an error would write a
     short freeze that looks complete.
+
+    A rate limit is not a transient blip and is not treated as one. 429 and
+    503 back off exponentially and honour `Retry-After` when the server
+    sends it, because the datasets API rate-limits sustained use and a
+    linear retry gives up inside a minute against a limit that wants
+    several. A caller that gives up too early reports "the dataset is
+    broken", which is a false finding about someone else's data.
     """
     last: Exception | None = None
     for attempt in range(ATTEMPTS):
@@ -53,11 +61,24 @@ def http_get(url: str, *, raw: bool = False, missing_ok: bool = False):
             if error.code == 404 and missing_ok:
                 return None
             last = error
+            if error.code in (429, 503):
+                header = error.headers.get("Retry-After") if error.headers else None
+                wait = int(header) if (header or "").isdigit() else 2 ** attempt * 5
+                print(
+                    f"  rate limited, waiting {min(wait, 120)}s "
+                    f"(attempt {attempt + 1}/{ATTEMPTS})",
+                    file=sys.stderr, flush=True,
+                )
+                time.sleep(min(wait, 120))
+                continue
             time.sleep(BACKOFF_SECONDS * (attempt + 1))
         except Exception as error:
             last = error
             time.sleep(BACKOFF_SECONDS * (attempt + 1))
-    raise RuntimeError(f"gave up on {url}") from last
+    raise RuntimeError(
+        f"could not read {url} after {ATTEMPTS} attempts: {last}. The Hugging "
+        "Face datasets API rate-limits sustained use; wait and retry."
+    ) from last
 
 
 def dataset_revision(dataset: str, ref: str = "") -> str:

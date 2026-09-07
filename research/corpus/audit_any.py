@@ -39,6 +39,8 @@ import sys
 import urllib.error
 import urllib.parse
 import urllib.request
+
+from corpus_io import http_get
 from collections import Counter
 
 _ROWS = "https://datasets-server.huggingface.co/rows"
@@ -59,43 +61,11 @@ EFFORT_HINTS = ("cost", "tokens", "calls", "steps", "duration", "time",
                 "iterations", "turns")
 
 
-def _get(url: str) -> dict | None:
-    """Fetch with backoff, and treat 429 as the instruction it is.
-
-    A linear few-second backoff is not enough after sustained use: the
-    first version of this gave up inside fifteen seconds against a rate
-    limit that wanted minutes, which for a tool someone else runs reads as
-    "the dataset is broken". 429 and 503 back off exponentially and honour
-    Retry-After when the server sends one.
-    """
-    import time
-
-    last: Exception | None = None
-    for attempt in range(7):
-        try:
-            with urllib.request.urlopen(url, timeout=120) as response:
-                return json.load(response)
-        except urllib.error.HTTPError as error:
-            if error.code == 404:
-                return None
-            last = error
-            if error.code in (429, 503):
-                header = error.headers.get("Retry-After") if error.headers else None
-                wait = int(header) if (header or "").isdigit() else 2 ** attempt * 5
-                print(
-                    f"  rate limited, waiting {wait}s "
-                    f"(attempt {attempt + 1}/7)", file=sys.stderr, flush=True,
-                )
-                time.sleep(min(wait, 120))
-                continue
-        except Exception as error:  # retried, then surfaced
-            last = error
-        time.sleep(3 * (attempt + 1))
-    raise SystemExit(
-        f"could not read {url.split('?')[0]} after 7 attempts: {last}. "
-        "The Hugging Face datasets API rate-limits sustained use; wait and "
-        "retry, or pass a smaller --rows."
-    )
+def _get(url: str):
+    """One shared retry policy, in corpus_io, including the Retry-After
+    handling this function used to own. A 404 is None because the caller
+    asks whether an optional config exists."""
+    return http_get(url, missing_ok=True)
 
 
 def _sha(value: object) -> str:
