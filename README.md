@@ -39,7 +39,9 @@ its own stratification.
 |---|---|
 | the findings | [Found in the wild](#found-in-the-wild), then [the index](research/FINDINGS.md) with stable ids and what to do about each |
 | use it on your data | [examples/README.md](examples/README.md), the five files and three commands |
+| audit any public dataset | `python3 research/corpus/audit_any.py <hf-dataset>`, no code to write |
 | check it without trusting me | [Check this repository](#check-this-repository-without-trusting-it) |
+| when it was wrong | [every correction](docs/corrections.md), including the suspicions killed before publication |
 | what it gets wrong | [the honest limits](docs/limitations.md) and [prior art](docs/landscape.md) |
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)
