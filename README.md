@@ -63,6 +63,14 @@ the vendors whose models the arms are named for. An arm name below identifies a
 set of runs in this dataset. It is not a number any vendor published, and nothing
 here is a measurement of a model.
 
+Three columns, because the dataset disagrees with itself about how many runs
+it can vouch for. **Naive rate** takes `info.resolved` at face value on every
+row. **Cross-check unknown** counts rows whose second outcome field,
+`info.scores.resolved`, says nothing. **Confirmed rate** restricts both the
+numerator and the denominator to rows that field did vouch for. The gap
+between the first and the last is the size of what the dataset is asked to
+support and cannot.
+
 | arm | n | naive rate | cross-check unknown | confirmed rate |
 |---|---:|---:|---:|---:|
 | `claude-4.5-haiku-high` | 500 | 66.6% | 0 | 66.6% |
@@ -241,6 +249,34 @@ assumptions, and `make mutation-score` shows the one attack the design does *not
 stop. Those are in [the honest limits](#the-honest-limits), not buried.
 
 **Your agent passed every enabled check. Did every required check run?**
+
+### The words this page uses
+
+Defined here rather than assumed, because each one carries a claim somewhere
+above.
+
+- **Bundle.** One file holding the evidence for a decision: the events, the
+  outcome labels, the rate card, the baseline, the policy. Every command
+  takes one.
+- **Gate.** A check that can withhold a green decision. A *required* gate is
+  one the fixed contract insists on; if nothing supplies it, the answer is
+  `INCOMPLETE` rather than a verdict computed without it.
+- **Pivotal gate.** One whose result alone decides the outcome. If a single
+  gate is carrying the verdict, that is worth knowing before you act on it.
+- **Attestation.** A record of how good your outcome labeller is, stating a
+  method, an agreement figure, a sample size and a date. A model that labels
+  outcomes is not trusted on its own say-so; the accepted methods and their
+  floors are in [examples/README.md](examples/README.md).
+- **Cohen's kappa.** Agreement between two labellers after subtracting the
+  agreement you would get by chance alone. 0 is chance, 1 is perfect. It is
+  not a percentage and a small positive value is not a small disagreement: a
+  kappa of 0.06 means the two signals are almost independent.
+- **AUC.** How often a scorer ranks a correct item above an incorrect one.
+  0.5 is a coin. It needs no threshold, which is why the corpus uses it where
+  a scoring rubric is unpublished, and it is not comparable to a kappa.
+- **Fail-closed.** Missing evidence produces a refusal, never a pass. The
+  opposite, treating absence as permission, is the failure this package
+  exists to make impossible.
 
 ## Where to go next
 

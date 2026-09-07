@@ -26,18 +26,18 @@ sustained use), `--outcome COLUMN` when the proposed roles are wrong, and
 The report is a **census, not a finding**. Four things it produces, and
 what each does and does not mean:
 
-- **Outcome coverage** — how many rows carry a usable value in each column
+- **Outcome coverage**: how many rows carry a usable value in each column
   that looks like an outcome. A column populated on a fraction of rows
   means any rate computed from it has a denominator nobody stated. Strings
   where a verdict belongs (`"unknown"`) count as absent, not as data.
-- **Duplicate work** — transcripts that hash identically. Training or
+- **Duplicate work**: transcripts that hash identically. Training or
   evaluating on both copies counts the same work twice, and this is
   invisible without hashing.
-- **Two outcome signals on the same rows** — the important one. When a
+- **Two outcome signals on the same rows**: the important one. When a
   dataset records two outcome-ish columns, their agreement is measurable
   rather than assumed. Below kappa 0.60 the signal would not clear the
   floor this package requires of an outcome instrument.
-- **Positives at minimum effort** — successes recorded against no work.
+- **Positives at minimum effort**: successes recorded against no work.
 
 ## Before calling anything a finding
 
@@ -47,7 +47,7 @@ Two steps, both of which have killed real suspicions in this corpus:
    a defect until the empty rate turned out identical among failures. A
    difference that looks dramatic pooled has more than once been
    composition: stratify before believing it.
-2. **Verify against upstream**, not against your own copy — otherwise a
+2. **Verify against upstream**, not against your own copy, otherwise a
    misread source agrees with itself.
 
 Agreement between two columns is only a reliability measurement if they

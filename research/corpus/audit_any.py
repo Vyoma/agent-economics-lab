@@ -301,8 +301,8 @@ def render(report: dict) -> str:
         f"{report['rows_read']:,} rows read"
         + (f" of {report['rows_upstream']:,} upstream" if report["rows_upstream"]
            else "")
-        + ("  — A SAMPLE. Every figure below is over the sample, not the "
-           "dataset." if report["sampled"] else "  — the whole split.")
+        + ("  A SAMPLE. Every figure below is over the sample, not the "
+           "dataset." if report["sampled"] else "  The whole split.")
     )
     lines += [scope, ""]
 

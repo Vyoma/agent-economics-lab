@@ -31,9 +31,10 @@ import json
 import pathlib
 import re
 import sys
-import time
 import urllib.parse
 import urllib.request
+
+from corpus_io import http_get, write_frozen
 from collections import defaultdict
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -49,15 +50,8 @@ TRIVIAL_BYTES = 200
 
 
 def _get(url: str) -> dict:
-    last: Exception | None = None
-    for attempt in range(6):
-        try:
-            with urllib.request.urlopen(url, timeout=180) as response:
-                return json.load(response)
-        except Exception as error:  # retried, then re-raised
-            last = error
-            time.sleep(6 * (attempt + 1))
-    raise RuntimeError(f"gave up on {url}") from last
+    """One shared retry policy, in corpus_io."""
+    return http_get(url)
 
 
 def _fetch_row(split: str, index: int) -> dict:
@@ -187,7 +181,7 @@ def main(argv: list[str] | None = None) -> int:
         "failures": failures,
         "groups": findings,
     }
-    OUT.write_text(json.dumps(document, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    write_frozen(OUT, document)
     print(
         f"\n{len(findings)}/{len(sample)} groups checked; "
         f"{len(nontrivial)} non-trivial; {len(misaligned)} with foreign-path rows; "

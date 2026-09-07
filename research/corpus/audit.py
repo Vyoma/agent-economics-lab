@@ -732,30 +732,14 @@ def openr1_math_summary() -> dict:
     }
 
 
-def render() -> str:
-    coderforge = _load("coderforge")
-    jetbrains = _load("jetbrains")
-    tarsur = _tarsur_summary()
-    smith = swesmith_summary()
-    ptb = posttrainbench_summary()
-    cogym = cogym_summary()
-    hle = hle_verifier_summary()
-    openr1 = openr1_math_summary()
-    sweagent = nebius_sweagent_summary()
-    openhands = nebius_openhands_summary()
+#: Every section of research/CORPUS.md, in the order it appears. This was
+#: one 569-line list literal with loops spliced through it, so a heading
+#: in the rendered page could only be traced back to the code that made
+#: it by scrolling until the prose matched. One function per heading now.
 
-    cf_re = readjudication(coderforge)
-    cf_census = outcome_census(coderforge)
-    jb_census = outcome_census(jetbrains)
-    jb_cross = Counter(row["cross"] for row in jetbrains["rows"])
-
-    for slug, doc in (("coderforge", coderforge), ("jetbrains", jetbrains)):
-        if duplicate_groups(doc) or degenerate_positives(doc):
-            # Neither dataset currently trips these; if a re-freeze ever does,
-            # the registry must say so rather than render a stale clean bill.
-            raise AssertionError(f"{slug}: new finding in frozen evidence; rewrite its entry")
-
-    lines = [
+def _entry_preamble(coderforge: dict, cf_re: dict, hle: dict, openr1: dict, cogym: dict, ptb: dict, smith: dict, sweagent: dict, openhands: dict, jetbrains: dict, tarsur: dict) -> list[str]:
+    """The header and the registry table: one row per dataset audited."""
+    out = [
         "# The corpus: public agent-trajectory datasets, audited",
         "",
         "Every dataset here was audited under the same discipline:",
@@ -869,6 +853,14 @@ def render() -> str:
             f"| `{jetbrains['revision'][:8]}` | {len(jetbrains['rows']):,} "
             f"| `resolved` column present, populated on 0 rows |"
         ),
+    ]
+    return out
+
+
+
+def _entry_coderforge(cf_census: dict, cf_re: dict) -> list[str]:
+    """A clean bill, re-derived from the raw evaluation logs."""
+    out = [
         "",
         "## togethercomputer/CoderForge-Preview-32B, SWE-bench Verified, 500 rows",
         "",
@@ -893,6 +885,14 @@ def render() -> str:
         "",
         f"Outcome census: {dict(sorted(cf_census.items()))}. No duplicate",
         "transcripts. No positive outcome on a run of one step or fewer.",
+    ]
+    return out
+
+
+
+def _entry_hle(hle: dict) -> list[str]:
+    """Seven graders against a checkable answer, ranked within question."""
+    out = [
         "",
         "## FUSE-verifiers/HLE-Verifications, "
         f"{hle['questions']} questions and {hle['responses']:,} graded responses",
@@ -920,13 +920,13 @@ def render() -> str:
     ]
     for grader in sorted(hle["graders"], key=lambda g: g["auc"]):
         note = " *" if grader["indistinguishable_from_random"] else ""
-        lines.append(
+        out.append(
             f"| `{grader['judge']}` | {grader['pairs']:,} "
             f"| {grader['questions_scored']} "
             f"| {grader['auc']:.3f}{note} | [{grader['low']:.3f}, "
             f"{grader['high']:.3f}] | {grader['pooled_auc']:.3f} |"
         )
-    lines += [
+    out += [
         "",
         "\\* interval contains 0.5, so that grader is not distinguishable",
         "from random at ranking within a question. Four of seven are.",
@@ -1002,6 +1002,14 @@ def render() -> str:
         "",
         "Evidence: [frozen/hle-verifiers.json](corpus/frozen/hle-verifiers.json),",
         "content-free, carrying the SHA-256 of the source file it read.",
+    ]
+    return out
+
+
+
+def _entry_openr1(openr1: dict) -> list[str]:
+    """Two verification columns arranged so they can never be compared."""
+    out = [
         "",
         "## open-r1/OpenR1-Math-220k, "
         f"{openr1['rows']:,} problems in a published training set",
@@ -1049,8 +1057,8 @@ def render() -> str:
     for verdict, count in sorted(
         openr1["answer_check"]["verdicts"].items(), key=lambda kv: -kv[1]
     ):
-        lines.append(f"- {verdict.replace('_', ' ')}: {count}")
-    lines += [
+        out.append(f"- {verdict.replace('_', ' ')}: {count}")
+    out += [
         "",
         "It does not settle the question, and it is reported as failing to.",
         "Most of the gap is shape rather than substance: a generation boxing",
@@ -1087,6 +1095,14 @@ def render() -> str:
         "and [frozen/openr1-math-answers.json]"
         "(corpus/frozen/openr1-math-answers.json), content-free, carrying the",
         "SHA-256 of every parquet shard read.",
+    ]
+    return out
+
+
+
+def _entry_cogym(cogym: dict) -> list[str]:
+    """Human ratings against each other, the only non-coding entry."""
+    out = [
         "",
         "## SALT-NLP/cogym-real-trajectories, "
         f"{cogym['rows']} human-agent sessions",
@@ -1120,12 +1136,12 @@ def render() -> str:
     ]
     for key, stats in cogym["pairs"].items():
         first, second = key.split("|")
-        lines.append(
+        out.append(
             f"| {first} vs {second} | {stats['n']} "
             f"| {stats['exact']:.0%} | {stats['mean_absolute_difference']:.2f} "
             f"| {stats['two_or_more_apart']:.0%} | {stats['qwk']:.3f} |"
         )
-    lines += [
+    out += [
         "",
         "The artifact rating and overall satisfaction, the two closest of the",
         "three, land at quadratic-weighted kappa "
@@ -1150,6 +1166,14 @@ def render() -> str:
         "and more carefully than usual because these are real people - "
         "ratings, counts and hashes, never the query, the feedback text, or",
         "the event log.",
+    ]
+    return out
+
+
+
+def _entry_posttrainbench(ptb: dict) -> list[str]:
+    """A contamination effect that mostly survives pooling, and does not."""
+    out = [
         "",
         "## aisa-group/PostTrainBench-Trajectories, "
         f"{ptb['rows']:,} autonomous runs",
@@ -1207,6 +1231,14 @@ def render() -> str:
         "against a ten-hour cap. Evidence:",
         "[frozen/posttrainbench.json](corpus/frozen/posttrainbench.json);",
         "every figure recomputes offline with `make corpus`.",
+    ]
+    return out
+
+
+
+def _entry_swesmith(smith: dict) -> list[str]:
+    """A patch column that is not row-aligned, and duplicated transcripts."""
+    out = [
         "",
         "## SWE-bench/SWE-smith-trajectories, three splits, "
         f"{smith['rows']:,} rows",
@@ -1263,6 +1295,14 @@ def render() -> str:
         "[frozen/swesmith-*.json](corpus/frozen/) and",
         "[frozen/swesmith-patch-check.json](corpus/frozen/swesmith-patch-check.json);",
         "reproduce the verification with `python3 research/corpus/patch_check.py`.",
+    ]
+    return out
+
+
+
+def _entry_sweagent(sweagent: dict) -> list[str]:
+    """A clean bill across 80,036 rows."""
+    out = [
         "",
         "## nebius/SWE-agent-trajectories, "
         f"{sweagent['rows']:,} rows",
@@ -1291,6 +1331,14 @@ def render() -> str:
         f"repeats {sweagent['repeat_attempt_pairs']:,} times because the",
         "dataset legitimately holds several attempts per pair; the",
         "transcripts are all distinct.",
+    ]
+    return out
+
+
+
+def _entry_openhands(sweagent: dict, openhands: dict) -> list[str]:
+    """Model-generated tests against adjudication: the sharpest result here."""
+    out = [
         "",
         "## nebius/SWE-rebench-openhands-trajectories, "
         f"{openhands['rows']:,} rows",
@@ -1342,6 +1390,14 @@ def render() -> str:
         "[frozen/nebius-sweagent.json](corpus/frozen/) and",
         "[frozen/nebius-openhands.json](corpus/frozen/); every figure",
         "recomputes offline.",
+    ]
+    return out
+
+
+
+def _entry_jetbrains(jetbrains: dict, jb_census: dict, jb_cross: dict) -> list[str]:
+    """An outcome column populated on no row at all."""
+    out = [
         "",
         "## JetBrains-Research, SWE-bench test-minus-verified, 1,785 rows",
         "",
@@ -1358,6 +1414,14 @@ def render() -> str:
         "",
         "No duplicate transcripts. Outcome census: "
         f"{dict(sorted(jb_census.items()))}.",
+    ]
+    return out
+
+
+
+def _entry_closing() -> list[str]:
+    """How an entry gets here, and what the freeze refuses to copy."""
+    out = [
         "",
         "## How an entry gets here",
         "",
@@ -1371,6 +1435,43 @@ def render() -> str:
         "two disagree. No prompts, responses, patches, or logs are stored.",
         "",
     ]
+    return out
+
+def render() -> str:
+    coderforge = _load("coderforge")
+    jetbrains = _load("jetbrains")
+    tarsur = _tarsur_summary()
+    smith = swesmith_summary()
+    ptb = posttrainbench_summary()
+    cogym = cogym_summary()
+    hle = hle_verifier_summary()
+    openr1 = openr1_math_summary()
+    sweagent = nebius_sweagent_summary()
+    openhands = nebius_openhands_summary()
+
+    cf_re = readjudication(coderforge)
+    cf_census = outcome_census(coderforge)
+    jb_census = outcome_census(jetbrains)
+    jb_cross = Counter(row["cross"] for row in jetbrains["rows"])
+
+    for slug, doc in (("coderforge", coderforge), ("jetbrains", jetbrains)):
+        if duplicate_groups(doc) or degenerate_positives(doc):
+            # Neither dataset currently trips these; if a re-freeze ever does,
+            # the registry must say so rather than render a stale clean bill.
+            raise AssertionError(f"{slug}: new finding in frozen evidence; rewrite its entry")
+
+    lines: list[str] = []
+    lines += _entry_preamble(coderforge, cf_re, hle, openr1, cogym, ptb, smith, sweagent, openhands, jetbrains, tarsur)
+    lines += _entry_coderforge(cf_census, cf_re)
+    lines += _entry_hle(hle)
+    lines += _entry_openr1(openr1)
+    lines += _entry_cogym(cogym)
+    lines += _entry_posttrainbench(ptb)
+    lines += _entry_swesmith(smith)
+    lines += _entry_sweagent(sweagent)
+    lines += _entry_openhands(sweagent, openhands)
+    lines += _entry_jetbrains(jetbrains, jb_census, jb_cross)
+    lines += _entry_closing()
     return "\n".join(lines)
 
 

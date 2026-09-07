@@ -703,3 +703,46 @@ class CogymNumbersRecompute(unittest.TestCase):
         for row in document["rows"]:
             with self.subTest(session=row["id"]):
                 self.assertFalse(forbidden & set(row))
+
+
+class EveryHeadingMapsToOneFunction(unittest.TestCase):
+    """CORPUS.md was rendered by a single 569-line list literal with loops
+    spliced through it, so tracing a heading in the page back to the code
+    that produced it meant scrolling until the prose matched. One function
+    per heading now, and this keeps it that way."""
+
+    def test_each_section_has_an_entry_function(self) -> None:
+        import ast
+
+        source = (ROOT / "research" / "corpus" / "audit.py").read_text(
+            encoding="utf-8"
+        )
+        tree = ast.parse(source)
+        functions = {
+            node.name for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name.startswith("_entry_")
+        }
+        headings = [
+            line for line in (ROOT / "research" / "CORPUS.md")
+            .read_text(encoding="utf-8").splitlines()
+            if line.startswith("## ")
+        ]
+        # every dataset heading plus the closing section, and the preamble
+        self.assertEqual(len(functions), len(headings) + 1)
+
+    def test_render_is_a_walk_not_a_literal(self) -> None:
+        import ast
+
+        tree = ast.parse(
+            (ROOT / "research" / "corpus" / "audit.py").read_text(encoding="utf-8")
+        )
+        render = next(
+            node for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "render"
+        )
+        span = render.end_lineno - render.lineno + 1
+        self.assertLess(
+            span, 60,
+            "render() is growing a literal again; add an _entry_ function",
+        )
