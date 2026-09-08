@@ -1,8 +1,40 @@
 PYTHON ?= python3
 
+# 47 targets and no way to find them. `make help` errored, which is a poor
+# first answer for a repository whose argument is that you should check it
+# yourself.
+.DEFAULT_GOAL := help
+
+.PHONY: help
+help:
+	@echo "Agent Economics Lab. Python 3.10+, no runtime dependencies."
+	@echo "On a machine whose python3 is older: make PYTHON=python3.12 <target>"
+	@echo ""
+	@echo "  start here"
+	@echo "    demo              a real decision on bundled data, about a second"
+	@echo "    label-error       the shortest real result: how wrong a judge can be"
+	@echo ""
+	@echo "  the findings"
+	@echo "    corpus            regenerate research/CORPUS.md from frozen evidence"
+	@echo "    findings          regenerate the citable findings index"
+	@echo "    patterns          what the audits say jointly"
+	@echo "    evals             how good the instrument is"
+	@echo "    verify-corpus     re-derive frozen rows from upstream (network)"
+	@echo ""
+	@echo "  check it yourself"
+	@echo "    test              the full suite"
+	@echo "    gate              docs-sync + test + ledger; the pre-push gate"
+	@echo "    reproduce         everything, byte-compared; about two and a half minutes"
+	@echo "    green-defects     re-run each catalogued defect at its pre-fix commit"
+	@echo "    mutation-score    can a gutted gate survive?"
+	@echo "    sensitivity       how many verdicts move when assumptions move"
+	@echo ""
+	@echo "  your own data: see examples/README.md"
+
+
 # Every target depends on this, not just `reproduce` and `test`. It guarded two
-# of thirty-four, so `make demo` -- the first command in the README, run by
-# someone who has just cloned -- crashed with a TypeError from `mutation.py` on
+# of thirty-four, so `make demo`, the first command in the README, run by
+# someone who has just cloned, crashed with a TypeError from `mutation.py` on
 # stock macOS Python 3.9 instead of printing the message below. A check that
 # does not run on the path that matters is not a check that passed, which is
 # this project's own thesis applied to its own front door.

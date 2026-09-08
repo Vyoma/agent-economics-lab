@@ -286,6 +286,11 @@ def hle_verifier_summary() -> dict:
     rows = document["rows"]
     judges = document["judges"]
 
+    # alpha / (2k) with k = 7 leaves 0.00357 in each tail, and the protocol
+    # requires at least 20 expected resamples there, so 6,000 is the floor
+    # rather than a round number.
+    DRAWS = 6000
+    assert DRAWS * ((1 - 0.95) / (2 * len(judges))) >= 20, "too few resamples"
     random.seed(20260903)
     graders = []
     for judge in sorted(judges):
@@ -317,11 +322,23 @@ def hle_verifier_summary() -> dict:
         draws = sorted(
             sum(per_question[random.randrange(len(per_question))]
                 for _ in per_question) / len(per_question)
-            for _ in range(6000)
+            for _ in range(DRAWS)
         )
-        low = draws[int(0.025 * len(draws))]
-        high = draws[int(0.975 * len(draws))]
+        # Seven simultaneous interval claims are a family, and at a nominal
+        # 95% each the chance that at least one is wrong is about 30%. The
+        # frontier protocol already applies alpha / (2k) to a family this
+        # size and this entry was not; the correction widens every interval,
+        # which is the conservative direction and the one that costs the
+        # entry its own comfortable readings.
+        adjusted = (1 - 0.95) / (2 * len(judges))
+        low = draws[int(adjusted * len(draws))]
+        high = draws[int((1 - adjusted) * len(draws))]
+        nominal_low = draws[int(0.025 * len(draws))]
+        nominal_high = draws[int(0.975 * len(draws))]
         graders.append({
+            "nominal_low": nominal_low,
+            "nominal_high": nominal_high,
+            "adjusted_alpha": adjusted,
             "judge": judge,
             "pairs": len(pooled),
             "null_scores": nulls,
@@ -340,6 +357,7 @@ def hle_verifier_summary() -> dict:
         "responses": len(correct),
         "base_rate": sum(correct) / len(correct),
         "graders": graders,
+        "draws": DRAWS,
         "excluded_pairs": sum(len(r["misaligned_graders"]) for r in rows),
         "best": max(graders, key=lambda g: g["auc"]),
         "worst": min(graders, key=lambda g: g["auc"]),
@@ -914,8 +932,8 @@ def _entry_hle(hle: dict) -> list[str]:
         "so this is a near-balanced problem rather than one where a constant",
         "answer scores well.",
         "",
-        "| verifier | scored | questions | within-question AUC | 95% CI"
-        " | pooled |",
+        "| verifier | scored | questions | within-question AUC"
+        " | 95% CI, family-adjusted | pooled |",
         "|---|---:|---:|---:|---|---:|",
     ]
     for grader in sorted(hle["graders"], key=lambda g: g["auc"]):
@@ -929,7 +947,10 @@ def _entry_hle(hle: dict) -> list[str]:
     out += [
         "",
         "\\* interval contains 0.5, so that grader is not distinguishable",
-        "from random at ranking within a question. Four of seven are.",
+        f"from random at ranking within a question."
+        f" {sum(1 for g in hle['graders'] if g['indistinguishable_from_random'])}"
+        " of seven are, and the same four are",
+        "indistinguishable before the correction as after it.",
         "",
         "**Why within question, and why the pooled column is worse.** These",
         "graders exist to pick the right response among fifty candidates to",
@@ -956,13 +977,20 @@ def _entry_hle(hle: dict) -> list[str]:
         "contract, and reading one across metric families is the category",
         "error this project has already published once.",
         "",
-        "**Why the intervals are wide.** 32,450 responses sit inside 649",
-        "questions and are not independent, so the bootstrap resamples",
-        "questions rather than responses. Treating the responses as",
-        "independent would give intervals several times too tight and would",
-        "be the error this corpus most often finds elsewhere. The draw count",
-        "is 6,000, set by the resample-adequacy rule the frontier protocol",
-        "already applies to a family this size; an earlier 400 put Monte",
+        "**Why the intervals are wide, twice over.** 32,450 responses sit",
+        "inside 649 questions and are not independent, so the bootstrap",
+        "resamples questions rather than responses; treating the responses as",
+        "independent would give intervals several times too tight and is the",
+        "error this corpus most often finds elsewhere. Then the intervals are",
+        "seven simultaneous claims, so they carry the same Bonferroni",
+        "correction the frontier protocol already applies to a family this",
+        f"size, alpha / 2k = {hle['graders'][0]['adjusted_alpha']:.5f} in each"
+        " tail. At a nominal 95% each, the",
+        "chance that at least one of seven is wrong is about 30%. The",
+        "correction widens every interval and costs this entry its more",
+        "comfortable readings, which is the point of applying it. The draw",
+        f"count is {hle['draws']:,}, the floor at which that tail still holds the",
+        "twenty resamples the protocol demands; an earlier 400 put Monte",
         "Carlo noise in the published third decimal.",
         "",
         "**Prior work.** That model judges are imperfect is established:"

@@ -72,7 +72,14 @@ def build_parser() -> argparse.ArgumentParser:
         version=f"agent-economics {__version__}",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
-    evaluate_parser = subparsers.add_parser("evaluate")
+    evaluate_parser = subparsers.add_parser(
+        "evaluate",
+        help=(
+            "Decide whether the evidence supports scaling this agent. "
+            "Prints SCALE, ASSIST, STOP, or INCOMPLETE when a required "
+            "dimension has no evidence behind it."
+        ),
+    )
     evaluate_parser.add_argument(
         "--check", action="append", default=[], metavar="CHECK_ID",
         help=(
@@ -91,12 +98,36 @@ def build_parser() -> argparse.ArgumentParser:
             "which is the point."
         ),
     )
-    evaluate_parser.add_argument("--bundle")
-    evaluate_parser.add_argument("--traces")
-    evaluate_parser.add_argument("--outcomes")
-    evaluate_parser.add_argument("--rates")
-    evaluate_parser.add_argument("--baseline")
-    evaluate_parser.add_argument("--policy")
+    evaluate_parser.add_argument(
+        "--bundle", help=(
+            "A normalized evidence bundle, as written by `bundle`. Use this or the five CSV/JSON inputs below, not both."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--traces", help=(
+            "CSV of agent events, one row per event. Needs task_id, event_id, timestamp, event_type, name, model, token counts and status."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--outcomes", help=(
+            "CSV of task outcomes, one row per task: whether it was acceptable and what it was worth."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--rates", help=(
+            "JSON price list keyed by model id, so token counts become money. Omit only if every event carries direct_cost_usd."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--baseline", help=(
+            "JSON describing the alternative you are comparing against, usually the human-only workflow. Without it the counterfactual gate has nothing to compare and the answer is INCOMPLETE."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--policy", help=(
+            "JSON of the thresholds you are willing to defend: minimum acceptable rate, cost ceilings, call caps."
+        ),
+    )
     evaluate_parser.add_argument(
         "--format", choices=("markdown", "json"), default="markdown"
     )
@@ -130,7 +161,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--independently-verified", action="append", default=[], metavar="INSTRUMENT",
         help="Instrument verified out of band, as for `audit`.",
     )
-    evaluate_parser.add_argument("--output")
+    evaluate_parser.add_argument(
+        "--output", help=(
+            "Write the report here instead of stdout."
+        ),
+    )
     frontier_parser = subparsers.add_parser(
         "frontier",
         help="Compare configurations on identical task input and rubric identities.",
@@ -281,7 +316,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Exit 1 if any delegated work is unaccounted for.",
     )
 
-    subparsers.add_parser("capabilities")
+    subparsers.add_parser(
+        "capabilities",
+        help="List the checks, adapters and renderers this build exposes.",
+    )
 
     judge_parser = subparsers.add_parser(
         "judge",

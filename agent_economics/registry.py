@@ -188,7 +188,11 @@ def default_registry() -> CheckRegistry:
         "diagnostic.directed-cycle": "cycles in the dependency graph, reported not gated",
     }
     for spec in default_checks():
-        registry.register(_static(spec, summaries.get(spec.id, spec.id)))
+        # Indexed, not `.get(spec.id, spec.id)`. The fallback handed a new
+        # check its own id as its description, so a check could ship into
+        # `capabilities` with no summary and nothing would say so. A silent
+        # fallback, in a package about silent fallbacks.
+        registry.register(_static(spec, summaries[spec.id]))
     registry.register(CheckBuilder(
         id="gate.delegation-closure", version="1",
         build=_build_delegation_closure,

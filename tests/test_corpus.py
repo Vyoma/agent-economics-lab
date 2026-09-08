@@ -746,3 +746,47 @@ class EveryHeadingMapsToOneFunction(unittest.TestCase):
             span, 60,
             "render() is growing a literal again; add an _entry_ function",
         )
+
+
+class FrozenDocumentsDeclareTheirProvenance(unittest.TestCase):
+    """`outcome_field` and `cross_field` are written into every document
+    freeze.py produces and were read by nothing, so they could drift from the
+    column they name and no build would notice. They are the only record of
+    which upstream column became the normalised `outcome` key, which a reader
+    of the frozen JSON needs, so they are checked here rather than deleted."""
+
+    def test_every_freeze_spec_declares_an_outcome_column(self) -> None:
+        import sys
+
+        sys.path.insert(0, str(ROOT / "research" / "corpus"))
+        from freeze import SPECS
+
+        for slug, spec in SPECS.items():
+            with self.subTest(dataset=slug):
+                self.assertIn("outcome_field", spec)
+                self.assertIn("cross_field", spec)
+                self.assertTrue(
+                    isinstance(spec["outcome_field"], str)
+                    and spec["outcome_field"].strip(),
+                    "outcome_field must name a real upstream column",
+                )
+
+    def test_frozen_documents_carry_the_declaration(self) -> None:
+        import sys
+
+        sys.path.insert(0, str(ROOT / "research" / "corpus"))
+        from freeze import SPECS
+
+        for slug, spec in SPECS.items():
+            path = FROZEN / f"{slug}.json"
+            if not path.exists():
+                continue
+            document = json.loads(path.read_text(encoding="utf-8"))
+            with self.subTest(dataset=slug):
+                self.assertEqual(
+                    document.get("outcome_field"), spec["outcome_field"],
+                    "the frozen document disagrees with the spec that made it",
+                )
+                self.assertEqual(
+                    document.get("cross_field"), spec["cross_field"]
+                )

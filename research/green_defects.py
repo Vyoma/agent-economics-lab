@@ -273,8 +273,18 @@ def _probe_at(commit: str, probe: str, python: str) -> dict:
         finished = _run([python, "_probe.py"], tree)
         try:
             return json.loads(finished.stdout.strip().splitlines()[-1])
-        except (ValueError, IndexError):
-            return {"probe_failed": (finished.stderr or finished.stdout)[-240:]}
+        except (ValueError, IndexError) as error:
+            # A probe that could not run is not a probe that reported a miss.
+            # This used to return {"probe_failed": ...}, a key nothing read,
+            # so an environmental failure produced different rendered output
+            # instead of an error and surfaced as a mystery byte-compare
+            # mismatch in the only command CI runs. That is the same
+            # "could not check reads as checked" this catalogue exists to
+            # document, committed by the catalogue.
+            raise RuntimeError(
+                f"probe for {commit[:8]} produced no JSON verdict. "
+                f"stderr: {(finished.stderr or finished.stdout)[-400:]}"
+            ) from error
 
 
 def _suite_at(commit: str, python: str) -> tuple[bool, int]:

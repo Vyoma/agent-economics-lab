@@ -233,7 +233,7 @@
       "kind": "measurement",
       "dataset": "FUSE-verifiers/HLE-Verifications",
       "revision": "e838b3dd7a12c78c292453e66de15a9c35340c36",
-      "statement": "Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity's Last Exam questions, against correctness established by matching the published answer. Measured the way the graders are actually used, ranking candidates within a question, their discrimination runs from AUC 0.491 to 0.581. Four of the seven have 95% intervals containing 0.5, including Skywork-Critic-Llama-3.1-70B, a model built to criticise, and gpt-oss-120b sits below chance at 0.491. Pooling all responses into one ranking instead reports 0.501 to 0.653, and that gap is between-question difficulty, not grader skill. This is a second negative result on an outcome instrument, not a replication of AEL-2026-008, which measured a different construct with a different statistic.",
+      "statement": "Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity's Last Exam questions, against correctness established by matching the published answer. Measured the way the graders are actually used, ranking candidates within a question, their discrimination runs from AUC 0.491 to 0.581. 4 of the seven have intervals containing 0.5, Bonferroni-corrected across the seven simultaneous claims at the same alpha / 2k the frontier protocol uses, including Skywork-Critic-Llama-3.1-70B, a model built to criticise, and gpt-oss-120b sits below chance at 0.491. Pooling all responses into one ranking instead reports 0.501 to 0.653, and that gap is between-question difficulty, not grader skill. This is a second negative result on an outcome instrument, not a replication of AEL-2026-008, which measured a different construct with a different statistic.",
       "figures": {
         "questions": 649,
         "responses": 32450,
@@ -243,11 +243,12 @@
         "intervals_containing_chance": 4,
         "pooled_worst": 0.501,
         "pooled_best": 0.653,
-        "base_rate": 0.514
+        "base_rate": 0.514,
+        "adjusted_alpha": 0.00357
       },
       "verify": "make corpus",
       "action": "Score your grader within question before you trust it, and on the responses it will actually rank. Four of seven models here could not be told from random at that task, and the pooled figure hides it.",
-      "scope": "AUC is threshold-free because the scoring rubric is not published, and it is not comparable to the agreement floors in SPEC 7.2, which govern chance-corrected agreement and held-out accuracy; there is no AUC floor in that contract. All responses come from one model, so this measures graders on that model's output rather than in general. Ground truth is exact matching against a published answer with a model used to parse answer formats: checkable, but not untouched by a model. HLE is adversarially hard by construction. gemini-3-flash, the highest scorer, carries no score on 19,284 of 32,450 responses and its figure is computed on the subset it did score, with the bias direction unknown. This is not a claim that model grading cannot work, only that on this data none of seven cleared a bar worth calling useful."
+      "scope": "Intervals are family-adjusted across seven graders, so they are wider than a single-comparison reading; the same four contain 0.5 either way. AUC is threshold-free because the scoring rubric is not published, and it is not comparable to the agreement floors in SPEC 7.2, which govern chance-corrected agreement and held-out accuracy; there is no AUC floor in that contract. All responses come from one model, so this measures graders on that model's output rather than in general. Ground truth is exact matching against a published answer with a model used to parse answer formats: checkable, but not untouched by a model. HLE is adversarially hard by construction. gemini-3-flash, the highest scorer, carries no score on 19,284 of 32,450 responses and its figure is computed on the subset it did score, with the bias direction unknown. This is not a claim that model grading cannot work, only that on this data none of seven cleared a bar worth calling useful."
     },
     {
       "id": "AEL-2026-014",

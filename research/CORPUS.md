@@ -79,18 +79,19 @@ dataset calls verifiers. The base rate is 51.4%,
 so this is a near-balanced problem rather than one where a constant
 answer scores well.
 
-| verifier | scored | questions | within-question AUC | 95% CI | pooled |
+| verifier | scored | questions | within-question AUC | 95% CI, family-adjusted | pooled |
 |---|---:|---:|---:|---|---:|
-| `gpt-oss-120b` | 32,437 | 538 | 0.491 * | [0.472, 0.510] | 0.537 |
-| `Qwen2.5-72B-Instruct` | 32,450 | 538 | 0.500 * | [0.488, 0.512] | 0.501 |
-| `Skywork-Critic-Llama-3.1-70B` | 32,442 | 538 | 0.505 * | [0.491, 0.520] | 0.550 |
-| `gptmini-high` | 32,450 | 538 | 0.515 * | [0.493, 0.536] | 0.578 |
-| `deepseek_reasoner` | 32,417 | 538 | 0.535 | [0.517, 0.553] | 0.586 |
-| `gpt5.2-high` | 32,297 | 536 | 0.547 | [0.522, 0.571] | 0.653 |
-| `gemini-3-flash` | 13,166 | 441 | 0.581 | [0.563, 0.598] | 0.587 |
+| `gpt-oss-120b` | 32,437 | 538 | 0.491 * | [0.464, 0.518] | 0.537 |
+| `Qwen2.5-72B-Instruct` | 32,450 | 538 | 0.500 * | [0.483, 0.516] | 0.501 |
+| `Skywork-Critic-Llama-3.1-70B` | 32,442 | 538 | 0.505 * | [0.486, 0.525] | 0.550 |
+| `gptmini-high` | 32,450 | 538 | 0.515 * | [0.485, 0.544] | 0.578 |
+| `deepseek_reasoner` | 32,417 | 538 | 0.535 | [0.511, 0.560] | 0.586 |
+| `gpt5.2-high` | 32,297 | 536 | 0.547 | [0.513, 0.580] | 0.653 |
+| `gemini-3-flash` | 13,166 | 441 | 0.581 | [0.557, 0.605] | 0.587 |
 
 \* interval contains 0.5, so that grader is not distinguishable
-from random at ranking within a question. Four of seven are.
+from random at ranking within a question. 4 of seven are, and the same four are
+indistinguishable before the correction as after it.
 
 **Why within question, and why the pooled column is worse.** These
 graders exist to pick the right response among fifty candidates to
@@ -112,13 +113,19 @@ coefficients and held-out accuracy; there is no AUC floor in that
 contract, and reading one across metric families is the category
 error this project has already published once.
 
-**Why the intervals are wide.** 32,450 responses sit inside 649
-questions and are not independent, so the bootstrap resamples
-questions rather than responses. Treating the responses as
-independent would give intervals several times too tight and would
-be the error this corpus most often finds elsewhere. The draw count
-is 6,000, set by the resample-adequacy rule the frontier protocol
-already applies to a family this size; an earlier 400 put Monte
+**Why the intervals are wide, twice over.** 32,450 responses sit
+inside 649 questions and are not independent, so the bootstrap
+resamples questions rather than responses; treating the responses as
+independent would give intervals several times too tight and is the
+error this corpus most often finds elsewhere. Then the intervals are
+seven simultaneous claims, so they carry the same Bonferroni
+correction the frontier protocol already applies to a family this
+size, alpha / 2k = 0.00357 in each tail. At a nominal 95% each, the
+chance that at least one of seven is wrong is about 30%. The
+correction widens every interval and costs this entry its more
+comfortable readings, which is the point of applying it. The draw
+count is 6,000, the floor at which that tail still holds the
+twenty resamples the protocol demands; an earlier 400 put Monte
 Carlo noise in the published third decimal.
 
 **Prior work.** That model judges are imperfect is established: MT-Bench measured judge agreement with human preference,

@@ -100,10 +100,18 @@ sixteen decimals, same call count, differing only in `model_label` and run id.
 
 That accident is the useful part: it scored the same input twice.
 **`info.resolved` disagrees with itself on 44 of those 500, so the label agrees
-with itself 91.2% of the time on identical input.** The spread
-across the nine scored arms is 20.6 points. The label's own disagreement is 8.8.
-Small gaps between models here cannot be distinguished from the instrument
-disagreeing with itself.
+with itself 91.2% of the time on identical input.** Those 44
+disagreements split 22 each way, so both arms still report the identical 72.8%:
+the per-task label is unreliable here and the aggregate rate is not, which are
+different failures and only one of them is visible in a leaderboard.
+
+What the self-disagreement does bound is how small a gap between arms can mean
+anything. A coin-split of 44 flips moves a 500-task rate with a standard
+deviation of 0.7 points, so gaps under about 2.6 points cannot be told from the
+instrument disagreeing with itself. The spread across the nine scored arms is
+20.6 points and clears that comfortably. An earlier draft of this paragraph
+read the 8.8% per-task flip rate as if it were the uncertainty on an arm's
+rate, which is a different quantity and about three times too large.
 
 Neither is a claim that the dataset is wrong: it ships the cross-check that
 reveals the first, and the duplication is visible to anyone who hashes the
@@ -728,10 +736,18 @@ incident-loss and remediation-cost assumptions per scenario:
 
 ```text
 ROBUST  (0 flips)        43/98   43.9%
+FRAGILE (1-2 flips)       0/98    0.0%
 BRITTLE (3+ flips)       55/98   56.1%
 Max flips for one scenario                42/48
 Counterfactual gate flips at 50% baseline error   25/98  (25.5%)
 ```
+
+The middle category is empty, and printing it is the point: nothing is mildly
+sensitive. A scenario either never moves or moves under three or more
+perturbations, which says the flips are driven by one dominant assumption
+rather than by graded sensitivity, and that 56.1% should not be read as a
+continuous fragility score. Earlier drafts printed only the two populated rows,
+which summed to 98 and implied there was no third.
 
 More than half of these synthetic verdicts are artifacts of an economic
 assumption rather than stable results, and a 50% error in the baseline flips a

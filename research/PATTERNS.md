@@ -22,8 +22,8 @@ once already.
 |---|---|---|---:|---:|---|
 | model-generated tests | adjudicated hidden-test outcome | Cohen's kappa | 0.062 [0.047, 0.077] | 31,389 | **no** |
 | one person's artifact rating | the same person's satisfaction rating | quadratic-weighted kappa | 0.625 [0.520, 0.708] | 191 | undetermined at n=191 |
-| 7 models asked to verify, worst | exact match against a published answer | within-question AUC | 0.491 [0.472, 0.510] | 649 | not comparable |
-| 7 models asked to verify, best | exact match against a published answer | within-question AUC | 0.581 [0.563, 0.598] | 649 | not comparable |
+| 7 models asked to verify, worst | exact match against a published answer | within-question AUC | 0.491 [0.464, 0.518] | 649 | not comparable |
+| 7 models asked to verify, best | exact match against a published answer | within-question AUC | 0.581 [0.557, 0.605] | 649 | not comparable |
 
 The two are not the same kind of measurement and the table should
 not be read as a ranking. The first compares an automated signal

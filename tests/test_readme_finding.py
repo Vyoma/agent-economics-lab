@@ -94,6 +94,30 @@ def _drift() -> dict:
     return json.loads(DRIFT.read_text(encoding="utf-8"))
 
 
+def _twin_split():
+    """(disagreements favouring the first arm, either arm's rate, SD in
+    points of the rate gap a coin-split of those disagreements produces)."""
+    import json
+    import math
+
+    arms = json.loads(
+        (ROOT / "examples" / "public-swebench" / "outcome_audit.json")
+        .read_text(encoding="utf-8")
+    )["arms"]
+    first = {row["task_id"]: row["resolved"] for row in arms["gpt-5.2-codex"]}
+    second = arms["gpt-5.2-high"]
+    total = len(second)
+    disagreements = [
+        row for row in second if first[row["task_id"]] != row["resolved"]
+    ]
+    favouring_first = sum(
+        1 for row in disagreements if first[row["task_id"]] is True
+    )
+    rate = sum(1 for row in second if row["resolved"] is True) / total
+    sd = math.sqrt(len(disagreements) * 0.25) / total * 100
+    return favouring_first, rate, sd
+
+
 def _openhands() -> dict:
     sys.path.insert(0, str(ROOT / "research" / "corpus"))
     from audit import nebius_openhands_summary
@@ -159,6 +183,12 @@ COMPUTED: dict[str, str] = {
     # The number that makes the kappa actionable: the proxy scores this many
     # points below always answering with the commoner label.
     "2.9": f"{abs(_openhands()['agreement_minus_majority']) * 100:.1f}",
+    # The twin arms' 44 disagreements split evenly, so both report the same
+    # rate; and the gap that split can move is what bounds a real difference.
+    "22": f"{_twin_split()[0]}",
+    "72.8": f"{_twin_split()[1] * 100:.1f}",
+    "0.7": f"{_twin_split()[2]:.1f}",
+    "2.6": f"{2 * 1.96 * _twin_split()[2]:.1f}",
     "31,389": f"{_openhands()['cross_present']:,}",
 }
 
