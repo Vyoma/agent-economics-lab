@@ -12,6 +12,7 @@ help:
 	@echo ""
 	@echo "  start here"
 	@echo "    demo              a real decision on bundled data, about a second"
+	@echo "                      (installed: agent-economics demo, no clone needed)"
 	@echo "    label-error       the shortest real result: how wrong a judge can be"
 	@echo ""
 	@echo "  the findings"

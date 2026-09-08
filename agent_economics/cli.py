@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import pathlib
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -62,6 +63,39 @@ CI_EXIT_CODES = {
     Decision.STOP: 4,
 }
 
+#: The five inputs `demo` runs on, shipped inside the wheel. Copies of the
+#: files in examples/, kept byte-identical by tests/test_packaging.py.
+DEMO_INPUTS = (
+    "support_trace.csv", "outcomes.csv", "rates.json",
+    "baseline.json", "policy.json",
+)
+
+
+def _demo_directory() -> dict[str, str]:
+    """The packaged examples as real files on disk.
+
+    `load_csv_bundle` takes paths and a wheel's contents are not guaranteed
+    to be real files, so these are materialised through
+    `importlib.resources` into a directory removed when the process exits.
+    Without this the demo works from a clone and fails from an installed
+    wheel, which is the exact gap it exists to close.
+    """
+    import atexit
+    import shutil
+    import tempfile
+    from importlib import resources
+
+    root = resources.files("agent_economics") / "_examples"
+    scratch = pathlib.Path(tempfile.mkdtemp(prefix="agent-economics-demo-"))
+    atexit.register(shutil.rmtree, scratch, True)
+    paths = {}
+    for name in DEMO_INPUTS:
+        destination = scratch / name
+        destination.write_bytes((root / name).read_bytes())
+        paths[name] = str(destination)
+    return paths
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agent-economics",
@@ -72,6 +106,23 @@ def build_parser() -> argparse.ArgumentParser:
         version=f"agent-economics {__version__}",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
+    demo_parser = subparsers.add_parser(
+        "demo",
+        help=(
+            "Run a real decision on the five example inputs shipped inside "
+            "this package. Needs no clone, no network and no arguments."
+        ),
+    )
+    demo_parser.add_argument(
+        "--extract", metavar="DIR", help=(
+            "Instead of deciding, write the five example inputs here so you "
+            "can replace their contents with your own runs."
+        ),
+    )
+    demo_parser.add_argument(
+        "--format", choices=("markdown", "json"), default="markdown",
+    )
+
     evaluate_parser = subparsers.add_parser(
         "evaluate",
         help=(
@@ -656,6 +707,39 @@ def main(argv: Sequence[str] | None = None) -> int:
             FrontierDecision.INCOMPLETE: 2,
             FrontierDecision.HOLD: 3,
         }[case.decision]
+    if args.command == "demo":
+        import shutil
+
+        packaged = _demo_directory()
+        if args.extract:
+            target = pathlib.Path(args.extract)
+            target.mkdir(parents=True, exist_ok=True)
+            for name, source in packaged.items():
+                shutil.copyfile(source, target / name)
+            print(
+                f"Wrote {len(packaged)} example inputs to {target.resolve()}\n"
+                "Replace "
+                "their contents with your own runs, then:\n\n"
+                "  agent-economics evaluate \\\n"
+                "    --traces support_trace.csv --outcomes outcomes.csv \\\n"
+                "    --rates rates.json --baseline baseline.json \\\n"
+                "    --policy policy.json"
+            )
+            return 0
+        # Re-parsed through the real `evaluate` parser rather than by
+        # setting attributes one at a time. The first version did the latter
+        # and shipped a demo that died on the first default it forgot, which
+        # is what enumerating someone else's parser by hand always earns.
+        args = build_parser().parse_args([
+            "evaluate",
+            "--traces", packaged["support_trace.csv"],
+            "--outcomes", packaged["outcomes.csv"],
+            "--rates", packaged["rates.json"],
+            "--baseline", packaged["baseline.json"],
+            "--policy", packaged["policy.json"],
+            "--format", args.format,
+        ])
+
     if args.command == "evaluate":
         csv_paths = {
             "traces": args.traces,

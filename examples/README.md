@@ -1,5 +1,10 @@
 # Start here with your own data
 
+If the package is installed, `agent-economics demo --extract .` writes these
+five files into the current directory for you. Everything below explains what
+goes in them.
+
+
 Every other example in this repository runs on data already committed here.
 This one does not. Copy the five files below, replace their contents with
 your runs, and the three commands at the bottom produce a decision.

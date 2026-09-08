@@ -8,15 +8,21 @@ to answer "should we scale this?". Python 3.10+, no dependencies outside the
 standard library, no API key, no account.
 
 ```bash
-git clone https://github.com/Vyoma/agent-economics-lab && cd agent-economics-lab
-make PYTHON=python3.12 demo
+uvx --from git+https://github.com/Vyoma/agent-economics-lab agent-economics demo
 ```
 
-About a second, and it prints a real decision on bundled data. Use plain
-`make demo` if your `python3` is already 3.10 or newer. To point it at your own
-CSVs, [start here](examples/README.md); the `agent-economics` command used later
-in this file comes from `pip install -e .`, and `python3 -m agent_economics`
-works from a bare clone without it.
+About a second, and it prints a real decision on data shipped inside the
+package. No clone, no config, no network beyond the install. When you want to
+run it on your own numbers, the same command hands you the input files to edit:
+
+```bash
+agent-economics demo --extract .
+```
+
+From a clone instead, `make PYTHON=python3.12 demo` does the same thing and is
+byte-identical; use plain `make demo` if your `python3` is already 3.10 or
+newer. `python3 -m agent_economics` works from a bare clone with no install at
+all. The five input files are explained in [examples/README.md](examples/README.md).
 
 The answer is one of four. `SCALE`, `ASSIST` and `STOP` are decisions.
 `INCOMPLETE` means a required gate had no evidence, and it is the common first
