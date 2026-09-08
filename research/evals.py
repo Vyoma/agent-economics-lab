@@ -54,6 +54,30 @@ def _wilson_upper(successes: int, trials: int, z: float = 1.959964) -> float:
     return (centre + spread) / (1 + z * z / trials)
 
 
+def _verifier_count() -> int:
+    """Frozen documents with an upstream verifier. This was 7 of 12 while
+    the page reported the corpus as though all of it were checkable."""
+    sys.path.insert(0, str(ROOT / "research" / "corpus"))
+    import verify_corpus
+
+    return len(set(verify_corpus.VERIFIERS) & _frozen_slugs())
+
+
+def _frozen_slugs() -> set[str]:
+    sys.path.insert(0, str(ROOT / "research" / "corpus"))
+    import verify_corpus
+
+    return {
+        path.stem for path in verify_corpus.FROZEN.glob("*.json")
+        if path.stem not in verify_corpus.SIDECARS
+        and path.stem not in verify_corpus.NOT_PUBLISHED
+    }
+
+
+def _frozen_count() -> int:
+    return len(_frozen_slugs())
+
+
 def _load(name: str) -> dict:
     return json.loads((RESULTS / name / "summary.json").read_text(encoding="utf-8"))
 
@@ -164,6 +188,18 @@ def render() -> str:
             f" {real} real defects at {sites} distinct sites | the count was"
             " published wrong twice (in the flattering direction both"
             " times); PROBE_RESULTS.md keeps that history |"
+        ),
+        (
+            "| Can a stranger re-derive the evidence? |"
+            f" one upstream verifier per frozen document, {_verifier_count()}"
+            f" of {_frozen_count()} covered |"
+            " each re-fetches at the pinned revision, checks bytes against"
+            " the hash the freeze recorded, and re-runs the freezer's own"
+            " extractor; a document with no verifier fails the run |"
+            " it proves the frozen file reproduces from the source, not that"
+            " the source itself is correct; and the sample size per dataset"
+            " is a knob, so a green run is not a full re-derivation of every"
+            " row |"
         ),
         (
             "| Does it work on data it did not produce? |"

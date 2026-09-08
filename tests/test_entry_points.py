@@ -118,3 +118,37 @@ class EverySubcommandIsRoutable(unittest.TestCase):
         for name, handler in DISPATCH.items():
             with self.subTest(command=name):
                 self.assertTrue(callable(handler))
+
+
+class TheLoaderBoundaryNamesTheFix(unittest.TestCase):
+    """Four names in adapters form a matrix: {path, mapping} into a bundle,
+    a bundle out to {document, string}. Guessing wrong is easy, and it used
+    to surface as a TypeError from inside pathlib naming neither the mistake
+    nor the remedy."""
+
+    def test_a_mapping_is_refused_with_the_right_call_named(self) -> None:
+        import json
+
+        from agent_economics import load_normalized_json_bundle
+
+        document = json.loads(
+            (ROOT / "examples" / "claude-code" / "bundle.json")
+            .read_text(encoding="utf-8")
+        )
+        with self.assertRaises(TypeError) as caught:
+            load_normalized_json_bundle(document)
+        self.assertIn("normalized_json_bundle", str(caught.exception))
+
+    def test_both_directions_still_work(self) -> None:
+        import json
+
+        from agent_economics import (
+            EvidenceBundle,
+            load_normalized_json_bundle,
+            normalized_json_bundle,
+        )
+
+        path = ROOT / "examples" / "claude-code" / "bundle.json"
+        document = json.loads(path.read_text(encoding="utf-8"))
+        self.assertIsInstance(load_normalized_json_bundle(path), EvidenceBundle)
+        self.assertIsInstance(normalized_json_bundle(document), EvidenceBundle)

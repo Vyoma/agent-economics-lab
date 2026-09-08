@@ -7,14 +7,20 @@ figures recompute from the frozen evidence, and nothing more: if the freeze
 had misread the source, every check would agree with every other check and
 all of them would be wrong together.
 
-Coverage is partial and this file says so. Datasets frozen by a standalone
-`freeze_*.py` have no entry in `freeze.SPECS` and therefore no upstream
-verifier, and for a while this script simply skipped them and printed the
-count of what it had checked, which read as the count of what exists. That
-is the exact failure this module was written to prevent, committed by the
-module. The gap is now declared in UNVERIFIED_UPSTREAM, printed on every
-run, and a frozen dataset that appears without either a verifier or an
-entry there fails the build rather than joining a silent majority.
+Every frozen document has a verifier, and that is enforced rather than
+hoped for. Datasets frozen by a standalone `freeze_*.py` have no entry in
+`freeze.SPECS`, and for a while this script skipped them and printed the
+count of what it had checked, which read as the count of what exists: six of
+fourteen published findings rested on evidence no reader could check against
+source, including the two the front page leans on hardest. That is the exact
+failure this module was written to prevent, committed by the module.
+
+VERIFIERS now holds one callable per frozen document, each owning the
+transport its freeze used, and a document without one fails the run. Each
+verifier re-derives rows by calling the freezer's own extractor on freshly
+fetched bytes, so what is proven is reproducibility: the same source and the
+same code give the same frozen file. Re-implementing extraction inside the
+verifier would test a second copy of the logic and let the two drift.
 
 This closes that. For each tabular dataset it re-fetches whole pages from
 the upstream rows API at the revision the freeze recorded, runs the same
@@ -35,11 +41,17 @@ requires the network, alongside verify_upstream.py.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import argparse
+import hashlib
 import json
+import os
 import pathlib
 import sys
+import tempfile
 import urllib.parse
+import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -138,16 +150,268 @@ def verify(slug: str, pages: int) -> tuple[int, list[str], list[str]]:
     return checked, failures, sorted(drifted)
 
 
-#: Frozen datasets with no upstream re-derivation, and why. Each was frozen
-#: by a standalone freeze_*.py whose transport has no freeze.SPECS entry, so
-#: `verify` cannot walk it. Named here so the coverage gap is printed on
-#: every run rather than inferred from a count that omits them.
-UNVERIFIED_UPSTREAM: dict[str, str] = {
-    "cogym": "frozen by freeze_cogym.py; HF tree transport, no SPECS entry",
-    "hle-verifiers": "frozen from a local JSONL the datasets-server cannot page",
-    "openr1-math": "frozen from the parquet mirror, which verify cannot walk",
-    "posttrainbench": "frozen by freeze_posttrainbench.py; HF tree transport",
-    "kwai-klear.partial": "incomplete freeze, not published as an entry",
+def _download(url: str, destination: pathlib.Path) -> str:
+    """Stream to disk, returning the SHA-256 of every byte received. Hashing
+    while writing rather than re-reading means the digest describes what
+    arrived, not what a later read happened to find."""
+    digest = hashlib.sha256()
+    with urllib.request.urlopen(url, timeout=1800) as response:
+        with destination.open("wb") as sink:
+            while chunk := response.read(1 << 20):
+                digest.update(chunk)
+                sink.write(chunk)
+    return digest.hexdigest()
+
+
+def _verify_hle(slug: str, pages: int) -> tuple[int, list[str], list[str]]:
+    """Total rather than sampled, because it can be.
+
+    The freeze recorded the SHA-256 of the entire source file, so this
+    fetches that file at the pinned revision, checks every byte against the
+    recorded digest, re-runs the freezer on what arrived, and compares all
+    649 rows against what is committed. Same input and same code must give
+    the same output; if they do not, either the source moved or the frozen
+    file was edited, and both are things a reader should be able to detect
+    without trusting this repository.
+    """
+    import freeze_hle_verifiers as freezer
+
+    document = json.loads((FROZEN / f"{slug}.json").read_text(encoding="utf-8"))
+    current = _sha_now(document["dataset"])
+    if current != document["revision"]:
+        return 0, [
+            f"{slug}: frozen at {document['revision'][:8]}, upstream is now "
+            f"{current[:8]}; re-freeze before verifying"
+        ], []
+
+    url = (
+        f"https://huggingface.co/datasets/{document['dataset']}/resolve/"
+        f"{document['revision']}/FUSE-hle-data.jsonl"
+    )
+    handle, raw = tempfile.mkstemp(suffix=".jsonl")
+    os.close(handle)
+    path = pathlib.Path(raw)
+    try:
+        digest = _download(url, path)
+        if digest != document["source_sha256"]:
+            return 0, [
+                f"{slug}: upstream source hashes {digest[:12]}, freeze "
+                f"recorded {document['source_sha256'][:12]}"
+            ], []
+        rederived = freezer.freeze(path, document["revision"])
+    finally:
+        path.unlink(missing_ok=True)
+
+    failures = []
+    frozen_rows = {row["id"]: row for row in document["rows"]}
+    fresh_rows = {row["id"]: row for row in rederived["rows"]}
+    if set(frozen_rows) != set(fresh_rows):
+        missing = sorted(set(frozen_rows) - set(fresh_rows))[:3]
+        extra = sorted(set(fresh_rows) - set(frozen_rows))[:3]
+        failures.append(
+            f"{slug}: row ids differ (only frozen: {missing}, only fresh: {extra})"
+        )
+    for key in sorted(set(frozen_rows) & set(fresh_rows)):
+        if frozen_rows[key] != fresh_rows[key]:
+            failures.append(f"{slug}/{key}: re-derived row differs from frozen")
+            if len(failures) > 5:
+                break
+    return len(frozen_rows), failures, []
+
+
+#: One verifier per frozen document. The rows-API family shares `verify`;
+#: the rest own their transport because they were frozen through it. A
+#: frozen document with no entry here fails the run: for a while they were
+#: simply skipped, and the count of what had been checked read as the count
+#: of what exists.
+def _verify_openr1(slug: str, pages: int) -> tuple[int, list[str], list[str]]:
+    """Re-derive whole shards from the parquet mirror.
+
+    The freeze recorded a SHA-256 per shard, so `pages` shards are chosen by
+    hash rank, fetched at the pinned parquet revision, checked byte for
+    byte, and re-extracted with the freezer's own row builder. Shards are
+    ordered with their row counts, so each one's slice of the frozen
+    document is exact and the comparison is total within the shard rather
+    than a sample inside it.
+    """
+    import freeze_openr1_math as freezer
+
+    document = json.loads((FROZEN / f"{slug}.json").read_text(encoding="utf-8"))
+    current = _sha_now(document["dataset"])
+    if current != document["revision"]:
+        return 0, [
+            f"{slug}: frozen at {document['revision'][:8]}, upstream is now "
+            f"{current[:8]}; re-freeze before verifying"
+        ], []
+
+    shards = document["shards"]
+    offsets, running = [], 0
+    for shard in shards:
+        offsets.append(running)
+        running += shard["rows"]
+
+    chosen = sorted(
+        range(len(shards)),
+        key=lambda i: hashlib.sha256(shards[i]["shard"].encode()).hexdigest(),
+    )[:max(1, pages)]
+
+    checked, failures, bytes_only = 0, [], []
+    for index in chosen:
+        shard = shards[index]
+        url = (
+            f"https://huggingface.co/datasets/{document['dataset']}/resolve/"
+            f"{document['parquet_revision']}/{document['config']}/"
+            f"{document['split']}/{shard['shard']}"
+        )
+        handle, raw = tempfile.mkstemp(suffix=".parquet")
+        os.close(handle)
+        path = pathlib.Path(raw)
+        try:
+            digest = _download(url, path)
+            if digest != shard["sha256"]:
+                failures.append(
+                    f"{slug}/{shard['shard']}: upstream hashes {digest[:12]}, "
+                    f"freeze recorded {shard['sha256'][:12]}"
+                )
+                continue
+            # The byte check above is the provenance claim and needs
+            # nothing installed. Re-extracting the rows additionally proves
+            # the freeze is reproducible from those bytes, and that needs
+            # pyarrow to read a parquet column. Where it is absent the
+            # weaker check still runs and the report says which was done,
+            # rather than reporting a row count nobody computed.
+            try:
+                import pyarrow.parquet as pq
+            except ImportError:
+                bytes_only.append(shard["shard"])
+                continue
+            table = pq.ParquetFile(path).read(columns=freezer.COLUMNS)
+            fresh = freezer.extract_rows(table.to_pylist())
+        finally:
+            path.unlink(missing_ok=True)
+
+        frozen_slice = document["rows"][offsets[index]:offsets[index] + shard["rows"]]
+        if len(fresh) != len(frozen_slice):
+            failures.append(
+                f"{slug}/{shard['shard']}: {len(fresh)} rows upstream, "
+                f"{len(frozen_slice)} frozen"
+            )
+            continue
+        for fresh_row, frozen_row in zip(fresh, frozen_slice):
+            checked += 1
+            if fresh_row != frozen_row:
+                failures.append(
+                    f"{slug}/{shard['shard']}/{frozen_row['uuid']}: "
+                    "re-derived row differs from frozen"
+                )
+                if len(failures) > 5:
+                    break
+    if bytes_only:
+        print(
+            f"     {slug}: {len(bytes_only)} shard(s) checked byte for byte "
+            "against the freeze; install pyarrow to also re-extract their "
+            "rows", flush=True,
+        )
+    return checked, failures, []
+
+
+def _verify_cogym(slug: str, pages: int) -> tuple[int, list[str], list[str]]:
+    """Re-fetch whole session files and re-run the freezer's extractor.
+
+    One file per session, so a hash-ranked sample of sessions is fetched at
+    the pinned revision and each re-extracted with `freeze_cogym._row`. A
+    session that cannot be fetched counts as a failure: "could not check"
+    must never read as "checked", which is the rule this module exists for.
+    """
+    import freeze_cogym as freezer
+
+    document = json.loads((FROZEN / f"{slug}.json").read_text(encoding="utf-8"))
+    current = _sha_now(document["dataset"])
+    if current != document["revision"]:
+        return 0, [
+            f"{slug}: frozen at {document['revision'][:8]}, upstream is now "
+            f"{current[:8]}; re-freeze before verifying"
+        ], []
+
+    rows = {row["id"]: row for row in document["rows"]}
+    chosen = sorted(
+        rows, key=lambda i: hashlib.sha256(i.encode()).hexdigest()
+    )[:max(1, pages) * 5]
+
+    checked, failures = 0, []
+    for identifier in chosen:
+        name = f"session_{identifier}.json"
+        url = (
+            f"https://huggingface.co/datasets/{document['dataset']}/resolve/"
+            f"{document['revision']}/{urllib.parse.quote(name)}"
+        )
+        try:
+            with urllib.request.urlopen(url, timeout=300) as response:
+                payload = response.read()
+        except Exception as error:
+            failures.append(f"{slug}/{identifier}: UNFETCHED ({error})")
+            continue
+        checked += 1
+        if freezer._row(name, payload) != rows[identifier]:
+            failures.append(
+                f"{slug}/{identifier}: re-derived row differs from frozen"
+            )
+    return checked, failures, []
+
+
+def _verify_posttrainbench(slug: str, pages: int) -> tuple[int, list[str], list[str]]:
+    """Re-derive whole runs from the files that produced them.
+
+    Each row is one run directory, so a hash-ranked sample of runs is
+    re-read at the pinned revision through the freezer's own `_run_row`,
+    which fetches the same files the freeze did. An unreadable run is a
+    failure rather than a skip.
+    """
+    import freeze_posttrainbench as freezer
+
+    document = json.loads((FROZEN / f"{slug}.json").read_text(encoding="utf-8"))
+    current = _sha_now(document["dataset"])
+    if current != document["revision"]:
+        return 0, [
+            f"{slug}: frozen at {document['revision'][:8]}, upstream is now "
+            f"{current[:8]}; re-freeze before verifying"
+        ], []
+
+    # `id` is "<group>/<run>", which is exactly what _run_row takes.
+    rows = {row["id"]: row for row in document["rows"]}
+    chosen = sorted(
+        rows, key=lambda k: hashlib.sha256(k.encode()).hexdigest()
+    )[:max(1, pages) * 3]
+
+    checked, failures = 0, []
+    for key in chosen:
+        group, run = key.split("/", 1)
+        try:
+            fresh = freezer._run_row(group, run)
+        except Exception as error:
+            failures.append(f"{slug}/{group}/{run}: UNFETCHED ({error})")
+            continue
+        if fresh is None:
+            failures.append(f"{slug}/{group}/{run}: upstream no longer yields a row")
+            continue
+        checked += 1
+        if fresh != rows[key]:
+            differing = sorted(
+                k for k in set(fresh) | set(rows[key])
+                if fresh.get(k) != rows[key].get(k)
+            )
+            failures.append(
+                f"{slug}/{group}/{run}: re-derived row differs on {differing}"
+            )
+    return checked, failures, []
+
+
+VERIFIERS: dict[str, "Callable[[str, int], tuple[int, list[str], list[str]]]"] = {
+    **{slug: verify for slug in SPECS},
+    "hle-verifiers": _verify_hle,
+    "openr1-math": _verify_openr1,
+    "cogym": _verify_cogym,
+    "posttrainbench": _verify_posttrainbench,
 }
 
 #: Not datasets: derived sidecars produced by a check, verified by the test
@@ -155,6 +419,10 @@ UNVERIFIED_UPSTREAM: dict[str, str] = {
 SIDECARS: frozenset[str] = frozenset({
     "openr1-math-answers", "swesmith-patch-check",
 })
+
+#: Frozen documents that are not published as corpus entries and so carry no
+#: finding to verify. A partial freeze is evidence of nothing.
+NOT_PUBLISHED: frozenset[str] = frozenset({"kwai-klear.partial"})
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -164,19 +432,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--slug", help="verify one dataset")
     args = parser.parse_args(argv)
 
-    slugs = [args.slug] if args.slug else sorted(
-        s for s in SPECS if (FROZEN / f"{s}.json").exists()
-    )
-    unregistered = sorted(
+    frozen = sorted(
         path.stem for path in FROZEN.glob("*.json")
-        if path.stem not in SPECS
-        and path.stem not in UNVERIFIED_UPSTREAM
-        and path.stem not in SIDECARS
+        if path.stem not in SIDECARS and path.stem not in NOT_PUBLISHED
     )
+    # A frozen document with no verifier is a failure, not a line in a list
+    # of reasons it could not be checked. That list existed, and the count
+    # of what had been checked read as the count of what exists.
+    unregistered = sorted(set(frozen) - set(VERIFIERS))
+    slugs = [args.slug] if args.slug else sorted(set(frozen) & set(VERIFIERS))
+
     total_checked = 0
     all_failures: list[str] = []
     for slug in slugs:
-        checked, failures, drifted = verify(slug, args.pages)
+        checked, failures, drifted = VERIFIERS[slug](slug, args.pages)
         total_checked += checked
         all_failures.extend(failures)
         state = "ok" if not failures else "FAIL"
@@ -184,26 +453,19 @@ def main(argv: list[str] | None = None) -> int:
             f"  (frozen before {', '.join(drifted)}; a re-freeze carries it)"
             if drifted else ""
         )
-        print(f"{state:4s} {slug:22s} {checked:3d} rows re-derived from source{note}",
+        print(f"{state:4s} {slug:22s} {checked:4d} rows re-derived from source{note}",
               flush=True)
 
-    frozen_datasets = sorted(
-        p.stem for p in FROZEN.glob("*.json") if p.stem not in SIDECARS
-    )
+    scope = f"{len(slugs)} of {len(frozen)}" if not args.slug else "1 selected"
     print(f"\n{total_checked} rows checked against upstream across "
-          f"{len(slugs)} of {len(frozen_datasets)} frozen datasets")
-    for slug in sorted(UNVERIFIED_UPSTREAM):
-        if (FROZEN / f"{slug}.json").exists():
-            print(f"UNVERIFIED {slug:20s} {UNVERIFIED_UPSTREAM[slug]}")
-    if unregistered:
-        # A dataset that is neither verifiable nor declared unverifiable is
-        # the silent skip this module exists to refuse.
-        for slug in unregistered:
-            print(
-                f"FAIL {slug}: frozen with no upstream verifier and no entry "
-                "in UNVERIFIED_UPSTREAM", file=sys.stderr,
-            )
-        all_failures.extend(unregistered)
+          f"{scope} frozen datasets")
+    for slug in unregistered:
+        print(
+            f"FAIL {slug}: frozen evidence with no upstream verifier. Every "
+            "published finding must be re-derivable from source; add one to "
+            "VERIFIERS or do not publish the entry.", file=sys.stderr,
+        )
+    all_failures.extend(unregistered)
     for failure in all_failures:
         print(f"FAIL {failure}", file=sys.stderr)
     return 1 if all_failures else 0

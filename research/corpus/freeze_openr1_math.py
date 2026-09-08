@@ -86,6 +86,42 @@ def _bools(value: object) -> list[bool] | None:
     return [bool(v) for v in value]
 
 
+def extract_rows(shard_rows: list[dict]) -> list[dict]:
+    """Content-free rows from one shard's projected columns.
+
+    Shared with research/corpus/verify_corpus.py, which re-derives a shard
+    from upstream and compares. Verification that reimplemented this would
+    be testing a second copy of the logic rather than the freeze, and the
+    two would drift.
+    """
+    out = []
+    for row in shard_rows:
+        symbolic = _bools(row["correctness_math_verify"])
+        judge = _bools(row["correctness_llama"])
+        complete = _bools(row["is_reasoning_complete"])
+
+        # Columns that disagree on length cannot be paired: the shorter may
+        # cover the first n generations or an arbitrary subset, and nothing
+        # in the data says which. Excluded and counted, never zipped,
+        # because zip truncates in silence and yields a paired statistic
+        # over an alignment nobody established.
+        lengths = {len(c) for c in (symbolic, judge, complete) if c is not None}
+        misaligned = len(lengths) > 1
+        out.append({
+            "uuid": row["uuid"],
+            "source": row["source"],
+            "problem_type": row["problem_type"],
+            "question_type": row["question_type"],
+            "count": row["correctness_count"],
+            "n": None if misaligned or not lengths else lengths.pop(),
+            "symbolic": symbolic,
+            "judge": judge,
+            "complete": complete,
+            "misaligned": misaligned,
+        })
+    return out
+
+
 def freeze() -> dict:
     import pyarrow.parquet as pq
 
@@ -112,30 +148,7 @@ def freeze() -> dict:
 
         shard_rows = table.to_pylist()
         del table
-        for row in shard_rows:
-            symbolic = _bools(row["correctness_math_verify"])
-            judge = _bools(row["correctness_llama"])
-            complete = _bools(row["is_reasoning_complete"])
-
-            # Columns that disagree on length cannot be paired: the shorter
-            # may cover the first n generations or an arbitrary subset, and
-            # nothing in the data says which. Excluded and counted, never
-            # zipped, because zip truncates in silence and yields a paired
-            # statistic over an alignment nobody established.
-            lengths = {len(c) for c in (symbolic, judge, complete) if c is not None}
-            misaligned = len(lengths) > 1
-            rows.append({
-                "uuid": row["uuid"],
-                "source": row["source"],
-                "problem_type": row["problem_type"],
-                "question_type": row["question_type"],
-                "count": row["correctness_count"],
-                "n": None if misaligned or not lengths else lengths.pop(),
-                "symbolic": symbolic,
-                "judge": judge,
-                "complete": complete,
-                "misaligned": misaligned,
-            })
+        rows.extend(extract_rows(shard_rows))
         shards.append({
             "shard": f"{index:04d}.parquet",
             "sha256": digest.hexdigest(),

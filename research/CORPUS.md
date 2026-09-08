@@ -488,5 +488,19 @@ partial arm, or a truncated cell), keeps identifiers, outcome fields,
 step counts, and SHA-256 hashes of the content it refuses to copy,
 and, where raw logs ship beside graded-test lists, the
 re-adjudication verdict. `research/corpus/corpus_report.py` renders
-document from the frozen evidence alone; `make corpus` fails when the
-two disagree. No prompts, responses, patches, or logs are stored.
+this document from the frozen evidence alone; `make corpus` fails
+when the two disagree. No prompts, responses, patches, or logs are
+stored.
+
+**Every entry re-derives from upstream, and that is enforced rather
+than asserted.** `make verify-corpus` holds one verifier per frozen
+document, each using the transport its freeze used, and each
+re-running the freezer's own extractor on freshly fetched bytes:
+what it proves is that the same source and the same code produce the
+committed file. A frozen document with no verifier fails the run.
+That rule is new because it had to be: the verifier once covered
+only the datasets frozen through one transport and silently skipped
+the rest, so six of the fourteen findings here rested on evidence no
+reader could check, including the two this corpus leans on hardest.
+It printed the count of what it had checked, which reads as the
+count of what exists.

@@ -176,6 +176,15 @@ def render_normalized_json(
 
 def load_normalized_json_bundle(path: str | Path) -> EvidenceBundle:
     """Load the canonical offline interchange format used by source adapters."""
+    # The four names in this module form a matrix: {path, mapping} into a
+    # bundle, and a bundle out to {document, string}. Guessing wrong is easy
+    # and used to surface as a TypeError from three frames down inside
+    # pathlib, which names neither the mistake nor the fix.
+    if isinstance(path, Mapping):
+        raise TypeError(
+            "load_normalized_json_bundle takes a path to a JSON file. For an "
+            "already-decoded document, call normalized_json_bundle(document)."
+        )
     try:
         raw = json.loads(
             Path(path).read_text(encoding="utf-8"),
