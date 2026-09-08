@@ -8,6 +8,24 @@ The short version: **almost nothing here is a new idea. The assembly may be new,
 and the discipline demonstrably works.** Those are different claims and they are
 worth different amounts.
 
+## The answer, before the working-out
+
+Every mechanism here is borrowed. Refusing when required coverage is missing
+comes from assurance cases, binding a contract to its check implementations from
+functional qualification, accounting for delegated work from audit scope
+completeness, and calibrating the measuring instrument from metrology.
+
+What has not been observed elsewhere is the **assembly**: one decision procedure
+that refuses when any of the four fails, over a portable evidence artifact, as a
+CI gate that exits non-zero and can be run by someone who did not build it.
+
+That is a modest claim, and it is the only one that has survived every
+adversarial pass so far. If that is all you needed, stop here. What follows is
+how it got that narrow: six novelty claims, six sweeps, and what each one left.
+Read it if you want to check the narrowing rather than take it on trust; it is
+kept in full because a claim that shrinks quietly is worse than one that shrinks
+in public.
+
 ## What is not novel
 
 Each of these was claimed at some point in this repository's history and each was
@@ -136,7 +154,8 @@ helpers, as a cautionary footnote.
 
 ## The claim actually worth making
 
-Not any single mechanism. Every one is borrowed:
+Stated at the top, and here is the provenance behind it. Not any single
+mechanism, because every one is borrowed:
 
 | Mechanism | Borrowed from |
 |---|---|
@@ -145,12 +164,9 @@ Not any single mechanism. Every one is borrowed:
 | Account for delegated work | audit scope completeness |
 | Calibrate the measuring instrument | metrology |
 
-What has not been observed elsewhere is the **assembly**: one decision procedure
-that refuses when any of the four fails, over a portable evidence artifact, as a
-CI gate that exits non-zero and can be run by someone who did not build it.
-
-That is a modest claim. It is also the only one that has survived every
-adversarial pass so far, and it is stated at that width deliberately.
+The assembly is what the sweeps did not find elsewhere, and it is stated at that
+width deliberately: four borrowed mechanisms behind one refusal, in an artifact
+a stranger can run.
 
 ## What is demonstrated rather than claimed
 

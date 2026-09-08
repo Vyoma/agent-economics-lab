@@ -81,3 +81,40 @@ class TheGateIsNeverMoreGenerousThanTheEngine(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EverySubcommandIsRoutable(unittest.TestCase):
+    """`main` used to be a 439-line chain of `if args.command == ...`, where
+    a subparser with no matching branch fell to the bottom and returned 2,
+    indistinguishable from a real refusal. The chain is a table now, and a
+    command in the parser with no entry in it is caught here rather than at
+    the exit code."""
+
+    def test_the_table_covers_the_parser(self) -> None:
+        import argparse as _argparse
+
+        from agent_economics.cli import DISPATCH, build_parser
+
+        parser = build_parser()
+        subparsers = [
+            action for action in parser._actions
+            if isinstance(action, _argparse._SubParsersAction)
+        ]
+        self.assertEqual(len(subparsers), 1, "expected one subparser group")
+        declared = set(subparsers[0].choices)
+        routed = set(DISPATCH)
+        self.assertEqual(
+            declared - routed, set(),
+            "subcommands the parser accepts but the table cannot route",
+        )
+        self.assertEqual(
+            routed - declared, set(),
+            "table entries for subcommands the parser does not accept",
+        )
+
+    def test_every_handler_is_callable(self) -> None:
+        from agent_economics.cli import DISPATCH
+
+        for name, handler in DISPATCH.items():
+            with self.subTest(command=name):
+                self.assertTrue(callable(handler))
