@@ -50,7 +50,7 @@ The gemini-3-pro arm reports info.resolved true on all 500 tasks while its own i
 
 **Dataset.** [`tarsur385/swebench-verified-trajectories`](https://huggingface.co/datasets/tarsur385/swebench-verified-trajectories) at `b55979d6`
 
-The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, against a 20.6-point spread across the nine scored arms.
+The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, 95% CI [88.4%, 93.4%], against a 20.6-point spread across the nine scored arms.
 
 **Check it.** `make outcome-audit && make verify-upstream`
 
@@ -122,7 +122,7 @@ Clean bill across 80,036 rows. Every resolved row carries a non-empty patch and 
 
 **Dataset.** [`nebius/SWE-rebench-openhands-trajectories`](https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) at `35455389`
 
-Model-generated tests, measured against adjudicated outcomes on the 31,389 rows carrying both signals, agree at Cohen's kappa 0.062, 95% CI [0.047, 0.077] bootstrapped over 5,870 instances. That interval excludes zero, so the signal is real; it is also far too small to act on. The decision-relevant comparison is against the majority class: raw agreement is 51.4% where always answering with the commoner label scores 54.2%, so consulting the proxy costs 2.9 points. Conditioned on the generated tests themselves being judged correct, kappa is 0.101 with precision 72.9% on 9,444 rows; that split was chosen after seeing the pooled result and is not corrected for multiplicity.
+Model-generated tests, measured against adjudicated outcomes on the 31,389 rows carrying both signals, agree at Cohen's kappa 0.062, 95% CI [0.047, 0.077] bootstrapped over 5,870 instances. That interval excludes zero, so the signal is real; it is also far too small to act on. The decision-relevant comparison is against the majority class: raw agreement is 51.4% where always answering with the commoner label scores 54.2%, so consulting the proxy costs 2.9 points, 95% CI [0.9, 5.0] points, an interval excluding zero. Conditioned on the generated tests themselves being judged correct, kappa is 0.101 with precision 72.9% on 9,444 rows; that split was chosen after seeing the pooled result and is not corrected for multiplicity.
 
 **Check it.** `make corpus`
 
@@ -158,7 +158,7 @@ Runs the contamination judge flagged score +0.209 accuracy above clean runs when
 
 **Dataset.** [`SALT-NLP/cogym-real-trajectories`](https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) at `729096dc`
 
-Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time and reach quadratic-weighted kappa 0.625, disagreeing by two points or more on 9% of sessions. That is barely above the 0.60 kappa floor this package requires of an automated outcome instrument.
+Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time and reach quadratic-weighted kappa 0.625, 95% CI [0.520, 0.708], an interval that straddles the 0.60 floor and so cannot decide against it at this sample, disagreeing by two points or more on 9% of sessions. That is barely above the 0.60 kappa floor this package requires of an automated outcome instrument.
 
 **Check it.** `make corpus`
 

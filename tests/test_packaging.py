@@ -73,3 +73,23 @@ class TheDemoRunsFromThePackagedData(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TheDriftGuardIsNotVacuous(unittest.TestCase):
+    def test_a_changed_packaged_file_is_caught(self) -> None:
+        """Proven by corrupting a copy and watching the comparison fail,
+        rather than by trusting that a byte comparison compares bytes."""
+        from agent_economics.cli import DEMO_INPUTS
+
+        name = DEMO_INPUTS[0]
+        target = PACKAGED / name
+        original = target.read_bytes()
+        try:
+            target.write_bytes(original + b"\n")
+            with self.assertRaises(AssertionError):
+                ThePackagedExamplesMatchTheRepository(
+                    "test_every_demo_input_is_byte_identical_to_its_source"
+                ).test_every_demo_input_is_byte_identical_to_its_source()
+        finally:
+            target.write_bytes(original)
+        self.assertEqual(target.read_bytes(), (SOURCE / name).read_bytes())

@@ -203,7 +203,11 @@ def nebius_openhands_summary() -> dict:
     n01 = [c[2] for c in table]
     n00 = [c[3] for c in table]
     size = len(table)
-    draws = []
+    # The decision-relevant figure is not the kappa, it is how far the
+    # proxy falls short of always answering with the commoner label. It was
+    # published as a bare -2.9 points, which is the same bare point estimate
+    # this corpus keeps finding elsewhere.
+    draws, gap_draws = [], []
     for _ in range(2000):
         idx = [_random.randrange(size) for _ in range(size)]
         a = sum(n11[i] for i in idx)
@@ -217,7 +221,12 @@ def nebius_openhands_summary() -> dict:
         pe = ((a + b) * (a + c) + (c + d) * (b + d)) / (total * total)
         if pe < 1:
             draws.append((po - pe) / (1 - pe))
+        resolved_here = a + b
+        gap_draws.append(
+            (po - max(resolved_here, total - resolved_here) / total) * 100
+        )
     draws.sort()
+    gap_draws.sort()
 
     return {
         "revision": doc["revision"],
@@ -225,6 +234,8 @@ def nebius_openhands_summary() -> dict:
         "resolved": sum(1 for r in rows if r["outcome"] == 1),
         "majority_baseline": majority,
         "agreement_minus_majority": po_all - majority,
+        "gap_low": gap_draws[int(0.025 * len(gap_draws))],
+        "gap_high": gap_draws[int(0.975 * len(gap_draws))],
         "kappa_low": draws[int(0.025 * len(draws))],
         "kappa_high": draws[int(0.975 * len(draws))],
         "kappa_clusters": size,
@@ -1503,7 +1514,11 @@ def _entry_openhands(sweagent: dict, openhands: dict) -> list[str]:
         f" majority-class baseline of"
         f" {openhands['majority_baseline']:.1%}: consulting the proxy is"
         f" **{openhands['agreement_minus_majority'] * 100:+.1f} points**"
-        " against always answering with the commoner label.",
+        f" (95% CI {openhands['gap_low']:+.1f} to {openhands['gap_high']:+.1f},"
+        f" clustered over {openhands['kappa_clusters']:,} instances) against"
+        " always answering with the commoner label. The interval excludes"
+        " zero, so the proxy is reliably worse than the baseline it has to"
+        " beat, not merely unhelpful on average.",
         f"- Cohen's kappa **{openhands['kappa']:.3f}**, 95% CI"
         f" [{openhands['kappa_low']:.3f}, {openhands['kappa_high']:.3f}]"
         f" bootstrapped over {openhands['kappa_clusters']:,} instances."

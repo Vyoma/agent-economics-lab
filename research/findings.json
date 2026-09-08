@@ -27,12 +27,14 @@
       "kind": "measurement",
       "dataset": "tarsur385/swebench-verified-trajectories",
       "revision": "b55979d6b24850b72ae4d80f912526280cd6058a",
-      "statement": "The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, against a 20.6-point spread across the nine scored arms.",
+      "statement": "The gpt-5.2-codex and gpt-5.2-high arms carry byte-identical transcripts on all 500 tasks, and info.resolved disagrees between the copies on 44 of them: the label agrees with itself 91.2% of the time on identical input, 95% CI [88.4%, 93.4%], against a 20.6-point spread across the nine scored arms.",
       "figures": {
         "tasks": 500,
         "disagreements": 44,
         "self_agreement": 0.912,
-        "spread_points": 20.6
+        "spread_points": 20.6,
+        "self_agreement_low": 0.884,
+        "self_agreement_high": 0.934
       },
       "verify": "make outcome-audit && make verify-upstream",
       "action": "Treat the two gpt-5.2 arms as one arm. If you rank arms in this dataset, 8.8 points is the floor below which a difference is indistinguishable from the label disagreeing with itself.",
@@ -135,7 +137,7 @@
       "kind": "measurement",
       "dataset": "nebius/SWE-rebench-openhands-trajectories",
       "revision": "35455389ab51bf5e2306bfd436ef72d0f98bf882",
-      "statement": "Model-generated tests, measured against adjudicated outcomes on the 31,389 rows carrying both signals, agree at Cohen's kappa 0.062, 95% CI [0.047, 0.077] bootstrapped over 5,870 instances. That interval excludes zero, so the signal is real; it is also far too small to act on. The decision-relevant comparison is against the majority class: raw agreement is 51.4% where always answering with the commoner label scores 54.2%, so consulting the proxy costs 2.9 points. Conditioned on the generated tests themselves being judged correct, kappa is 0.101 with precision 72.9% on 9,444 rows; that split was chosen after seeing the pooled result and is not corrected for multiplicity.",
+      "statement": "Model-generated tests, measured against adjudicated outcomes on the 31,389 rows carrying both signals, agree at Cohen's kappa 0.062, 95% CI [0.047, 0.077] bootstrapped over 5,870 instances. That interval excludes zero, so the signal is real; it is also far too small to act on. The decision-relevant comparison is against the majority class: raw agreement is 51.4% where always answering with the commoner label scores 54.2%, so consulting the proxy costs 2.9 points, 95% CI [0.9, 5.0] points, an interval excluding zero. Conditioned on the generated tests themselves being judged correct, kappa is 0.101 with precision 72.9% on 9,444 rows; that split was chosen after seeing the pooled result and is not corrected for multiplicity.",
       "figures": {
         "n": 31389,
         "kappa": 0.062,
@@ -146,7 +148,9 @@
         "kappa_low": 0.047,
         "kappa_high": 0.077,
         "majority_baseline": 0.5424,
-        "agreement": 0.5136
+        "agreement": 0.5136,
+        "gap_low": -4.98,
+        "gap_high": -0.86
       },
       "verify": "make corpus",
       "action": "Do not gate releases on model-generated tests. Compare any outcome proxy against the majority-class baseline before trusting it: this one loses to always guessing the commoner label by 2.9 points, so consulting it is worse than not having it.",
@@ -201,12 +205,14 @@
       "kind": "measurement",
       "dataset": "SALT-NLP/cogym-real-trajectories",
       "revision": "729096dc62df4feaf13570b2d613cc23ca685ea6",
-      "statement": "Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time and reach quadratic-weighted kappa 0.625, disagreeing by two points or more on 9% of sessions. That is barely above the 0.60 kappa floor this package requires of an automated outcome instrument.",
+      "statement": "Across 191 sessions where the same person rated both the artifact and their overall satisfaction, the two ratings agree exactly 50% of the time and reach quadratic-weighted kappa 0.625, 95% CI [0.520, 0.708], an interval that straddles the 0.60 floor and so cannot decide against it at this sample, disagreeing by two points or more on 9% of sessions. That is barely above the 0.60 kappa floor this package requires of an automated outcome instrument.",
       "figures": {
         "n": 191,
         "exact": 0.503,
         "qwk": 0.625,
-        "two_or_more_apart": 0.094
+        "two_or_more_apart": 0.094,
+        "qwk_low": 0.52,
+        "qwk_high": 0.708
       },
       "verify": "make corpus",
       "action": "Do not substitute the artifact rating for overall satisfaction. They agree exactly half the time.",
@@ -270,7 +276,9 @@
         "admitted_on_judge_alone": 28627,
         "judge_acceptance_rate": 0.757,
         "verified_sample": 398,
-        "both_numeric_and_differ": 18
+        "both_numeric_and_differ": 18,
+        "acceptance_low": 0.754,
+        "acceptance_high": 0.76
       },
       "verify": "make corpus",
       "action": "Filter to rows whose correctness_math_verify contains a true before training on this split, or accept that 30.5% of your rows were admitted by a judge nobody scored.",

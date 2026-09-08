@@ -183,6 +183,10 @@ COMPUTED: dict[str, str] = {
     # The number that makes the kappa actionable: the proxy scores this many
     # points below always answering with the commoner label.
     "2.9": f"{abs(_openhands()['agreement_minus_majority']) * 100:.1f}",
+    # Published with its interval: the claim is that the shortfall is
+    # reliably negative, not merely negative on this sample.
+    "5.0": f"{abs(_openhands()['gap_low']):.1f}",
+    "0.9": f"{abs(_openhands()['gap_high']):.1f}",
     # The twin arms' 44 disagreements split evenly, so both report the same
     # rate; and the gap that split can move is what bounds a real difference.
     "22": f"{_twin_split()[0]}",

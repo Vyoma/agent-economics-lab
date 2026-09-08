@@ -32,7 +32,7 @@ happened to be present. Only `SCALE` exits 0.
 **Pointed at ten public datasets it did not produce, it has filed fourteen
 results.** The sharpest is about the graders. Across 31,389 runs where an
 adjudicated outcome sat beside whether the model's own generated tests passed,
-the two agree at Cohen's kappa 0.062, and the proxy predicts the outcome 2.9 points worse than always guessing the commoner label. One published model arm reports a
+the two agree at Cohen's kappa 0.062, and the proxy predicts the outcome 2.9 points worse than always guessing the commoner label, an interval excluding zero. One published model arm reports a
 100% resolution rate from a field its own cross-check never confirmed once. Two
 arms turn out to be the same 500 runs, and the outcome label disagrees with
 itself on 44 of them.

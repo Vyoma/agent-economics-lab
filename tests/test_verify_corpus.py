@@ -184,3 +184,17 @@ class EveryPublishedFindingIsVerifiable(unittest.TestCase):
         for slug, verifier in verify_corpus.VERIFIERS.items():
             with self.subTest(slug=slug):
                 self.assertTrue(callable(verifier))
+
+    def test_the_coverage_guard_fires_when_a_verifier_is_removed(self) -> None:
+        """Proven non-vacuous. A guard demonstrated once by hand can rot
+        silently; this keeps the demonstration in the suite."""
+        import verify_corpus
+
+        removed = verify_corpus.VERIFIERS.pop("hle-verifiers")
+        try:
+            with self.assertRaises(AssertionError):
+                self.test_every_frozen_document_has_a_verifier()
+        finally:
+            verify_corpus.VERIFIERS["hle-verifiers"] = removed
+        # and it passes again once restored, so the failure was the removal
+        self.test_every_frozen_document_has_a_verifier()

@@ -31,6 +31,21 @@ from corpus_report import (  # noqa: E402
 AUDIT = ROOT / "examples" / "public-swebench" / "outcome_audit.json"
 
 
+def _wilson(successes: int, trials: int, z: float = 1.959964) -> tuple[float, float]:
+    """Two-sided Wilson interval on a proportion."""
+    import math
+
+    if not trials:
+        return 0.0, 1.0
+    p = successes / trials
+    centre = p + z * z / (2 * trials)
+    spread = z * math.sqrt(
+        p * (1 - p) / trials + z * z / (4 * trials * trials)
+    )
+    denominator = 1 + z * z / trials
+    return (centre - spread) / denominator, (centre + spread) / denominator
+
+
 def _figures(finding_id: str) -> dict:
     registry = findings_module.load()
     return next(
@@ -74,6 +89,11 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertAlmostEqual(
             published["self_agreement"], 1 - disagreements / len(b), places=3
         )
+        # A point estimate quoted from the index without its interval is the
+        # failure this corpus keeps finding in other people's numbers.
+        low, high = _wilson(len(b) - disagreements, len(b))
+        self.assertAlmostEqual(published["self_agreement_low"], low, places=3)
+        self.assertAlmostEqual(published["self_agreement_high"], high, places=3)
         # The index promised every figure recomputes and this one did not,
         # so it drifted: 21 is the naive-rate spread, 20.6 the confirmed-rate
         # spread the other two documents publish.
@@ -160,6 +180,12 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertAlmostEqual(
             published["invalid_kappa"], summary["invalid_kappa"], places=3
         )
+        # The decision figure carries its interval, and the entry asserts
+        # that interval excludes zero. If it stops excluding zero the claim
+        # that the proxy is reliably worse than the baseline is wrong.
+        self.assertAlmostEqual(published["gap_low"], summary["gap_low"], places=2)
+        self.assertAlmostEqual(published["gap_high"], summary["gap_high"], places=2)
+        self.assertLess(summary["gap_high"], 0)
 
     def test_009_and_010_the_posttrainbench_figures(self) -> None:
         from corpus_report import posttrainbench_summary
@@ -195,6 +221,12 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         summary = cogym_summary()
         pair = summary["pairs"]["outcomeRating|agentRating"]
         eleven = _figures("AEL-2026-011")
+        self.assertAlmostEqual(eleven["qwk_low"], pair["qwk_low"], places=3)
+        self.assertAlmostEqual(eleven["qwk_high"], pair["qwk_high"], places=3)
+        # The entry says the interval straddles the floor, so if it stops
+        # straddling, the sentence is wrong.
+        self.assertLess(pair["qwk_low"], 0.60)
+        self.assertGreater(pair["qwk_high"], 0.60)
         self.assertEqual(eleven["n"], pair["n"])
         self.assertAlmostEqual(eleven["qwk"], pair["qwk"], places=3)
         self.assertAlmostEqual(eleven["exact"], pair["exact"], places=3)
@@ -216,6 +248,11 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertEqual(published["graders"], len(summary["graders"]))
         self.assertAlmostEqual(published["worst_auc"], summary["worst"]["auc"], places=3)
         self.assertAlmostEqual(published["best_auc"], summary["best"]["auc"], places=3)
+        self.assertEqual(
+            published["intervals_containing_chance"],
+            sum(1 for g in summary["graders"]
+                if g["indistinguishable_from_random"]),
+        )
         # The published claim is that no grader clears the floor, so if one
         # ever does the entry is wrong and this must fail rather than let
         # the prose stand.
@@ -252,6 +289,14 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         )
         self.assertEqual(
             summary["count_tracks_symbolic"], summary["symbolic_only_rows"]
+        )
+        self.assertAlmostEqual(
+            _figures("AEL-2026-014")["acceptance_low"],
+            summary["acceptance_ci"][0], places=3,
+        )
+        self.assertAlmostEqual(
+            _figures("AEL-2026-014")["acceptance_high"],
+            summary["acceptance_ci"][1], places=3,
         )
 
     def test_the_selection_guard_fires_on_doctored_evidence(self) -> None:

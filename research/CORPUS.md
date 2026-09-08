@@ -444,7 +444,7 @@ instrument. Here both signals sit on the same
 31,389 rows, which is a validity
 measurement at scale:
 
-- Raw agreement 51.4%, against a majority-class baseline of 54.2%: consulting the proxy is **-2.9 points** against always answering with the commoner label.
+- Raw agreement 51.4%, against a majority-class baseline of 54.2%: consulting the proxy is **-2.9 points** (95% CI -5.0 to -0.9, clustered over 5,870 instances) against always answering with the commoner label. The interval excludes zero, so the proxy is reliably worse than the baseline it has to beat, not merely unhelpful on average.
 - Cohen's kappa **0.062**, 95% CI [0.047, 0.077] bootstrapped over 5,870 instances. Reliably above zero and far too small to act on. This entry said "indistinguishable from guessing" before the interval existed, which was wrong in the direction of overstating: chance is zero and this excludes zero. The useful statement is the line above it, that the signal is worse than the baseline it has to beat.
 - Conditioned on the generated tests themselves being judged
   correct (9,444 rows): kappa
