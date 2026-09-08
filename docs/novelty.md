@@ -209,9 +209,15 @@ it can fail, the pre-registration is a git object rather than a claim, and two
 adversarial reviews were run and acted on rather than filed. That is copyable by
 anyone, which disqualifies it as a moat and is the reason to write it down.
 
-## The earlier framing, kept for the record
+## The earlier framing, retracted and kept for the record
 
-**Since writing that, it became the novelty.** The list below is no longer an
+**Everything in this section is superseded by the sections above, which record
+why the claim did not survive.** It is preserved because deleting a claim you
+made is a worse record than keeping it marked, and because the shape of the
+error is more useful than its absence. Read it in the past tense; it is written
+in the present because that is how it was written at the time.
+
+**At the time, this read: since writing that, it became the novelty.** The list below is no longer an
 anecdote about diligence; it is a corpus with a measurable property. Five of
 these defects have been pinned to the commit they were live at, and at every
 one of those commits the entire test suite passed: 448, 448, 455, 462, 462

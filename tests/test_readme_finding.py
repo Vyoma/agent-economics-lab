@@ -120,7 +120,7 @@ def _twin_split():
 
 def _openhands() -> dict:
     sys.path.insert(0, str(ROOT / "research" / "corpus"))
-    from audit import nebius_openhands_summary
+    from corpus_report import nebius_openhands_summary
 
     return nebius_openhands_summary()
 

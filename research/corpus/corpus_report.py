@@ -134,6 +134,15 @@ def nebius_sweagent_summary() -> dict:
 def nebius_openhands_summary() -> dict:
     """Every published number for the SWE-rebench-openhands entry."""
     doc = _load("nebius-openhands")
+    # `cross` carries whatever second outcome signal the dataset had, and it
+    # is not one type across the corpus: a float here, an exit-status string
+    # in the JetBrains freeze. Nothing stopped a reader from treating one as
+    # the other, so each consumer states the column it believes it is
+    # reading and a re-freeze that changes it fails here rather than
+    # silently computing a kappa over exit statuses.
+    assert doc["cross_field"] == "pred_passes_gen_tests", (
+        f"expected pred_passes_gen_tests in `cross`, got {doc['cross_field']}"
+    )
     rows = doc["rows"]
 
     def _kappa(subset: list) -> tuple[float, float, float]:
@@ -335,7 +344,18 @@ def hle_verifier_summary() -> dict:
         high = draws[int((1 - adjusted) * len(draws))]
         nominal_low = draws[int(0.025 * len(draws))]
         nominal_high = draws[int(0.975 * len(draws))]
+        observed = sorted({
+            v for row in rows for v in (row["scores"].get(judge) or [])
+            if v is not None
+        })
+        integer_scale = all(float(v).is_integer() for v in observed)
         graders.append({
+            "levels": len(observed),
+            "integer_scale": integer_scale,
+            "scale": (
+                f"{observed[0]:g} to {observed[-1]:g}" if integer_scale
+                else f"{observed[0]:g} to {observed[-1]:g}, continuous"
+            ),
             "nominal_low": nominal_low,
             "nominal_high": nominal_high,
             "adjusted_alpha": adjusted,
@@ -531,6 +551,56 @@ def posttrainbench_summary() -> dict:
         / (len(item[1]["clean"]) + len(item[1]["dirty"])),
     )
     worst_name, worst_buckets = worst
+    # Intervals on both differences, resampling runs inside each benchmark,
+    # because the whole claim is about what stratification does to the
+    # estimate and a claim about an estimate needs its uncertainty.
+    import random as _random
+    _random.seed(20260908)
+
+    def _both(sample: dict) -> tuple[float | None, float | None]:
+        flat_clean = [v for b in sample.values() for v in b["clean"]]
+        flat_dirty = [v for b in sample.values() for v in b["dirty"]]
+        if not flat_clean or not flat_dirty:
+            return None, None
+        pooled_value = (
+            statistics.mean(flat_dirty) - statistics.mean(flat_clean)
+        )
+        usable = [
+            (name, b) for name, b in sample.items()
+            if len(b["clean"]) >= 5 and len(b["dirty"]) >= 5
+        ]
+        if not usable:
+            return pooled_value, None
+        top = sum(
+            (statistics.mean(b["dirty"]) - statistics.mean(b["clean"]))
+            * (len(b["clean"]) + len(b["dirty"]))
+            for _, b in usable
+        )
+        bottom = sum(len(b["clean"]) + len(b["dirty"]) for _, b in usable)
+        return pooled_value, top / bottom
+
+    pooled_draws, stratified_draws = [], []
+    for _ in range(4000):
+        resampled = {
+            name: {
+                side: [values[_random.randrange(len(values))] for _ in values]
+                if values else []
+                for side, values in buckets.items()
+            }
+            for name, buckets in by_benchmark.items()
+        }
+        one, two = _both(resampled)
+        if one is not None:
+            pooled_draws.append(one)
+        if two is not None:
+            stratified_draws.append(two)
+    pooled_draws.sort()
+    stratified_draws.sort()
+    pooled_low = pooled_draws[int(0.025 * len(pooled_draws))]
+    pooled_high = pooled_draws[int(0.975 * len(pooled_draws))]
+    stratified_low = stratified_draws[int(0.025 * len(stratified_draws))]
+    stratified_high = stratified_draws[int(0.975 * len(stratified_draws))]
+
     worst_n = len(worst_buckets["clean"]) + len(worst_buckets["dirty"])
 
     return {
@@ -546,7 +616,18 @@ def posttrainbench_summary() -> dict:
         "disallowed_model": sum(1 for r in judged if r["disallowed_model"]),
         "pooled_difference": pooled,
         "stratified_difference": stratified,
+        # Kept for the recomputation test and for anyone who wants it, but
+        # not published as a finding. A ratio whose denominator's interval
+        # contains zero has effectively unbounded uncertainty: this one
+        # bootstraps to [-110, +107], so "11.5x smaller" is arithmetic on
+        # two point estimates rather than a quantity. The reportable fact is
+        # that the stratified effect is not distinguishable from no effect.
         "overstatement": pooled / stratified,
+        "pooled_low": pooled_low,
+        "pooled_high": pooled_high,
+        "stratified_low": stratified_low,
+        "stratified_high": stratified_high,
+        "stratified_spans_zero": stratified_low <= 0 <= stratified_high,
         "comparable_benchmarks": len(comparable),
         "benchmarks_where_contamination_helps": sum(
             1 for _, b in comparable
@@ -834,7 +915,9 @@ def _entry_preamble(coderforge: dict, cf_re: dict, hle: dict, openr1: dict, cogy
             f"| `{ptb['revision'][:8]}` | {ptb['rows']:,} "
             f"| {ptb['unusable_accuracy']} runs carry no usable outcome; the "
             "contamination judge's apparent effect on scores is "
-            f"{ptb['overstatement']:.1f}x smaller once benchmark composition "
+            f"but only {ptb['stratified_difference']:+.3f}"
+            f" [{ptb['stratified_low']:+.3f}, {ptb['stratified_high']:+.3f}],"
+            " an interval containing zero, once benchmark composition "
             "is held fixed |"
         ),
         (
@@ -932,14 +1015,15 @@ def _entry_hle(hle: dict) -> list[str]:
         "so this is a near-balanced problem rather than one where a constant",
         "answer scores well.",
         "",
-        "| verifier | scored | questions | within-question AUC"
+        "| verifier | scale | scored | questions | within-question AUC"
         " | 95% CI, family-adjusted | pooled |",
-        "|---|---:|---:|---:|---|---:|",
+        "|---|---|---:|---:|---:|---|---:|",
     ]
     for grader in sorted(hle["graders"], key=lambda g: g["auc"]):
         note = " *" if grader["indistinguishable_from_random"] else ""
         out.append(
-            f"| `{grader['judge']}` | {grader['pairs']:,} "
+            f"| `{grader['judge']}` | {grader['scale']} "
+            f"| {grader['pairs']:,} "
             f"| {grader['questions_scored']} "
             f"| {grader['auc']:.3f}{note} | [{grader['low']:.3f}, "
             f"{grader['high']:.3f}] | {grader['pooled_auc']:.3f} |"
@@ -965,6 +1049,19 @@ def _entry_hle(hle: dict) -> list[str]:
         f" `{hle['below_chance'][0] if hle['below_chance'] else ''}` crossing"
         " below chance. The gap between the two columns is the size of the",
         "between-question difficulty effect, which is why both are shown.",
+        "",
+        "**The graders are not on one scale, and ties decide the figures.**",
+        "The scale column is measured from the data, not taken from the card.",
+        "Five graders use six integer levels, two never emit 0 and use five,",
+        "and `gpt-oss-120b` is not on an integer scale at all. With fifty",
+        "responses to a question and six possible scores, nearly every",
+        "pairwise comparison inside a question is a tie, so the tie",
+        "convention is decisive rather than incidental: mid-rank throughout,",
+        "which is the Mann-Whitney treatment and the one that neither",
+        "rewards nor punishes a grader for refusing to discriminate. A",
+        "grader with more levels can separate responses the six-level",
+        "graders cannot, so the column is worth reading beside the AUC",
+        "rather than under it.",
         "",
         "**Why AUC and not an accuracy.** The graders score against a rubric",
         "the dataset does not publish, so no threshold can be justified from",
@@ -1228,13 +1325,29 @@ def _entry_posttrainbench(ptb: dict) -> list[str]:
         "where most benchmarks sit near 0.2. Pooling therefore credits that",
         "benchmark's easiness to contamination. Holding benchmark fixed and",
         "weighting by size, the difference is",
-        f"{ptb['stratified_difference']:+.3f} - smaller by a factor of",
-        f"{ptb['overstatement']:.1f} - and contaminated runs beat clean ones",
-        f"in only {ptb['benchmarks_where_contamination_helps']} of",
-        f"{ptb['comparable_benchmarks']} benchmarks with enough of both to",
-        "compare. The honest statement is that this dataset does not show",
-        "contamination reliably paying, and that anyone computing the pooled",
-        "number gets an answer an order of magnitude too large.",
+        f"{ptb['stratified_difference']:+.3f}, and its 95% interval is"
+        f" [{ptb['stratified_low']:+.3f}, {ptb['stratified_high']:+.3f}]:"
+        " it contains zero, so within",
+        "benchmarks this dataset does not show contamination paying at all.",
+        "The pooled figure's interval is"
+        f" [{ptb['pooled_low']:+.3f}, {ptb['pooled_high']:+.3f}] and does not",
+        "contain zero, which is what makes the pair a Simpson case rather",
+        "than two noisy numbers.",
+        "",
+        "**No ratio is published between them, deliberately.** An earlier",
+        "draft said the pooled figure was larger by a factor of"
+        f" {ptb['overstatement']:.1f},",
+        "which is arithmetic on two point estimates. A ratio whose",
+        "denominator's interval contains zero has effectively unbounded",
+        "uncertainty; bootstrapping this one gives an interval running from",
+        "about -110 to +107. The reportable fact is the pair of intervals",
+        "above, not the number you get by dividing them. An earlier draft",
+        "also offered that contaminated runs beat clean ones in only"
+        f" {ptb['benchmarks_where_contamination_helps']} of"
+        f" {ptb['comparable_benchmarks']} benchmarks as corroboration; that",
+        "is a sign test at n=5 with a two-sided p of 1.0, and it corroborates",
+        "nothing. It is stated here as a count and nothing is inferred from",
+        "it.",
         "",
         "**What is missing, counted rather than dropped.**",
         f"{ptb['no_metrics_file']} runs ship no metrics file and",
@@ -1458,7 +1571,7 @@ def _entry_closing() -> list[str]:
         "partial arm, or a truncated cell), keeps identifiers, outcome fields,",
         "step counts, and SHA-256 hashes of the content it refuses to copy,",
         "and, where raw logs ship beside graded-test lists, the",
-        "re-adjudication verdict. `research/corpus/audit.py` renders this",
+        "re-adjudication verdict. `research/corpus/corpus_report.py` renders",
         "document from the frozen evidence alone; `make corpus` fails when the",
         "two disagree. No prompts, responses, patches, or logs are stored.",
         "",
@@ -1468,6 +1581,10 @@ def _entry_closing() -> list[str]:
 def render() -> str:
     coderforge = _load("coderforge")
     jetbrains = _load("jetbrains")
+    # See the note in nebius_openhands_summary: `cross` is a string here.
+    assert jetbrains["cross_field"] == "exit_status", (
+        f"expected exit_status in `cross`, got {jetbrains['cross_field']}"
+    )
     tarsur = _tarsur_summary()
     smith = swesmith_summary()
     ptb = posttrainbench_summary()

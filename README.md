@@ -689,7 +689,11 @@ Two questions decide whether any of the above is worth trusting, and both have
 executable answers that are less flattering than the headline.
 
 **Can the harness be fooled?** `make mutation-score` injects 1,176 mutants under
-two operators and excludes equivalent mutants from the denominator:
+two operators and excludes equivalent mutants from the denominator. The three
+denominators below reconcile: 1,176 is 588 per operator, 510 is those 588 minus
+the 78 equivalent mutants that operator produces (156 across both), and the
+digest row keeps 588 because a contract digest changes whether or not the mutant
+it describes is semantically equivalent.
 
 ```text
 REMOVAL       fixed 510/510 killed (100.0%)   forced by construction, not evidence

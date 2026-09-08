@@ -288,6 +288,12 @@ def _nvidia_swezero(row: dict) -> dict:
     }
 
 
+#: `cross_field` names the second outcome signal a dataset carries, and the
+#: frozen row exposes it under the neutral key `cross`. That key therefore
+#: holds different types across the corpus: a float for
+#: `pred_passes_gen_tests`, a string for `exit_status`. Consumers assert the
+#: declared column before reading it rather than inferring the type, because
+#: a kappa computed over exit statuses would look like a number.
 SPECS = {
     "coderforge": {
         "dataset": (

@@ -23,7 +23,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "research" / "corpus"))
 
-from audit import (
+from corpus_report import (
     _load,
     cogym_summary,
     nebius_openhands_summary,

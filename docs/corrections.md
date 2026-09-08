@@ -35,7 +35,7 @@ over a scored denominator, and says so in its own comment
 **One factor, three renderings.** The PostTrainBench overstatement appeared
 as `12x`, "eleven times" and `11.5` in three places: two render sites
 rounding with `:.0f`, and a hardcoded word that stopped tracking the
-computation ([research/corpus/audit.py](../research/corpus/audit.py)).
+computation ([research/corpus/corpus_report.py](../research/corpus/corpus_report.py)).
 
 **Twenty contradictions across twenty-six documents.** A cross-document
 audit found stale adapter inventories, a four-versus-seven disagreement

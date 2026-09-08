@@ -53,7 +53,7 @@ test or by the freeze itself:
 
 ## The checks: base rates before accusations
 
-Run the shared family in [research/corpus/audit.py](../research/corpus/audit.py):
+Run the shared family in [research/corpus/corpus_report.py](../research/corpus/corpus_report.py):
 outcome census, cross-check agreement where the dataset carries two outcome
 signals, duplicate-transcript groups with label agreement, degenerate
 positives. Then, before any suspicion becomes a finding:

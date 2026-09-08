@@ -159,16 +159,20 @@
       "kind": "measurement",
       "dataset": "aisa-group/PostTrainBench-Trajectories",
       "revision": "39d3fcd794df51c062c8bd3b7f8523ba707aaeb3",
-      "statement": "Runs the contamination judge flagged score +0.209 accuracy above clean runs when pooled, which reads as cheating paying twenty points. Holding benchmark fixed and weighting by size, the difference is +0.018, smaller by a factor of 11.5, and contaminated runs beat clean ones in only 2 of the 5 benchmarks with enough of both to compare. Contamination concentrates on bfcl, which carries 39% of its own runs flagged, 47% of all contamination, and a clean-run mean of 0.673 against a corpus where most benchmarks sit near 0.2.",
+      "statement": "Runs the contamination judge flagged score +0.209 accuracy above clean runs when pooled, 95% CI [+0.173, +0.241], which reads as cheating paying twenty points. Holding benchmark fixed and weighting by size, the difference is +0.018 with a 95% CI of [-0.019, +0.055], which contains zero: within benchmarks the dataset does not show contamination paying at all. 39% of `bfcl` runs are flagged and it carries 47% of all contamination while having a clean-run mean of 0.673 against a corpus sitting near 0.2, so pooling credits that benchmark's easiness to contamination. No ratio between the two figures is published: a ratio whose denominator's interval contains zero is unbounded, and this one bootstraps to roughly [-110, +107].",
       "figures": {
         "pooled": 0.209,
         "stratified": 0.018,
         "overstatement": 11.5,
         "helps_in": 2,
-        "comparable": 5
+        "comparable": 5,
+        "pooled_low": 0.173,
+        "pooled_high": 0.241,
+        "stratified_low": -0.019,
+        "stratified_high": 0.055
       },
       "verify": "make corpus",
-      "action": "Stratify by benchmark before quoting a contamination effect. Pooled, it is eleven times larger than it is within benchmarks.",
+      "action": "Stratify by benchmark before quoting any contamination effect. Pooled it looks like twenty points; within benchmarks the interval contains zero. If your own metric mixes populations with different baselines, the pooled number is measuring the mix.",
       "scope": "A statement about a confound in this dataset, not about whether contamination helps in general: the stratified estimate is observational, benchmarks are not randomised across runs, and the flags come from an unvalidated judge. It does establish that the pooled comparison anyone would compute first is an order of magnitude too large."
     },
     {
@@ -248,7 +252,7 @@
       },
       "verify": "make corpus",
       "action": "Score your grader within question before you trust it, and on the responses it will actually rank. Four of seven models here could not be told from random at that task, and the pooled figure hides it.",
-      "scope": "Intervals are family-adjusted across seven graders, so they are wider than a single-comparison reading; the same four contain 0.5 either way. AUC is threshold-free because the scoring rubric is not published, and it is not comparable to the agreement floors in SPEC 7.2, which govern chance-corrected agreement and held-out accuracy; there is no AUC floor in that contract. All responses come from one model, so this measures graders on that model's output rather than in general. Ground truth is exact matching against a published answer with a model used to parse answer formats: checkable, but not untouched by a model. HLE is adversarially hard by construction. gemini-3-flash, the highest scorer, carries no score on 19,284 of 32,450 responses and its figure is computed on the subset it did score, with the bias direction unknown. This is not a claim that model grading cannot work, only that on this data none of seven cleared a bar worth calling useful."
+      "scope": "The seven are not on one scale: five use six integer levels, two never emit 0 and use five, and gpt-oss-120b is not integer-scaled. Ties take the mid-rank, which is decisive at fifty responses and six levels rather than incidental, though the grader with the most levels scores lowest, so ties are not hiding a signal. Intervals are family-adjusted across seven graders, so they are wider than a single-comparison reading; the same four contain 0.5 either way. AUC is threshold-free because the scoring rubric is not published, and it is not comparable to the agreement floors in SPEC 7.2, which govern chance-corrected agreement and held-out accuracy; there is no AUC floor in that contract. All responses come from one model, so this measures graders on that model's output rather than in general. Ground truth is exact matching against a published answer with a model used to parse answer formats: checkable, but not untouched by a model. HLE is adversarially hard by construction. gemini-3-flash, the highest scorer, carries no score on 19,284 of 32,450 responses and its figure is computed on the subset it did score, with the bias direction unknown. This is not a claim that model grading cannot work, only that on this data none of seven cleared a bar worth calling useful."
     },
     {
       "id": "AEL-2026-014",

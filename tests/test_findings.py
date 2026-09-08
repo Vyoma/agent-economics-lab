@@ -20,7 +20,7 @@ sys.path.insert(0, str(ROOT / "research"))
 sys.path.insert(0, str(ROOT / "research" / "corpus"))
 
 import findings as findings_module  # noqa: E402
-from audit import (  # noqa: E402
+from corpus_report import (  # noqa: E402
     FROZEN,
     nebius_openhands_summary,
     nebius_sweagent_summary,
@@ -162,7 +162,7 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         )
 
     def test_009_and_010_the_posttrainbench_figures(self) -> None:
-        from audit import posttrainbench_summary
+        from corpus_report import posttrainbench_summary
 
         summary = posttrainbench_summary()
         nine = _figures("AEL-2026-009")
@@ -170,7 +170,14 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertAlmostEqual(
             nine["stratified"], summary["stratified_difference"], places=3
         )
-        self.assertAlmostEqual(nine["overstatement"], summary["overstatement"], places=1)
+        for key in ("pooled_low", "pooled_high",
+                    "stratified_low", "stratified_high"):
+            self.assertAlmostEqual(nine[key], summary[key], places=3)
+        # The published claim is that stratifying moves the effect onto an
+        # interval containing zero, so if it ever stops containing zero the
+        # entry is wrong and this must fail rather than let the prose stand.
+        self.assertLessEqual(summary["stratified_low"], 0)
+        self.assertGreaterEqual(summary["stratified_high"], 0)
         self.assertEqual(
             nine["helps_in"], summary["benchmarks_where_contamination_helps"]
         )
@@ -183,7 +190,7 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertEqual(ten["unjudged"], summary["unjudged"])
 
     def test_011_and_012_the_cogym_figures(self) -> None:
-        from audit import cogym_summary
+        from corpus_report import cogym_summary
 
         summary = cogym_summary()
         pair = summary["pairs"]["outcomeRating|agentRating"]
@@ -200,7 +207,7 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
             self.assertEqual(twelve[key], summary["coverage"][field])
 
     def test_013_the_hle_verifier_replication(self) -> None:
-        from audit import hle_verifier_summary
+        from corpus_report import hle_verifier_summary
 
         summary = hle_verifier_summary()
         published = _figures("AEL-2026-013")
@@ -215,7 +222,7 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         self.assertLess(summary["best"]["auc"], 0.75)
 
     def test_014_the_unauditable_training_set(self) -> None:
-        from audit import openr1_math_summary
+        from corpus_report import openr1_math_summary
 
         summary = openr1_math_summary()
         published = _figures("AEL-2026-014")
@@ -253,18 +260,18 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
         selection claim the whole entry rests on must stop holding."""
         from unittest import mock
 
-        import audit
+        import corpus_report
 
-        document = audit._load("openr1-math")
+        document = corpus_report._load("openr1-math")
         for row in document["rows"]:
             if row["judge"] is not None and not row["misaligned"]:
                 row["symbolic"][0] = True
                 break
         else:
             self.fail("no dual-signal row to doctor")
-        with mock.patch.object(audit, "_load", lambda slug: document):
+        with mock.patch.object(corpus_report, "_load", lambda slug: document):
             self.assertGreater(
-                audit.openr1_math_summary()["selection_violations"], 0
+                corpus_report.openr1_math_summary()["selection_violations"], 0
             )
 
     def test_the_recomputation_fires_on_a_doctored_figure(self) -> None:

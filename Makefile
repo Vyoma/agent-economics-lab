@@ -178,7 +178,7 @@ outcome-audit: check-python
 # the push than after the round-trip. `make hooks` wires this to git push.
 docs-sync: check-python
 	@$(PYTHON) research/probe_sites.py > research/PROBE_SITES.md
-	@$(PYTHON) research/corpus/audit.py > research/CORPUS.md
+	@$(PYTHON) research/corpus/corpus_report.py > research/CORPUS.md
 	@$(PYTHON) research/adapter_fidelity.py > research/ADAPTER_FIDELITY.md
 	@$(PYTHON) research/findings.py > research/FINDINGS.md
 	@$(PYTHON) research/patterns.py > research/PATTERNS.md
@@ -247,7 +247,7 @@ verify-upstream: check-python
 # The registry of every public dataset audited, rendered from frozen evidence
 # alone. Fails when the committed document and the evidence disagree.
 corpus: check-python
-	@$(PYTHON) research/corpus/audit.py > /tmp/agent-economics-corpus.md
+	@$(PYTHON) research/corpus/corpus_report.py > /tmp/agent-economics-corpus.md
 	@cmp /tmp/agent-economics-corpus.md research/CORPUS.md
 	@echo "ok  corpus: research/CORPUS.md is byte-identical to a fresh render"
 

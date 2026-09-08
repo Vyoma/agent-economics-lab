@@ -31,7 +31,7 @@ vendor published, and nothing here is a measurement of a model.
 | [FUSE-verifiers/HLE-Verifications](https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) | `e838b3dd` | 649 | seven models asked to verify correctness reach within-question AUC 0.491 to 0.581 against a checkable answer; four of the seven have intervals containing 0.5 |
 | [open-r1/OpenR1-Math-220k](https://huggingface.co/datasets/open-r1/OpenR1-Math-220k) | `e4e141ec` | 93,733 | 28,627 problems entered the published training set on a model judge's word alone, on rows where the symbolic checker had found nothing correct |
 | [SALT-NLP/cogym-real-trajectories](https://huggingface.co/datasets/SALT-NLP/cogym-real-trajectories) | `729096dc` | 228 | the only human-rated entry: one person's ratings of one session agree exactly 50% of the time, and the communication rating exists on 22% of sessions |
-| [aisa-group/PostTrainBench-Trajectories](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) | `39d3fcd7` | 1,842 | 260 runs carry no usable outcome; the contamination judge's apparent effect on scores is 11.5x smaller once benchmark composition is held fixed |
+| [aisa-group/PostTrainBench-Trajectories](https://huggingface.co/datasets/aisa-group/PostTrainBench-Trajectories) | `39d3fcd7` | 1,842 | 260 runs carry no usable outcome; the contamination judge's apparent effect on scores is but only +0.018 [-0.019, +0.055], an interval containing zero, once benchmark composition is held fixed |
 | [SWE-bench/SWE-smith-trajectories](https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories) | `08e109b4` | 76,002 | labels self-consistent across every duplicate; the `patch` column is not row-aligned (266 verbatim cross-repository patch groups); 2,255 duplicate rows in one split |
 | [nebius/SWE-agent-trajectories](https://huggingface.co/datasets/nebius/SWE-agent-trajectories) | `68195a14` | 80,036 | clean: every coherence probe passes; resolved rows always carry a patch and evaluation logs; no duplicate transcripts |
 | [nebius/SWE-rebench-openhands-trajectories](https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) | `35455389` | 67,074 | clean labels; its recorded generated-test signal measures kappa 0.06 against adjudication over 31,389 runs, and agree 2.9 points less often than the majority-class baseline |
@@ -79,15 +79,15 @@ dataset calls verifiers. The base rate is 51.4%,
 so this is a near-balanced problem rather than one where a constant
 answer scores well.
 
-| verifier | scored | questions | within-question AUC | 95% CI, family-adjusted | pooled |
-|---|---:|---:|---:|---|---:|
-| `gpt-oss-120b` | 32,437 | 538 | 0.491 * | [0.464, 0.518] | 0.537 |
-| `Qwen2.5-72B-Instruct` | 32,450 | 538 | 0.500 * | [0.483, 0.516] | 0.501 |
-| `Skywork-Critic-Llama-3.1-70B` | 32,442 | 538 | 0.505 * | [0.486, 0.525] | 0.550 |
-| `gptmini-high` | 32,450 | 538 | 0.515 * | [0.485, 0.544] | 0.578 |
-| `deepseek_reasoner` | 32,417 | 538 | 0.535 | [0.511, 0.560] | 0.586 |
-| `gpt5.2-high` | 32,297 | 536 | 0.547 | [0.513, 0.580] | 0.653 |
-| `gemini-3-flash` | 13,166 | 441 | 0.581 | [0.557, 0.605] | 0.587 |
+| verifier | scale | scored | questions | within-question AUC | 95% CI, family-adjusted | pooled |
+|---|---|---:|---:|---:|---|---:|
+| `gpt-oss-120b` | 0 to 5, continuous | 32,437 | 538 | 0.491 * | [0.464, 0.518] | 0.537 |
+| `Qwen2.5-72B-Instruct` | 0 to 5 | 32,450 | 538 | 0.500 * | [0.483, 0.516] | 0.501 |
+| `Skywork-Critic-Llama-3.1-70B` | 0 to 5 | 32,442 | 538 | 0.505 * | [0.486, 0.525] | 0.550 |
+| `gptmini-high` | 1 to 5 | 32,450 | 538 | 0.515 * | [0.485, 0.544] | 0.578 |
+| `deepseek_reasoner` | 1 to 5 | 32,417 | 538 | 0.535 | [0.511, 0.560] | 0.586 |
+| `gpt5.2-high` | 0 to 5 | 32,297 | 536 | 0.547 | [0.513, 0.580] | 0.653 |
+| `gemini-3-flash` | 0 to 5 | 13,166 | 441 | 0.581 | [0.557, 0.605] | 0.587 |
 
 \* interval contains 0.5, so that grader is not distinguishable
 from random at ranking within a question. 4 of seven are, and the same four are
@@ -101,6 +101,19 @@ single ranking lets a grader score well by detecting that a question
 is easy, which is not the job. This entry published the pooled
 figure first, and it flattered every grader: the range was 0.501 to 0.653 pooled and is 0.491 to 0.581 within question, with `Qwen2.5-72B-Instruct` crossing below chance. The gap between the two columns is the size of the
 between-question difficulty effect, which is why both are shown.
+
+**The graders are not on one scale, and ties decide the figures.**
+The scale column is measured from the data, not taken from the card.
+Five graders use six integer levels, two never emit 0 and use five,
+and `gpt-oss-120b` is not on an integer scale at all. With fifty
+responses to a question and six possible scores, nearly every
+pairwise comparison inside a question is a tie, so the tie
+convention is decisive rather than incidental: mid-rank throughout,
+which is the Mann-Whitney treatment and the one that neither
+rewards nor punishes a grader for refusing to discriminate. A
+grader with more levels can separate responses the six-level
+graders cannot, so the column is worth reading beside the AUC
+rather than under it.
 
 **Why AUC and not an accuracy.** The graders score against a rubric
 the dataset does not publish, so no threshold can be justified from
@@ -298,13 +311,23 @@ clean-run mean of 0.673 against a corpus
 where most benchmarks sit near 0.2. Pooling therefore credits that
 benchmark's easiness to contamination. Holding benchmark fixed and
 weighting by size, the difference is
-+0.018 - smaller by a factor of
-11.5 - and contaminated runs beat clean ones
-in only 2 of
-5 benchmarks with enough of both to
-compare. The honest statement is that this dataset does not show
-contamination reliably paying, and that anyone computing the pooled
-number gets an answer an order of magnitude too large.
++0.018, and its 95% interval is [-0.019, +0.055]: it contains zero, so within
+benchmarks this dataset does not show contamination paying at all.
+The pooled figure's interval is [+0.173, +0.241] and does not
+contain zero, which is what makes the pair a Simpson case rather
+than two noisy numbers.
+
+**No ratio is published between them, deliberately.** An earlier
+draft said the pooled figure was larger by a factor of 11.5,
+which is arithmetic on two point estimates. A ratio whose
+denominator's interval contains zero has effectively unbounded
+uncertainty; bootstrapping this one gives an interval running from
+about -110 to +107. The reportable fact is the pair of intervals
+above, not the number you get by dividing them. An earlier draft
+also offered that contaminated runs beat clean ones in only 2 of 5 benchmarks as corroboration; that
+is a sign test at n=5 with a two-sided p of 1.0, and it corroborates
+nothing. It is stated here as a count and nothing is inferred from
+it.
 
 **What is missing, counted rather than dropped.**
 208 runs ship no metrics file and
@@ -464,6 +487,6 @@ the repository SHA (refusing a snapshot that moved mid-fetch, a
 partial arm, or a truncated cell), keeps identifiers, outcome fields,
 step counts, and SHA-256 hashes of the content it refuses to copy,
 and, where raw logs ship beside graded-test lists, the
-re-adjudication verdict. `research/corpus/audit.py` renders this
+re-adjudication verdict. `research/corpus/corpus_report.py` renders
 document from the frozen evidence alone; `make corpus` fails when the
 two disagree. No prompts, responses, patches, or logs are stored.
