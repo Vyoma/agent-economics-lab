@@ -306,6 +306,23 @@ above.
 
 ## Check this repository without trusting it
 
+The strongest check here needs none of this repository.
+[`research/reproduce_hle.py`](research/reproduce_hle.py) is 148 lines of
+standard library that downloads the public dataset, checks its bytes against a
+published hash, and recomputes the headline grader result from scratch. It
+imports nothing from this package, so it is an independent check rather than
+another way of running the same code:
+
+```bash
+make reproduce-hle      # or: python3 research/reproduce_hle.py
+```
+
+About four minutes, most of it an 83MB download. If it disagrees with
+[research/CORPUS.md](research/CORPUS.md), the published number is wrong.
+Everything else below re-derives this project's frozen evidence using this
+project's own extractor, which proves the freeze reproduces but takes the
+extraction on trust.
+
 Everything below is something *this project* checked. A reader who does not run
 the code has to take it on faith, which is the posture this package exists to
 argue against, applied to itself.

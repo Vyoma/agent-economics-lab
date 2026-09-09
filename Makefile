@@ -21,6 +21,7 @@ help:
 	@echo "    patterns          what the audits say jointly"
 	@echo "    evals             how good the instrument is"
 	@echo "    verify-corpus     re-derive frozen rows from upstream (network)"
+	@echo "    reproduce-hle     recompute the headline from raw data, no repo needed"
 	@echo ""
 	@echo "  check it yourself"
 	@echo "    test              the full suite"
@@ -235,6 +236,9 @@ bench-check: check-python
 
 # Every frozen corpus dataset re-derived from its source, not from our copy.
 # Network, so deliberately outside `reproduce`.
+reproduce-hle: check-python
+	@$(PYTHON) research/reproduce_hle.py
+
 verify-corpus: check-python
 	@$(PYTHON) research/corpus/verify_corpus.py
 
