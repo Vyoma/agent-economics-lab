@@ -763,6 +763,31 @@ def _comparable(openr1: dict) -> int:
             + verdicts.get("matches_published_answer", 0))
 
 
+def _chisq_sf(statistic: float, degrees: int) -> float:
+    """Upper tail of a chi-square, in the standard library only.
+
+    Used for a homogeneity test across strata. The entry called an
+    acceptance rate "flat" across a 4.6-point range and drew a conclusion
+    from it, which is an eyeball where a test belongs.
+    """
+    import math
+
+    if degrees % 2 == 0:
+        term = math.exp(-statistic / 2)
+        total = term
+        for index in range(1, degrees // 2):
+            term *= statistic / 2 / index
+            total += term
+        return min(1.0, total)
+    root = math.sqrt(statistic)
+    total = math.erfc(root / math.sqrt(2))
+    term = math.sqrt(2 / math.pi) * root * math.exp(-statistic / 2)
+    for index in range(1, (degrees - 1) // 2 + 1):
+        total += term
+        term *= statistic / (2 * index + 1)
+    return min(1.0, total)
+
+
 def openr1_math_summary() -> dict:
     """Two verification columns arranged so they can never be compared."""
     import random
@@ -815,9 +840,25 @@ def openr1_math_summary() -> dict:
         (FROZEN / "openr1-math-answers.json").read_text(encoding="utf-8")
     )
 
+    # Homogeneity across strata, tested rather than eyeballed.
+    accepted_total = sum(x["accepted"] for x in strata)
+    n_total = sum(x["generations"] for x in strata)
+    share = accepted_total / n_total if n_total else 0.0
+    chi = sum(
+        (x["accepted"] - x["generations"] * share) ** 2
+        / (x["generations"] * share)
+        + ((x["generations"] - x["accepted"]) - x["generations"] * (1 - share)) ** 2
+        / (x["generations"] * (1 - share))
+        for x in strata
+    ) if strata and 0 < share < 1 else 0.0
+    degrees = max(1, len(strata) - 1)
+
     return {
         "rows": len(rows),
         "misaligned": len(rows) - len(aligned),
+        "homogeneity_chi_square": chi,
+        "homogeneity_df": degrees,
+        "homogeneity_p": _chisq_sf(chi, degrees),
         "answer_check": answers,
         "dual_signal_rows": len(dual),
         "symbolic_only_rows": len(solo),
@@ -970,11 +1011,12 @@ def _entry_preamble(coderforge: dict, cf_re: dict, hle: dict, openr1: dict, cogy
 
 
 
-def _entry_coderforge(cf_census: dict, cf_re: dict) -> list[str]:
+def _entry_coderforge(coderforge: dict, cf_census: dict, cf_re: dict) -> list[str]:
     """A clean bill, re-derived from the raw evaluation logs."""
     out = [
         "",
-        "## togethercomputer/CoderForge-Preview-32B, SWE-bench Verified, 500 rows",
+        "## togethercomputer/CoderForge-Preview-32B, SWE-bench Verified, "
+        f"{len(coderforge['rows']):,} rows",
         "",
         "The dataset ships the raw evaluation log and the graded-test lists",
         "beside every published `reward`, which permits the strongest check in",
@@ -1019,7 +1061,8 @@ def _entry_hle(hle: dict) -> list[str]:
         "different things are two results, not one confirmed twice, and the",
         "generality of the corpus rests on that distinction being kept.",
         "",
-        "649 Humanity's Last Exam questions, 50 candidate responses each.",
+        f"{hle['questions']} Humanity's Last Exam questions,"
+        f" {hle['responses'] // hle['questions']} candidate responses each.",
         "Every response is marked correct or not by matching the published",
         "answer, and every response is scored 0 to 5 by seven models the",
         f"dataset calls verifiers. The base rate is {hle['base_rate']:.1%},",
@@ -1085,8 +1128,10 @@ def _entry_hle(hle: dict) -> list[str]:
         "contract, and reading one across metric families is the category",
         "error this project has already published once.",
         "",
-        "**Why the intervals are wide, twice over.** 32,450 responses sit",
-        "inside 649 questions and are not independent, so the bootstrap",
+        f"**Why the intervals are wide, twice over.** {hle['responses']:,}"
+        " responses sit",
+        f"inside {hle['questions']} questions and are not independent, so the"
+        " bootstrap",
         "resamples questions rather than responses; treating the responses as",
         "independent would give intervals several times too tight and is the",
         "error this corpus most often finds elsewhere. Then the intervals are",
@@ -1127,9 +1172,10 @@ def _entry_hle(hle: dict) -> list[str]:
         "**One grader is mostly absent, and it is the top row.**"
         f" `gemini-3-flash` carries no score on"
         f" {next(g['null_scores'] for g in hle['graders'] if g['judge'] == 'gemini-3-flash'):,}"
-        " of the 32,450 responses, scoring"
+        f" of the {hle['responses']:,} responses, scoring"
         f" {next(g['questions_scored'] for g in hle['graders'] if g['judge'] == 'gemini-3-flash')}"
-        " of 538 rankable questions. Its figure is computed on the subset it",
+        f" of {max(g['questions_scored'] for g in hle['graders'])} rankable"
+        " questions. Its figure is computed on the subset it",
         "did score, the missingness is not random with respect to outcome,",
         "and the direction of the resulting bias is unknown. It is left in",
         "the table with its coverage stated rather than dropped, because",
@@ -1176,10 +1222,19 @@ def _entry_openr1(openr1: dict) -> list[str]:
         f"judge accepted {openr1['judge_accepted']:,} of {openr1['dual_generations']:,} rejected generations,",
         f"{openr1['judge_acceptance_rate']:.1%} (95% CI"
         f" {openr1['acceptance_ci'][0]:.1%} to {openr1['acceptance_ci'][1]:.1%}, bootstrapped over",
-        "problems, since generations cluster inside them). The rate is flat",
-        f"across every source stratum, {min(s['rate'] for s in openr1['strata']):.1%} to"
-        f" {max(s['rate'] for s in openr1['strata']):.1%}, so it is not one",
-        "problem set's quirk.",
+        "problems, since generations cluster inside them). Across the seven",
+        f"source strata the rate runs {min(x['rate'] for x in openr1['strata']):.1%}"
+        f" to {max(x['rate'] for x in openr1['strata']):.1%}, and a"
+        " chi-square test of homogeneity does not",
+        f"detect a difference between them (X2 ="
+        f" {openr1['homogeneity_chi_square']:.2f}, df ="
+        f" {openr1['homogeneity_df']}, p ="
+        f" {openr1['homogeneity_p']:.2f}) at n = {openr1['dual_generations']:,}.",
+        "That is consistent with one common rate rather than proof of one,",
+        "which is the most a failure to reject supports. An earlier draft",
+        "called the range flat and concluded from the word that it was not",
+        "one problem set's quirk, which is an eyeball standing where a test",
+        "belongs.",
         "",
         "This is not evidence that the judge is wrong. A symbolic checker",
         "that cannot parse a valid answer and a judge that waves through an",
@@ -1246,7 +1301,8 @@ def _entry_cogym(cogym: dict) -> list[str]:
         "Every other entry here audits a coding agent, and every outcome",
         "instrument in them is automated: a cross-check column, a",
         "re-adjudication from logs, model-generated tests, an LLM judge.",
-        "This is neither. 228 real human-agent collaboration sessions across",
+        f"This is neither. {cogym['rows']} real human-agent collaboration"
+        " sessions across",
         f"{', '.join(sorted(cogym['tasks']))}, where the outcome labels were",
         "typed by the person who was in the session. It is the one entry",
         "whose instrument is the thing every other instrument gets validated",
@@ -1555,7 +1611,8 @@ def _entry_jetbrains(jetbrains: dict, jb_census: dict, jb_cross: dict) -> list[s
     """An outcome column populated on no row at all."""
     out = [
         "",
-        "## JetBrains-Research, SWE-bench test-minus-verified, 1,785 rows",
+        "## JetBrains-Research, SWE-bench test-minus-verified, "
+        f"{len(jetbrains['rows']):,} rows",
         "",
         f"The `resolved` column is null on all {len(jetbrains['rows']):,} rows. "
         f"{jb_cross.get('Submitted', 0):,} runs report",
@@ -1636,7 +1693,7 @@ def render() -> str:
 
     lines: list[str] = []
     lines += _entry_preamble(coderforge, cf_re, hle, openr1, cogym, ptb, smith, sweagent, openhands, jetbrains, tarsur)
-    lines += _entry_coderforge(cf_census, cf_re)
+    lines += _entry_coderforge(coderforge, cf_census, cf_re)
     lines += _entry_hle(hle)
     lines += _entry_openr1(openr1)
     lines += _entry_cogym(cogym)

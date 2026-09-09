@@ -728,7 +728,12 @@ producer should not read it as one.
 you gate on cost per acceptable outcome, the label sits in a denominator and its
 error is amplified by `1 / acceptable_rate`. The largest error a gate can absorb is
 `r*s/(1+s)`, so at a 70% acceptable rate with 10% slack you need **93.6% agreement,
-not the 85% commonly treated as sufficient**. How often 85% clears that bar depends on the
+not the 85% inherited from classification practice**, where an 85%-accurate labeller
+induces roughly 15% error in whatever you compute next. A cost gate is not a
+classification: the label sits in a denominator, so the threshold does not carry
+over. 93.6% is an algebraic consequence of that ratio, not a measured result, and
+[the derivation](docs/label-error.md) shows why it is a sufficient condition rather
+than a necessary property of a judge. How often 85% clears that bar depends on the
 slack range considered: 1 of 15 cells with slack up to 25%, 8 of 25 up to 100%. And
 `e*` bounds net bias, `|false accepts - false rejects|/n`, not disagreement, so a
 balanced judge can disagree 30% of the time and move the metric not at all.

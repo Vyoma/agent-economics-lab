@@ -198,9 +198,14 @@ field `correctness_count` equals the judge's count on all
 judge overruled a checker that had rejected every candidate. The
 judge accepted 42,271 of 55,808 rejected generations,
 75.7% (95% CI 75.4% to 76.0%, bootstrapped over
-problems, since generations cluster inside them). The rate is flat
-across every source stratum, 74.9% to 79.5%, so it is not one
-problem set's quirk.
+problems, since generations cluster inside them). Across the seven
+source strata the rate runs 74.9% to 79.5%, and a chi-square test of homogeneity does not
+detect a difference between them (X2 = 6.72, df = 6, p = 0.35) at n = 55,808.
+That is consistent with one common rate rather than proof of one,
+which is the most a failure to reject supports. An earlier draft
+called the range flat and concluded from the word that it was not
+one problem set's quirk, which is an eyeball standing where a test
+belongs.
 
 This is not evidence that the judge is wrong. A symbolic checker
 that cannot parse a valid answer and a judge that waves through an
