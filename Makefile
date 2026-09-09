@@ -377,7 +377,7 @@ public-case: check-python
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit corpus findings patterns adapter-fidelity evals
+reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit held-out bench-check corpus findings patterns adapter-fidelity evals
 
 lessons: check-python
 # Without set -e the loop reports only the LAST lesson's exit status, so a
@@ -388,7 +388,10 @@ lessons: check-python
 video: check-python
 	@$(PYTHON) render_video.py
 
+# ruff is a dev dependency, not a runtime one, so a fresh clone does not
+# have it and the bare ImportError names neither that fact nor the fix.
 lint: check-python
+	@$(PYTHON) -c "import ruff" 2>/dev/null || { 	  echo "ruff is not installed. It is a dev dependency, not needed to run"; 	  echo "anything in this repository. To lint:"; 	  echo "  $(PYTHON) -m pip install -e '.[dev]'"; exit 1; }
 	@$(PYTHON) -m ruff check .
 
 coverage: check-python
