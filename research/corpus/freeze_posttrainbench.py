@@ -41,7 +41,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from corpus_io import http_get, write_frozen
+from corpus_io import dataset_revision, http_get, write_frozen
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FROZEN = pathlib.Path(__file__).resolve().parent / "frozen"
@@ -66,7 +66,8 @@ def _get(url: str, *, raw: bool = False):
 
 
 def _revision() -> str:
-    return _get(f"{_API}/{urllib.parse.quote(DATASET, safe='/')}")["sha"]
+    """The revision a freeze pins to. Shared, in corpus_io."""
+    return dataset_revision(DATASET)
 
 
 def _tree(path: str = "") -> list[dict]:

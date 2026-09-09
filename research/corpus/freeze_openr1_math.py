@@ -45,6 +45,8 @@ import sys
 import tempfile
 import urllib.request
 
+from corpus_io import dataset_revision
+
 FROZEN = pathlib.Path(__file__).resolve().parent / "frozen"
 OUT = FROZEN / "openr1-math.json"
 
@@ -68,9 +70,9 @@ COLUMNS = [
 
 
 def _revision(ref: str = "") -> str:
-    url = INFO_API + (f"/revision/{ref}" if ref else "")
-    with urllib.request.urlopen(url, timeout=120) as response:
-        return json.load(response)["sha"]
+    """The revision a freeze pins to. Shared, in corpus_io. `ref` names the
+    parquet mirror's own branch, which carries a revision of its own."""
+    return dataset_revision(DATASET, ref)
 
 
 def _shard_url(revision: str, index: int) -> str:

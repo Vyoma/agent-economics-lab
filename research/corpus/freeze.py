@@ -28,7 +28,7 @@ import time
 import urllib.parse
 import urllib.request
 
-from corpus_io import http_get, write_frozen
+from corpus_io import dataset_revision, http_get, write_frozen
 from collections.abc import Mapping
 from typing import Any
 
@@ -47,7 +47,8 @@ def _get(url: str) -> dict:
 
 
 def _sha_now(dataset: str) -> str:
-    return _get(f"{_INFO_API}/{urllib.parse.quote(dataset, safe='/')}")["sha"]
+    """The revision a freeze pins to. Shared, in corpus_io."""
+    return dataset_revision(dataset)
 
 
 #: A checkpoint rewrites every row fetched so far, so writing one per page
