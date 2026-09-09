@@ -7,6 +7,21 @@ repository and each number below is produced by a `make` target, not typed.
 Start with [the README](../README.md) for what this is and why. Come here when
 you want to run something.
 
+## Recipe 0: start from your own runs
+
+Every recipe below this one runs on data already committed here, which proves
+the numbers and teaches you nothing about your own. If you came to point this
+at your agent, that path is
+[examples/README.md](../examples/README.md): the five input files with their
+columns, how to fill the three that ask for figures nobody has written down
+(the baseline cost, the acceptable rate, the value of an outcome), the six
+attestation methods and their floors if a model labelled your outcomes, and
+the `bundle` then `evaluate` then `claim` sequence end to end.
+
+Expect `INCOMPLETE` on the first run. That is the tool refusing to score you
+on partial evidence rather than scoring you on whatever happened to be
+present, and the grounds it prints name what is missing.
+
 ## Run the full decision
 
 Python 3.10+. No cloud account. No third-party runtime packages.
@@ -73,7 +88,9 @@ make public-case
 Opus resolves `14/20` tasks versus Haiku's `11/20`, while costing 56.9% more
 per attempt and 23.3% more per resolved task.
 
-**The useful result is the frontier's `HOLD`, not the engine's `STOP`.** One
+**The useful result is the frontier's `HOLD`, not the engine's `STOP`.**
+`HOLD` and `ADOPT` are the frontier's own two verdicts, separate from the
+engine's four: `HOLD` says the comparison is undecided at this sample size. One
 harmful transition in 20 pairs gives an exact one-sided upper bound of 24.9% on
 the harmful-regression rate, against a predeclared 5% limit. Twenty paired tasks
 cannot detect the regression rate the decision depends on, so the honest answer is
@@ -98,7 +115,7 @@ public trajectory remains verifiable by its upstream path and SHA-256 digest.
 ## Compose a contract by name
 
 `agent-economics capabilities` lists every check this build can run. Two of
-them — delegation closure and evidence provenance — shipped, were documented,
+them, delegation closure and evidence provenance, shipped, were documented,
 and reached no command-line decision at all, because the check set was a
 literal compiled into four consumers rather than something a caller could ask
 for.
@@ -116,8 +133,8 @@ in a different order are a different contract. A check the build cannot
 resolve is refused with exit 2 rather than dropped, because a contract naming a
 check nobody can build is unreadable rather than weaker.
 
-Both of those gates are built from the evidence itself — the delegation
-manifest the bundle declares, the instrument it names — so naming one on a
+Both of those gates are built from the evidence itself: the delegation
+manifest the bundle declares, the instrument it names, so naming one on a
 command line is enough. A contract that let the caller supply the manifest
 could declare every delegation accounted for without the evidence saying so.
 
@@ -183,7 +200,7 @@ threshold meaning spend. See `examples/checks-only/`, the same session as
 - Verdict on the evidence as supplied: **STOP**
 - Withheld on: **unprovided coverage**
 
-- `refusal_rate` — no enabled check supplies this
+- `refusal_rate`: no enabled check supplies this
 - `jailbreak_safety` is pivotal: removing it flips this run green
 ```
 
@@ -458,7 +475,7 @@ The engine is linear to a million events in one process
 ([the measured envelope](at-scale.md)), and evidence bundles are in-memory
 objects, so the wall past that is memory, not time. The supported answer is
 sharding: split the fleet's window into cohorts, decide each cohort, and
-issue one claim per cohort. Nothing about the contract weakens — each shard
+issue one claim per cohort. Nothing about the contract weakens: each shard
 carries its own evidence digest, its own bounded decision, and its own
 claim, and a reader verifies each shard exactly as they would one bundle.
 

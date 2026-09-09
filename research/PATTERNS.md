@@ -10,14 +10,20 @@ the build fails if it drifts.
 
 This package refuses a green decision unless the instrument that
 produced the outcome labels is attested at kappa 0.60
-or better. Two datasets in this corpus happen to record two outcome
-signals on the same rows, which makes the instrument measurable
-rather than assumed. Nobody had put them next to each other.
+or better. 3 datasets in this corpus record two outcome signals
+on the same rows, which is what makes the instrument measurable
+rather than assumed. The floor governs chance-corrected agreement,
+so the AUC rows are shown beside it and not graded against it:
+there is no AUC floor in the contract, and reading one across
+metric families is a category error this project has published
+once already.
 
-| instrument | measured against | statistic | value | n | clears 0.60? |
+| instrument | measured against | statistic | value (95% CI) | n | clears 0.60? |
 |---|---|---|---:|---:|---|
-| model-generated tests | adjudicated hidden-test outcome | Cohen's kappa | 0.062 | 31,389 | **no** |
-| one person's artifact rating | the same person's satisfaction rating | quadratic-weighted kappa | 0.625 | 191 | yes |
+| model-generated tests | adjudicated hidden-test outcome | Cohen's kappa | 0.062 [0.047, 0.077] | 31,389 | **no** |
+| one person's artifact rating | the same person's satisfaction rating | quadratic-weighted kappa | 0.625 [0.520, 0.708] | 191 | undetermined at n=191 |
+| 7 models asked to verify, worst | exact match against a published answer | within-question AUC | 0.491 [0.464, 0.518] | 649 | not comparable |
+| 7 models asked to verify, best | exact match against a published answer | within-question AUC | 0.581 [0.557, 0.605] | 649 | not comparable |
 
 The two are not the same kind of measurement and the table should
 not be read as a ranking. The first compares an automated signal
@@ -30,8 +36,12 @@ What survives that caveat is worth stating plainly. The cheap
 automated oracle the field reaches for when there is no answer key
 lands at chance. And the human judgement everything else is
 validated against, asked two adjacent questions about one session,
-spreads by more than the margin most published instrument
-comparisons are arguing over. Anything reported as agreement with
+agrees exactly half the time. That is a statement about this
+dataset at this size, not about human rating in general: an earlier
+draft compared it to "the margin most published instrument
+comparisons are arguing over", which names no margin, no
+comparison and no source, and so could not be checked or refuted.
+Anything reported as agreement with
 human labels inherits whichever question was asked, and none of
 these datasets record which.
 
@@ -68,7 +78,7 @@ halves counts the same work twice.
 
 ## What this does not establish
 
-Eight datasets, chosen partly because they were auditable at all,
+10 datasets, chosen partly because they were auditable at all,
 are not a sample of anything. These are not prevalence estimates,
 and a reader who leaves with "agent datasets are unreliable" has
 taken more than the evidence gives. Every figure above is a

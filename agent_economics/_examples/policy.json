@@ -1,0 +1,11 @@
+{
+  "human_hourly_cost_usd": 60.0,
+  "min_acceptable_rate": 0.80,
+  "max_cost_per_acceptable_outcome_usd": 2.00,
+  "max_p95_task_cost_usd": 8.00,
+  "max_trace_cost_per_task_usd": 0.15,
+  "max_calls_per_task": 8,
+  "min_expected_net_value_per_attempt_usd": 0.0,
+  "min_incremental_net_value_vs_baseline_usd": 0.0,
+  "repetition_warning_threshold": 3
+}

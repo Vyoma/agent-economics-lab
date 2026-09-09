@@ -444,6 +444,8 @@ def _event_boundaries(
 
 
 def inspect_claude_code_session_tree(path: str | Path) -> ClaudeCodeSession:
+    """Read a Claude Code session directory, following subagent trees, without
+    converting it. Step one of the three-step conversion."""
     parent_path = Path(path)
     if not parent_path.is_file():
         raise ValueError("Claude Code session-tree input must be a parent JSONL file")
@@ -773,6 +775,7 @@ def claude_code_tree_bundle_from_session(
     session: ClaudeCodeSession,
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
+    """Convert an already-inspected session tree under an explicit contract."""
     if session.source_id != SOURCE_ID or session.source_version != SOURCE_VERSION:
         raise ValueError("Expected a Claude Code session-tree inspection")
     return claude_code_bundle_from_session(session, contract)
@@ -782,6 +785,8 @@ def claude_code_tree_bundle(
     source_path: str | Path,
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
+    """Convert a Claude Code session tree, subagents included, under an
+    explicit contract."""
     return claude_code_tree_bundle_from_session(
         inspect_claude_code_session_tree(source_path),
         contract,

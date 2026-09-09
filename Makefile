@@ -1,8 +1,46 @@
 PYTHON ?= python3
 
+# 47 targets and no way to find them. `make help` errored, which is a poor
+# first answer for a repository whose argument is that you should check it
+# yourself.
+.DEFAULT_GOAL := help
+
+.PHONY: help
+help:
+	@echo "Agent Economics Lab. Python 3.10+, no runtime dependencies."
+	@echo "On a machine whose python3 is older: make PYTHON=python3.12 <target>"
+	@echo ""
+	@echo "  start here"
+	@echo "    demo              a real decision on bundled data, about a second"
+	@echo "                      (installed: agent-economics demo, no clone needed)"
+	@echo "    label-error       the shortest real result: how wrong a judge can be"
+	@echo ""
+	@echo "  the findings"
+	@echo "    corpus            regenerate research/CORPUS.md from frozen evidence"
+	@echo "    findings          regenerate the citable findings index"
+	@echo "    patterns          what the audits say jointly"
+	@echo "    evals             how good the instrument is"
+	@echo "    verify-corpus     re-derive frozen rows from upstream (network)"
+	@echo "    reproduce-hle     recompute the headline from raw data, no repo needed"
+	@echo ""
+	@echo "  check it yourself"
+	@echo "    test              the full suite"
+	@echo "    gate              docs-sync + test + ledger; the pre-push gate"
+	@echo "    reproduce         everything, byte-compared; about two and a half minutes"
+	@echo "    green-defects     re-run each catalogued defect at its pre-fix commit"
+	@echo "    mutation-score    can a gutted gate survive?"
+	@echo "    sensitivity       how many verdicts move when assumptions move"
+	@echo ""
+	@echo "  contribute an audit"
+	@echo "    python3 research/corpus/audit_any.py <hf-dataset>       a census"
+	@echo "    python3 research/corpus/scaffold_entry.py <hf-dataset>  the plumbing"
+	@echo ""
+	@echo "  your own data: see examples/README.md"
+
+
 # Every target depends on this, not just `reproduce` and `test`. It guarded two
-# of thirty-four, so `make demo` -- the first command in the README, run by
-# someone who has just cloned -- crashed with a TypeError from `mutation.py` on
+# of thirty-four, so `make demo`, the first command in the README, run by
+# someone who has just cloned, crashed with a TypeError from `mutation.py` on
 # stock macOS Python 3.9 instead of printing the message below. A check that
 # does not run on the path that matters is not a check that passed, which is
 # this project's own thesis applied to its own front door.
@@ -137,6 +175,7 @@ issue-claim: check-python
 outcome-audit: check-python
 	@$(PYTHON) research/outcome_audit.py > /tmp/agent-economics-outcome-audit.md
 	@cmp /tmp/agent-economics-outcome-audit.md research/OUTCOME_AUDIT.md
+	@echo "ok  outcome audit: research/OUTCOME_AUDIT.md is byte-identical to a fresh render"
 
 # Regenerate every fast derived artifact in place, then refuse if that
 # changed the tree: the CI failures this repository actually has are stale
@@ -144,7 +183,7 @@ outcome-audit: check-python
 # the push than after the round-trip. `make hooks` wires this to git push.
 docs-sync: check-python
 	@$(PYTHON) research/probe_sites.py > research/PROBE_SITES.md
-	@$(PYTHON) research/corpus/audit.py > research/CORPUS.md
+	@$(PYTHON) research/corpus/corpus_report.py > research/CORPUS.md
 	@$(PYTHON) research/adapter_fidelity.py > research/ADAPTER_FIDELITY.md
 	@$(PYTHON) research/findings.py > research/FINDINGS.md
 	@$(PYTHON) research/patterns.py > research/PATTERNS.md
@@ -164,21 +203,25 @@ hooks:
 patterns: check-python
 	@$(PYTHON) research/patterns.py > /tmp/agent-economics-patterns.md
 	@cmp /tmp/agent-economics-patterns.md research/PATTERNS.md
+	@echo "ok  patterns: research/PATTERNS.md is byte-identical to a fresh render"
 
 # The citable index of what the audits found: stable ids, priority dates.
 findings: check-python
 	@$(PYTHON) research/findings.py > /tmp/agent-economics-findings.md
 	@cmp /tmp/agent-economics-findings.md research/FINDINGS.md
+	@echo "ok  findings index: research/FINDINGS.md is byte-identical to a fresh render"
 
 # What each ingestion path loses: conservation with a named remainder.
 adapter-fidelity: check-python
 	@$(PYTHON) research/adapter_fidelity.py > /tmp/agent-economics-fidelity.md
 	@cmp /tmp/agent-economics-fidelity.md research/ADAPTER_FIDELITY.md
+	@echo "ok  adapter fidelity: research/ADAPTER_FIDELITY.md is byte-identical to a fresh render"
 
 # The instrument's own scorecard, assembled from the frozen eval artifacts.
 evals: check-python
 	@$(PYTHON) research/evals.py > /tmp/agent-economics-evals.md
 	@cmp /tmp/agent-economics-evals.md research/EVALS.md
+	@echo "ok  instrument scorecard: research/EVALS.md is byte-identical to a fresh render"
 
 # The measured envelope: full decision path at three scales, written to
 # bench/RESULTS.json and rendered to docs/at-scale.md. bench-smoke is the CI
@@ -193,9 +236,13 @@ bench-smoke: check-python
 bench-check: check-python
 	@$(PYTHON) bench/render.py > /tmp/agent-economics-at-scale.md
 	@cmp /tmp/agent-economics-at-scale.md docs/at-scale.md
+	@echo "ok  at-scale envelope: docs/at-scale.md is byte-identical to a fresh render"
 
 # Every frozen corpus dataset re-derived from its source, not from our copy.
 # Network, so deliberately outside `reproduce`.
+reproduce-hle: check-python
+	@$(PYTHON) research/reproduce_hle.py
+
 verify-corpus: check-python
 	@$(PYTHON) research/corpus/verify_corpus.py
 
@@ -208,8 +255,9 @@ verify-upstream: check-python
 # The registry of every public dataset audited, rendered from frozen evidence
 # alone. Fails when the committed document and the evidence disagree.
 corpus: check-python
-	@$(PYTHON) research/corpus/audit.py > /tmp/agent-economics-corpus.md
+	@$(PYTHON) research/corpus/corpus_report.py > /tmp/agent-economics-corpus.md
 	@cmp /tmp/agent-economics-corpus.md research/CORPUS.md
+	@echo "ok  corpus: research/CORPUS.md is byte-identical to a fresh render"
 
 # The ledger is the record. --check fails the build on a REFUTED claim, on a
 # malformed one, and on an UNVERIFIED one pinning no revision a reader could
@@ -219,6 +267,7 @@ ledger: check-python
 	@$(PYTHON) research/ledger.py --check
 	@$(PYTHON) research/ledger.py > /tmp/agent-economics-ledger.md
 	@cmp /tmp/agent-economics-ledger.md research/claims/LEDGER.md
+	@echo "ok  claim ledger: research/claims/LEDGER.md is byte-identical to a fresh render"
 
 # The ledger verifies every claim against the evidence it names. This adds the
 # other direction: handed the wrong evidence a claim must refuse. A verifier
@@ -235,6 +284,7 @@ claims: ledger check-python
 probe-sites: check-python
 	@$(PYTHON) research/probe_sites.py > /tmp/agent-economics-probe-sites.md
 	@cmp /tmp/agent-economics-probe-sites.md research/PROBE_SITES.md
+	@echo "ok  probe sites: research/PROBE_SITES.md is byte-identical to a fresh render"
 
 # Checks out the commit before each catalogued defect's fix, runs the whole
 # suite there, and runs the probe that discriminates. Pinned commits, so the
@@ -242,6 +292,7 @@ probe-sites: check-python
 green-defects: check-python
 	@$(PYTHON) research/green_defects.py $(PYTHON) > /tmp/agent-economics-green-defects.md
 	@cmp /tmp/agent-economics-green-defects.md research/GREEN_DEFECTS.md
+	@echo "ok  green defects: research/GREEN_DEFECTS.md is byte-identical to a fresh render"
 
 # The same session as the claude-code example, converted under a contract that
 # declares no rate card. Proves the checks-only path is reachable from a real

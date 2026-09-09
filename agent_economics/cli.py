@@ -3,8 +3,9 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import pathlib
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from . import __version__, kimi_client
@@ -62,6 +63,39 @@ CI_EXIT_CODES = {
     Decision.STOP: 4,
 }
 
+#: The five inputs `demo` runs on, shipped inside the wheel. Copies of the
+#: files in examples/, kept byte-identical by tests/test_packaging.py.
+DEMO_INPUTS = (
+    "support_trace.csv", "outcomes.csv", "rates.json",
+    "baseline.json", "policy.json",
+)
+
+
+def _demo_directory() -> dict[str, str]:
+    """The packaged examples as real files on disk.
+
+    `load_csv_bundle` takes paths and a wheel's contents are not guaranteed
+    to be real files, so these are materialised through
+    `importlib.resources` into a directory removed when the process exits.
+    Without this the demo works from a clone and fails from an installed
+    wheel, which is the exact gap it exists to close.
+    """
+    import atexit
+    import shutil
+    import tempfile
+    from importlib import resources
+
+    root = resources.files("agent_economics") / "_examples"
+    scratch = pathlib.Path(tempfile.mkdtemp(prefix="agent-economics-demo-"))
+    atexit.register(shutil.rmtree, scratch, True)
+    paths = {}
+    for name in DEMO_INPUTS:
+        destination = scratch / name
+        destination.write_bytes((root / name).read_bytes())
+        paths[name] = str(destination)
+    return paths
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="agent-economics",
@@ -72,7 +106,31 @@ def build_parser() -> argparse.ArgumentParser:
         version=f"agent-economics {__version__}",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
-    evaluate_parser = subparsers.add_parser("evaluate")
+    demo_parser = subparsers.add_parser(
+        "demo",
+        help=(
+            "Run a real decision on the five example inputs shipped inside "
+            "this package. Needs no clone, no network and no arguments."
+        ),
+    )
+    demo_parser.add_argument(
+        "--extract", metavar="DIR", help=(
+            "Instead of deciding, write the five example inputs here so you "
+            "can replace their contents with your own runs."
+        ),
+    )
+    demo_parser.add_argument(
+        "--format", choices=("markdown", "json"), default="markdown",
+    )
+
+    evaluate_parser = subparsers.add_parser(
+        "evaluate",
+        help=(
+            "Decide whether the evidence supports scaling this agent. "
+            "Prints SCALE, ASSIST, STOP, or INCOMPLETE when a required "
+            "dimension has no evidence behind it."
+        ),
+    )
     evaluate_parser.add_argument(
         "--check", action="append", default=[], metavar="CHECK_ID",
         help=(
@@ -91,12 +149,36 @@ def build_parser() -> argparse.ArgumentParser:
             "which is the point."
         ),
     )
-    evaluate_parser.add_argument("--bundle")
-    evaluate_parser.add_argument("--traces")
-    evaluate_parser.add_argument("--outcomes")
-    evaluate_parser.add_argument("--rates")
-    evaluate_parser.add_argument("--baseline")
-    evaluate_parser.add_argument("--policy")
+    evaluate_parser.add_argument(
+        "--bundle", help=(
+            "A normalized evidence bundle, as written by `bundle`. Use this or the five CSV/JSON inputs below, not both."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--traces", help=(
+            "CSV of agent events, one row per event. Needs task_id, event_id, timestamp, event_type, name, model, token counts and status."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--outcomes", help=(
+            "CSV of task outcomes, one row per task: whether it was acceptable and what it was worth."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--rates", help=(
+            "JSON price list keyed by model id, so token counts become money. Omit only if every event carries direct_cost_usd."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--baseline", help=(
+            "JSON describing the alternative you are comparing against, usually the human-only workflow. Without it the counterfactual gate has nothing to compare and the answer is INCOMPLETE."
+        ),
+    )
+    evaluate_parser.add_argument(
+        "--policy", help=(
+            "JSON of the thresholds you are willing to defend: minimum acceptable rate, cost ceilings, call caps."
+        ),
+    )
     evaluate_parser.add_argument(
         "--format", choices=("markdown", "json"), default="markdown"
     )
@@ -130,7 +212,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--independently-verified", action="append", default=[], metavar="INSTRUMENT",
         help="Instrument verified out of band, as for `audit`.",
     )
-    evaluate_parser.add_argument("--output")
+    evaluate_parser.add_argument(
+        "--output", help=(
+            "Write the report here instead of stdout."
+        ),
+    )
     frontier_parser = subparsers.add_parser(
         "frontier",
         help="Compare configurations on identical task input and rubric identities.",
@@ -281,7 +367,10 @@ def build_parser() -> argparse.ArgumentParser:
         help="Exit 1 if any delegated work is unaccounted for.",
     )
 
-    subparsers.add_parser("capabilities")
+    subparsers.add_parser(
+        "capabilities",
+        help="List the checks, adapters and renderers this build exposes.",
+    )
 
     judge_parser = subparsers.add_parser(
         "judge",
@@ -334,412 +423,496 @@ def _load_attestations(path: str | None) -> dict[str, Attestation] | None:
     }
 
 
-def main(argv: Sequence[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
-    if args.command == "bundle":
-        # The missing link. `claim`, `audit` and `verify` all take a bundle,
-        # and until now only the three adapters could produce one, so anyone
-        # holding ordinary CSV evidence could evaluate it but never publish a
-        # claim about it. That is the friction that keeps a record single-issuer.
-        try:
-            bundle = load_csv_bundle(
-                traces=args.traces,
-                outcomes=args.outcomes,
-                rates=args.rates,
-                baseline=args.baseline,
-                policy=args.policy,
-                label_source=args.label_source,
+def _cmd_bundle(args: argparse.Namespace) -> int:
+    """`agent-economics bundle`."""
+    try:
+        bundle = load_csv_bundle(
+            traces=args.traces,
+            outcomes=args.outcomes,
+            rates=args.rates,
+            baseline=args.baseline,
+            policy=args.policy,
+            label_source=args.label_source,
+        )
+    except (OSError, ValueError, KeyError) as error:
+        print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+        return 2
+    Path(args.out).write_text(
+        render_normalized_json(bundle), encoding="utf-8"
+    )
+    print(f"Wrote {args.out}")
+    return 0
+
+
+def _cmd_claim(args: argparse.Namespace) -> int:
+    """`agent-economics claim`."""
+    try:
+        bundle = load_normalized_json_bundle(Path(args.bundle))
+    except (OSError, ValueError) as error:
+        print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+        return 2
+    specs = tuple(default_checks())
+    if args.omit_check:
+        unknown = sorted(set(args.omit_check) - {spec.id for spec in specs})
+        if unknown:
+            print(
+                f"INCOMPLETE: no such check(s): {', '.join(unknown)}",
+                file=sys.stderr,
             )
-        except (OSError, ValueError, KeyError) as error:
-            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
             return 2
-        Path(args.out).write_text(
-            render_normalized_json(bundle), encoding="utf-8"
-        )
-        print(f"Wrote {args.out}")
-        return 0
+        omitted = set(args.omit_check)
+        specs = tuple(spec for spec in specs if spec.id not in omitted)
+    document = issue_claim(
+        bundle, args.assertion, checks=specs, issuer=args.issuer,
+        source_commit=args.source_commit,
+    ).render()
+    if args.output:
+        Path(args.output).write_text(document, encoding="utf-8")
+        print(f"Wrote {args.output}")
+    else:
+        sys.stdout.write(document)
+    return 0
 
-    if args.command == "claim":
-        try:
-            bundle = load_normalized_json_bundle(Path(args.bundle))
-        except (OSError, ValueError) as error:
-            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
-            return 2
-        specs = tuple(default_checks())
-        if args.omit_check:
-            unknown = sorted(set(args.omit_check) - {spec.id for spec in specs})
-            if unknown:
-                print(
-                    f"INCOMPLETE: no such check(s): {', '.join(unknown)}",
-                    file=sys.stderr,
-                )
-                return 2
-            omitted = set(args.omit_check)
-            specs = tuple(spec for spec in specs if spec.id not in omitted)
-        document = issue_claim(
-            bundle, args.assertion, checks=specs, issuer=args.issuer,
-            source_commit=args.source_commit,
-        ).render()
-        if args.output:
-            Path(args.output).write_text(document, encoding="utf-8")
-            print(f"Wrote {args.output}")
-        else:
-            sys.stdout.write(document)
-        return 0
 
-    if args.command == "verify":
-        try:
-            claim = parse_claim(json.loads(Path(args.claim).read_text()))
-            bundle = load_normalized_json_bundle(Path(args.bundle))
-        except (OSError, ValueError, TypeError) as error:
-            # Refusing to read the inputs is a failure to verify, never a pass.
-            print(f"UNVERIFIED: {error}", file=sys.stderr)
-            return 2
-        result = verify_claim(claim, bundle)
+def _cmd_verify(args: argparse.Namespace) -> int:
+    """`agent-economics verify`."""
+    try:
+        claim = parse_claim(json.loads(Path(args.claim).read_text()))
+        bundle = load_normalized_json_bundle(Path(args.bundle))
+    except (OSError, ValueError, TypeError) as error:
+        # Refusing to read the inputs is a failure to verify, never a pass.
+        print(f"UNVERIFIED: {error}", file=sys.stderr)
+        return 2
+    result = verify_claim(claim, bundle)
+    print(
+        json.dumps(result.to_dict(), indent=2, sort_keys=True)
+        if args.format == "json"
+        else result.render()
+    )
+    return {"SUPPORTED": 0, "UNVERIFIED": 2, "REFUTED": 4}[result.verdict.value]
+
+
+def _cmd_audit(args: argparse.Namespace) -> int:
+    """`agent-economics audit`."""
+    try:
+        bundle = load_normalized_json_bundle(Path(args.bundle))
+    except (OSError, ValueError) as error:
+        print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+        return 2
+    try:
+        attestations = _load_attestations(args.attestations)
+        as_of = dt.date.fromisoformat(args.as_of) if args.as_of else None
+    except (OSError, ValueError, TypeError, KeyError) as error:
+        print(f"INCOMPLETE: invalid attestation: {error}", file=sys.stderr)
+        return 2
+    report = audit(
+        bundle,
+        attestations=attestations,
+        as_of=as_of,
+        independently_verified=tuple(args.independently_verified),
+    )
+    rendered = (
+        json.dumps(report.to_dict(), indent=2, sort_keys=True)
+        if args.format == "json"
+        else render_audit_markdown(report)
+    )
+    if args.output:
+        Path(args.output).write_text(rendered, encoding="utf-8")
+    print(rendered)
+    return 1 if args.ci and not report.assessable else 0
+
+
+def _cmd_closure_or_mutate(args: argparse.Namespace) -> int:
+    """`agent-economics closure` and `mutate`, one path."""
+    try:
+        bundle = load_normalized_json_bundle(Path(args.bundle))
+    except (OSError, ValueError) as error:
+        print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+        return 2
+    if args.command == "closure":
+        declared = None if args.declared is None else tuple(args.declared)
+        report = assess_bundle_closure(bundle, declared=declared)
+        print(json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return 1 if args.ci and report.unaccounted else 0
+    report = mutate(bundle)
+    rendered = (
+        json.dumps(report.to_dict(), indent=2, sort_keys=True)
+        if args.format == "json"
+        else render_mutation_markdown(report)
+    )
+    if args.output:
+        Path(args.output).write_text(rendered, encoding="utf-8")
+    print(rendered)
+    # Gate on the harness properties, not the dynamic-coverage comparison.
+    if args.ci and (
+        report.unprovided_coverage or not report.fail_closed_conformance
+    ):
+        return 1
+    return 0
+
+
+def _cmd_capabilities(args: argparse.Namespace) -> int:
+    """`agent-economics capabilities`."""
+    print("SOURCE ADAPTERS")
+    print("source.csv@1")
+    print("source.normalized-json@1")
+    print(f"{CLAUDE_CODE_SOURCE_ID}@{CLAUDE_CODE_SOURCE_VERSION}")
+    print(
+        f"{CLAUDE_CODE_TREE_SOURCE_ID}@{CLAUDE_CODE_TREE_SOURCE_VERSION}"
+    )
+    print(f"{OTEL_GENAI_SOURCE_ID}@{OTEL_GENAI_SOURCE_VERSION}")
+    print("\nCONVERTERS")
+    print("converter.claude-code-jsonl@1")
+    print("converter.claude-code-session-tree@1")
+    print("converter.otel-genai@1")
+    print("\nCHECKS")
+    # From the registry, not a hardcoded list. This printed only the six
+    # economic gates, so the two shipped gates nothing could reach were
+    # also invisible in the capability report that advertises them.
+    shipped = {spec.id for spec in default_checks()}
+    for check_id, version, summary in default_registry().describe():
+        default = "default" if check_id in shipped else "opt-in"
+        print(f"{check_id}@{version}  {default}  {summary}")
+    print("\nRENDERERS")
+    print("renderer.markdown@1")
+    print("renderer.json@1")
+    print("renderer.frontier-markdown@1")
+    print("renderer.frontier-json@1")
+    print("renderer.frontier-svg@1")
+    print("\nEXPERIMENTS")
+    print("experiment.paired-budget-frontier@1")
+    print("\nINFERENCE")
+    print(
+        f"provider  {kimi_client.PROVIDER}  "
+        f"({kimi_client.API_KEY_ENV_VAR} required)"
+    )
+    print(
+        f"model     {kimi_client.DEFAULT_MODEL}  "
+        f"reasoning_effort={kimi_client.DEFAULT_REASONING_EFFORT}"
+    )
+    print("egress    agent_economics.kimi_client  (single call path)")
+    print("kimi-judge@1    label outcomes against a frozen rubric")
+    print("kimi-analyst@1  recommend fixes from a decided case")
+    print("The decision kernel performs no inference and stays deterministic.")
+    return 0
+
+
+def _cmd_convert(args: argparse.Namespace) -> int:
+    """`agent-economics convert`."""
+    parser = build_parser()
+    template_mode = bool(args.template)
+    conversion_mode = bool(args.contract or args.out)
+    if template_mode and conversion_mode:
+        parser.error("--template cannot be combined with --contract or --out")
+    if not template_mode and not (args.contract and args.out):
+        parser.error("provide --template or both --contract and --out")
+    source_path = Path(args.input_path)
+    target_path = Path(args.template if template_mode else args.out)
+    protected_paths = [source_path]
+    if args.source == "claude-code-tree":
+        subagent_dir = source_path.with_suffix("") / "subagents"
+        if subagent_dir.is_dir():
+            protected_paths.extend(
+                path
+                for path in subagent_dir.rglob("*")
+                if path.is_file()
+            )
+    if args.contract:
+        protected_paths.append(Path(args.contract))
+    if any(
+        target_path.resolve() == protected.resolve()
+        for protected in protected_paths
+    ):
         print(
-            json.dumps(result.to_dict(), indent=2, sort_keys=True)
-            if args.format == "json"
-            else result.render()
+            "INCOMPLETE: conversion output cannot overwrite its input or contract",
+            file=sys.stderr,
         )
-        return {"SUPPORTED": 0, "UNVERIFIED": 2, "REFUTED": 4}[result.verdict.value]
+        return 2
+    try:
+        if args.source == "claude-code":
+            session = inspect_claude_code_jsonl(source_path)
+            template = conversion_contract_template(session)
+            if not template_mode:
+                contract = load_conversion_contract(args.contract)
+                bundle = claude_code_bundle_from_session(session, contract)
+                receipt = conversion_receipt(session, contract, bundle)
+        elif args.source == "claude-code-tree":
+            session = inspect_claude_code_session_tree(source_path)
+            template = conversion_contract_template(session)
+            if not template_mode:
+                contract = load_conversion_contract(args.contract)
+                bundle = claude_code_tree_bundle_from_session(
+                    session,
+                    contract,
+                )
+                receipt = conversion_receipt(session, contract, bundle)
+        else:
+            session = inspect_otel_genai_json(source_path)
+            template = otel_genai_conversion_contract_template(session)
+            if not template_mode:
+                contract = load_conversion_contract(args.contract)
+                bundle = otel_genai_bundle_from_session(session, contract)
+                receipt = otel_genai_conversion_receipt(
+                    session, contract, bundle
+                )
+        if template_mode:
+            content = (
+                json.dumps(
+                    template,
+                    sort_keys=True,
+                    indent=2,
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+        else:
+            content = render_normalized_json(bundle, conversion=receipt)
+        target_path.write_text(content, encoding="utf-8")
+    except (
+        ArithmeticError,
+        AttributeError,
+        KeyError,
+        OSError,
+        TypeError,
+        ValueError,
+    ) as error:
+        print(f"INCOMPLETE: conversion failed: {error}", file=sys.stderr)
+        return 2
+    print(f"Wrote {target_path}")
+    return 0
 
-    if args.command == "audit":
-        try:
-            bundle = load_normalized_json_bundle(Path(args.bundle))
-        except (OSError, ValueError) as error:
-            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
-            return 2
-        try:
-            attestations = _load_attestations(args.attestations)
-            as_of = dt.date.fromisoformat(args.as_of) if args.as_of else None
-        except (OSError, ValueError, TypeError, KeyError) as error:
-            print(f"INCOMPLETE: invalid attestation: {error}", file=sys.stderr)
-            return 2
-        report = audit(
-            bundle,
+
+def _cmd_frontier(args: argparse.Namespace) -> int:
+    """`agent-economics frontier`."""
+    output_dir = Path(args.output_dir)
+    if args.verify_dir and output_dir.resolve() == Path(args.verify_dir).resolve():
+        print(
+            "INCOMPLETE: --output-dir and --verify-dir must be different directories",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        case = run_frontier(args.plan)
+    except (OSError, ValueError) as error:
+        print(f"INCOMPLETE: invalid frontier plan: {error}", file=sys.stderr)
+        return 2
+    artifacts = {
+        "frontier.md": render_frontier_markdown(case),
+        "frontier.json": render_frontier_json(case),
+    }
+    if args.verify_dir:
+        verify_dir = Path(args.verify_dir)
+        mismatches = [
+            name
+            for name, content in artifacts.items()
+            if not (verify_dir / name).exists()
+            or (verify_dir / name).read_text(encoding="utf-8") != content
+        ]
+        if mismatches:
+            print("Generated frontier artifacts differ: " + ", ".join(mismatches))
+            return 1
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for name, content in artifacts.items():
+        (output_dir / name).write_text(content, encoding="utf-8")
+    print(artifacts["frontier.md"])
+    return {
+        FrontierDecision.ADOPT: 0,
+        FrontierDecision.INCOMPLETE: 2,
+        FrontierDecision.HOLD: 3,
+    }[case.decision]
+
+
+def _cmd_demo(args: argparse.Namespace) -> int:
+    """`agent-economics demo`."""
+    import shutil
+
+    packaged = _demo_directory()
+    if args.extract:
+        target = pathlib.Path(args.extract)
+        target.mkdir(parents=True, exist_ok=True)
+        for name, source in packaged.items():
+            shutil.copyfile(source, target / name)
+        print(
+            f"Wrote {len(packaged)} example inputs to {target.resolve()}\n"
+            "Replace "
+            "their contents with your own runs, then:\n\n"
+            "  agent-economics evaluate \\\n"
+            "    --traces support_trace.csv --outcomes outcomes.csv \\\n"
+            "    --rates rates.json --baseline baseline.json \\\n"
+            "    --policy policy.json"
+        )
+        return 0
+    # Re-parsed through the real `evaluate` parser rather than by
+    # setting attributes one at a time. The first version did the latter
+    # and shipped a demo that died on the first default it forgot, which
+    # is what enumerating someone else's parser by hand always earns.
+    return _cmd_evaluate(build_parser().parse_args([
+        "evaluate",
+        "--traces", packaged["support_trace.csv"],
+        "--outcomes", packaged["outcomes.csv"],
+        "--rates", packaged["rates.json"],
+        "--baseline", packaged["baseline.json"],
+        "--policy", packaged["policy.json"],
+        "--format", args.format,
+    ]))
+
+
+def _cmd_evaluate(args: argparse.Namespace) -> int:
+    """`agent-economics evaluate`."""
+    csv_paths = {
+        "traces": args.traces,
+        "outcomes": args.outcomes,
+        "rates": args.rates,
+        "baseline": args.baseline,
+        "policy": args.policy,
+    }
+    supplied_csv = [name for name, value in csv_paths.items() if value]
+    if args.bundle and supplied_csv:
+        build_parser().error("--bundle cannot be combined with CSV input options")
+    if not args.bundle and len(supplied_csv) != len(csv_paths):
+        missing = [name for name, value in csv_paths.items() if not value]
+        build_parser().error(
+            "provide --bundle or all CSV inputs; missing: " + ", ".join(missing)
+        )
+    try:
+        evidence = (
+            load_normalized_json_bundle(args.bundle)
+            if args.bundle
+            else load_csv_bundle(**csv_paths, label_source=args.label_source)
+        )
+        attestations = _load_attestations(args.attestations)
+        as_of = dt.date.fromisoformat(args.as_of) if args.as_of else None
+        if args.check or args.require_coverage:
+            # A contract composed by name. The registry builds the two
+            # factory gates from the evidence itself -- the delegation
+            # manifest the bundle declares, the instrument it names -- so
+            # naming them on a command line is enough, and neither could
+            # be reached from any CLI path before.
+            registry = default_registry()
+            names = args.check or [
+                spec.id for spec in default_checks()
+            ]
+            specs = registry.compose(names, bundle=evidence)
+            coverage = (
+                frozenset(args.require_coverage)
+                if args.require_coverage
+                else frozenset(DEFAULT_REQUIRED_COVERAGE)
+            )
+        else:
+            specs, coverage = None, None
+        # One act, not two commands: the only reachable SCALE is one the
+        # audit has no grounds against. `evaluate` and `audit` returning
+        # opposite answers for the same bundle was the largest hole an
+        # adversarial review found in this package.
+        case, _ = decide(
+            evidence,
+            specs,
+            coverage,
             attestations=attestations,
             as_of=as_of,
             independently_verified=tuple(args.independently_verified),
         )
-        rendered = (
-            json.dumps(report.to_dict(), indent=2, sort_keys=True)
-            if args.format == "json"
-            else render_audit_markdown(report)
+    except UnknownCheck as error:
+        # A contract naming a check nobody can build is unreadable, not
+        # weaker. Refusing beats evaluating whatever remains.
+        print(f"INCOMPLETE: {error}", file=sys.stderr)
+        return 2
+    except (
+        ArithmeticError,
+        AttributeError,
+        KeyError,
+        OSError,
+        TypeError,
+        ValueError,
+    ) as error:
+        print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
+        return 2
+    try:
+        report = (
+            render_json(case) if args.format == "json" else render_markdown(case)
         )
-        if args.output:
-            Path(args.output).write_text(rendered, encoding="utf-8")
-        print(rendered)
-        return 1 if args.ci and not report.assessable else 0
-    if args.command in {"mutate", "closure"}:
-        try:
-            bundle = load_normalized_json_bundle(Path(args.bundle))
-        except (OSError, ValueError) as error:
-            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
-            return 2
-        if args.command == "closure":
-            declared = None if args.declared is None else tuple(args.declared)
-            report = assess_bundle_closure(bundle, declared=declared)
-            print(json.dumps(report.to_dict(), indent=2, sort_keys=True))
-            return 1 if args.ci and report.unaccounted else 0
-        report = mutate(bundle)
-        rendered = (
-            json.dumps(report.to_dict(), indent=2, sort_keys=True)
-            if args.format == "json"
-            else render_mutation_markdown(report)
+    except LookupError as error:
+        # The renderer asked for an economic figure the bundle declared
+        # unsupplied. Refusing is right; escaping as a traceback is not.
+        # Exit 1 was not in this CLI's documented set at all (0 SCALE,
+        # 2 INCOMPLETE, 3 ASSIST, 4 STOP), so a checks-only bundle -- the
+        # path the README points readers to -- crashed with an exit code
+        # that meant nothing.
+        print(f"INCOMPLETE: {error}", file=sys.stderr)
+        return 2
+    if args.output:
+        Path(args.output).write_text(report, encoding="utf-8")
+    print(report)
+    if args.ci:
+        return CI_EXIT_CODES[case.decision]
+    return 0
+
+
+def _cmd_judge(args: argparse.Namespace) -> int:
+    """`agent-economics judge`."""
+    import logging
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    try:
+        kimi_judge(
+            args.task_results, args.rubric, args.out,
+            model=args.model, rate_limit=args.rate_limit,
+            reasoning_effort=args.reasoning_effort,
         )
-        if args.output:
-            Path(args.output).write_text(rendered, encoding="utf-8")
-        print(rendered)
-        # Gate on the harness properties, not the dynamic-coverage comparison.
-        if args.ci and (
-            report.unprovided_coverage or not report.fail_closed_conformance
-        ):
-            return 1
         return 0
-    if args.command == "capabilities":
-        print("SOURCE ADAPTERS")
-        print("source.csv@1")
-        print("source.normalized-json@1")
-        print(f"{CLAUDE_CODE_SOURCE_ID}@{CLAUDE_CODE_SOURCE_VERSION}")
-        print(
-            f"{CLAUDE_CODE_TREE_SOURCE_ID}@{CLAUDE_CODE_TREE_SOURCE_VERSION}"
-        )
-        print(f"{OTEL_GENAI_SOURCE_ID}@{OTEL_GENAI_SOURCE_VERSION}")
-        print("\nCONVERTERS")
-        print("converter.claude-code-jsonl@1")
-        print("converter.claude-code-session-tree@1")
-        print("converter.otel-genai@1")
-        print("\nCHECKS")
-        # From the registry, not a hardcoded list. This printed only the six
-        # economic gates, so the two shipped gates nothing could reach were
-        # also invisible in the capability report that advertises them.
-        shipped = {spec.id for spec in default_checks()}
-        for check_id, version, summary in default_registry().describe():
-            default = "default" if check_id in shipped else "opt-in"
-            print(f"{check_id}@{version}  {default}  {summary}")
-        print("\nRENDERERS")
-        print("renderer.markdown@1")
-        print("renderer.json@1")
-        print("renderer.frontier-markdown@1")
-        print("renderer.frontier-json@1")
-        print("renderer.frontier-svg@1")
-        print("\nEXPERIMENTS")
-        print("experiment.paired-budget-frontier@1")
-        print("\nINFERENCE")
-        print(
-            f"provider  {kimi_client.PROVIDER}  "
-            f"({kimi_client.API_KEY_ENV_VAR} required)"
-        )
-        print(
-            f"model     {kimi_client.DEFAULT_MODEL}  "
-            f"reasoning_effort={kimi_client.DEFAULT_REASONING_EFFORT}"
-        )
-        print("egress    agent_economics.kimi_client  (single call path)")
-        print("kimi-judge@1    label outcomes against a frozen rubric")
-        print("kimi-analyst@1  recommend fixes from a decided case")
-        print("The decision kernel performs no inference and stays deterministic.")
-        return 0
-    if args.command == "convert":
-        parser = build_parser()
-        template_mode = bool(args.template)
-        conversion_mode = bool(args.contract or args.out)
-        if template_mode and conversion_mode:
-            parser.error("--template cannot be combined with --contract or --out")
-        if not template_mode and not (args.contract and args.out):
-            parser.error("provide --template or both --contract and --out")
-        source_path = Path(args.input_path)
-        target_path = Path(args.template if template_mode else args.out)
-        protected_paths = [source_path]
-        if args.source == "claude-code-tree":
-            subagent_dir = source_path.with_suffix("") / "subagents"
-            if subagent_dir.is_dir():
-                protected_paths.extend(
-                    path
-                    for path in subagent_dir.rglob("*")
-                    if path.is_file()
-                )
-        if args.contract:
-            protected_paths.append(Path(args.contract))
-        if any(
-            target_path.resolve() == protected.resolve()
-            for protected in protected_paths
-        ):
-            print(
-                "INCOMPLETE: conversion output cannot overwrite its input or contract",
-                file=sys.stderr,
-            )
-            return 2
-        try:
-            if args.source == "claude-code":
-                session = inspect_claude_code_jsonl(source_path)
-                template = conversion_contract_template(session)
-                if not template_mode:
-                    contract = load_conversion_contract(args.contract)
-                    bundle = claude_code_bundle_from_session(session, contract)
-                    receipt = conversion_receipt(session, contract, bundle)
-            elif args.source == "claude-code-tree":
-                session = inspect_claude_code_session_tree(source_path)
-                template = conversion_contract_template(session)
-                if not template_mode:
-                    contract = load_conversion_contract(args.contract)
-                    bundle = claude_code_tree_bundle_from_session(
-                        session,
-                        contract,
-                    )
-                    receipt = conversion_receipt(session, contract, bundle)
-            else:
-                session = inspect_otel_genai_json(source_path)
-                template = otel_genai_conversion_contract_template(session)
-                if not template_mode:
-                    contract = load_conversion_contract(args.contract)
-                    bundle = otel_genai_bundle_from_session(session, contract)
-                    receipt = otel_genai_conversion_receipt(
-                        session, contract, bundle
-                    )
-            if template_mode:
-                content = (
-                    json.dumps(
-                        template,
-                        sort_keys=True,
-                        indent=2,
-                        ensure_ascii=False,
-                    )
-                    + "\n"
-                )
-            else:
-                content = render_normalized_json(bundle, conversion=receipt)
-            target_path.write_text(content, encoding="utf-8")
-        except (
-            ArithmeticError,
-            AttributeError,
-            KeyError,
-            OSError,
-            TypeError,
-            ValueError,
-        ) as error:
-            print(f"INCOMPLETE: conversion failed: {error}", file=sys.stderr)
-            return 2
-        print(f"Wrote {target_path}")
-        return 0
-    if args.command == "frontier":
-        output_dir = Path(args.output_dir)
-        if args.verify_dir and output_dir.resolve() == Path(args.verify_dir).resolve():
-            print(
-                "INCOMPLETE: --output-dir and --verify-dir must be different directories",
-                file=sys.stderr,
-            )
-            return 2
-        try:
-            case = run_frontier(args.plan)
-        except (OSError, ValueError) as error:
-            print(f"INCOMPLETE: invalid frontier plan: {error}", file=sys.stderr)
-            return 2
-        artifacts = {
-            "frontier.md": render_frontier_markdown(case),
-            "frontier.json": render_frontier_json(case),
-        }
-        if args.verify_dir:
-            verify_dir = Path(args.verify_dir)
-            mismatches = [
-                name
-                for name, content in artifacts.items()
-                if not (verify_dir / name).exists()
-                or (verify_dir / name).read_text(encoding="utf-8") != content
-            ]
-            if mismatches:
-                print("Generated frontier artifacts differ: " + ", ".join(mismatches))
-                return 1
-        output_dir.mkdir(parents=True, exist_ok=True)
-        for name, content in artifacts.items():
-            (output_dir / name).write_text(content, encoding="utf-8")
-        print(artifacts["frontier.md"])
-        return {
-            FrontierDecision.ADOPT: 0,
-            FrontierDecision.INCOMPLETE: 2,
-            FrontierDecision.HOLD: 3,
-        }[case.decision]
-    if args.command == "evaluate":
-        csv_paths = {
-            "traces": args.traces,
-            "outcomes": args.outcomes,
-            "rates": args.rates,
-            "baseline": args.baseline,
-            "policy": args.policy,
-        }
-        supplied_csv = [name for name, value in csv_paths.items() if value]
-        if args.bundle and supplied_csv:
-            build_parser().error("--bundle cannot be combined with CSV input options")
-        if not args.bundle and len(supplied_csv) != len(csv_paths):
-            missing = [name for name, value in csv_paths.items() if not value]
-            build_parser().error(
-                "provide --bundle or all CSV inputs; missing: " + ", ".join(missing)
-            )
-        try:
-            evidence = (
-                load_normalized_json_bundle(args.bundle)
-                if args.bundle
-                else load_csv_bundle(**csv_paths, label_source=args.label_source)
-            )
-            attestations = _load_attestations(args.attestations)
-            as_of = dt.date.fromisoformat(args.as_of) if args.as_of else None
-            if args.check or args.require_coverage:
-                # A contract composed by name. The registry builds the two
-                # factory gates from the evidence itself -- the delegation
-                # manifest the bundle declares, the instrument it names -- so
-                # naming them on a command line is enough, and neither could
-                # be reached from any CLI path before.
-                registry = default_registry()
-                names = args.check or [
-                    spec.id for spec in default_checks()
-                ]
-                specs = registry.compose(names, bundle=evidence)
-                coverage = (
-                    frozenset(args.require_coverage)
-                    if args.require_coverage
-                    else frozenset(DEFAULT_REQUIRED_COVERAGE)
-                )
-            else:
-                specs, coverage = None, None
-            # One act, not two commands: the only reachable SCALE is one the
-            # audit has no grounds against. `evaluate` and `audit` returning
-            # opposite answers for the same bundle was the largest hole an
-            # adversarial review found in this package.
-            case, _ = decide(
-                evidence,
-                specs,
-                coverage,
-                attestations=attestations,
-                as_of=as_of,
-                independently_verified=tuple(args.independently_verified),
-            )
-        except UnknownCheck as error:
-            # A contract naming a check nobody can build is unreadable, not
-            # weaker. Refusing beats evaluating whatever remains.
-            print(f"INCOMPLETE: {error}", file=sys.stderr)
-            return 2
-        except (
-            ArithmeticError,
-            AttributeError,
-            KeyError,
-            OSError,
-            TypeError,
-            ValueError,
-        ) as error:
-            print(f"INCOMPLETE: invalid evidence: {error}", file=sys.stderr)
-            return 2
-        try:
-            report = (
-                render_json(case) if args.format == "json" else render_markdown(case)
-            )
-        except LookupError as error:
-            # The renderer asked for an economic figure the bundle declared
-            # unsupplied. Refusing is right; escaping as a traceback is not.
-            # Exit 1 was not in this CLI's documented set at all (0 SCALE,
-            # 2 INCOMPLETE, 3 ASSIST, 4 STOP), so a checks-only bundle -- the
-            # path the README points readers to -- crashed with an exit code
-            # that meant nothing.
-            print(f"INCOMPLETE: {error}", file=sys.stderr)
-            return 2
-        if args.output:
-            Path(args.output).write_text(report, encoding="utf-8")
-        print(report)
-        if args.ci:
-            return CI_EXIT_CODES[case.decision]
-        return 0
-    if args.command == "judge":
-        import logging
-        logging.basicConfig(level=logging.INFO, format="%(message)s")
-        try:
-            kimi_judge(
-                args.task_results, args.rubric, args.out,
-                model=args.model, rate_limit=args.rate_limit,
-                reasoning_effort=args.reasoning_effort,
-            )
-            return 0
-        except (RuntimeError, ValueError, OSError) as e:
-            print(f"Error: {e}", file=sys.stderr)
-            return 2
-    if args.command == "analyse":
-        import logging
-        logging.basicConfig(level=logging.INFO, format="%(message)s")
-        try:
-            report = json.loads(Path(args.case).read_text())
-            policy = json.loads(Path(args.policy).read_text()) if args.policy else None
-            baseline = json.loads(Path(args.baseline).read_text()) if args.baseline else None
-            result = analyse_report(report, policy, baseline, model=args.model)
-        except (RuntimeError, ValueError, KeyError, OSError, json.JSONDecodeError) as e:
-            print(f"Error: {e}", file=sys.stderr)
-            return 2
-        output = (
-            json.dumps(result.to_dict(), indent=2)
-            if args.format == "json"
-            else result.render_markdown()
-        )
-        if args.out:
-            Path(args.out).write_text(output)
-        print(output)
-        return 0
-    return 2
+    except (RuntimeError, ValueError, OSError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 2
+
+
+def _cmd_analyse(args: argparse.Namespace) -> int:
+    """`agent-economics analyse`."""
+    import logging
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    try:
+        report = json.loads(Path(args.case).read_text())
+        policy = json.loads(Path(args.policy).read_text()) if args.policy else None
+        baseline = json.loads(Path(args.baseline).read_text()) if args.baseline else None
+        result = analyse_report(report, policy, baseline, model=args.model)
+    except (RuntimeError, ValueError, KeyError, OSError, json.JSONDecodeError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 2
+    output = (
+        json.dumps(result.to_dict(), indent=2)
+        if args.format == "json"
+        else result.render_markdown()
+    )
+    if args.out:
+        Path(args.out).write_text(output)
+    print(output)
+    return 0
+
+
+#: One function per subcommand. `main` was a 439-line chain of twelve
+#: `if args.command == ...` blocks: the file a newcomer opens to find out
+#: what a command does, and the only part of the package with no structure.
+DISPATCH: dict[str, Callable[[argparse.Namespace], int]] = {
+    "bundle": _cmd_bundle,
+    "claim": _cmd_claim,
+    "verify": _cmd_verify,
+    "audit": _cmd_audit,
+    "closure": _cmd_closure_or_mutate,
+    "mutate": _cmd_closure_or_mutate,
+    "capabilities": _cmd_capabilities,
+    "convert": _cmd_convert,
+    "frontier": _cmd_frontier,
+    "demo": _cmd_demo,
+    "evaluate": _cmd_evaluate,
+    "judge": _cmd_judge,
+    "analyse": _cmd_analyse,
+}
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    handler = DISPATCH.get(args.command)
+    if handler is None:
+        return 2
+    return handler(args)
 
 
 if __name__ == "__main__":

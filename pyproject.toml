@@ -38,6 +38,14 @@ agent-economics = "agent_economics.cli:main"
 [tool.setuptools.dynamic]
 version = {attr = "agent_economics.__version__"}
 
+[tool.setuptools.package-data]
+# Without this the wheel ships 36 modules and no data, so an installed copy
+# has nothing to decide about and `agent-economics demo` cannot exist. The
+# whole argument of this package is "check it yourself", and requiring a
+# clone plus a Makefile plus an interpreter override to run the first check
+# was the largest adoption cost in the repository.
+agent_economics = ["_examples/*"]
+
 [tool.setuptools.packages.find]
 include = ["agent_economics*"]
 

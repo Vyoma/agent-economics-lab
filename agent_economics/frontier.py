@@ -316,6 +316,7 @@ def _validate_plan_instance(plan: ExperimentPlan) -> tuple[str, ...]:
 
 
 def load_plan(path: str | Path) -> ExperimentPlan:
+    """Load a pre-registered comparison plan from JSON."""
     plan_path = Path(path)
     with plan_path.open(encoding="utf-8") as handle:
         raw = json.load(handle, parse_constant=_reject_json_constant)
@@ -398,6 +399,8 @@ def _task_manifest_digest(bundle: EvidenceBundle) -> str:
 def load_experiment(
     plan_path: str | Path,
 ) -> tuple[ExperimentPlan, dict[str, EvidenceBundle], tuple[str, ...]]:
+    """Load a plan with the arm bundles it names and the problems it started
+    from, so a comparison runs over exactly what was declared."""
     plan_file = Path(plan_path)
     plan = load_plan(plan_file)
     bundles: dict[str, EvidenceBundle] = {}
@@ -595,6 +598,12 @@ def evaluate_frontier(
     bundles: Mapping[str, EvidenceBundle],
     initial_problems: Sequence[str] = (),
 ) -> FrontierCase:
+    """Compare configurations on identical task input under a plan.
+
+    Selection is post-hoc unless the plan declared the comparison up front,
+    and the case records which it was, because a winner chosen after seeing
+    the results is a different claim from one predicted before.
+    """
     problems = list(initial_problems)
     plan_problems = _validate_plan_instance(plan)
     if plan_problems:
@@ -838,6 +847,7 @@ def evaluate_frontier(
 
 
 def run_frontier(plan_path: str | Path) -> FrontierCase:
+    """Load a plan and evaluate it, returning the comparison case."""
     plan, bundles, problems = load_experiment(plan_path)
     return evaluate_frontier(plan, bundles, problems)
 

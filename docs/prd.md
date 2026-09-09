@@ -1,6 +1,6 @@
 # Product requirements
 
-What this package must do, for whom, and — with equal force — what it must
+What this package must do, for whom, and, with equal force, what it must
 refuse to do. Requirements here are testable statements; each names the
 surface that enforces it. A change that breaks one of these is a product
 regression even if every test still passes, and a feature that serves none
@@ -16,7 +16,7 @@ refuses when the evidence cannot support one.
 
 **The reviewer who was handed someone else's green.** A PR comment, a slide,
 a leaderboard row. They cannot re-run the harness and should not have to
-trust its author. They need a portable claim that verifies — or refutes —
+trust its author. They need a portable claim that verifies, or refutes,
 offline against the evidence's digest.
 
 **The auditor of public agent data.** Datasets ship with outcome fields that
@@ -40,7 +40,7 @@ where an arm name is read as a measurement of a vendor's model.
    the fixed decision contract plus the audit; the mutation self-test proves
    the refusal on every run.
 3. **Make the decision portable.** A claim file that anyone can verify
-   against a bundle, yielding exactly SUPPORTED, REFUTED, or UNVERIFIED —
+   against a bundle, yielding exactly SUPPORTED, REFUTED, or UNVERIFIED,
    never a crash and never silence. Surface: `claim` / `verify`, the ledger.
 4. **Audit third-party data without inventing anything.** Content-free
    freezes, censuses, cross-checks, verification passes; findings that

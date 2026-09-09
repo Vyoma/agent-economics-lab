@@ -1,13 +1,13 @@
-"""Render research/PATTERNS.md: what eight audits say that one cannot.
+"""Render research/PATTERNS.md: what the audits say that one cannot.
 
 Each corpus entry is a statement about one dataset. A registry earns its
 name when the entries together support something none of them does alone,
-and after eight there are three such things. This renders them, computed
+and there are three such things. This renders them, computed
 from the same frozen evidence the entries use, so the synthesis cannot
 drift from what it summarises.
 
 The temptation in a page like this is to generalise: "outcome instruments
-are unreliable", "duplication is endemic". Eight datasets chosen partly for
+are unreliable", "duplication is endemic". Datasets chosen partly for
 being auditable do not support statements about a population, and the page
 says so at the point where a reader would otherwise start extrapolating.
 What it does support is narrower and still useful: a reader can see the
@@ -23,18 +23,32 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "research" / "corpus"))
 
-from audit import (  # noqa: E402
+from corpus_report import (
     _load,
     cogym_summary,
     nebius_openhands_summary,
     nebius_sweagent_summary,
     posttrainbench_summary,
+    hle_verifier_summary,
     swesmith_summary,
 )
 
 #: The floor agent_economics.provenance requires of an outcome instrument
 #: before a green decision can be issued, for kappa-family methods.
 KAPPA_FLOOR = 0.60
+
+
+def _dataset_count() -> int:
+    """From the findings index, not typed into the prose. This page said
+    "Eight datasets" while the corpus held ten, in a generated file whose
+    own header promises the build fails if it drifts; the build compared
+    stale text with stale text and agreed with itself."""
+    import json
+
+    registry = json.loads(
+        (ROOT / "research" / "findings.json").read_text(encoding="utf-8")
+    )
+    return len({f["dataset"] for f in registry["findings"]})
 
 
 def measure() -> dict:
@@ -45,6 +59,7 @@ def measure() -> dict:
     sweagent = nebius_sweagent_summary()
     jetbrains = _load("jetbrains")
 
+    hle = hle_verifier_summary()
     human = cogym["pairs"]["outcomeRating|agentRating"]
     return {
         "instruments": [
@@ -53,6 +68,9 @@ def measure() -> dict:
                 "against": "adjudicated hidden-test outcome",
                 "statistic": "Cohen's kappa",
                 "value": openhands["kappa"],
+                "low": openhands["kappa_low"],
+                "high": openhands["kappa_high"],
+                "family": "kappa",
                 "n": openhands["cross_present"],
                 "dataset": "nebius/SWE-rebench-openhands-trajectories",
             },
@@ -61,8 +79,37 @@ def measure() -> dict:
                 "against": "the same person's satisfaction rating",
                 "statistic": "quadratic-weighted kappa",
                 "value": human["qwk"],
+                "low": human["qwk_low"],
+                "high": human["qwk_high"],
+                "family": "kappa",
                 "n": human["n"],
                 "dataset": "SALT-NLP/cogym-real-trajectories",
+            },
+            {
+                "instrument": (
+                    f"{len(hle['graders'])} models asked to verify, worst"
+                ),
+                "against": "exact match against a published answer",
+                "statistic": "within-question AUC",
+                "value": hle["worst"]["auc"],
+                "low": hle["worst"]["low"],
+                "high": hle["worst"]["high"],
+                "family": "auc",
+                "n": hle["questions"],
+                "dataset": "FUSE-verifiers/HLE-Verifications",
+            },
+            {
+                "instrument": (
+                    f"{len(hle['graders'])} models asked to verify, best"
+                ),
+                "against": "exact match against a published answer",
+                "statistic": "within-question AUC",
+                "value": hle["best"]["auc"],
+                "low": hle["best"]["low"],
+                "high": hle["best"]["high"],
+                "family": "auc",
+                "n": hle["questions"],
+                "dataset": "FUSE-verifiers/HLE-Verifications",
             },
         ],
         "absence": [
@@ -120,19 +167,38 @@ def render() -> str:
         "",
         "This package refuses a green decision unless the instrument that",
         f"produced the outcome labels is attested at kappa {KAPPA_FLOOR:.2f}",
-        "or better. Two datasets in this corpus happen to record two outcome",
-        "signals on the same rows, which makes the instrument measurable",
-        "rather than assumed. Nobody had put them next to each other.",
+        f"or better. {len({row['dataset'] for row in data['instruments']})}"
+        " datasets in this corpus record two outcome signals",
+        "on the same rows, which is what makes the instrument measurable",
+        "rather than assumed. The floor governs chance-corrected agreement,",
+        "so the AUC rows are shown beside it and not graded against it:",
+        "there is no AUC floor in the contract, and reading one across",
+        "metric families is a category error this project has published",
+        "once already.",
         "",
-        "| instrument | measured against | statistic | value | n | clears "
-        f"{KAPPA_FLOOR:.2f}? |",
+        "| instrument | measured against | statistic | value (95% CI) | n"
+        f" | clears {KAPPA_FLOOR:.2f}? |",
         "|---|---|---|---:|---:|---|",
     ]
     for row in data["instruments"]:
-        clears = "yes" if row["value"] >= KAPPA_FLOOR else "**no**"
+        # Graded from the interval, not the point estimate, and only where
+        # the floor governs that metric. This column read "yes" for a
+        # quadratic-weighted kappa of 0.625 whose interval runs to 0.520,
+        # and graded two AUCs against a kappa floor that does not govern
+        # them: deciding pass or fail from a point estimate, and comparing
+        # across metric families, in the same six characters.
+        if row.get("family") == "auc":
+            clears = "not comparable"
+        elif row["low"] >= KAPPA_FLOOR:
+            clears = "yes"
+        elif row["high"] < KAPPA_FLOOR:
+            clears = "**no**"
+        else:
+            clears = f"undetermined at n={row['n']:,}"
         lines.append(
             f"| {row['instrument']} | {row['against']} | {row['statistic']} "
-            f"| {row['value']:.3f} | {row['n']:,} | {clears} |"
+            f"| {row['value']:.3f} [{row['low']:.3f}, {row['high']:.3f}]"
+            f" | {row['n']:,} | {clears} |"
         )
     lines += [
         "",
@@ -147,8 +213,12 @@ def render() -> str:
         "automated oracle the field reaches for when there is no answer key",
         "lands at chance. And the human judgement everything else is",
         "validated against, asked two adjacent questions about one session,",
-        "spreads by more than the margin most published instrument",
-        "comparisons are arguing over. Anything reported as agreement with",
+        "agrees exactly half the time. That is a statement about this",
+        "dataset at this size, not about human rating in general: an earlier",
+        "draft compared it to \"the margin most published instrument",
+        "comparisons are arguing over\", which names no margin, no",
+        "comparison and no source, and so could not be checked or refuted.",
+        "Anything reported as agreement with",
         "human labels inherits whichever question was asked, and none of",
         "these datasets record which.",
         "",
@@ -189,7 +259,8 @@ def render() -> str:
         "",
         "## What this does not establish",
         "",
-        "Eight datasets, chosen partly because they were auditable at all,",
+        f"{_dataset_count()} datasets, chosen partly because they were"
+        " auditable at all,",
         "are not a sample of anything. These are not prevalence estimates,",
         "and a reader who leaves with \"agent datasets are unreliable\" has",
         "taken more than the evidence gives. Every figure above is a",

@@ -2,7 +2,7 @@
 
 The script exists to close a stated hole: offline, the wild finding verified
 only against this repository's own frozen file. These tests cover everything
-that does not require the network — the selection is deterministic and always
+that does not require the network: the selection is deterministic and always
 includes the load-bearing rows, the hash recipe matches the freeze's, and a
 fetch that fails or a hash that mismatches is a failure, never a silent skip.
 The one network path is exercised by `make verify-upstream`, deliberately not

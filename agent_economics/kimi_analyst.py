@@ -30,7 +30,7 @@ Usage (Python):
 Requires:
     MOONSHOT_API_KEY env var
 
-Zero external dependencies — uses stdlib urllib only.
+Zero external dependencies: uses stdlib urllib only.
 """
 from __future__ import annotations
 
@@ -164,7 +164,7 @@ engineering team actionable, QUANTIFIED recommendations.
 
 Decision branches:
   ASSIST   → List the top-3 failing gates ranked by distance to threshold
-              (smallest absolute gap first — easiest wins first). For each fix,
+              (smallest absolute gap first, easiest wins first). For each fix,
               name the gate, state the exact numerical gap, propose a specific
               action, rate effort (low/medium/high), and quantify expected impact.
   STOP     → Determine if recovery is realistic. Compute what minimum change in
@@ -185,7 +185,7 @@ Rules:
 - revised_policy: only populate if you can suggest specific threshold changes
   with a clear economic rationale. Leave empty {} if not applicable.
 
-Respond with valid JSON ONLY — no markdown fences, no commentary:
+Respond with valid JSON ONLY, no markdown fences, no commentary:
 {
   "decision": "<echoed>",
   "summary": "<one sentence root cause or key insight>",
@@ -300,7 +300,7 @@ def _build_context_from_case(
     else:
         lines += ["GATE RESULTS", "------------"]
         for r in case.check_results:
-            lines.append(f"  {r.check_id}: {r.status.value} — {r.message}")
+            lines.append(f"  {r.check_id}: {r.status.value} - {r.message}")
         lines.append("")
 
     lines += [
@@ -334,13 +334,13 @@ def _build_context_from_case(
     if case.breaches:
         lines += ["POLICY BREACHES", "---------------"]
         for b in case.breaches:
-            lines.append(f"  — {b}")
+            lines.append(f"  - {b}")
         lines.append("")
 
     if case.missing_coverage:
         lines += ["MISSING COVERAGE", "----------------"]
         for c in case.missing_coverage:
-            lines.append(f"  — {c}")
+            lines.append(f"  - {c}")
         lines.append("")
 
     # Task-level breakdown: worst-performing tasks first
@@ -383,7 +383,7 @@ def _build_context_from_report(
     lines += ["GATE RESULTS", "------------"]
     for check in report.get("checks", []):
         failure_note = f" → {check['on_failure']}" if check.get("on_failure") else ""
-        lines.append(f"  {check['id']}: {check['status']} — {check['message']}{failure_note}")
+        lines.append(f"  {check['id']}: {check['status']} - {check['message']}{failure_note}")
     lines.append("")
 
     lines += [
@@ -424,7 +424,7 @@ def _build_context_from_report(
     if missing:
         lines += ["MISSING COVERAGE", "----------------"]
         for c in missing:
-            lines.append(f"  — {c}")
+            lines.append(f"  - {c}")
         lines.append("")
 
     return "\n".join(lines)

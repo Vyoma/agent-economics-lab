@@ -1,7 +1,23 @@
-"""Small, dependency-free primitives for an agent economic assurance case."""
+"""Small, dependency-free primitives for an agent economic assurance case.
+
+Two entry points issue a decision and they are not interchangeable.
+`decide` is the gate: it evaluates and audits as one act, and a SCALE the
+audit has grounds against comes back INCOMPLETE. `evaluate_bundle` is the
+engine alone, which is what the property tests and the sweeps want, and it
+will return that SCALE.
+
+For a while only the CLI reached the gate. `decide` was not exported, so a
+library consumer doing the obvious thing got the engine, and on
+`examples/claude-code-tree/bundle.json` the engine says SCALE where the gate
+says INCOMPLETE on unattested instruments. That is the fail-open this
+package exists to argue against, shipped in its own public surface. Both are
+exported now, tests/test_entry_points.py pins the difference on every
+shipped bundle, and the rule is: gating anything, call `decide`.
+"""
 
 __version__ = "0.9.0"
 
+from .audit import AuditReport, audit, decide
 from .adapters import (
     load_normalized_json_bundle,
     normalized_json_bundle,
@@ -161,6 +177,9 @@ __all__ = [
     "delegation_closure_gate",
     "evaluate",
     "evaluate_bundle",
+    "decide",
+    "audit",
+    "AuditReport",
     "evaluate_frontier",
     "evidence_provenance_gate",
     "implementation_fingerprint",

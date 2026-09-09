@@ -55,6 +55,24 @@ jobs:
       - run: /tmp/agent-economics-venv/bin/pip install /tmp/wheels/agent_economics_lab-*.whl
       - run: /tmp/agent-economics-venv/bin/agent-economics capabilities
         working-directory: /tmp
+      # Touches nothing in the workspace, which is the point. Every other
+      # step here reads evidence out of ${{ github.workspace }}, so they
+      # prove the CLI runs and not that the wheel carries what it needs.
+      # The wheel shipped 36 modules and no data for a long time and this
+      # job passed throughout.
+      - name: The wheel decides with no clone in reach
+        working-directory: /tmp
+        run: |
+          /tmp/agent-economics-venv/bin/agent-economics demo | tee /tmp/demo.md
+          grep -q "Decision: ASSIST" /tmp/demo.md
+          mkdir -p /tmp/extracted && cd /tmp/extracted
+          /tmp/agent-economics-venv/bin/agent-economics demo --extract .
+          test -f support_trace.csv && test -f policy.json
+          /tmp/agent-economics-venv/bin/agent-economics evaluate \
+            --traces support_trace.csv --outcomes outcomes.csv \
+            --rates rates.json --baseline baseline.json \
+            --policy policy.json | grep -q "Decision: ASSIST"
+
       - name: Evaluate a real bundle through the installed wheel
         working-directory: /tmp
         env:

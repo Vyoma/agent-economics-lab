@@ -14,7 +14,7 @@ Each row checks out the commit before the defect's fix, runs the whole suite the
 
 ## What each probe asked
 
-### D07 — the gate paid teams to delete their own honesty field
+### D07: the gate paid teams to delete their own honesty field
 
 - **File:** `agent_economics/audit.py`
 - **Live at** `4b60e19`, **fixed by** `ffb6ca4`
@@ -25,7 +25,7 @@ Each row checks out the commit before the defect's fix, runs the whole suite the
   - after the fix: `{'declared_assessable': False, 'deleted_assessable': False}`
   - true answer: `{'declared_assessable': False, 'deleted_assessable': False}`
 
-### D08 — a dollar figure computed from costs nothing had priced
+### D08: a dollar figure computed from costs nothing had priced
 
 - **File:** `agent_economics/audit.py`
 - **Live at** `4b60e19`, **fixed by** `ffb6ca4`
@@ -36,7 +36,7 @@ Each row checks out the commit before the defect's fix, runs the whole suite the
   - after the fix: `{'dollar_lines': []}`
   - true answer: `{'dollar_lines': []}`
 
-### D09 — rate-priced subagent spend weighed nothing
+### D09: rate-priced subagent spend weighed nothing
 
 - **File:** `agent_economics/delegation.py`
 - **Live at** `ffb6ca4`, **fixed by** `93c3552`
@@ -47,7 +47,7 @@ Each row checks out the commit before the defect's fix, runs the whole suite the
   - after the fix: `{'closure_pct': 84.7, 'unaccounted_usd': 18.0}`
   - true answer: `{'closure_pct': 84.7, 'unaccounted_usd': 18.0}`
 
-### D10 — the fix for D09 left the gate unable to price anything
+### D10: the fix for D09 left the gate unable to price anything
 
 - **File:** `agent_economics/delegation.py`
 - **Live at** `dbc28e8`, **fixed by** `dc72ae6`
@@ -59,7 +59,7 @@ Each row checks out the commit before the defect's fix, runs the whole suite the
   - after the fix: `{'raised': None, 'priced_18': True}`
   - true answer: `{'raised': None, 'priced_18': True}`
 
-### D11 — tool calls asserted free with no rate card to say so
+### D11: tool calls asserted free with no rate card to say so
 
 - **File:** `agent_economics/delegation.py`
 - **Live at** `dbc28e8`, **fixed by** `dc72ae6`

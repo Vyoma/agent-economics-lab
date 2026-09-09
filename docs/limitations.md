@@ -39,11 +39,15 @@ verdict:
 
 ```text
 ROBUST  (0 flips)   43/98   43.9%
+FRAGILE (1-2 flips)  0/98    0.0%
 BRITTLE (3+ flips)  55/98   56.1%
 ```
 
 Fifty-five of ninety-eight scenarios produce a verdict that moves under
-plausible economic assumptions. A 50% error in the baseline acceptable rate
+plausible economic assumptions. The middle band is empty rather than omitted:
+no scenario is mildly sensitive, so a verdict either holds throughout or breaks
+under three or more perturbations, and the 56.1% is bimodal rather than a
+continuous fragility score. A 50% error in the baseline acceptable rate
 flips the counterfactual gate in 25 of 98 scenarios. These are properties of a
 synthetic fixture rather than a prevalence estimate, but the direction
 generalizes: a decision built on an estimated incident loss, an estimated

@@ -8,6 +8,24 @@ The short version: **almost nothing here is a new idea. The assembly may be new,
 and the discipline demonstrably works.** Those are different claims and they are
 worth different amounts.
 
+## The answer, before the working-out
+
+Every mechanism here is borrowed. Refusing when required coverage is missing
+comes from assurance cases, binding a contract to its check implementations from
+functional qualification, accounting for delegated work from audit scope
+completeness, and calibrating the measuring instrument from metrology.
+
+What has not been observed elsewhere is the **assembly**: one decision procedure
+that refuses when any of the four fails, over a portable evidence artifact, as a
+CI gate that exits non-zero and can be run by someone who did not build it.
+
+That is a modest claim, and it is the only one that has survived every
+adversarial pass so far. If that is all you needed, stop here. What follows is
+how it got that narrow: six novelty claims, six sweeps, and what each one left.
+Read it if you want to check the narrowing rather than take it on trust; it is
+kept in full because a claim that shrinks quietly is worse than one that shrinks
+in public.
+
 ## What is not novel
 
 Each of these was claimed at some point in this repository's history and each was
@@ -119,14 +137,14 @@ A September 2026 referee pass, run with instructions to reject, took the
 economics lane whole: cost per confirmed outcome as an evaluation primitive is
 *Cost-of-Pass* ([arXiv:2504.13359](https://arxiv.org/abs/2504.13359)) and
 Kapoor et al. ([arXiv:2407.01502](https://arxiv.org/abs/2407.01502)), neither
-of which five prior sweeps had surfaced — for a document claiming adversarial
+of which five prior sweeps had surfaced. For a document claiming adversarial
 sweeps, missing the two canonical citations of its own lane is the finding.
 It also found the trajectory-audit lane populated (AgentLens, ATBench,
 automated transcript scanners; see
 [the landscape entry](landscape.md#auditing-benchmark-labels-and-trajectories-is-a-crowded-lane)).
 
 Its verdict on what would earn a citation, recorded at full strength: for the
-machinery, nothing — a researcher would cite in-toto, Inspect, ABC,
+machinery, nothing: a researcher would cite in-toto, Inspect, ABC,
 Cost-of-Pass, and the psychometrics line instead. Two narrow claims survive:
 the documented defect record for the specific public datasets audited in
 [research/CORPUS.md](../research/CORPUS.md), whose arm names circulate as
@@ -136,7 +154,8 @@ helpers, as a cautionary footnote.
 
 ## The claim actually worth making
 
-Not any single mechanism. Every one is borrowed:
+Stated at the top, and here is the provenance behind it. Not any single
+mechanism, because every one is borrowed:
 
 | Mechanism | Borrowed from |
 |---|---|
@@ -145,12 +164,9 @@ Not any single mechanism. Every one is borrowed:
 | Account for delegated work | audit scope completeness |
 | Calibrate the measuring instrument | metrology |
 
-What has not been observed elsewhere is the **assembly**: one decision procedure
-that refuses when any of the four fails, over a portable evidence artifact, as a
-CI gate that exits non-zero and can be run by someone who did not build it.
-
-That is a modest claim. It is also the only one that has survived every
-adversarial pass so far, and it is stated at that width deliberately.
+The assembly is what the sweeps did not find elsewhere, and it is stated at that
+width deliberately: four borrowed mechanisms behind one refusal, in an artifact
+a stranger can run.
 
 ## What is demonstrated rather than claimed
 
@@ -209,9 +225,15 @@ it can fail, the pre-registration is a git object rather than a claim, and two
 adversarial reviews were run and acted on rather than filed. That is copyable by
 anyone, which disqualifies it as a moat and is the reason to write it down.
 
-## The earlier framing, kept for the record
+## The earlier framing, retracted and kept for the record
 
-**Since writing that, it became the novelty.** The list below is no longer an
+**Everything in this section is superseded by the sections above, which record
+why the claim did not survive.** It is preserved because deleting a claim you
+made is a worse record than keeping it marked, and because the shape of the
+error is more useful than its absence. Read it in the past tense; it is written
+in the present because that is how it was written at the time.
+
+**At the time, this read: since writing that, it became the novelty.** The list below is no longer an
 anecdote about diligence; it is a corpus with a measurable property. Five of
 these defects have been pinned to the commit they were live at, and at every
 one of those commits the entire test suite passed: 448, 448, 455, 462, 462

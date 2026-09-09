@@ -1,7 +1,7 @@
 """
 Tests for kimi_judge module.
 
-All Kimi API calls are mocked — no network required. The tests verify:
+All Kimi API calls are mocked: no network required. The tests verify:
   - Rubric validation logic
   - Prompt construction
   - Outcome row building (acceptable → correct CSV values)

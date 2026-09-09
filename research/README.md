@@ -6,12 +6,12 @@ conformance so a software invariant is not mistaken for external empirical evide
 **Start with the audits of third-party data**, which is where this project's
 external evidence lives and what the front page leads with:
 
-- [The corpus](CORPUS.md) — every public dataset audited, one section each.
-- [The findings index](FINDINGS.md) — each result with a stable identifier, a
+- [The corpus](CORPUS.md): every public dataset audited, one section each.
+- [The findings index](FINDINGS.md): each result with a stable identifier, a
   priority date, and the command that checks it.
-- [What the audits say together](PATTERNS.md) — the three things the entries
+- [What the audits say together](PATTERNS.md): the three things the entries
   support jointly, and what they refuse to claim.
-- [How good the instrument is](EVALS.md) — the scorecard, including the
+- [How good the instrument is](EVALS.md): the scorecard, including the
   capabilities nothing yet measures.
 - [What each ingestion path loses](ADAPTER_FIDELITY.md).
 

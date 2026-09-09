@@ -1,8 +1,8 @@
 """Render research/EVALS.md: one scorecard for the instrument itself.
 
-The eval artifacts already exist — mutation score, coverage-drift
+The eval artifacts already exist (mutation score, coverage-drift
 conformance, evidence ablation, the catalogued green defects, the
-pre-registered prospective search, the corpus, the claim ledger — but a
+pre-registered prospective search, the corpus, the claim ledger) but a
 reader asking the only question that matters, "how good is the auditor?",
 had to assemble the answer from seven files. This renders the assembly,
 computing every figure from the frozen artifact that owns it and quoting
@@ -39,6 +39,43 @@ UNMEASURED: dict[str, str] = {
     "research/eval/judge-eval-set.json, which exists and which the row "
     "above reports; no equivalent set exists for remediations.",
 }
+
+
+def _wilson_upper(successes: int, trials: int, z: float = 1.959964) -> float:
+    """Upper end of a Wilson interval. A bare 0% on 24 cases reads as proof
+    of no false accepts, and this page's whole argument is that unqualified
+    numbers mislead; the bound says what 0 of 24 actually licenses."""
+    if not trials:
+        return 1.0
+    phat = successes / trials
+    centre = phat + z * z / (2 * trials)
+    spread = z * ((phat * (1 - phat) / trials
+                   + z * z / (4 * trials * trials)) ** 0.5)
+    return (centre + spread) / (1 + z * z / trials)
+
+
+def _verifier_count() -> int:
+    """Frozen documents with an upstream verifier. This was 7 of 12 while
+    the page reported the corpus as though all of it were checkable."""
+    sys.path.insert(0, str(ROOT / "research" / "corpus"))
+    import verify_corpus
+
+    return len(set(verify_corpus.VERIFIERS) & _frozen_slugs())
+
+
+def _frozen_slugs() -> set[str]:
+    sys.path.insert(0, str(ROOT / "research" / "corpus"))
+    import verify_corpus
+
+    return {
+        path.stem for path in verify_corpus.FROZEN.glob("*.json")
+        if path.stem not in verify_corpus.SIDECARS
+        and path.stem not in verify_corpus.NOT_PUBLISHED
+    }
+
+
+def _frozen_count() -> int:
+    return len(_frozen_slugs())
 
 
 def _load(name: str) -> dict:
@@ -153,6 +190,18 @@ def render() -> str:
             " times); PROBE_RESULTS.md keeps that history |"
         ),
         (
+            "| Can a stranger re-derive the evidence? |"
+            f" one upstream verifier per frozen document, {_verifier_count()}"
+            f" of {_frozen_count()} covered |"
+            " each re-fetches at the pinned revision, checks bytes against"
+            " the hash the freeze recorded, and re-runs the freezer's own"
+            " extractor; a document with no verifier fails the run |"
+            " it proves the frozen file reproduces from the source, not that"
+            " the source itself is correct; and the sample size per dataset"
+            " is a knob, so a green run is not a full re-derivation of every"
+            " row |"
+        ),
+        (
             "| Does it work on data it did not produce? |"
             f" {len(registry_rows)} public datasets audited |"
             f" {len(finding_datasets)} with verified findings,"
@@ -179,10 +228,14 @@ def render() -> str:
         (
             "| How good is the shipped judge (`kimi-judge@1`)? | agreement"
             " with hand-authored"
-            f" rubric-derived labels, {judge['case_count']}"
+            f" rubric-derived labels, {first['cases_scored']}"
             " constructed cases |"
-            f" {first['agreement_rate']:.1%} agreement,"
-            f" {first['false_accept_rate']:.0%} false-accept (eval-version 1)"
+            f" {first['agreement_rate']:.1%} agreement"
+            f" ({first['cases_scored'] - len(first['disagreements'])}"
+            f"/{first['cases_scored']}), 0/{first['cases_scored']} false"
+            f" accepts, 95% upper bound"
+            f" {_wilson_upper(0, first['cases_scored']):.0%}"
+            " (eval-version 1)"
             " | not accuracy against production ground truth; constructed"
             " cases are easier than real ones, and the later 100% run is"
             " excluded here because the set was edited after seeing this"

@@ -33,9 +33,8 @@ import hashlib
 import json
 import pathlib
 import sys
-import time
-import urllib.error
-import urllib.request
+
+from corpus_io import http_get, write_frozen
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FROZEN = pathlib.Path(__file__).resolve().parent / "frozen"
@@ -49,21 +48,9 @@ RATINGS = ("outcomeRating", "agentRating", "communicationRating")
 
 
 def _get(url: str, *, raw: bool = False):
-    last: Exception | None = None
-    for attempt in range(6):
-        try:
-            with urllib.request.urlopen(url, timeout=120) as response:
-                payload = response.read()
-                return payload if raw else json.loads(payload)
-        except urllib.error.HTTPError as error:
-            if error.code == 404:
-                return None
-            last = error
-            time.sleep(4 * (attempt + 1))
-        except Exception as error:
-            last = error
-            time.sleep(4 * (attempt + 1))
-    raise RuntimeError(f"gave up on {url}") from last
+    """One shared retry policy, in corpus_io. A 404 is None here because
+    the tree walk asks whether an optional file exists."""
+    return http_get(url, raw=raw, missing_ok=True)
 
 
 def _rating(value: object) -> int | None:
@@ -126,10 +113,7 @@ def freeze() -> dict:
 
 def main() -> int:
     document = freeze()
-    FROZEN.mkdir(exist_ok=True)
-    OUT.write_text(
-        json.dumps(document, indent=1, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    write_frozen(OUT, document)
     print(f"froze {len(document['rows'])} sessions -> {OUT.relative_to(ROOT)}")
     return 0
 

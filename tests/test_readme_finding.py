@@ -1,8 +1,8 @@
 """Every numeral in the README's finding section, bound to frozen evidence.
 
-An adversarial audit corrupted the README's most-quoted figures — the 44
+An adversarial audit corrupted the README's most-quoted figures: the 44
 disagreements, the 91.2%, the spread, the nine idle runs, the GIF alt text's
-23-across-588 — and the entire suite stayed green, under a front page claiming
+23-across-588, and the entire suite stayed green, under a front page claiming
 every published number is verified in CI. The quotable sentences were exactly
 the unguarded ones: the same figures inside generated documents were
 byte-compared, and their hand-typed README copies were not.
@@ -94,9 +94,33 @@ def _drift() -> dict:
     return json.loads(DRIFT.read_text(encoding="utf-8"))
 
 
+def _twin_split():
+    """(disagreements favouring the first arm, either arm's rate, SD in
+    points of the rate gap a coin-split of those disagreements produces)."""
+    import json
+    import math
+
+    arms = json.loads(
+        (ROOT / "examples" / "public-swebench" / "outcome_audit.json")
+        .read_text(encoding="utf-8")
+    )["arms"]
+    first = {row["task_id"]: row["resolved"] for row in arms["gpt-5.2-codex"]}
+    second = arms["gpt-5.2-high"]
+    total = len(second)
+    disagreements = [
+        row for row in second if first[row["task_id"]] != row["resolved"]
+    ]
+    favouring_first = sum(
+        1 for row in disagreements if first[row["task_id"]] is True
+    )
+    rate = sum(1 for row in second if row["resolved"] is True) / total
+    sd = math.sqrt(len(disagreements) * 0.25) / total * 100
+    return favouring_first, rate, sd
+
+
 def _openhands() -> dict:
     sys.path.insert(0, str(ROOT / "research" / "corpus"))
-    from audit import nebius_openhands_summary
+    from corpus_report import nebius_openhands_summary
 
     return nebius_openhands_summary()
 
@@ -156,6 +180,19 @@ COMPUTED: dict[str, str] = {
     # the registry sentence: the generated-test instrument measurement,
     # rederived from the frozen nebius-openhands evidence
     "0.062": f"{_openhands()['kappa']:.3f}",
+    # The number that makes the kappa actionable: the proxy scores this many
+    # points below always answering with the commoner label.
+    "2.9": f"{abs(_openhands()['agreement_minus_majority']) * 100:.1f}",
+    # Published with its interval: the claim is that the shortfall is
+    # reliably negative, not merely negative on this sample.
+    "5.0": f"{abs(_openhands()['gap_low']):.1f}",
+    "0.9": f"{abs(_openhands()['gap_high']):.1f}",
+    # The twin arms' 44 disagreements split evenly, so both report the same
+    # rate; and the gap that split can move is what bounds a real difference.
+    "22": f"{_twin_split()[0]}",
+    "72.8": f"{_twin_split()[1] * 100:.1f}",
+    "0.7": f"{_twin_split()[2]:.1f}",
+    "2.6": f"{2 * 1.96 * _twin_split()[2]:.1f}",
     "31,389": f"{_openhands()['cross_present']:,}",
 }
 

@@ -9,8 +9,8 @@ produces is ever presented as a finding about any agent. Its bundle digest
 is recorded so two machines can confirm they measured the same input.
 
 Each scale runs the full shipped decision path, `agent_economics.audit
-.decide` — engine evaluation, delegation closure, every default check, and
-the audit — on an in-memory bundle. Build time is reported separately from
+.decide` (engine evaluation, delegation closure, every default check, and
+the audit) on an in-memory bundle. Build time is reported separately from
 decision time because ingestion and decision scale differently and hiding
 one inside the other would flatter both.
 

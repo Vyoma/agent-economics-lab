@@ -337,7 +337,7 @@ def main() -> int:
     print("## The shapes, and the defect each was abstracted from\n")
     for shape in SHAPES:
         hits = len(by_shape.get(shape.id, ()))
-        print(f"### {shape.id} — {shape.name}  ({hits} sites)\n")
+        print(f"### {shape.id}: {shape.name}  ({hits} sites)\n")
         print(f"- **Learned from:** {shape.learned_from}")
         print(f"- **Why it hides:** {shape.why}\n")
 

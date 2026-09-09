@@ -23,6 +23,7 @@ def _load_json(path: str | Path) -> dict[str, Any]:
 
 
 def load_rates(path: str | Path) -> dict[str, ModelRate]:
+    """Load the per-model rate card from JSON, so token counts become money."""
     raw = _load_json(path)
     return {
         name: ModelRate(
@@ -82,6 +83,7 @@ _OUTCOME_ECONOMICS = (
 
 
 def load_outcomes(path: str | Path) -> dict[str, Outcome]:
+    """Load per-task outcomes from CSV, keyed by task id."""
     outcomes: dict[str, Outcome] = {}
     with Path(path).open(newline="", encoding="utf-8") as handle:
         for row in csv.DictReader(handle):
@@ -123,6 +125,8 @@ def load_outcomes(path: str | Path) -> dict[str, Outcome]:
 
 
 def load_baseline(path: str | Path) -> Baseline:
+    """Load the alternative being compared against, usually the human-only
+    workflow, from JSON."""
     raw = _load_json(path)
     return Baseline(
         name=raw["name"],
@@ -135,6 +139,7 @@ def load_baseline(path: str | Path) -> Baseline:
 
 
 def load_policy(path: str | Path) -> EconomicPolicy:
+    """Load the thresholds a decision will be held to, from JSON."""
     raw = _load_json(path)
     return EconomicPolicy(**raw)
 
@@ -165,6 +170,9 @@ def load_csv_bundle(
     policy: str | Path,
     label_source: str = "",
 ) -> EvidenceBundle:
+    """Build a bundle from the five CSV and JSON inputs. `label_source` names
+    the instrument that produced the outcome labels; the gate wants that
+    instrument attested before it counts the labels."""
     return make_evidence_bundle(
         events=load_traces(traces),
         outcomes=load_outcomes(outcomes),

@@ -3,7 +3,7 @@
 Each test names the clause it enforces. This file is the conformance
 surface ROADMAP.md's first stage gate calls for: a second implementation
 passing these tests against the same fixtures produces the same digests and
-the same decisions. Overlap with the wider suite is deliberate — here the
+the same decisions. Overlap with the wider suite is deliberate: here the
 organizing principle is the spec's numbering, so a clause with no test is
 visible by grepping for its number.
 """

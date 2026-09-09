@@ -6,8 +6,8 @@ One command per dataset, network required once, everything downstream offline:
     python3 research/corpus/freeze.py jetbrains
 
 Per row it keeps identifiers, outcome fields, step counts, SHA-256 hashes of
-the content it refuses to copy, and — where the dataset ships raw test logs
-beside graded-test lists — the re-adjudication verdict those logs support.
+the content it refuses to copy, and, where the dataset ships raw test logs
+beside graded-test lists, the re-adjudication verdict those logs support.
 No prompts, no responses, no patches, no logs are stored.
 
 Rows come from the Hugging Face datasets-server, which serves the dataset's
@@ -27,6 +27,8 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+
+from corpus_io import http_get, write_frozen
 from collections.abc import Mapping
 from typing import Any
 
@@ -40,15 +42,8 @@ _INFO_API = "https://huggingface.co/api/datasets"
 
 
 def _get(url: str) -> dict:
-    last: Exception | None = None
-    for attempt in range(7):
-        try:
-            with urllib.request.urlopen(url, timeout=300) as response:
-                return json.load(response)
-        except Exception as error:  # retried, then re-raised
-            last = error
-            time.sleep(8 * (attempt + 1))
-    raise RuntimeError(f"gave up on {url}") from last
+    """One shared retry policy, in corpus_io."""
+    return http_get(url)
 
 
 def _sha_now(dataset: str) -> str:
@@ -293,6 +288,12 @@ def _nvidia_swezero(row: dict) -> dict:
     }
 
 
+#: `cross_field` names the second outcome signal a dataset carries, and the
+#: frozen row exposes it under the neutral key `cross`. That key therefore
+#: holds different types across the corpus: a float for
+#: `pred_passes_gen_tests`, a string for `exit_status`. Consumers assert the
+#: declared column before reading it rather than inferring the type, because
+#: a kappa computed over exit statuses would look like a number.
 SPECS = {
     "coderforge": {
         "dataset": (
@@ -441,9 +442,8 @@ def freeze(slug: str) -> pathlib.Path:
         "fetched_via": "datasets-server /rows, revision bracketed by repo SHA",
         "rows": rows,
     }
-    FROZEN.mkdir(exist_ok=True)
     path = FROZEN / f"{slug}.json"
-    path.write_text(json.dumps(document, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    write_frozen(path, document)
     (FROZEN / f"{slug}.partial.json").unlink(missing_ok=True)
     return path
 

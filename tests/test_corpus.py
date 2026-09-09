@@ -19,7 +19,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "research" / "corpus"))
 
-from audit import (  # noqa: E402
+from corpus_report import (  # noqa: E402
     FROZEN,
     degenerate_positives,
     duplicate_groups,
@@ -228,11 +228,11 @@ class TheGuardActuallyGuards(unittest.TestCase):
         document = json.loads((FROZEN / "coderforge.json").read_text(encoding="utf-8"))
         document["rows"][1]["transcript_sha256"] = document["rows"][0]["transcript_sha256"]
         script = (
-            "import json, sys; sys.path.insert(0, 'research/corpus'); import audit;"
-            "audit._load = lambda slug, _d=json.loads(sys.stdin.read()): ("
+            "import json, sys; sys.path.insert(0, 'research/corpus'); import corpus_report;"
+            "corpus_report._load = lambda slug, _d=json.loads(sys.stdin.read()): ("
             "_d if slug == 'coderforge' else "
-            "json.loads((audit.FROZEN / (slug + '.json')).read_text()));"
-            "audit.render()"
+            "json.loads((corpus_report.FROZEN / (slug + '.json')).read_text()));"
+            "corpus_report.render()"
         )
         proc = subprocess.run(
             [sys.executable, "-c", script],
@@ -297,7 +297,7 @@ class SweSmithNumbersRecompute(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        from audit import swesmith_summary
+        from corpus_report import swesmith_summary
 
         cls.smith = swesmith_summary()
 
@@ -348,9 +348,9 @@ class SweSmithNumbersRecompute(unittest.TestCase):
         """Corrupt one duplicate row's label; the summary must not stay quiet."""
         from unittest import mock
 
-        import audit
+        import corpus_report
 
-        real_load = audit._load
+        real_load = corpus_report._load
 
         def corrupted(slug: str) -> dict:
             document = real_load(slug)
@@ -364,8 +364,8 @@ class SweSmithNumbersRecompute(unittest.TestCase):
                     by_hash[h] = 1
             return document
 
-        with mock.patch.object(audit, "_load", corrupted):
-            smith = audit.swesmith_summary()
+        with mock.patch.object(corpus_report, "_load", corrupted):
+            smith = corpus_report.swesmith_summary()
         self.assertGreater(smith["label_disagreeing_groups"], 0)
 
 
@@ -374,7 +374,7 @@ class NebiusNumbersRecompute(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        from audit import nebius_openhands_summary, nebius_sweagent_summary
+        from corpus_report import nebius_openhands_summary, nebius_sweagent_summary
 
         cls.sweagent = nebius_sweagent_summary()
         cls.openhands = nebius_openhands_summary()
@@ -413,9 +413,9 @@ class NebiusNumbersRecompute(unittest.TestCase):
         computation reads the evidence rather than echoing a constant."""
         from unittest import mock
 
-        import audit
+        import corpus_report
 
-        real_load = audit._load
+        real_load = corpus_report._load
 
         def corrupted(slug: str) -> dict:
             document = real_load(slug)
@@ -425,8 +425,8 @@ class NebiusNumbersRecompute(unittest.TestCase):
                         row["cross"] = 1.0 if row["outcome"] == 1 else 0.0
             return document
 
-        with mock.patch.object(audit, "_load", corrupted):
-            perfect = audit.nebius_openhands_summary()
+        with mock.patch.object(corpus_report, "_load", corrupted):
+            perfect = corpus_report.nebius_openhands_summary()
         self.assertGreater(perfect["kappa"], 0.99)
 
 
@@ -435,7 +435,7 @@ class PostTrainBenchNumbersRecompute(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        from audit import posttrainbench_summary
+        from corpus_report import posttrainbench_summary
 
         cls.ptb = posttrainbench_summary()
 
@@ -465,7 +465,12 @@ class PostTrainBenchNumbersRecompute(unittest.TestCase):
         p = self.ptb
         self.assertAlmostEqual(p["pooled_difference"], 0.209, places=3)
         self.assertAlmostEqual(p["stratified_difference"], 0.018, places=3)
-        self.assertGreater(p["overstatement"], 10)
+        # The ratio is kept but not published; what the entry asserts is
+        # that stratifying moves a solidly non-zero pooled effect onto an
+        # interval that contains zero.
+        self.assertLess(p["pooled_low"], p["pooled_high"])
+        self.assertGreater(p["pooled_low"], 0)
+        self.assertTrue(p["stratified_spans_zero"])
 
     def test_the_confound_is_where_the_entry_says_it_is(self) -> None:
         p = self.ptb
@@ -488,9 +493,9 @@ class PostTrainBenchNumbersRecompute(unittest.TestCase):
         import json
         from unittest import mock
 
-        import audit
+        import corpus_report
 
-        real = audit._load
+        real = corpus_report._load
 
         def flattened(slug: str) -> dict:
             document = real(slug)
@@ -500,8 +505,8 @@ class PostTrainBenchNumbersRecompute(unittest.TestCase):
                     row["benchmark"] = "only"
             return document
 
-        with mock.patch.object(audit, "_load", flattened):
-            collapsed = audit.posttrainbench_summary()
+        with mock.patch.object(corpus_report, "_load", flattened):
+            collapsed = corpus_report.posttrainbench_summary()
         self.assertAlmostEqual(
             collapsed["stratified_difference"],
             collapsed["pooled_difference"],
@@ -639,7 +644,7 @@ class CogymNumbersRecompute(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        from audit import cogym_summary
+        from corpus_report import cogym_summary
 
         cls.cogym = cogym_summary()
 
@@ -664,9 +669,9 @@ class CogymNumbersRecompute(unittest.TestCase):
         sits near the 0.60 floor depends on the scale being right."""
         from unittest import mock
 
-        import audit
+        import corpus_report
 
-        real = audit._load
+        real = corpus_report._load
 
         def perfect(slug: str) -> dict:
             document = real(slug)
@@ -679,8 +684,8 @@ class CogymNumbersRecompute(unittest.TestCase):
                         row["agentRating"] = row["outcomeRating"]
             return document
 
-        with mock.patch.object(audit, "_load", perfect):
-            aligned = audit.cogym_summary()
+        with mock.patch.object(corpus_report, "_load", perfect):
+            aligned = corpus_report.cogym_summary()
         self.assertAlmostEqual(
             aligned["pairs"]["outcomeRating|agentRating"]["qwk"], 1.0, places=6
         )
@@ -694,7 +699,7 @@ class CogymNumbersRecompute(unittest.TestCase):
         """These are real people. Ratings and hashes only."""
         import json as _json
 
-        from audit import FROZEN
+        from corpus_report import FROZEN
 
         document = _json.loads(
             (FROZEN / "cogym.json").read_text(encoding="utf-8")
@@ -703,3 +708,90 @@ class CogymNumbersRecompute(unittest.TestCase):
         for row in document["rows"]:
             with self.subTest(session=row["id"]):
                 self.assertFalse(forbidden & set(row))
+
+
+class EveryHeadingMapsToOneFunction(unittest.TestCase):
+    """CORPUS.md was rendered by a single 569-line list literal with loops
+    spliced through it, so tracing a heading in the page back to the code
+    that produced it meant scrolling until the prose matched. One function
+    per heading now, and this keeps it that way."""
+
+    def test_each_section_has_an_entry_function(self) -> None:
+        import ast
+
+        source = (ROOT / "research" / "corpus" / "corpus_report.py").read_text(
+            encoding="utf-8"
+        )
+        tree = ast.parse(source)
+        functions = {
+            node.name for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name.startswith("_entry_")
+        }
+        headings = [
+            line for line in (ROOT / "research" / "CORPUS.md")
+            .read_text(encoding="utf-8").splitlines()
+            if line.startswith("## ")
+        ]
+        # every dataset heading plus the closing section, and the preamble
+        self.assertEqual(len(functions), len(headings) + 1)
+
+    def test_render_is_a_walk_not_a_literal(self) -> None:
+        import ast
+
+        tree = ast.parse(
+            (ROOT / "research" / "corpus" / "corpus_report.py").read_text(encoding="utf-8")
+        )
+        render = next(
+            node for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "render"
+        )
+        span = render.end_lineno - render.lineno + 1
+        self.assertLess(
+            span, 60,
+            "render() is growing a literal again; add an _entry_ function",
+        )
+
+
+class FrozenDocumentsDeclareTheirProvenance(unittest.TestCase):
+    """`outcome_field` and `cross_field` are written into every document
+    freeze.py produces and were read by nothing, so they could drift from the
+    column they name and no build would notice. They are the only record of
+    which upstream column became the normalised `outcome` key, which a reader
+    of the frozen JSON needs, so they are checked here rather than deleted."""
+
+    def test_every_freeze_spec_declares_an_outcome_column(self) -> None:
+        import sys
+
+        sys.path.insert(0, str(ROOT / "research" / "corpus"))
+        from freeze import SPECS
+
+        for slug, spec in SPECS.items():
+            with self.subTest(dataset=slug):
+                self.assertIn("outcome_field", spec)
+                self.assertIn("cross_field", spec)
+                self.assertTrue(
+                    isinstance(spec["outcome_field"], str)
+                    and spec["outcome_field"].strip(),
+                    "outcome_field must name a real upstream column",
+                )
+
+    def test_frozen_documents_carry_the_declaration(self) -> None:
+        import sys
+
+        sys.path.insert(0, str(ROOT / "research" / "corpus"))
+        from freeze import SPECS
+
+        for slug, spec in SPECS.items():
+            path = FROZEN / f"{slug}.json"
+            if not path.exists():
+                continue
+            document = json.loads(path.read_text(encoding="utf-8"))
+            with self.subTest(dataset=slug):
+                self.assertEqual(
+                    document.get("outcome_field"), spec["outcome_field"],
+                    "the frozen document disagrees with the spec that made it",
+                )
+                self.assertEqual(
+                    document.get("cross_field"), spec["cross_field"]
+                )

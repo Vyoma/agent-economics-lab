@@ -765,12 +765,15 @@ def _inspect_claude_code_jsonl_bytes(
 
 
 def inspect_claude_code_jsonl(path: str | Path) -> ClaudeCodeSession:
+    """Read a Claude Code JSONL session without converting it. Step one of
+    three: inspect, write a conversion contract, then build the bundle."""
     return _inspect_claude_code_jsonl_bytes(Path(path).read_bytes())
 
 
 def conversion_contract_template(
     session: ClaudeCodeSession,
 ) -> dict[str, Any]:
+    """A conversion-contract template for an already-inspected session."""
     models = sorted({call.model for call in session.model_calls})
     cache_buckets_by_model: dict[str, set[str]] = defaultdict(set)
     billing_contexts_by_model: dict[str, set[str]] = defaultdict(set)
@@ -892,6 +895,9 @@ def conversion_contract_template(
 
 
 def inspect_to_contract_template(path: str | Path) -> dict[str, Any]:
+    """Inspect a session and emit a conversion-contract template for it. The
+    template is a starting point to edit, never a contract to trust unread:
+    it guesses roles from what the export happens to contain."""
     return conversion_contract_template(inspect_claude_code_jsonl(path))
 
 
@@ -1254,6 +1260,8 @@ def claude_code_bundle_from_session(
     session: ClaudeCodeSession,
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
+    """Convert an already-inspected Claude Code session under an explicit
+    contract."""
     if contract.get("schema_version") != CONTRACT_SCHEMA_VERSION:
         raise ValueError(
             f"schema_version must be {CONTRACT_SCHEMA_VERSION}"
@@ -1440,6 +1448,9 @@ def claude_code_bundle(
     source_path: str | Path,
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
+    """Convert a Claude Code JSONL session into a bundle under an explicit
+    contract. The contract is required, not inferred, because a mapping
+    guessed from the data is a mapping nobody undertook to be correct."""
     return claude_code_bundle_from_session(
         inspect_claude_code_jsonl(source_path), contract
     )
@@ -1450,6 +1461,9 @@ def conversion_receipt(
     contract: Mapping[str, Any],
     bundle: EvidenceBundle,
 ) -> dict[str, Any]:
+    """What the conversion did, unit by unit: which source records became which
+    entities and which were accounted for as carrying no economics. The
+    adapter-fidelity check reads this to prove nothing vanished."""
     outcome_contract = _required_mapping(
         contract.get("outcome_contract"), label="outcome_contract"
     )

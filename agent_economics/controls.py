@@ -88,7 +88,7 @@ def find_directed_cycles(edges: Iterable[tuple[str, str]]) -> list[tuple[str, ..
     # Iterative, with an index dict beside the stack. The recursive form had
     # two scale failures: `node in visiting` scanned a list at every visit,
     # O(depth) each, and Python's recursion limit turned a dependency chain
-    # a thousand events deep into RecursionError — which the engine's
+    # a thousand events deep into RecursionError, which the engine's
     # diagnostic guard then reported as "could not run", so cycle detection
     # silently stopped existing exactly when traces got big.
     for root in graph:

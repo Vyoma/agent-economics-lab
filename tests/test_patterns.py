@@ -26,7 +26,7 @@ class TheFiguresComeFromTheEntries(unittest.TestCase):
         cls.data = patterns.measure()
 
     def test_the_instrument_figures_match_their_entries(self) -> None:
-        from audit import cogym_summary, nebius_openhands_summary
+        from corpus_report import cogym_summary, nebius_openhands_summary
 
         by_name = {row["instrument"]: row for row in self.data["instruments"]}
         self.assertAlmostEqual(

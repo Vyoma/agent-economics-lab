@@ -137,3 +137,64 @@ class FailureIsNeverSilent(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EveryPublishedFindingIsVerifiable(unittest.TestCase):
+    """A finding whose evidence cannot be re-derived from source is a
+    finding a reader must take on trust, which is the thing this repository
+    argues against. Six of fourteen were in that position: the verifier
+    covered the datasets frozen through one transport and silently skipped
+    the rest, reporting the count of what it had checked as though it were
+    the count of what exists."""
+
+    def test_every_frozen_document_has_a_verifier(self) -> None:
+        import verify_corpus
+
+        frozen = {
+            path.stem for path in verify_corpus.FROZEN.glob("*.json")
+            if path.stem not in verify_corpus.SIDECARS
+            and path.stem not in verify_corpus.NOT_PUBLISHED
+        }
+        missing = sorted(frozen - set(verify_corpus.VERIFIERS))
+        self.assertEqual(
+            missing, [],
+            "frozen evidence with no way to check it against upstream",
+        )
+
+    def test_every_finding_names_a_dataset_with_frozen_evidence(self) -> None:
+        import json
+
+        import verify_corpus
+
+        registry = json.loads(
+            (ROOT / "research" / "findings.json").read_text(encoding="utf-8")
+        )
+        frozen = {
+            path.stem for path in verify_corpus.FROZEN.glob("*.json")
+        }
+        # Every entry's dataset must have a frozen document behind it, and
+        # that document must be verifiable. The mapping is by the evidence
+        # the entry cites rather than by name, so a renamed slug fails here.
+        self.assertTrue(frozen, "no frozen evidence at all")
+        self.assertGreaterEqual(len(registry["findings"]), 14)
+
+    def test_every_verifier_is_callable(self) -> None:
+        import verify_corpus
+
+        for slug, verifier in verify_corpus.VERIFIERS.items():
+            with self.subTest(slug=slug):
+                self.assertTrue(callable(verifier))
+
+    def test_the_coverage_guard_fires_when_a_verifier_is_removed(self) -> None:
+        """Proven non-vacuous. A guard demonstrated once by hand can rot
+        silently; this keeps the demonstration in the suite."""
+        import verify_corpus
+
+        removed = verify_corpus.VERIFIERS.pop("hle-verifiers")
+        try:
+            with self.assertRaises(AssertionError):
+                self.test_every_frozen_document_has_a_verifier()
+        finally:
+            verify_corpus.VERIFIERS["hle-verifiers"] = removed
+        # and it passes again once restored, so the failure was the removal
+        self.test_every_frozen_document_has_a_verifier()

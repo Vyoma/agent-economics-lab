@@ -139,9 +139,13 @@ def decide(
     `evaluate --ci` returned exit 0 for a bundle whose outcome instrument
     nobody had attested and whose delegation was never declared, while `audit
     --ci` on the identical bundle withheld with grounds. The reassuring answer
-    was the default. Every surface that issues a green decision goes through
-    here now, so the auditor and the gate cannot answer differently: the only
-    reachable SCALE is one the audit has no grounds against.
+    was the default. Every *shipped surface* that issues a green decision
+    goes through here: the CLI, the GitHub Action, the claim path. The
+    engine, `evaluate_bundle`, deliberately does not, because the property
+    tests and sweeps need it unaudited, and it will hand back a SCALE this
+    function withholds. Both are exported and tests/test_entry_points.py
+    pins the difference on every shipped bundle, because for a while only
+    this one was reachable from the CLI and it was the one not exported.
 
     ASSIST, STOP, and INCOMPLETE pass through untouched. They are already
     refusals to scale, and demoting them would hide *why* the evidence failed
@@ -290,7 +294,7 @@ def render_markdown(report: AuditReport) -> str:
     lines += ["## 1. Coverage with no provider", ""]
     if report.unprovided_coverage:
         lines += [
-            f"- `{c}` — no enabled check supplies this"
+            f"- `{c}`: no enabled check supplies this"
             for c in report.unprovided_coverage
         ]
         lines.append("")
@@ -367,7 +371,7 @@ def render_markdown(report: AuditReport) -> str:
 
     lines += ["## 4. Instruments nobody validated", ""]
     if report.unattested_instruments:
-        lines += [f"- `{i}` — {r}" for i, r in report.unattested_instruments]
+        lines += [f"- `{i}`: {r}" for i, r in report.unattested_instruments]
     elif report.instruments_checked:
         lines.append(
             "Every evidence-producing instrument carries a current attestation: "

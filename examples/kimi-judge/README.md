@@ -1,10 +1,10 @@
-# Kimi Judge + Analyst — 3-command demo
+# Kimi Judge + Analyst: a 3-command demo
 
 This example shows the full Kimi-powered workflow for agent-economics-lab:
 
-1. **Judge** — Kimi scores each agent output against the rubric and writes `outcomes.csv`
-2. **Evaluate** — the framework runs 6 economic gates and issues a SCALE/ASSIST/STOP decision
-3. **Analyse** — Kimi reads the decision and gives quantified, actionable recommendations
+1. **Judge**: Kimi scores each agent output against the rubric and writes `outcomes.csv`
+2. **Evaluate**: the framework runs 6 economic gates and issues a SCALE/ASSIST/STOP decision
+3. **Analyse**: Kimi reads the decision and gives quantified, actionable recommendations
 
 ## Prerequisites
 
@@ -53,7 +53,7 @@ agent-economics analyse \
 
 Kimi reads the decision and metric gaps and returns:
 - **ASSIST** → top-3 fixes ranked by threshold distance, with quantified expected impact
-- **STOP** → viability math — what change in acceptable_rate or cost would flip the decision
+- **STOP** → viability math: what change in acceptable_rate or cost would flip the decision
 - **SCALE** → sustainability watch-outs for metrics within 20% of their thresholds
 
 ## Rubric schema

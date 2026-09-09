@@ -129,7 +129,7 @@ class TheRecordCarriesTheRealCase(unittest.TestCase):
 
 
 class TheReadmeCitesAClaimThatVerifies(unittest.TestCase):
-    """The showcase `verify` command exited 4 — the repo's strongest refusal.
+    """The showcase `verify` command exited 4, the repo's strongest refusal.
 
     The claim it cited had been superseded when the arms were rebuilt, and
     nothing bound the README to a claim that still verifies. `make ledger`

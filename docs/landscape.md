@@ -389,8 +389,8 @@ landmarks, not derived from this package's data, and are labelled as such.
 
 ## What other frameworks do when a check cannot run
 
-This section exists because the stance this package takes — that evidence which
-could not be produced is not a result — is only worth taking if the field does
+This section exists because the stance this package takes, that evidence which
+could not be produced is not a result, is only worth taking if the field does
 something else. A survey was run against primary sources to find out. **It
 refuted the premise it started from**, and the real answer is more interesting.
 
