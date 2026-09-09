@@ -7,6 +7,31 @@ matter who submits it, and an entry that does not gets returned no matter who
 submits it, including us. Every rule below exists because this project broke
 it once and published the scar.
 
+## Start with the scaffold
+
+```bash
+python3 research/corpus/audit_any.py <owner/dataset>      # is there anything here?
+python3 research/corpus/scaffold_entry.py <owner/dataset> # then the plumbing
+```
+
+The first prints a census: coverage, duplicate work, and agreement wherever a
+dataset carries two outcome signals. It is deliberately not a finding.
+
+The second emits the boilerplate this contract requires, read from the
+dataset's own schema: the freeze spec, an extractor, the findings record and
+the test skeleton. It refuses a dataset whose licence is undeclared, and what
+it emits is a proposal in the same sense the census is: guessed from column
+names and value shapes, worth editing, never worth committing unread.
+
+Everything it emits is the part that does not require judgement. What it
+leaves you is the row count, the extractor's fields, the base rate, the
+verification pass, the statement, the action, the scope, and one guard proven
+to fire. That is the entry; the rest was typing.
+
+A spec in `SPECS` gets an upstream verifier for free, because
+`verify_corpus.VERIFIERS` registers every SPECS slug. A standalone freezer
+does not, and owes one.
+
 ## What qualifies
 
 A publicly downloadable dataset of agent trajectories or run records, pinned

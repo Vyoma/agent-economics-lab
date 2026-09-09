@@ -31,6 +31,10 @@ help:
 	@echo "    mutation-score    can a gutted gate survive?"
 	@echo "    sensitivity       how many verdicts move when assumptions move"
 	@echo ""
+	@echo "  contribute an audit"
+	@echo "    python3 research/corpus/audit_any.py <hf-dataset>       a census"
+	@echo "    python3 research/corpus/scaffold_entry.py <hf-dataset>  the plumbing"
+	@echo ""
 	@echo "  your own data: see examples/README.md"
 
 
