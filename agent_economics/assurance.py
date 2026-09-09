@@ -107,6 +107,9 @@ def decision_contract_digest(
     checks: Sequence[CheckSpec],
     required_coverage: frozenset[Coverage],
 ) -> str:
+    """A digest over the check identities, versions and required coverage. It
+    changes whenever the contract does, which is what lets a claim bind the
+    decision procedure and not merely its answer."""
     payload = decision_contract_manifest(checks, required_coverage)
     encoded = json.dumps(
         payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
@@ -541,6 +544,9 @@ def default_engine(
     checks: Sequence[CheckSpec] | None = None,
     required_coverage: frozenset[Coverage] = DEFAULT_REQUIRED_COVERAGE,
 ) -> AssuranceEngine:
+    """The engine with the default six gates and the fixed required coverage.
+    It evaluates; it does not audit. To gate on the result, use
+    `agent_economics.decide`."""
     return AssuranceEngine(
         checks=tuple(checks) if checks is not None else default_checks(),
         required_coverage=required_coverage,
@@ -551,6 +557,19 @@ def evaluate_bundle(
     evidence: EvidenceBundle,
     checks: Sequence[CheckSpec] | None = None,
 ) -> AssuranceCase:
+    """Run the checks over a bundle and return the case. The engine alone.
+
+    This is the most-used function in the package and carried no docstring,
+    which mattered because it is not the one to gate on. It answers what the
+    checks say; `agent_economics.decide` answers what the checks say *and*
+    what the audit found, and withholds a SCALE the audit has grounds
+    against. On examples/claude-code-tree/bundle.json they differ, and
+    tests/test_entry_points.py pins that difference.
+
+    Reach for this when you want the engine unaudited, which is what the
+    property tests and the sensitivity sweeps want. Reach for `decide` when
+    something downstream acts on the answer.
+    """
     return default_engine(checks).evaluate(evidence)
 
 
@@ -562,7 +581,14 @@ def evaluate(
     policy: EconomicPolicy,
     checks: Sequence[CheckSpec] | None = None,
 ) -> AssuranceCase:
-    """Compatibility wrapper around the explicitly composed engine."""
+    """Build a bundle from loose components, then evaluate it.
+
+    Kept for callers that hold events and outcomes rather than a bundle. It
+    is the same engine as `evaluate_bundle` and carries the same caveat:
+    neither runs the audit, so neither is the one to gate on. See
+    `agent_economics.decide`.
+
+    Compatibility wrapper around the explicitly composed engine."""
     evidence = make_evidence_bundle(
         events=events,
         outcomes=outcomes,

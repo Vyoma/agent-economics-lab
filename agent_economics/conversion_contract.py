@@ -37,6 +37,7 @@ def loads_strict_json(raw: str, *, label: str) -> Any:
 
 
 def load_conversion_contract(path: str | Path) -> dict[str, Any]:
+    """Load a conversion contract from JSON."""
     value = loads_strict_json(
         Path(path).read_text(encoding="utf-8"),
         label=f"conversion contract {str(path)!r}",

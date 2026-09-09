@@ -152,3 +152,52 @@ class TheLoaderBoundaryNamesTheFix(unittest.TestCase):
         document = json.loads(path.read_text(encoding="utf-8"))
         self.assertIsInstance(load_normalized_json_bundle(path), EvidenceBundle)
         self.assertIsInstance(normalized_json_bundle(document), EvidenceBundle)
+
+
+class TheEngineEntryPointsSayWhatTheyAre(unittest.TestCase):
+    """`evaluate_bundle` is the most-used function in the package and had no
+    docstring, which mattered because it is not the one to gate on: it
+    answers what the checks say, and `decide` answers that plus what the
+    audit found."""
+
+    def test_both_engine_calls_are_documented(self) -> None:
+        import inspect
+
+        from agent_economics import decide, evaluate, evaluate_bundle
+
+        for function in (evaluate, evaluate_bundle, decide):
+            with self.subTest(function=function.__name__):
+                doc = inspect.getdoc(function) or ""
+                self.assertTrue(doc.strip(), "undocumented public entry point")
+
+    def test_the_engine_calls_point_at_the_gate(self) -> None:
+        """A reader who lands on either engine call must be told the gate
+        exists, because reaching for the obvious name is how the fail-open
+        was reachable in the first place."""
+        import inspect
+
+        from agent_economics import evaluate, evaluate_bundle
+
+        for function in (evaluate, evaluate_bundle):
+            with self.subTest(function=function.__name__):
+                self.assertIn("decide", inspect.getdoc(function) or "")
+
+
+class ThePublicSurfaceIsDocumented(unittest.TestCase):
+    """29 of 88 exports carried no docstring, in a package whose argument is
+    that you should be able to check it yourself. A public name with no
+    statement of what it takes and returns is a name you have to read the
+    body to use."""
+
+    def test_every_exported_callable_says_what_it_does(self) -> None:
+        import inspect
+
+        import agent_economics as package
+
+        bare = []
+        for name in package.__all__:
+            member = getattr(package, name, None)
+            if inspect.isfunction(member) or inspect.isclass(member):
+                if not (inspect.getdoc(member) or "").strip():
+                    bare.append(name)
+        self.assertEqual(bare, [], "exported callables with no docstring")

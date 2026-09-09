@@ -24,6 +24,7 @@ def _money(value: float) -> str:
 
 
 def render_frontier_markdown(case: FrontierCase) -> str:
+    """Render a comparison case as Markdown, every arm and refusal kept."""
     candidate_count = len(case.plan.candidate_arms)
     tail_draws = (
         case.plan.bootstrap_samples
@@ -225,6 +226,7 @@ def _json_safe(value: Any) -> Any:
 
 
 def render_frontier_json(case: FrontierCase) -> str:
+    """Render a comparison case as JSON, every arm and refusal kept."""
     return json.dumps(
         _json_safe(frontier_payload(case)),
         indent=2,
@@ -234,6 +236,7 @@ def render_frontier_json(case: FrontierCase) -> str:
 
 
 def render_frontier_svg(case: FrontierCase) -> str:
+    """Render a comparison case as an SVG chart, one point per arm."""
     width, height = 760, 430
     left, right, top, bottom = 84, 36, 46, 70
     plot_width = width - left - right

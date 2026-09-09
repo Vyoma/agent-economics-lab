@@ -271,6 +271,8 @@ def _status(raw: Any, attributes: Mapping[str, Any], *, label: str) -> str:
 
 
 def inspect_otel_genai_json(path: str | Path) -> OtelGenAISession:
+    """Read an OpenTelemetry GenAI span export without converting it. Step one
+    of the three-step conversion."""
     source = Path(path)
     raw_bytes = source.read_bytes()
     try:
@@ -576,6 +578,7 @@ def inspect_otel_genai_json(path: str | Path) -> OtelGenAISession:
 
 
 def conversion_contract_template(session: OtelGenAISession) -> dict[str, Any]:
+    """A conversion-contract template for an already-inspected session."""
     models = sorted({span.model for span in session.spans if span.event_type == "model"})
     tools = sorted(
         {span.tool_name for span in session.spans if span.event_type == "tool"}
@@ -691,6 +694,7 @@ def otel_genai_bundle_from_session(
     session: OtelGenAISession,
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
+    """Convert an already-inspected span export under an explicit contract."""
     _validate_fixed_contract(session, contract)
     outcomes, task_manifest, _rubric_version, label_source = parse_outcomes_and_manifest(
         raw_tasks=contract.get("tasks"),
@@ -834,6 +838,8 @@ def otel_genai_bundle(
     source_path: str | Path,
     contract: Mapping[str, Any],
 ) -> EvidenceBundle:
+    """Convert an OpenTelemetry GenAI span export into a bundle under an
+    explicit contract."""
     return otel_genai_bundle_from_session(
         inspect_otel_genai_json(source_path), contract
     )
@@ -844,6 +850,9 @@ def conversion_receipt(
     contract: Mapping[str, Any],
     bundle: EvidenceBundle,
 ) -> dict[str, Any]:
+    """What the conversion did, unit by unit: which source records became which
+    entities and which were accounted for as carrying no economics. The
+    adapter-fidelity check reads this to prove nothing vanished."""
     outcome_contract = required_mapping(
         contract.get("outcome_contract"), label="outcome_contract"
     )
