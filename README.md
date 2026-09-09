@@ -306,6 +306,11 @@ above.
 
 ## Check this repository without trusting it
 
+One requirement before you start: clone with full history. `make reproduce`
+re-runs each catalogued defect at the commit it was live at, so a shallow
+clone fails partway through with a message telling you to run
+`git fetch --unshallow`. A plain `git clone` is fine; `--depth` is not.
+
 The strongest check here needs none of this repository.
 [`research/reproduce_hle.py`](research/reproduce_hle.py) is 148 lines of
 standard library that downloads the public dataset, checks its bytes against a
