@@ -837,6 +837,12 @@ implied to be the same thing.
 - Test one real workflow with the
   [blank decision contract](templates/agent-scale-decision-contract.md).
 - Submit one counterexample that narrows or falsifies a claim.
+- Audit one public dataset and file the finding. Two commands get you most of
+  the way: `python3 research/corpus/audit_any.py <hf-dataset>` prints a census,
+  and `python3 research/corpus/scaffold_entry.py <hf-dataset>` emits the freeze
+  spec, extractor, findings record and test skeleton from the dataset's own
+  schema. What is left is the analysis, which is the part worth your time. The
+  rules are in [contributing an audit](docs/contributing-an-audit.md).
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md) or the issue templates. Do not submit
 customer data, secrets, proprietary prompts, or contract pricing.
