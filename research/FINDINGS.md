@@ -5,7 +5,7 @@ identifier, the date it was first published, the command that checks
 it, what to do about it if you use the dataset, and the scope it does
 not claim.
 
-**14 standing: 6 defects, 6 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
+**16 standing: 6 defects, 8 measurements, 2 clean bills.** Clean bills are listed here with the same weight as defects, because
 an auditor that only ever finds problems is indistinguishable from
 one that manufactures them.
 
@@ -31,6 +31,8 @@ evidence and fails the build if the two ever disagree.
 | `AEL-2026-012` | 2026-09-03 | defect | `cogym-real-trajectories` | The communication rating is present on 50 of 228 sessions and the artifact rating on 191; only overall satisfaction is on every session |
 | `AEL-2026-013` | 2026-09-03 | measurement | `HLE-Verifications` | Seven models the dataset calls verifiers scored 32,450 responses to 649 Humanity's Last Exam questions, against correctness established by... |
 | `AEL-2026-014` | 2026-09-04 | measurement | `OpenR1-Math-220k` | The default split ships two verification columns on the same generations: correctness_math_verify, a symbolic check against the published answer,... |
+| `AEL-2026-015` | 2026-09-10 | measurement | `SWE-rebench-openhands-trajectories` | Selective prediction does not repair the generated-test proxy of AEL-2026-008; it makes the shortfall larger |
+| `AEL-2026-016` | 2026-09-10 | measurement | `HLE-Verifications` | Forcing the seven graders of AEL-2026-013 to abstain where they are least confident does not rescue them |
 
 ## The findings in full
 
@@ -201,6 +203,30 @@ The default split ships two verification columns on the same generations: correc
 **If you use this dataset.** Filter to rows whose correctness_math_verify contains a true before training on this split, or accept that 30.5% of your rows were admitted by a judge nobody scored.
 
 **What it does not claim.** This is a claim about provenance, not about accuracy. It does not establish that the judge is wrong. A symbolic checker that cannot parse a valid answer and a judge that waves through an invalid one produce identical columns, and separating them needs the answers themselves. A verification pass re-fetched 398 admitted generations at the pinned revision, every shard checked against the freeze's own SHA-256, and found only 18 where the boxed answer and the published answer both reduce to a single unambiguous number and disagree. Most of the remaining gap is answer-format heterogeneity, a boxed multiple-choice letter against a published value or a published answer carrying several roots at once, which is itself the likeliest reason the symbolic check failed on these rows. That parser is a third instrument in the room, and this project has already published a re-adjudicator whose 186 disagreements were every one its own blindness, so its mismatches are reported as unresolved and never as judge errors. The fallback design is documented by the dataset's authors and is a reasonable answer to a checker that cannot parse every valid form; what is measured here is that its result is unauditable from the columns as shipped.
+
+### AEL-2026-015 - measurement, 2026-09-10
+
+**Dataset.** [`nebius/SWE-rebench-openhands-trajectories`](https://huggingface.co/datasets/nebius/SWE-rebench-openhands-trajectories) at `35455389`
+
+Selective prediction does not repair the generated-test proxy of AEL-2026-008; it makes the shortfall larger. The proxy emits a bare verdict with no confidence attached, so the only available gate is a second signal, gen_tests_correct. Abstaining unless the generated tests were themselves judged correct retains 30.1% of rows and lifts raw agreement from 51.4% to 65.4%, which is not a gain: abstention changes the population and therefore the baseline, and the majority class flips from unresolved at 54.2% to resolved at 70.4%. Scored against the best constant policy on the rows it keeps, the proxy goes from 2.9 points short, 95% CI [0.4, 5.5], to 5.0 points short, [3.2, 6.6]. On the 69.7% it would have abstained on it is 19.5 points short, [16.8, 22.2]. No arm clears its baseline and every interval lies entirely below zero. Always-fail is the right comparator only while unresolved is the commoner label; on the retained rows it scores 29.6%, so the proxy's apparent win over it there is a win over a policy nobody would run.
+
+**Check it.** `make corpus`
+
+**If you use this dataset.** Before reporting that abstention improved a grader, recompute the baseline on the retained subset. An accuracy quoted at partial coverage is not comparable to the same accuracy at full coverage, because the population and its majority class both moved. Here the confident subset is the easier subset, and the bar rose further than the proxy did.
+
+**What it does not claim.** A measurement of one abstention rule on one dataset, not a claim that selective prediction cannot work. The gate is itself an adjudicated label that would not be available at the moment a release decision is made, so this is the best case for abstention on this proxy rather than a deployable policy, and the best case still loses. The gate was chosen because it is the only confidence-like signal the dataset ships; no threshold sweep was run, because a binary verdict has nothing to sweep. Intervals are clustered over the 5,870 instances and family-adjusted across the three arms. Compare AEL-2026-016, which asks the same question of graders that do emit a score and reaches the same answer by a different route.
+
+### AEL-2026-016 - measurement, 2026-09-10
+
+**Dataset.** [`FUSE-verifiers/HLE-Verifications`](https://huggingface.co/datasets/FUSE-verifiers/HLE-Verifications) at `e838b3dd`
+
+Forcing the seven graders of AEL-2026-013 to abstain where they are least confident does not rescue them. Ranking each grader's questions by the standard deviation of the scores it gave and keeping the most confident quarter, 6 of 7 point estimates rise, and yet 5 of 7 intervals contain 0.5 at 25% coverage against 4 of 7 at full coverage. Abstention leaves the family further from a usable verdict, not closer, because the question is the independent unit and abstaining discards it: the interval widens faster than the estimate rises. Only gemini-3-flash, 0.581 to 0.657 [0.591, 0.718], and gpt5.2-high, 0.547 to 0.607 [0.514, 0.697], clear chance on the quarter they keep. The first draft of this analysis reported gpt5.2-high at 0.833 and was an artifact of the tie-break: three of the four confidence rules are integer-valued, so the coverage cutoff lands inside a block of tied questions, and that draft chose among them by sorting on the AUC being measured. Measured directly, the tie-break alone can move the retained figure by up to 0.657 under top-margin and 0.577 under spread, against 0.002 under the standard deviation rule published here.
+
+**Check it.** `make corpus`
+
+**If you use this dataset.** Score a selective-prediction curve on the unit your interval is computed over, and before believing the curve, measure how far the tie-break at the coverage cutoff could move it on its own. If that width is comparable to the effect you are reporting, you are reporting the tie-break: here it reaches 0.657 under one rule and 0.002 under another, over the same data and the same graders.
+
+**What it does not claim.** Four confidence rules were computed: standard deviation, max minus min, the margin below the top score, and how many responses share the top score. Standard deviation is published because it is the only continuous one and the tie-break can move it by 0.002; the other three are recomputed beside it and no grader clears chance under any of them that does not clear it under this one. Intervals are family-adjusted across 14 claims, seven graders at two retained coverage levels, and are therefore wider than a single-comparison reading. Every caveat on AEL-2026-013 still applies, in particular that gemini-3-flash carries no score on 19,284 of 32,450 responses and is measured on the subset it scored, which is the grader that gains most here. This measures abstention on grader self-confidence, not on an external difficulty signal or a calibrated probability, neither of which this dataset ships. Compare AEL-2026-015, which asks the same question of a proxy with no score to threshold on and reaches the same answer.
 
 ## Citing one
 
