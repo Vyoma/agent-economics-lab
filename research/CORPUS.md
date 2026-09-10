@@ -141,6 +141,66 @@ count is 6,000, the floor at which that tail still holds the
 twenty resamples the protocol demands; an earlier 400 put Monte
 Carlo noise in the published third decimal.
 
+**Does abstention rescue them?** The standard repair for a weak
+grader is selective prediction: let it answer only where it is
+confident. It does not work here, and the reason is structural. The
+question is the independent unit, so abstaining discards the very
+thing the interval is computed over, and the interval widens faster
+than the estimate rises. 6 of seven point estimates rose at 25%
+coverage, and yet 5 of seven intervals contain 0.5 there against
+4 at full coverage: abstention left this family further from a
+usable verdict, not closer. Only
+`gemini-3-flash` and `gpt5.2-high` clear chance on the quarter
+they keep.
+
+| grader | full | 50% coverage | 25% coverage |
+|---|---|---|---|
+| `Qwen2.5-72B-Instruct` | 0.500 | 0.497 [0.465, 0.529] | 0.480 [0.429, 0.530] |
+| `Skywork-Critic-Llama-3.1-70B` | 0.505 | 0.511 [0.477, 0.545] | 0.506 [0.457, 0.554] |
+| `deepseek_reasoner` | 0.535 | 0.551 [0.509, 0.593] | 0.540 [0.483, 0.599] |
+| `gemini-3-flash` | 0.581 | 0.636 [0.591, 0.680] | 0.657 [0.591, 0.718] |
+| `gpt-oss-120b` | 0.491 | 0.491 [0.448, 0.534] | 0.500 [0.437, 0.561] |
+| `gpt5.2-high` | 0.547 | 0.572 [0.509, 0.630] | 0.607 [0.514, 0.697] |
+| `gptmini-high` | 0.515 | 0.526 [0.477, 0.576] | 0.535 [0.457, 0.608] |
+
+Intervals are family-adjusted across
+14 claims, seven graders at two retained coverage
+levels, alpha / 2k = 0.00179 in each tail,
+12,000 draws over questions.
+
+**The confidence rule, and the version of this that was wrong.**
+A grader here emits a score, so its confidence on a question has to
+be read off the spread of the scores it gave. Four rules were
+computed: standard deviation, max minus min, the margin between the
+top score and the next, and how many responses share the top score.
+Only the first is continuous. The others are integer-valued, so at
+25% coverage the cutoff falls inside a block of hundreds of tied
+questions and whatever breaks those ties decides the answer. The
+first version of this analysis broke them by sorting on the AUC it
+was measuring, which is circular, and it invented the finding:
+`gpt5.2-high` read 0.833 under the leaking sort and
+0.566 under the same rule tie-broken by
+question id.
+
+The rule is not chosen by preference. For each rule this measures
+the width between the best and worst retained mean the tie-break
+could produce, which is the share of the published figure decided
+by something other than the confidence signal:
+
+| rule | continuous | most the tie-break could move it |
+|---|---|---|
+| `stdev` | yes | 0.002 |
+| `spread` | no | 0.577 |
+| `top-margin` | no | 0.657 |
+| `few-at-top` | no | 0.035 |
+
+Standard deviation is published because the tie-break owns
+0.002 of its answer. Under `top-margin` it owns 0.657,
+which is wider than the entire distance from chance to the best
+grader in this corpus, so a figure computed that way reports the
+tie-break. The other three are recomputed beside it all the same,
+and under all four every grader still falls short.
+
 **Prior work.** That model judges are imperfect is established: MT-Bench measured judge agreement with human preference,
 RewardBench scores reward models against it, and position,
 verbosity and self-preference bias each have a literature. What
@@ -462,6 +522,38 @@ measurement at scale:
   0.020, pure noise - and that is
   the majority of rows carrying the signal.
 
+
+**Abstention makes it worse, and the reason is the baseline.** The
+repair for a proxy that loses to the majority class is to consult it
+only where it is trustworthy. This proxy emits a bare verdict with
+no confidence attached, so the only gate available is a second
+signal: `gen_tests_correct`, whether the generated tests were
+themselves judged correct. Gating on it lifts raw agreement from
+51.4% to 65.4%, which is not the gain it
+looks like. Abstention changes the population, so it changes the
+baseline too: the majority class flips from unresolved at
+54.2% to resolved at 70.4%, and the bar rises
+further than the proxy does.
+
+| retained | coverage | agreement | best constant policy | gap |
+|---|---|---|---|---|
+| full coverage | 100.0% | 51.4% | always-fail 54.2% | -2.9 [-5.4, -0.4] |
+| tests judged correct | 30.1% | 65.4% | always-pass 70.4% | -5.0 [-6.6, -3.2] |
+| tests judged wrong | 69.7% | 45.3% | always-fail 64.8% | -19.5 [-22.2, -16.8] |
+
+No arm clears its baseline; every interval sits entirely below zero.
+Always-fail is the comparator only while unresolved is the commoner
+label, and on the retained rows it is not: it scores
+29.6% there, so reporting the proxy as beating it
+would be a win over a policy nobody would run. Intervals are
+clustered over instances, family-adjusted across 3 arms at
+alpha / 2k = 0.00833, 3,000 draws.
+
+One caveat sharpens the result rather than softening it: the gate
+is itself an adjudicated label, unavailable at the moment a release
+decision is made. This is the best case for abstention here, not a
+deployable policy, and the best case still loses.
+
 Scope, stated exactly: this measures the generated-test *method*,
 not a defect of the dataset - recording both signals side by side
 is what made the measurement possible at all, and the signal is
@@ -505,7 +597,8 @@ what it proves is that the same source and the same code produce the
 committed file. A frozen document with no verifier fails the run.
 That rule is new because it had to be: the verifier once covered
 only the datasets frozen through one transport and silently skipped
-the rest, so six of the fourteen findings here rested on evidence no
-reader could check, including the two this corpus leans on hardest.
+the rest, so six of the fourteen findings published at the time
+rested on evidence no reader could check, including the two this
+corpus leans on hardest.
 It printed the count of what it had checked, which reads as the
 count of what exists.

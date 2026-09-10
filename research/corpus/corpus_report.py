@@ -258,6 +258,119 @@ def nebius_openhands_summary() -> dict:
     }
 
 
+def openhands_selective_prediction() -> dict:
+    """Abstention on the generated-test proxy, scored against what it replaces.
+
+    AEL-2026-008 measured this proxy at full coverage and found it 2.9 points
+    worse than answering with the commoner label. The standard repair is
+    selective prediction: keep the rows where the proxy is most likely to be
+    right, abstain on the rest, and check whether the retained decisions
+    finally beat the baseline. The repair fails here, and the reason
+    generalises past this dataset.
+
+    Restricting to rows whose generated tests were themselves judged correct
+    lifts raw agreement from 51.4% to 65.4%. That reads as a large gain and
+    is not one. Abstention changes the population, so it also changes the
+    baseline: the majority class flips from unresolved at 54.2% to resolved
+    at 70.4%, and the bar rises further than the proxy does. Scored against
+    the best constant policy on the rows it actually keeps, the shortfall
+    grows from 2.9 points to 5.0.
+
+    So an accuracy quoted on a retained subset cannot be compared with the
+    same accuracy at full coverage. This is the majority-baseline trap the
+    corpus already documents, on a second axis, and it is the axis on which
+    a selective-prediction result is normally reported.
+    """
+    import random
+
+    document = _load("nebius-openhands")
+    assert document["cross_field"] == "pred_passes_gen_tests", (
+        f"expected pred_passes_gen_tests in `cross`, got {document['cross_field']}"
+    )
+    rows = [r for r in document["rows"] if r["cross"] is not None]
+
+    # Three simultaneous interval claims, so alpha / (2k) with k = 3 leaves
+    # 0.00833 in each tail, and the frontier protocol's adequacy rule wants
+    # at least 20 expected resamples there, which is 2,400 draws. The assert
+    # is the check that matters; 3,000 clears it with margin.
+    ARMS = 3
+    DRAWS = 3000
+    adjusted = (1 - 0.95) / (2 * ARMS)
+    assert DRAWS * adjusted >= 20, "too few resamples for the adjusted tail"
+    random.seed(20260910)
+
+    def arm(label: str, subset: list) -> dict:
+        size = len(subset)
+        agreement = sum(
+            1 for r in subset if (r["outcome"] == 1) == (r["cross"] == 1.0)
+        ) / size
+        resolved_rate = sum(1 for r in subset if r["outcome"] == 1) / size
+        # The reviewer's question named the always-fail baseline, which is
+        # the right comparator only while unresolved is the commoner label.
+        # On the confident subset it is not, and always-fail collapses to
+        # 29.6%; reporting the proxy's +35.8 against it there would be a
+        # win over a policy nobody would run. The comparator has to be the
+        # best constant policy on the retained rows.
+        majority_is_pass = resolved_rate >= 0.5
+        majority = max(resolved_rate, 1 - resolved_rate)
+
+        # Clustered over instances: the same instance recurs across runs, so
+        # resampling rows would treat repeats of one problem as independent
+        # evidence and give an interval too narrow to mean anything.
+        clusters: dict[str, list[int]] = {}
+        for row in subset:
+            hit = int((row["outcome"] == 1) == (row["cross"] == 1.0))
+            constant = int(
+                (row["outcome"] == 1) if majority_is_pass else (row["outcome"] == 0)
+            )
+            cell = clusters.setdefault(row["instance_id"], [0, 0])
+            cell[0] += 1
+            cell[1] += hit - constant
+        table = list(clusters.values())
+        counts = [c[0] for c in table]
+        margins = [c[1] for c in table]
+        span = len(table)
+        draws = []
+        for _ in range(DRAWS):
+            index = [random.randrange(span) for _ in range(span)]
+            total = sum(counts[i] for i in index)
+            if total:
+                draws.append(sum(margins[i] for i in index) / total * 100)
+        draws.sort()
+        return {
+            "label": label,
+            "rows": size,
+            "coverage": size / len(rows),
+            "instances": span,
+            "agreement": agreement,
+            "resolved_rate": resolved_rate,
+            "majority_policy": "always-pass" if majority_is_pass else "always-fail",
+            "majority_baseline": majority,
+            "always_fail_baseline": 1 - resolved_rate,
+            "gap": (agreement - majority) * 100,
+            "gap_low": draws[int(adjusted * len(draws))],
+            "gap_high": draws[int((1 - adjusted) * len(draws))],
+            "beats_baseline": draws[int(adjusted * len(draws))] > 0,
+        }
+
+    arms = [
+        arm("full coverage", rows),
+        arm("tests judged correct", [r for r in rows if r["gen_tests_correct"] == 1.0]),
+        arm("tests judged wrong", [r for r in rows if r["gen_tests_correct"] == 0.0]),
+    ]
+    return {
+        "revision": document["revision"],
+        "gate": "gen_tests_correct",
+        "draws": DRAWS,
+        "adjusted_alpha": adjusted,
+        "arms": arms,
+        "full": arms[0],
+        "retained": arms[1],
+        "abstained": arms[2],
+        "any_arm_beats_baseline": any(a["beats_baseline"] for a in arms),
+    }
+
+
 def _auc(pairs: list) -> float | None:
     """Rank-based AUC: threshold-free, and invariant to the rubric.
 
@@ -395,6 +508,209 @@ def hle_verifier_summary() -> dict:
         "below_chance": [g["judge"] for g in graders if g["auc"] < 0.5],
         "pooled_best": max(g["pooled_auc"] for g in graders),
         "pooled_worst": min(g["pooled_auc"] for g in graders),
+    }
+
+
+# Four confidence rules were examined before one was published, and the
+# choice is not a matter of taste. A rule can only rank questions it can
+# separate, and three of the four cannot: at 25% coverage the cutoff for
+# top-margin falls inside a block of 509 tied questions, spread inside 216,
+# few-at-top inside 27. Whatever breaks those ties decides the result, and
+# the first version of this analysis broke them by sorting on the AUC being
+# measured. That is not a weak method, it is circular, and it manufactured
+# the entire finding: gpt5.2-high read 0.833 at 25% coverage under the
+# leaking sort and 0.566 under the same rule tie-broken by question id.
+# Standard deviation is published because it is the only continuous rule
+# here, with 2 questions tied at the cutoff rather than hundreds. The other
+# three are recomputed beside it so a reader can see the choice did not
+# create the answer: under all four, abstention leaves every grader short.
+CONFIDENCE_RULES = ("stdev", "spread", "top-margin", "few-at-top")
+COVERAGE_LEVELS = (0.50, 0.25)
+
+
+def _confidence(scores: list[float]) -> dict:
+    """Per-question confidence signals, computed from a grader's own scores.
+
+    Nothing here may touch `correct`. A gate that sees the outcome it is
+    gating is not selective prediction, it is the answer key.
+    """
+    import statistics
+
+    top = max(scores)
+    below = [s for s in scores if s < top]
+    return {
+        "stdev": statistics.pstdev(scores),
+        "spread": top - min(scores),
+        "top-margin": top - (max(below) if below else top),
+        # Fewer responses sharing the top score is the more decisive verdict,
+        # so this one sorts the other way and is negated to keep every rule
+        # "larger is more confident".
+        "few-at-top": -sum(1 for s in scores if s == top),
+    }
+
+
+def _tie_band(scored: list, rule: str, keep: int) -> tuple[float, float]:
+    """How far the tie-break alone could move a retained mean.
+
+    The cutoff of a coverage curve usually lands inside a block of questions
+    the confidence rule scores identically, and something has to choose
+    among them. This computes the retained mean when that choice is made as
+    favourably as possible and as unfavourably as possible: the width
+    between them is the amount of the published figure that is decided by
+    the tie-break rather than by the confidence signal. A first draft of
+    this analysis resolved those ties by sorting on the AUC it was
+    measuring, and the width below is exactly how much room that left it.
+    """
+    values = sorted(scored, key=lambda q: -q[2][rule])
+    cutoff = values[keep - 1][2][rule]
+    above = [a for _, a, c in values if c[rule] > cutoff]
+    tied = sorted(a for _, a, c in scored if c[rule] == cutoff)
+    room = keep - len(above)
+    fixed = sum(above)
+    return (
+        (fixed + sum(tied[:room])) / keep,
+        (fixed + sum(tied[len(tied) - room:])) / keep,
+    )
+
+
+def hle_selective_prediction() -> dict:
+    """Does forcing the graders to abstain rescue them?
+
+    AEL-2026-013 found four of seven indistinguishable from random when
+    scored within question. The natural repair is to let a grader answer
+    only where it is confident. It does not work, and it fails in a way
+    worth stating precisely: abstention widens the interval faster than it
+    lifts the point estimate, because the questions are the independent unit
+    and abstaining throws them away. At 25% coverage five of seven contain
+    0.5, which is one worse than at full coverage, even though six of the
+    seven point estimates rose. A rescued grader has to clear chance on the
+    responses it kept, and only gemini-3-flash and gpt5.2-high do.
+    """
+    import random
+
+    document = _load("hle-verifiers")
+    rows = document["rows"]
+    judges = sorted(document["judges"])
+
+    # Seven graders at two retained coverage levels is a family of 14
+    # simultaneous interval claims: alpha / (2k) leaves 0.00179 in each
+    # tail, and the adequacy rule needs at least 20 expected resamples
+    # there, so 11,200 draws is the floor.
+    family = len(judges) * len(COVERAGE_LEVELS)
+    DRAWS = 12000
+    adjusted = (1 - 0.95) / (2 * family)
+    assert DRAWS * adjusted >= 20, "too few resamples for the adjusted tail"
+    random.seed(20260910)
+
+    graders = []
+    for judge in judges:
+        scored = []
+        for index, row in enumerate(rows):
+            values = row["scores"].get(judge)
+            if values is None:
+                continue
+            present = [float(v) for v in values if v is not None]
+            pairs = [
+                (float(v), bool(y))
+                for v, y in zip(values, row["correct"]) if v is not None
+            ]
+            value = _auc(pairs)
+            # One score cannot have a spread, and a question that ranks
+            # nothing carries no information about a grader either way.
+            if value is None or len(present) < 2:
+                continue
+            scored.append((index, value, _confidence(present)))
+
+        full = sum(a for _, a, _ in scored) / len(scored)
+        levels = {}
+        for coverage in COVERAGE_LEVELS:
+            keep = max(1, round(len(scored) * coverage))
+            rule_points = {}
+            for rule in CONFIDENCE_RULES:
+                # Ties broken by question id, which is fixed before any
+                # score is read. Any tie-break that consults the outcome
+                # decides the answer by itself, as the first version did.
+                order = sorted(scored, key=lambda q: (-q[2][rule], q[0]))
+                kept = [a for _, a, _ in order[:keep]]
+                rule_points[rule] = sum(kept) / keep
+            primary = sorted(scored, key=lambda q: (-q[2]["stdev"], q[0]))[:keep]
+            retained = [a for _, a, _ in primary]
+            draws = sorted(
+                sum(retained[random.randrange(keep)] for _ in range(keep)) / keep
+                for _ in range(DRAWS)
+            )
+            low = draws[int(adjusted * DRAWS)]
+            high = draws[int((1 - adjusted) * DRAWS)]
+            cutoff = primary[-1][2]["stdev"]
+            levels[coverage] = {
+                "coverage": coverage,
+                "questions": keep,
+                "auc": rule_points["stdev"],
+                "low": low,
+                "high": high,
+                "indistinguishable_from_random": low <= 0.5 <= high,
+                "by_rule": rule_points,
+                "tied_at_cutoff": sum(
+                    1 for _, _, c in scored if c["stdev"] == cutoff
+                ),
+                # The published number is worth only as much as the room the
+                # tie-break had to move it. Reported per rule so the reason
+                # stdev is the published one is a measured width, not a
+                # preference.
+                "tie_band": {
+                    r: round(
+                        _tie_band(scored, r, keep)[1]
+                        - _tie_band(scored, r, keep)[0], 6
+                    )
+                    for r in CONFIDENCE_RULES
+                },
+            }
+        graders.append({
+            "judge": judge,
+            "questions_scored": len(scored),
+            "full_auc": full,
+            "levels": levels,
+            "rose": levels[0.25]["auc"] > full,
+        })
+
+    quarter = [g["levels"][0.25] for g in graders]
+    # Hoisted: this was called inside the comprehension below, so the
+    # published entry recomputed 6,000 bootstrap draws per grader seven
+    # times over and spent 24 of its 29 seconds doing it.
+    at_full = hle_verifier_summary()["graders"]
+    return {
+        "revision": document["revision"],
+        "draws": DRAWS,
+        "adjusted_alpha": adjusted,
+        "family": family,
+        "rule": "stdev",
+        "rules": CONFIDENCE_RULES,
+        "coverage_levels": COVERAGE_LEVELS,
+        "graders": graders,
+        "chance_at_full": sum(
+            1 for x in at_full if x["indistinguishable_from_random"]
+        ),
+        "chance_at_quarter": sum(
+            1 for level in quarter if level["indistinguishable_from_random"]
+        ),
+        "rose_at_quarter": sum(1 for g in graders if g["rose"]),
+        # The width the tie-break alone could move each rule's figure, taken
+        # over every grader and coverage level. This is why stdev is the
+        # published rule and the others are shown beside it: under stdev the
+        # tie-break owns 0.002 of the answer, under top-margin it owns 0.66,
+        # which is more than the entire distance from chance to a good
+        # grader.
+        "tie_band": {
+            rule: max(
+                g["levels"][c]["tie_band"][rule]
+                for g in graders for c in COVERAGE_LEVELS
+            )
+            for rule in CONFIDENCE_RULES
+        },
+        "cleared_at_quarter": sorted(
+            g["judge"] for g in graders
+            if not g["levels"][0.25]["indistinguishable_from_random"]
+        ),
     }
 
 
@@ -1044,7 +1360,17 @@ def _entry_coderforge(coderforge: dict, cf_census: dict, cf_re: dict) -> list[st
 
 
 
-def _entry_hle(hle: dict) -> list[str]:
+def _grader(coverage: dict, judge: str) -> dict:
+    """Look a grader up by name.
+
+    The prose cites one grader's figure by name, and a positional index into
+    the sorted list would keep rendering after a re-freeze added a grader,
+    quietly attributing one model's number to another.
+    """
+    return next(g for g in coverage["graders"] if g["judge"] == judge)
+
+
+def _entry_hle(hle: dict, coverage: dict) -> list[str]:
     """Seven graders against a checkable answer, ranked within question."""
     out = [
         "",
@@ -1145,6 +1471,79 @@ def _entry_hle(hle: dict) -> list[str]:
         f"count is {hle['draws']:,}, the floor at which that tail still holds the",
         "twenty resamples the protocol demands; an earlier 400 put Monte",
         "Carlo noise in the published third decimal.",
+        "",
+        "**Does abstention rescue them?** The standard repair for a weak",
+        "grader is selective prediction: let it answer only where it is",
+        "confident. It does not work here, and the reason is structural. The",
+        "question is the independent unit, so abstaining discards the very",
+        "thing the interval is computed over, and the interval widens faster",
+        f"than the estimate rises. {coverage['rose_at_quarter']} of seven"
+        " point estimates rose at 25%",
+        f"coverage, and yet {coverage['chance_at_quarter']} of seven intervals"
+        f" contain 0.5 there against",
+        f"{coverage['chance_at_full']} at full coverage: abstention left this"
+        " family further from a",
+        "usable verdict, not closer. Only",
+        f"{' and '.join('`%s`' % j for j in coverage['cleared_at_quarter'])}"
+        " clear chance on the quarter",
+        "they keep.",
+        "",
+        "| grader | full | 50% coverage | 25% coverage |",
+        "|---|---|---|---|",
+    ]
+    for grader in coverage["graders"]:
+        half, quarter = grader["levels"][0.50], grader["levels"][0.25]
+        out.append(
+            f"| `{grader['judge']}` | {grader['full_auc']:.3f} "
+            f"| {half['auc']:.3f} [{half['low']:.3f}, {half['high']:.3f}] "
+            f"| {quarter['auc']:.3f} [{quarter['low']:.3f}, "
+            f"{quarter['high']:.3f}] |"
+        )
+    out += [
+        "",
+        "Intervals are family-adjusted across",
+        f"{coverage['family']} claims, seven graders at two retained coverage",
+        f"levels, alpha / 2k = {coverage['adjusted_alpha']:.5f} in each tail,",
+        f"{coverage['draws']:,} draws over questions.",
+        "",
+        "**The confidence rule, and the version of this that was wrong.**",
+        "A grader here emits a score, so its confidence on a question has to",
+        "be read off the spread of the scores it gave. Four rules were",
+        "computed: standard deviation, max minus min, the margin between the",
+        "top score and the next, and how many responses share the top score.",
+        "Only the first is continuous. The others are integer-valued, so at",
+        "25% coverage the cutoff falls inside a block of hundreds of tied",
+        "questions and whatever breaks those ties decides the answer. The",
+        "first version of this analysis broke them by sorting on the AUC it",
+        "was measuring, which is circular, and it invented the finding:",
+        "`gpt5.2-high` read 0.833 under the leaking sort and",
+        f"{_grader(coverage, 'gpt5.2-high')['levels'][0.25]['by_rule']['spread']:.3f}"
+        " under the same rule tie-broken by",
+        "question id.",
+        "",
+        "The rule is not chosen by preference. For each rule this measures",
+        "the width between the best and worst retained mean the tie-break",
+        "could produce, which is the share of the published figure decided",
+        "by something other than the confidence signal:",
+        "",
+        "| rule | continuous | most the tie-break could move it |",
+        "|---|---|---|",
+    ]
+    for rule in coverage["rules"]:
+        out.append(
+            f"| `{rule}` | {'yes' if rule == coverage['rule'] else 'no'} "
+            f"| {coverage['tie_band'][rule]:.3f} |"
+        )
+    out += [
+        "",
+        "Standard deviation is published because the tie-break owns",
+        f"{coverage['tie_band'][coverage['rule']]:.3f} of its answer. Under"
+        f" `top-margin` it owns"
+        f" {coverage['tie_band']['top-margin']:.3f},",
+        "which is wider than the entire distance from chance to the best",
+        "grader in this corpus, so a figure computed that way reports the",
+        "tie-break. The other three are recomputed beside it all the same,",
+        "and under all four every grader still falls short.",
         "",
         "**Prior work.** That model judges are imperfect is established:"
         " MT-Bench measured judge agreement with human preference,",
@@ -1544,7 +1943,7 @@ def _entry_sweagent(sweagent: dict) -> list[str]:
 
 
 
-def _entry_openhands(sweagent: dict, openhands: dict) -> list[str]:
+def _entry_openhands(sweagent: dict, openhands: dict, abstention: dict) -> list[str]:
     """Model-generated tests against adjudication: the sharpest result here."""
     out = [
         "",
@@ -1593,6 +1992,50 @@ def _entry_openhands(sweagent: dict, openhands: dict) -> list[str]:
         f"  ({openhands['invalid_n']:,} rows): kappa",
         f"  {openhands['invalid_kappa']:.3f}, pure noise - and that is",
         "  the majority of rows carrying the signal.",
+        "",
+        "",
+        "**Abstention makes it worse, and the reason is the baseline.** The",
+        "repair for a proxy that loses to the majority class is to consult it",
+        "only where it is trustworthy. This proxy emits a bare verdict with",
+        "no confidence attached, so the only gate available is a second",
+        f"signal: `{abstention['gate']}`, whether the generated tests were",
+        "themselves judged correct. Gating on it lifts raw agreement from",
+        f"{abstention['full']['agreement']:.1%} to"
+        f" {abstention['retained']['agreement']:.1%}, which is not the gain it",
+        "looks like. Abstention changes the population, so it changes the",
+        "baseline too: the majority class flips from unresolved at",
+        f"{abstention['full']['majority_baseline']:.1%} to resolved at"
+        f" {abstention['retained']['majority_baseline']:.1%}, and the bar rises",
+        "further than the proxy does.",
+        "",
+        "| retained | coverage | agreement | best constant policy | gap |",
+        "|---|---|---|---|---|",
+    ]
+    for one in abstention["arms"]:
+        out.append(
+            f"| {one['label']} | {one['coverage']:.1%} "
+            f"| {one['agreement']:.1%} "
+            f"| {one['majority_policy']} {one['majority_baseline']:.1%} "
+            f"| {one['gap']:+.1f} [{one['gap_low']:+.1f}, "
+            f"{one['gap_high']:+.1f}] |"
+        )
+    out += [
+        "",
+        "No arm clears its baseline; every interval sits entirely below zero.",
+        "Always-fail is the comparator only while unresolved is the commoner",
+        "label, and on the retained rows it is not: it scores",
+        f"{abstention['retained']['always_fail_baseline']:.1%} there, so"
+        " reporting the proxy as beating it",
+        "would be a win over a policy nobody would run. Intervals are",
+        f"clustered over instances, family-adjusted across"
+        f" {len(abstention['arms'])} arms at",
+        f"alpha / 2k = {abstention['adjusted_alpha']:.5f},"
+        f" {abstention['draws']:,} draws.",
+        "",
+        "One caveat sharpens the result rather than softening it: the gate",
+        "is itself an adjudicated label, unavailable at the moment a release",
+        "decision is made. This is the best case for abstention here, not a",
+        "deployable policy, and the best case still loses.",
         "",
         "Scope, stated exactly: this measures the generated-test *method*,",
         "not a defect of the dataset - recording both signals side by side",
@@ -1656,8 +2099,9 @@ def _entry_closing() -> list[str]:
         "committed file. A frozen document with no verifier fails the run.",
         "That rule is new because it had to be: the verifier once covered",
         "only the datasets frozen through one transport and silently skipped",
-        "the rest, so six of the fourteen findings here rested on evidence no",
-        "reader could check, including the two this corpus leans on hardest.",
+        "the rest, so six of the fourteen findings published at the time",
+        "rested on evidence no reader could check, including the two this",
+        "corpus leans on hardest.",
         "It printed the count of what it had checked, which reads as the",
         "count of what exists.",
         "",
@@ -1679,6 +2123,8 @@ def render() -> str:
     openr1 = openr1_math_summary()
     sweagent = nebius_sweagent_summary()
     openhands = nebius_openhands_summary()
+    abstention = openhands_selective_prediction()
+    coverage = hle_selective_prediction()
 
     cf_re = readjudication(coderforge)
     cf_census = outcome_census(coderforge)
@@ -1694,13 +2140,13 @@ def render() -> str:
     lines: list[str] = []
     lines += _entry_preamble(coderforge, cf_re, hle, openr1, cogym, ptb, smith, sweagent, openhands, jetbrains, tarsur)
     lines += _entry_coderforge(coderforge, cf_census, cf_re)
-    lines += _entry_hle(hle)
+    lines += _entry_hle(hle, coverage)
     lines += _entry_openr1(openr1)
     lines += _entry_cogym(cogym)
     lines += _entry_posttrainbench(ptb)
     lines += _entry_swesmith(smith)
     lines += _entry_sweagent(sweagent)
-    lines += _entry_openhands(sweagent, openhands)
+    lines += _entry_openhands(sweagent, openhands, abstention)
     lines += _entry_jetbrains(jetbrains, jb_census, jb_cross)
     lines += _entry_closing()
     return "\n".join(lines)
