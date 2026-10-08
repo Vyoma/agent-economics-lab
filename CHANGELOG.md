@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Add a machine-readable Agent Decision Record contract for one bounded agent
+  deployment decision.
+- Ship a JSON Schema, intentionally incomplete template, and filled support-fixture
+  example with a normalized bundle and evidence artifact digests.
+- Add dependency-free `decision-record init` and `decision-record validate` CLI
+  workflows.
+- Refuse `SCALE` when a required claim does not pass, known evidence is missing,
+  the audit is unassessable, or delegated work is unaccounted; reject unsigned
+  records, undeclared references, and paths that escape the artifact root.
+- Recompute artifact hashes, the audited decision, evidence and contract digests,
+  required coverage, per-gate statuses, instrument provenance, delegation
+  closure, and fail-closed conformance in the CLI and reproduction path.
+
 ## 0.9.0 - 2026-09-02
 
 The SCALE semantics changed, the instrument was pointed at the wild, and the

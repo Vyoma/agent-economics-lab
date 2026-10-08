@@ -14,22 +14,22 @@ Derived mechanically from the shapes of five defects that were live while the su
 - **Learned from:** D08
 - **Why it hides:** A format spec renders whatever it is handed. If the value can be absent, unestablished, or a placeholder, the renderer converts it into a figure with decimal places, which reads as a measurement.
 
-### S3: ratio whose denominator can be empty  (65 sites)
+### S3: ratio whose denominator can be empty  (66 sites)
 
 - **Learned from:** the vacuous closure line
 - **Why it hides:** A ratio over nothing is 1.0 or a guarded constant. Printed as a percentage it reads as full marks for work that never happened.
 
-### S4: early return that answers before consulting its qualifier  (41 sites)
+### S4: early return that answers before consulting its qualifier  (47 sites)
 
 - **Learned from:** D11
 - **Why it hides:** A branch that returns a value before reading the parameter that would qualify it is right in the configuration the tests build and unsupported in the one they do not.
 
-### S5: caller omitting an optional parameter it could supply  (34 sites)
+### S5: caller omitting an optional parameter it could supply  (44 sites)
 
 - **Learned from:** D10
 - **Why it hides:** A helper takes an optional input and a caller with that input in hand does not pass it. The helper then degrades, correctly, to a weaker answer nobody asked for.
 
-## The 301 sites
+## The 318 sites
 
 ### S1 (38)
 
@@ -202,7 +202,7 @@ agent_economics/report.py:92  f"${case.baseline.expected_net_value_per_attempt_u
 agent_economics/report.py:96  f"${case.incremental_net_value_vs_baseline_usd:.2f} | N/A |"
 ```
 
-### S3 (65)
+### S3 (66)
 
 ```
 agent_economics/assurance.py:243  human_cost = outcome.human_minutes * policy.human_hourly_cost_usd / 60
@@ -212,14 +212,15 @@ agent_economics/assurance.py:390  expected_net = (realized_value - total_cost) /
 agent_economics/assurance.py:384  cost_per_acceptable = total_cost / accepted if accepted else math.inf
 agent_economics/claude_code.py:1368  token_cost = (
 agent_economics/claude_code_tree.py:454  subagent_dir = parent_path.with_suffix("") / "subagents"
-agent_economics/cli.py:88  root = resources.files("agent_economics") / "_examples"
-agent_economics/cli.py:93  destination = scratch / name
-agent_economics/cli.py:613  subagent_dir = source_path.with_suffix("") / "subagents"
-agent_economics/cli.py:716  (output_dir / name).write_text(content, encoding="utf-8")
-agent_economics/cli.py:734  shutil.copyfile(source, target / name)
-agent_economics/cli.py:94  destination.write_bytes((root / name).read_bytes())
-agent_economics/cli.py:708  if not (verify_dir / name).exists()
-agent_economics/cli.py:709  or (verify_dir / name).read_text(encoding="utf-8") != content
+agent_economics/cli.py:94  root = resources.files("agent_economics") / "_examples"
+agent_economics/cli.py:99  destination = scratch / name
+agent_economics/cli.py:731  subagent_dir = source_path.with_suffix("") / "subagents"
+agent_economics/cli.py:834  (output_dir / name).write_text(content, encoding="utf-8")
+agent_economics/cli.py:852  shutil.copyfile(source, target / name)
+agent_economics/cli.py:100  destination.write_bytes((root / name).read_bytes())
+agent_economics/cli.py:826  if not (verify_dir / name).exists()
+agent_economics/cli.py:827  or (verify_dir / name).read_text(encoding="utf-8") != content
+agent_economics/decision_record.py:591  path = (root / artifact["uri"]).resolve()
 agent_economics/delegation.py:211  return (total - (self.unaccounted_cost_usd or 0.0)) / total
 agent_economics/delegation.py:207  return (self.total - len(self.unaccounted)) / self.total
 agent_economics/frontier.py:200  adjusted_alpha = (1 - confidence) / (2 * (len(arms) - 1))
@@ -272,37 +273,43 @@ agent_economics/models.py:110  return (
 agent_economics/models.py:142  return self.cost_per_attempt_usd / self.acceptable_rate
 ```
 
-### S4 (41)
+### S4 (47)
 
 ```
-agent_economics/cli.py:444  in _cmd_bundle(): return 0
-agent_economics/cli.py:439  in _cmd_bundle(): return 2
-agent_economics/cli.py:474  in _cmd_claim(): return 0
-agent_economics/cli.py:453  in _cmd_claim(): return 2
-agent_economics/cli.py:462  in _cmd_claim(): return 2
-agent_economics/cli.py:485  in _cmd_verify(): return 2
-agent_economics/cli.py:501  in _cmd_audit(): return 2
-agent_economics/cli.py:507  in _cmd_audit(): return 2
-agent_economics/cli.py:551  in _cmd_closure_or_mutate(): return 0
-agent_economics/cli.py:550  in _cmd_closure_or_mutate(): return 1
-agent_economics/cli.py:531  in _cmd_closure_or_mutate(): return 2
-agent_economics/cli.py:597  in _cmd_capabilities(): return 0
-agent_economics/cli.py:682  in _cmd_convert(): return 0
-agent_economics/cli.py:630  in _cmd_convert(): return 2
-agent_economics/cli.py:680  in _cmd_convert(): return 2
-agent_economics/cli.py:693  in _cmd_frontier(): return 2
-agent_economics/cli.py:698  in _cmd_frontier(): return 2
-agent_economics/cli.py:713  in _cmd_frontier(): return 1
-agent_economics/cli.py:744  in _cmd_demo(): return 0
-agent_economics/cli.py:848  in _cmd_evaluate(): return 0
-agent_economics/cli.py:819  in _cmd_evaluate(): return 2
-agent_economics/cli.py:829  in _cmd_evaluate(): return 2
-agent_economics/cli.py:842  in _cmd_evaluate(): return 2
-agent_economics/cli.py:861  in _cmd_judge(): return 0
-agent_economics/cli.py:864  in _cmd_judge(): return 2
-agent_economics/cli.py:887  in _cmd_analyse(): return 0
-agent_economics/cli.py:878  in _cmd_analyse(): return 2
-agent_economics/cli.py:914  in main(): return 2
+agent_economics/cli.py:503  in _cmd_bundle(): return 0
+agent_economics/cli.py:498  in _cmd_bundle(): return 2
+agent_economics/cli.py:533  in _cmd_claim(): return 0
+agent_economics/cli.py:512  in _cmd_claim(): return 2
+agent_economics/cli.py:521  in _cmd_claim(): return 2
+agent_economics/cli.py:544  in _cmd_verify(): return 2
+agent_economics/cli.py:560  in _cmd_audit(): return 2
+agent_economics/cli.py:566  in _cmd_audit(): return 2
+agent_economics/cli.py:610  in _cmd_closure_or_mutate(): return 0
+agent_economics/cli.py:609  in _cmd_closure_or_mutate(): return 1
+agent_economics/cli.py:590  in _cmd_closure_or_mutate(): return 2
+agent_economics/cli.py:666  in _cmd_decision_record(): return 0
+agent_economics/cli.py:633  in _cmd_decision_record(): return 0
+agent_economics/cli.py:660  in _cmd_decision_record(): return 2
+agent_economics/cli.py:622  in _cmd_decision_record(): return 2
+agent_economics/cli.py:648  in _cmd_decision_record(): return 2
+agent_economics/cli.py:631  in _cmd_decision_record(): return 2
+agent_economics/cli.py:715  in _cmd_capabilities(): return 0
+agent_economics/cli.py:800  in _cmd_convert(): return 0
+agent_economics/cli.py:748  in _cmd_convert(): return 2
+agent_economics/cli.py:798  in _cmd_convert(): return 2
+agent_economics/cli.py:811  in _cmd_frontier(): return 2
+agent_economics/cli.py:816  in _cmd_frontier(): return 2
+agent_economics/cli.py:831  in _cmd_frontier(): return 1
+agent_economics/cli.py:862  in _cmd_demo(): return 0
+agent_economics/cli.py:966  in _cmd_evaluate(): return 0
+agent_economics/cli.py:937  in _cmd_evaluate(): return 2
+agent_economics/cli.py:947  in _cmd_evaluate(): return 2
+agent_economics/cli.py:960  in _cmd_evaluate(): return 2
+agent_economics/cli.py:979  in _cmd_judge(): return 0
+agent_economics/cli.py:982  in _cmd_judge(): return 2
+agent_economics/cli.py:1005  in _cmd_analyse(): return 0
+agent_economics/cli.py:996  in _cmd_analyse(): return 2
+agent_economics/cli.py:1033  in main(): return 2
 agent_economics/delegation.py:264  in _event_cost(): return 0.0
 agent_economics/delegation.py:205  in closure(): return 1.0
 agent_economics/frontier.py:475  in _binomial_cdf(): return 1.0
@@ -318,7 +325,7 @@ agent_economics/label_error.py:333  in main(): return 0
 agent_economics/models.py:103  in cost(): return 0.0
 ```
 
-### S5 (34)
+### S5 (44)
 
 ```
 agent_economics/assurance.py:592  make_evidence_bundle(...) omits declared_delegations, dependency_edges, label_source, source_version, task_manifest  [evidence = make_evidence_bundle(]
@@ -333,11 +340,21 @@ agent_economics/checks.py:106  _result(...) omits task_id  [results=(_result("ga
 agent_economics/claude_code.py:770  _inspect_claude_code_jsonl_bytes(...) omits allow_empty_tasks  [return _inspect_claude_code_jsonl_bytes(]
 agent_economics/claude_code.py:520  _normalize_usage(...) omits allow_zero  [usage = _normalize_usage(]
 agent_economics/claude_code_tree.py:496  _inspect_claude_code_jsonl_bytes(...) omits allow_empty_tasks  [parent = _inspect_claude_code_jsonl_byte]
-agent_economics/cli.py:508  audit(...) omits policy  [report = audit(]
-agent_economics/cli.py:537  mutate(...) omits _evidence_digest  [report = mutate(bundle)]
-agent_economics/cli.py:441  render_normalized_json(...) omits conversion  [render_normalized_json(bundle), encoding]
-agent_economics/cli.py:534  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
-agent_economics/cli.py:807  decide(...) omits policy  [case, _ = decide(]
+agent_economics/cli.py:567  audit(...) omits policy  [report = audit(]
+agent_economics/cli.py:596  mutate(...) omits _evidence_digest  [report = mutate(bundle)]
+agent_economics/cli.py:500  render_normalized_json(...) omits conversion  [render_normalized_json(bundle), encoding]
+agent_economics/cli.py:593  assess_bundle_closure(...) omits delegation_tools  [report = assess_bundle_closure(bundle, d]
+agent_economics/cli.py:925  decide(...) omits policy  [case, _ = decide(]
+agent_economics/decision_record.py:156  _expect_exact(...) omits prefix  [_expect_exact(document, "schema_version"]
+agent_economics/decision_record.py:362  _expect_string_list(...) omits non_empty  [grounds = _expect_string_list(assurance,]
+agent_economics/decision_record.py:364  _expect_string_list(...) omits non_empty  [attestation_refs = _expect_string_list(]
+agent_economics/decision_record.py:409  _expect_string_list(...) omits non_empty  [unaccounted = _expect_string_list(]
+agent_economics/decision_record.py:477  _expect_string_list(...) omits non_empty  [_expect_string_list(cost_boundary, "excl]
+agent_economics/decision_record.py:488  _expect_string_list(...) omits non_empty  [missing_evidence = _expect_string_list(]
+agent_economics/decision_record.py:502  _expect_string_list(...) omits non_empty  [_expect_string_list(]
+agent_economics/decision_record.py:506  _expect_string_list(...) omits non_empty  [_expect_string_list(controls, "runtime_c]
+agent_economics/decision_record.py:610  decide(...) omits independently_verified, policy  [case, report = decide(]
+agent_economics/decision_record.py:243  _expect_string_list(...) omits non_empty  [evidence_refs = _expect_string_list(clai]
 agent_economics/evidence.py:390  validate_evidence_bundle(...) omits label, require_explicit_costs, require_task_manifest  [problems = validate_evidence_bundle(bund]
 agent_economics/evidence.py:90  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:124  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
@@ -359,13 +376,23 @@ agent_economics/otel_genai.py:812  make_evidence_bundle(...) omits declared_dele
 
 ## Why the coarse shapes are not the method
 
-301 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
+318 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
 
 ## The narrowing that has support
 
 All five known defects share a sharper form than any shape above: the same quantity computed two ways, with one way wrong. That is why each read fine in isolation and why a test exercising either path alone passed. Divergence is enumerable, and there are far fewer of them.
 
-**20 divergences**, against 301 coarse sites.
+**23 divergences**, against 318 coarse sites.
+
+### `_expect_exact(..., prefix=)`  (inconsistent-caller)
+
+- passes / resolves (1): `agent_economics/decision_record.py:353`
+- omits / reads raw (1): `agent_economics/decision_record.py:156`
+
+### `_expect_string_list(..., non_empty=)`  (inconsistent-caller)
+
+- passes / resolves (5): `agent_economics/decision_record.py:293`, `agent_economics/decision_record.py:296`, `agent_economics/decision_record.py:474`, `agent_economics/decision_record.py:491`, `agent_economics/decision_record.py:529`
+- omits / reads raw (8): `agent_economics/decision_record.py:362`, `agent_economics/decision_record.py:364`, `agent_economics/decision_record.py:409`, `agent_economics/decision_record.py:477`, `agent_economics/decision_record.py:488`, `agent_economics/decision_record.py:502`
 
 ### `_inspect_claude_code_jsonl_bytes(..., allow_empty_tasks=)`  (inconsistent-caller)
 
@@ -404,13 +431,18 @@ All five known defects share a sharper form than any shape above: the same quant
 
 ### `assess_bundle_closure(..., declared=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/cli.py:534`
+- passes / resolves (1): `agent_economics/cli.py:593`
 - omits / reads raw (1): `agent_economics/audit.py:202`
 
 ### `audit(..., policy=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/audit.py:159`
-- omits / reads raw (1): `agent_economics/cli.py:508`
+- omits / reads raw (1): `agent_economics/cli.py:567`
+
+### `decide(..., independently_verified=)`  (inconsistent-caller)
+
+- passes / resolves (1): `agent_economics/cli.py:925`
+- omits / reads raw (1): `agent_economics/decision_record.py:610`
 
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)
 
@@ -440,12 +472,12 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `mutate(..., _evidence_digest=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/audit.py:201`
-- omits / reads raw (1): `agent_economics/cli.py:537`
+- omits / reads raw (1): `agent_economics/cli.py:596`
 
 ### `render_normalized_json(..., conversion=)`  (inconsistent-caller)
 
-- passes / resolves (1): `agent_economics/cli.py:669`
-- omits / reads raw (1): `agent_economics/cli.py:441`
+- passes / resolves (1): `agent_economics/cli.py:787`
+- omits / reads raw (1): `agent_economics/cli.py:500`
 
 ### `validate_evidence_bundle(..., label=)`  (inconsistent-caller)
 

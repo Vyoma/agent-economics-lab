@@ -17,7 +17,6 @@ shipped bundle, and the rule is: gating anything, call `decide`.
 
 __version__ = "0.9.0"
 
-from .audit import AuditReport, audit, decide
 from .adapters import (
     load_normalized_json_bundle,
     normalized_json_bundle,
@@ -35,6 +34,7 @@ from .assurance import (
     evaluate,
     evaluate_bundle,
 )
+from .audit import AuditReport, audit, decide
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
 from .claude_code import (
     ClaudeCodeSession,
@@ -50,6 +50,15 @@ from .claude_code_tree import (
     claude_code_tree_bundle,
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
+)
+from .decision_record import (
+    GATE_ENTRY_POINT as DECISION_RECORD_GATE_ENTRY_POINT,
+    SCHEMA_VERSION as DECISION_RECORD_SCHEMA_VERSION,
+    blank_decision_record,
+    load_decision_record,
+    render_blank_decision_record,
+    validate_decision_record,
+    verify_decision_record,
 )
 from .delegation import (
     DELEGATION_CLOSURE,
@@ -125,6 +134,8 @@ from .provenance import (
 __all__ = [
     "ASSURANCE_ENGINE_IMPLEMENTATION",
     "DECISION_CONTRACT_SCHEMA",
+    "DECISION_RECORD_GATE_ENTRY_POINT",
+    "DECISION_RECORD_SCHEMA_VERSION",
     "DEFAULT_REQUIRED_COVERAGE",
     "DELEGATION_CLOSURE",
     "EVIDENCE_PROVENANCE",
@@ -133,6 +144,7 @@ __all__ = [
     "AssuranceCase",
     "AssuranceEngine",
     "Attestation",
+    "AuditReport",
     "Baseline",
     "CheckMode",
     "CheckOutput",
@@ -163,6 +175,8 @@ __all__ = [
     "__version__",
     "assess_bundle_closure",
     "assess_provenance",
+    "audit",
+    "blank_decision_record",
     "claude_code_bundle",
     "claude_code_bundle_from_session",
     "claude_code_tree_bundle",
@@ -170,6 +184,7 @@ __all__ = [
     "clopper_pearson_upper",
     "conversion_contract_template",
     "conversion_receipt",
+    "decide",
     "decision_contract_digest",
     "decision_contract_manifest",
     "default_checks",
@@ -177,9 +192,6 @@ __all__ = [
     "delegation_closure_gate",
     "evaluate",
     "evaluate_bundle",
-    "decide",
-    "audit",
-    "AuditReport",
     "evaluate_frontier",
     "evidence_provenance_gate",
     "implementation_fingerprint",
@@ -190,6 +202,7 @@ __all__ = [
     "load_baseline",
     "load_conversion_contract",
     "load_csv_bundle",
+    "load_decision_record",
     "load_experiment",
     "load_normalized_json_bundle",
     "load_outcomes",
@@ -206,9 +219,12 @@ __all__ = [
     "otel_genai_conversion_contract_template",
     "otel_genai_conversion_receipt",
     "parse_attestations",
+    "render_blank_decision_record",
     "render_frontier_json",
     "render_frontier_markdown",
     "render_frontier_svg",
     "render_normalized_json",
     "run_frontier",
+    "validate_decision_record",
+    "verify_decision_record",
 ]

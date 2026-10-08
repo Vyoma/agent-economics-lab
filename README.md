@@ -791,6 +791,44 @@ assumption rather than stable results, and a 50% error in the baseline flips a
 quarter of the counterfactual gates. A baseline is always an estimate. Publish
 the fragility index next to the verdict.
 
+## Put the decision in a record that can fail CI
+
+An assurance report describes what the engine observed. An
+[Agent Decision Record](templates/agent-decision-record.template.json) binds that
+result to the workload, required claims, evidence artifacts, counterfactual, cost
+boundary, uncertainty, controls, reproduction command, and named reviewers. It
+also records the label instrument, its attestation, delegation closure, and the
+date at which attestation age was assessed.
+
+Create an intentionally incomplete record, complete it, then validate it:
+
+```bash
+agent-economics decision-record init --output decision-record.json
+agent-economics decision-record validate decision-record.json \
+  --bundle evidence.bundle.json \
+  --attestations attestations.json \
+  --artifact-root .
+```
+
+The verifier returns exit code `2` until the record is structurally complete and
+reproducible. It hashes every declared artifact, loads the supplied normalized
+bundle, calls the public fail-closed `decide()` entry point, and compares the
+decision, evidence and contract digests, enabled checks, required coverage,
+per-gate claim statuses, instrument provenance, audit grounds, delegation
+closure, and fail-closed conformance. It also refuses `SCALE` when any required
+claim does not pass or known evidence is missing. The prose rationale and
+real-world truth of the inputs remain issuer claims; this verifies the decision
+against the supplied evidence, not reality.
+
+Version 1 deliberately replays the shipped default check contract. A custom
+composed check set is refused until the record format can carry and rebuild its
+configuration. `signed_off` and the reviewer names are assertions, not digital
+signatures; protect real approvals with repository review controls.
+
+[Inspect the filled example](examples/agent-decision-record.json) ·
+[Read the JSON Schema](templates/agent-decision-record.schema.json) ·
+[Use the one-page review contract](templates/agent-scale-decision-contract.md)
+
 ## Recipes
 
 Twelve worked examples, each running against data in this repository: converting
@@ -818,6 +856,7 @@ make mutation-score
 make sensitivity
 make completion-vs-verdict
 make demo
+make decision-record
 make frontier
 make otel-genai
 make reproduce

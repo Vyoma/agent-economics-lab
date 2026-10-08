@@ -14,6 +14,7 @@ help:
 	@echo "    demo              a real decision on bundled data, about a second"
 	@echo "                      (installed: agent-economics demo, no clone needed)"
 	@echo "    label-error       the shortest real result: how wrong a judge can be"
+	@echo "    decision-record   validate the filled, evidence-bound decision record"
 	@echo ""
 	@echo "  the findings"
 	@echo "    corpus            regenerate research/CORPUS.md from frozen evidence"
@@ -53,7 +54,7 @@ help:
 check-python:
 	@$(PYTHON) -c 'import sys; sys.version_info >= (3, 10) or sys.exit("agent-economics-lab requires Python 3.10 or newer; %d.%d found. Retry with: make PYTHON=python3.12 <target>" % sys.version_info[:2])'
 
-.PHONY: check-python lint coverage label-error demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
+.PHONY: check-python lint coverage label-error demo decision-record falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
 
 demo: check-python
 	@$(PYTHON) -m agent_economics evaluate \
@@ -62,6 +63,13 @@ demo: check-python
 		--rates examples/rates.json \
 		--baseline examples/baseline.json \
 		--policy examples/policy.json
+
+decision-record: check-python
+	@$(PYTHON) -m agent_economics decision-record validate \
+		examples/agent-decision-record.json \
+		--bundle examples/agent-decision-record.bundle.json \
+		--attestations examples/attestations.json \
+		--artifact-root .
 
 modularity: check-python
 	PYTHONPATH=. $(PYTHON) examples/modularity_demo.py
@@ -377,7 +385,7 @@ public-case: check-python
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: check-python test modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit held-out bench-check corpus findings patterns adapter-fidelity evals
+reproduce: check-python test decision-record modularity lessons benchmark mutation-score label-error sensitivity completion-vs-verdict evidence-ablation frontier claude-code claude-code-tree otel-genai public-case checks-only audit green-defects probe-sites claims outcome-audit held-out bench-check corpus findings patterns adapter-fidelity evals
 
 lessons: check-python
 # Without set -e the loop reports only the LAST lesson's exit status, so a
