@@ -18,6 +18,13 @@ from .assurance import (
     evaluate_bundle,
 )
 from .checks import DEFAULT_REQUIRED_COVERAGE, default_checks
+from .decision_record import (
+    SCHEMA_VERSION as DECISION_RECORD_SCHEMA_VERSION,
+    blank_decision_record,
+    load_decision_record,
+    render_blank_decision_record,
+    validate_decision_record,
+)
 from .claude_code import (
     ClaudeCodeSession,
     claude_code_bundle,
@@ -101,6 +108,7 @@ __all__ = [
     "Coverage",
     "DEFAULT_REQUIRED_COVERAGE",
     "DECISION_CONTRACT_SCHEMA",
+    "DECISION_RECORD_SCHEMA_VERSION",
     "Decision",
     "EconomicPolicy",
     "EvaluationView",
@@ -117,6 +125,7 @@ __all__ = [
     "ROUTING_SEMANTICS",
     "decision_contract_digest",
     "decision_contract_manifest",
+    "blank_decision_record",
     "default_checks",
     "default_engine",
     "clopper_pearson_upper",
@@ -132,6 +141,7 @@ __all__ = [
     "load_baseline",
     "load_conversion_contract",
     "load_csv_bundle",
+    "load_decision_record",
     "load_experiment",
     "load_normalized_json_bundle",
     "load_outcomes",
@@ -143,10 +153,12 @@ __all__ = [
     "normalized_json_bundle",
     "normalized_json_document",
     "render_normalized_json",
+    "render_blank_decision_record",
     "render_frontier_json",
     "render_frontier_markdown",
     "render_frontier_svg",
     "run_frontier",
+    "validate_decision_record",
     "inspect_claude_code_jsonl",
     "inspect_claude_code_session_tree",
     "inspect_to_contract_template",

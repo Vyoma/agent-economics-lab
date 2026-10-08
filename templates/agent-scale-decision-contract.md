@@ -3,6 +3,10 @@
 Use this one-page contract for one named agent workload. Complete it before
 reviewing candidate results. A blank field is not approval.
 
+For a machine-checkable review artifact, initialize an
+[Agent Decision Record](agent-decision-record.template.json) and validate it with
+`agent-economics decision-record validate`.
+
 ## Decision header
 
 | Field | Value |

@@ -1,4 +1,4 @@
-.PHONY: demo falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark reproduce lessons test
+.PHONY: demo decision-record falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark reproduce lessons test
 
 demo:
 	@python3 -m agent_economics evaluate \
@@ -7,6 +7,10 @@ demo:
 		--rates examples/rates.json \
 		--baseline examples/baseline.json \
 		--policy examples/policy.json
+
+decision-record:
+	@python3 -m agent_economics decision-record validate \
+		examples/agent-decision-record.json
 
 modularity:
 	PYTHONPATH=. python3 examples/modularity_demo.py
@@ -85,7 +89,7 @@ public-case:
 		--verify-dir examples/public-swebench/frontier \
 		|| [ $$? -eq 3 ]
 
-reproduce: test modularity lessons benchmark evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
+reproduce: test decision-record modularity lessons benchmark evidence-ablation frontier claude-code claude-code-tree otel-genai public-case
 
 lessons:
 	@for lesson in lessons/*.py; do PYTHONPATH=. python3 "$$lesson"; done

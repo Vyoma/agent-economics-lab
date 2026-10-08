@@ -1,0 +1,59 @@
+{
+  "schema_version": "agent-decision-record/v1",
+  "record_id": "",
+  "workload": {
+    "name": "",
+    "unit_of_work": "",
+    "owner": "",
+    "population": "",
+    "observation_window": {
+      "start": "",
+      "end": ""
+    }
+  },
+  "decision": {
+    "requested": "",
+    "issued": "",
+    "rationale": "",
+    "expires_on": "",
+    "rollback_trigger": ""
+  },
+  "claims": [],
+  "evidence": {
+    "source_manifest_id": "",
+    "evidence_digest": "",
+    "decision_contract_digest": "",
+    "artifacts": []
+  },
+  "counterfactual": {
+    "name": "",
+    "evidence_ref": "",
+    "why_comparable": ""
+  },
+  "cost_boundary": {
+    "currency": "USD",
+    "included": [],
+    "excluded": [],
+    "allocation_notes": ""
+  },
+  "uncertainty": {
+    "method": "",
+    "known_missing_evidence": [],
+    "non_claims": []
+  },
+  "controls": {
+    "required_before_next_mode": [],
+    "human_escalation": "",
+    "runtime_caps": []
+  },
+  "reproduction": {
+    "command": "",
+    "environment": "",
+    "revision": ""
+  },
+  "review": {
+    "review_date": "",
+    "reviewers": [],
+    "signed_off": false
+  }
+}

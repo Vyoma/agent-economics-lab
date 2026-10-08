@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.8.0 - 2026-10-08
+
+- Add a machine-readable Agent Decision Record contract for one bounded agent
+  deployment decision.
+- Ship a JSON Schema, intentionally incomplete template, and filled support-fixture
+  example with evidence artifact digests.
+- Add dependency-free `decision-record init` and `decision-record validate` CLI
+  workflows.
+- Refuse `SCALE` when a required claim does not pass or known missing evidence
+  remains; reject unsigned records and undeclared evidence references.
+- Verify the checked-in template, schema root contract, semantic invariants, and
+  overwrite protection in the test suite and reproduction path.
+
 ## 0.7.0 - 2026-07-29
 
 - Add a separate `claude-code-tree` converter for parent plus persisted subagent

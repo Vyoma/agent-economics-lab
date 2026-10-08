@@ -1,0 +1,191 @@
+{
+  "schema_version": "agent-decision-record/v1",
+  "record_id": "support-assurance-demo-v1",
+  "workload": {
+    "name": "Synthetic support-agent fixture",
+    "unit_of_work": "One support request",
+    "owner": "Agent Economics Lab maintainers",
+    "population": "Eight synthetic support tasks checked into examples/",
+    "observation_window": {
+      "start": "fixture-v1",
+      "end": "fixture-v1"
+    }
+  },
+  "decision": {
+    "requested": "SCALE",
+    "issued": "ASSIST",
+    "rationale": "The fixture is profitable versus its named baseline, but required quality, unit-cost, tail-cost, and runtime-cap claims fail policy.",
+    "expires_on": "When the fixture, policy, baseline, or required checks change",
+    "rollback_trigger": "Any missing required evidence or a newly failed required claim"
+  },
+  "claims": [
+    {
+      "id": "outcome-quality",
+      "statement": "At least 80% of attempted tasks produce acceptable outcomes.",
+      "status": "FAIL",
+      "threshold": "acceptable_rate >= 80.0%",
+      "observed": "6/8 acceptable outcomes; acceptable_rate = 75.0%",
+      "check_id": "gate.acceptable-rate@1",
+      "required": true,
+      "if_absent": "INCOMPLETE",
+      "evidence_refs": ["examples/outcomes.csv"]
+    },
+    {
+      "id": "unit-economics",
+      "statement": "Cost per acceptable outcome does not exceed policy.",
+      "status": "FAIL",
+      "threshold": "cost_per_acceptable_outcome_usd <= 2.00",
+      "observed": "cost_per_acceptable_outcome_usd = 3.50",
+      "check_id": "gate.unit-economics@1",
+      "required": true,
+      "if_absent": "INCOMPLETE",
+      "evidence_refs": [
+        "examples/support_trace.csv",
+        "examples/outcomes.csv",
+        "examples/rates.json",
+        "examples/policy.json"
+      ]
+    },
+    {
+      "id": "tail-risk",
+      "statement": "The p95 effective task cost does not exceed policy.",
+      "status": "FAIL",
+      "threshold": "p95_task_cost_usd <= 8.00",
+      "observed": "p95_task_cost_usd = 14.25",
+      "check_id": "gate.tail-cost@1",
+      "required": true,
+      "if_absent": "INCOMPLETE",
+      "evidence_refs": [
+        "examples/support_trace.csv",
+        "examples/outcomes.csv",
+        "examples/policy.json"
+      ]
+    },
+    {
+      "id": "business-value",
+      "statement": "Expected net value per attempt is non-negative.",
+      "status": "PASS",
+      "threshold": "expected_net_value_per_attempt_usd >= 0.00",
+      "observed": "expected_net_value_per_attempt_usd = 3.37",
+      "check_id": "gate.net-value@1",
+      "required": true,
+      "if_absent": "INCOMPLETE",
+      "evidence_refs": [
+        "examples/outcomes.csv",
+        "examples/policy.json"
+      ]
+    },
+    {
+      "id": "counterfactual",
+      "statement": "Expected value exceeds the named human-only baseline.",
+      "status": "PASS",
+      "threshold": "incremental_net_value_vs_baseline_usd >= 0.00",
+      "observed": "incremental_net_value_vs_baseline_usd = 2.77",
+      "check_id": "gate.counterfactual@1",
+      "required": true,
+      "if_absent": "INCOMPLETE",
+      "evidence_refs": [
+        "examples/baseline.json",
+        "examples/outcomes.csv"
+      ]
+    },
+    {
+      "id": "runtime-caps",
+      "statement": "Every task remains inside call-count and trace-cost caps.",
+      "status": "FAIL",
+      "threshold": "calls_per_task <= 8 and trace_cost_per_task_usd <= 0.15",
+      "observed": "t-005 used 12 calls and 0.2454 USD of trace cost",
+      "check_id": "gate.runtime-caps@1",
+      "required": true,
+      "if_absent": "INCOMPLETE",
+      "evidence_refs": [
+        "examples/support_trace.csv",
+        "examples/rates.json",
+        "examples/policy.json"
+      ]
+    }
+  ],
+  "evidence": {
+    "source_manifest_id": "source.csv@1",
+    "evidence_digest": "485f97ae54ca71c84116036e1d987fd249a3e5c4e10f734b2fcf9c4878428fc4",
+    "decision_contract_digest": "f30996d535c1722fddb2e767bc830c9d2cb34054b864481e1220d459121e3e1a",
+    "artifacts": [
+      {
+        "uri": "examples/support_trace.csv",
+        "role": "trace evidence",
+        "sha256": "d752e187de8fd73dcdc2808eb33714284a92fdf1b2c1ce0cf4e9040a459334a7"
+      },
+      {
+        "uri": "examples/outcomes.csv",
+        "role": "outcome evidence",
+        "sha256": "efaa75a84dfbc06226ea875af0dfc57af3fba545674215ac8d446bbb04260fca"
+      },
+      {
+        "uri": "examples/rates.json",
+        "role": "price contract",
+        "sha256": "2ef3052312a37b4451ca3a3da4da722ebdaa8b3149fefa11b467ef9a7b0213ae"
+      },
+      {
+        "uri": "examples/baseline.json",
+        "role": "counterfactual evidence",
+        "sha256": "d00a05b2ea238419303f2631f2c13587baa69557061c4c21cd1ee7be0a5829ec"
+      },
+      {
+        "uri": "examples/policy.json",
+        "role": "decision policy",
+        "sha256": "db98ee3605ce0dda59b8f7be8b9fcd5fc6264baf1104fdac476566efc724f9ab"
+      }
+    ]
+  },
+  "counterfactual": {
+    "name": "Human-only support queue",
+    "evidence_ref": "examples/baseline.json",
+    "why_comparable": "It represents the same unit of work and values an acceptable support outcome under the same currency boundary."
+  },
+  "cost_boundary": {
+    "currency": "USD",
+    "included": [
+      "model and tool spend",
+      "human review",
+      "remediation and rework",
+      "incident loss"
+    ],
+    "excluded": [
+      "shared infrastructure amortization"
+    ],
+    "allocation_notes": "Effective task cost sums observed trace, human, remediation, and incident costs. The excluded shared-infrastructure category makes this a lower-bound cost claim."
+  },
+  "uncertainty": {
+    "method": "Deterministic conformance fixture; no population interval is claimed.",
+    "known_missing_evidence": [
+      "No production sampling, temporal drift estimate, or subgroup analysis"
+    ],
+    "non_claims": [
+      "This record is not a production deployment authorization.",
+      "The eight-task fixture is not an estimate of production prevalence or ROI."
+    ]
+  },
+  "controls": {
+    "required_before_next_mode": [
+      "Meet the acceptable-rate, unit-cost, and tail-cost policy gates.",
+      "Enforce per-task call and trace-cost caps before reconsidering SCALE."
+    ],
+    "human_escalation": "Route the workload through human review while the decision remains ASSIST.",
+    "runtime_caps": [
+      "No more than 8 calls per task",
+      "No more than 0.15 USD of trace cost per task"
+    ]
+  },
+  "reproduction": {
+    "command": "make demo",
+    "environment": "Python 3.10+ with no third-party runtime dependencies",
+    "revision": "7f7e5df5c72150f790cdccc93e87fd80fc91d9d1"
+  },
+  "review": {
+    "review_date": "2026-10-08",
+    "reviewers": [
+      "Vyoma Gajjar"
+    ],
+    "signed_off": true
+  }
+}

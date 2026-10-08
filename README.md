@@ -100,6 +100,30 @@ Why not SCALE                    quality, unit cost, tail cost, runtime caps
 That is the assurance case: evidence, the fixed decision contract, and routing
 semantics remain inspectable.
 
+## Put the decision in a record that can fail CI
+
+An assurance report describes what the engine observed. An
+[Agent Decision Record](templates/agent-decision-record.template.json) binds that
+result to the workload, required claims, evidence artifacts, counterfactual, cost
+boundary, uncertainty, controls, reproduction command, and named reviewers.
+
+Create an intentionally incomplete record, complete it, then validate it:
+
+```bash
+agent-economics decision-record init --output decision-record.json
+agent-economics decision-record validate decision-record.json
+```
+
+The validator returns exit code `2` until the record is structurally complete. It
+also refuses `SCALE` when any required claim does not pass or when known missing
+evidence remains, rejects undeclared evidence references, and treats an unsigned
+record as incomplete. The JSON Schema supports editor and repository validation;
+the dependency-free CLI adds these decision-level invariants.
+
+[Inspect the filled example](examples/agent-decision-record.json) ·
+[Read the JSON Schema](templates/agent-decision-record.schema.json) ·
+[Use the one-page review contract](templates/agent-scale-decision-contract.md)
+
 ## Find the cheapest tested configuration that still clears policy
 
 ```bash
@@ -318,6 +342,7 @@ it.
 make coverage-drift
 make evidence-ablation
 make demo
+make decision-record
 make frontier
 make otel-genai
 make reproduce

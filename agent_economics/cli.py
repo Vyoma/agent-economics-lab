@@ -24,6 +24,12 @@ from .claude_code_tree import (
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
 )
+from .decision_record import (
+    SCHEMA_VERSION as DECISION_RECORD_SCHEMA_VERSION,
+    load_decision_record,
+    render_blank_decision_record,
+    validate_decision_record,
+)
 from .otel_genai import (
     SOURCE_ID as OTEL_GENAI_SOURCE_ID,
     SOURCE_VERSION as OTEL_GENAI_SOURCE_VERSION,
@@ -95,6 +101,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="Completed conversion contract with outcomes, prices, baseline, and policy.",
     )
     convert_parser.add_argument("--out", help="Normalized JSON output path.")
+    decision_record_parser = subparsers.add_parser(
+        "decision-record",
+        help="Create or validate a machine-readable agent deployment decision.",
+    )
+    decision_record_actions = decision_record_parser.add_subparsers(
+        dest="decision_record_action",
+        required=True,
+    )
+    decision_record_init = decision_record_actions.add_parser(
+        "init",
+        help="Write an intentionally incomplete decision-record template.",
+    )
+    decision_record_init.add_argument("--output", required=True)
+    decision_record_validate = decision_record_actions.add_parser(
+        "validate",
+        help="Validate structure and fail-closed decision invariants.",
+    )
+    decision_record_validate.add_argument("record")
     subparsers.add_parser("capabilities")
     return parser
 
@@ -124,8 +148,50 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("renderer.frontier-markdown@1")
         print("renderer.frontier-json@1")
         print("renderer.frontier-svg@1")
+        print("\nDECISION RECORDS")
+        print(f"contract.{DECISION_RECORD_SCHEMA_VERSION}")
+        print("validator.agent-decision-record@1")
         print("\nEXPERIMENTS")
         print("experiment.paired-budget-frontier@1")
+        return 0
+    if args.command == "decision-record":
+        if args.decision_record_action == "init":
+            target = Path(args.output)
+            if target.exists():
+                print(
+                    f"INCOMPLETE: decision-record output already exists: {target}",
+                    file=sys.stderr,
+                )
+                return 2
+            try:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(render_blank_decision_record(), encoding="utf-8")
+            except OSError as error:
+                print(
+                    f"INCOMPLETE: could not write decision record: {error}",
+                    file=sys.stderr,
+                )
+                return 2
+            print(f"Wrote incomplete {DECISION_RECORD_SCHEMA_VERSION} template to {target}")
+            return 0
+        try:
+            record = load_decision_record(args.record)
+        except (OSError, ValueError) as error:
+            print(
+                f"INCOMPLETE: invalid decision record: {error}",
+                file=sys.stderr,
+            )
+            return 2
+        errors = validate_decision_record(record)
+        if errors:
+            for error in errors:
+                print(f"INCOMPLETE: {error}", file=sys.stderr)
+            return 2
+        print(
+            f"VALID {DECISION_RECORD_SCHEMA_VERSION} "
+            f"record_id={record['record_id']} "
+            f"decision={record['decision']['issued']}"
+        )
         return 0
     if args.command == "convert":
         parser = build_parser()
