@@ -829,6 +829,34 @@ signatures; protect real approvals with repository review controls.
 [Read the JSON Schema](templates/agent-decision-record.schema.json) ·
 [Use the one-page review contract](templates/agent-scale-decision-contract.md)
 
+## Bind the production feedback loop across model types
+
+Predictive models, generative systems, and tool-using agents fail differently,
+but they still need one traceable path from a versioned decision to a delayed
+outcome. The [Production Feedback Contract](templates/production-feedback-contract.template.json)
+keeps the shared path explicit without pretending the modalities have identical
+evidence requirements.
+
+The contract versions the primary outcome definition and requires calibration,
+threshold policy, and drift slices for a
+predictive component; prompt, retrieval, and task-outcome versions for a
+generative component; and a tool registry, side-effect ledger, and human-handoff
+rule for an agent. Proxies must name the primary outcome they were checked
+against, their failure modes, and where they are forbidden. Every intervention
+names one layer, a test, an owner, and a rollback trigger.
+
+```bash
+python3 -m agent_economics.feedback_contract \
+  examples/production-feedback-contract.json
+```
+
+The filled example is synthetic. The validator proves structural completeness,
+closed modality-specific evidence, and a digest over the supplied policy. It
+does not prove that an outcome label, proxy relationship, or rollout assertion
+is true.
+
+[Inspect the filled cross-modality example](examples/production-feedback-contract.json)
+
 ## Recipes
 
 Twelve worked examples, each running against data in this repository: converting

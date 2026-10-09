@@ -1,0 +1,119 @@
+{
+  "schema_version": "production-feedback-contract/v1",
+  "contract_id": "support-loop-synthetic-v1",
+  "system": {
+    "name": "synthetic support-resolution stack",
+    "unit_of_decision": "one support case",
+    "owner": "example system owner",
+    "modalities": [
+      "predictive",
+      "generative",
+      "agent"
+    ],
+    "model_versions": [
+      "triage-model@fixture-1",
+      "draft-model@fixture-1",
+      "tool-agent@fixture-1"
+    ],
+    "policy_version": "support-routing@fixture-1",
+    "observation_window": {
+      "start": "2026-01-01",
+      "end": "2026-01-31"
+    }
+  },
+  "outcome": {
+    "name": "resolved_without_reopen_14d",
+    "definition_version": "resolved-without-reopen@fixture-1",
+    "source": "synthetic delayed-outcome fixture",
+    "acceptable_when": "case is resolved and is not reopened within 14 days",
+    "available_after": "14 days after the terminal case event",
+    "missing_route": "INCOMPLETE"
+  },
+  "proxies": [
+    {
+      "name": "same_session_acceptance",
+      "source": "synthetic user-action fixture",
+      "validated_against": "resolved_without_reopen_14d",
+      "agreement_measure": "fixture-only confusion matrix; no production estimate",
+      "failure_modes": [
+        "acceptance can precede a later reopen",
+        "silent abandonment can look like acceptance"
+      ],
+      "allowed_uses": [
+        "diagnostic slicing"
+      ],
+      "forbidden_uses": [
+        "deployment gate",
+        "substitute for the delayed outcome"
+      ]
+    }
+  ],
+  "joins": {
+    "decision_id": "synthetic case decision id",
+    "outcome_id": "synthetic terminal case id",
+    "deduplication": "retain the first decision and latest terminal outcome per case",
+    "late_data": "recompute the cohort after the 14-day outcome window closes",
+    "unmatched_route": "INCOMPLETE"
+  },
+  "modality_evidence": {
+    "predictive": {
+      "calibration": "synthetic calibration table by support queue",
+      "threshold_policy": "route only at the pre-committed threshold",
+      "drift_slices": [
+        "support queue",
+        "language",
+        "customer tier"
+      ]
+    },
+    "generative": {
+      "prompt_version": "draft-prompt@fixture-1",
+      "retrieval_version": "knowledge-index@fixture-1",
+      "task_outcome": "resolved_without_reopen_14d"
+    },
+    "agent": {
+      "tool_registry_version": "support-tools@fixture-1",
+      "side_effect_ledger": "synthetic tool-call and write ledger",
+      "human_handoff": "handoff when authorization, evidence, or tool execution is incomplete"
+    }
+  },
+  "interventions": [
+    {
+      "layer": "data",
+      "hypothesis": "queue-specific labels improve triage calibration",
+      "test": "paired replay with the same case manifest",
+      "owner": "example data owner",
+      "rollback_trigger": "calibration error worsens on any pre-committed queue"
+    },
+    {
+      "layer": "retrieval",
+      "hypothesis": "a frozen curated index improves delayed task outcomes",
+      "test": "paired case assignment against the current index",
+      "owner": "example retrieval owner",
+      "rollback_trigger": "outcome lift is absent or unsupported-citation rate increases"
+    },
+    {
+      "layer": "tool",
+      "hypothesis": "a deterministic pre-check reduces failed writes",
+      "test": "canary with a complete side-effect ledger",
+      "owner": "example agent owner",
+      "rollback_trigger": "failed-write rate or human remediation increases"
+    }
+  ],
+  "rollout": {
+    "counterfactual": "current rules plus human handling",
+    "canary": "pre-committed hash-ranked 10 percent of eligible synthetic cases",
+    "advance_when": "the delayed outcome improves without a pre-committed slice regression",
+    "rollback_when": "any safety gate fails or joined outcome coverage is incomplete",
+    "reviewer": "example independent reviewer"
+  },
+  "non_claims": [
+    "This is a synthetic contract fixture, not a measured production result.",
+    "The proxy is not validated as a substitute for the delayed outcome.",
+    "The contract validates completeness, not the truth of issuer assertions."
+  ],
+  "reproduction": {
+    "revision": "synthetic-fixture-v1",
+    "command": "python3 -m agent_economics.feedback_contract examples/production-feedback-contract.json",
+    "environment": "Python 3.10+ with no third-party runtime dependencies"
+  }
+}

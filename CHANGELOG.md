@@ -14,6 +14,10 @@
 - Recompute artifact hashes, the audited decision, evidence and contract digests,
   required coverage, per-gate statuses, instrument provenance, delegation
   closure, and fail-closed conformance in the CLI and reproduction path.
+- Add a strict Production Feedback Contract spanning predictive, generative, and
+  agent systems, with distinct modality evidence, outcome-proxy boundaries,
+  versioned interventions, rollback semantics, a canonical digest, and a filled
+  synthetic example.
 
 ## 0.9.0 - 2026-09-02
 

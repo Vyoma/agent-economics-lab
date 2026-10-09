@@ -19,17 +19,17 @@ Derived mechanically from the shapes of five defects that were live while the su
 - **Learned from:** the vacuous closure line
 - **Why it hides:** A ratio over nothing is 1.0 or a guarded constant. Printed as a percentage it reads as full marks for work that never happened.
 
-### S4: early return that answers before consulting its qualifier  (47 sites)
+### S4: early return that answers before consulting its qualifier  (50 sites)
 
 - **Learned from:** D11
 - **Why it hides:** A branch that returns a value before reading the parameter that would qualify it is right in the configuration the tests build and unsupported in the one they do not.
 
-### S5: caller omitting an optional parameter it could supply  (44 sites)
+### S5: caller omitting an optional parameter it could supply  (46 sites)
 
 - **Learned from:** D10
 - **Why it hides:** A helper takes an optional input and a caller with that input in hand does not pass it. The helper then degrades, correctly, to a weaker answer nobody asked for.
 
-## The 318 sites
+## The 323 sites
 
 ### S1 (38)
 
@@ -273,7 +273,7 @@ agent_economics/models.py:110  return (
 agent_economics/models.py:142  return self.cost_per_attempt_usd / self.acceptable_rate
 ```
 
-### S4 (47)
+### S4 (50)
 
 ```
 agent_economics/cli.py:503  in _cmd_bundle(): return 0
@@ -312,6 +312,9 @@ agent_economics/cli.py:996  in _cmd_analyse(): return 2
 agent_economics/cli.py:1033  in main(): return 2
 agent_economics/delegation.py:264  in _event_cost(): return 0.0
 agent_economics/delegation.py:205  in closure(): return 1.0
+agent_economics/feedback_contract.py:444  in main(): return 0
+agent_economics/feedback_contract.py:442  in main(): return 2
+agent_economics/feedback_contract.py:437  in main(): return 2
 agent_economics/frontier.py:475  in _binomial_cdf(): return 1.0
 agent_economics/frontier.py:504  in clopper_pearson_upper(): return 1.0
 agent_economics/github_action.py:335  in main(): return 0
@@ -325,7 +328,7 @@ agent_economics/label_error.py:333  in main(): return 0
 agent_economics/models.py:103  in cost(): return 0.0
 ```
 
-### S5 (44)
+### S5 (46)
 
 ```
 agent_economics/assurance.py:592  make_evidence_bundle(...) omits declared_delegations, dependency_edges, label_source, source_version, task_manifest  [evidence = make_evidence_bundle(]
@@ -366,6 +369,8 @@ agent_economics/evidence.py:267  _numeric_issue(...) omits integer, maximum, min
 agent_economics/evidence.py:295  _numeric_issue(...) omits integer, maximum, minimum  [issue = _numeric_issue(]
 agent_economics/evidence.py:304  _numeric_issue(...) omits integer, maximum  [issue = _numeric_issue(]
 agent_economics/evidence.py:318  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
+agent_economics/feedback_contract.py:125  _expect_exact(...) omits prefix  [_expect_exact(document, "schema_version"]
+agent_economics/feedback_contract.py:170  _expect_list(...) omits non_empty  [proxies = _expect_list(document, "proxie]
 agent_economics/io.py:176  make_evidence_bundle(...) omits declared_delegations, task_manifest  [return make_evidence_bundle(]
 agent_economics/kimi_analyst.py:507  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
 agent_economics/kimi_analyst.py:529  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
@@ -376,22 +381,27 @@ agent_economics/otel_genai.py:812  make_evidence_bundle(...) omits declared_dele
 
 ## Why the coarse shapes are not the method
 
-318 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
+323 sites in a package this size is a detector with no specificity. Probing them one at a time would be a worse use of attention than reading the code. Reported here rather than quietly dropped, because a search that only shows its narrowed form is hiding how it was narrowed.
 
 ## The narrowing that has support
 
 All five known defects share a sharper form than any shape above: the same quantity computed two ways, with one way wrong. That is why each read fine in isolation and why a test exercising either path alone passed. Divergence is enumerable, and there are far fewer of them.
 
-**23 divergences**, against 318 coarse sites.
+**24 divergences**, against 323 coarse sites.
 
 ### `_expect_exact(..., prefix=)`  (inconsistent-caller)
 
 - passes / resolves (1): `agent_economics/decision_record.py:353`
-- omits / reads raw (1): `agent_economics/decision_record.py:156`
+- omits / reads raw (2): `agent_economics/decision_record.py:156`, `agent_economics/feedback_contract.py:125`
+
+### `_expect_list(..., non_empty=)`  (inconsistent-caller)
+
+- passes / resolves (5): `agent_economics/decision_record.py:203`, `agent_economics/decision_record.py:303`, `agent_economics/decision_record.py:836`, `agent_economics/feedback_contract.py:258`, `agent_economics/feedback_contract.py:374`
+- omits / reads raw (1): `agent_economics/feedback_contract.py:170`
 
 ### `_expect_string_list(..., non_empty=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/decision_record.py:293`, `agent_economics/decision_record.py:296`, `agent_economics/decision_record.py:474`, `agent_economics/decision_record.py:491`, `agent_economics/decision_record.py:529`
+- passes / resolves (10): `agent_economics/decision_record.py:293`, `agent_economics/decision_record.py:296`, `agent_economics/decision_record.py:474`, `agent_economics/decision_record.py:491`, `agent_economics/decision_record.py:529`, `agent_economics/feedback_contract.py:132`
 - omits / reads raw (8): `agent_economics/decision_record.py:362`, `agent_economics/decision_record.py:364`, `agent_economics/decision_record.py:409`, `agent_economics/decision_record.py:477`, `agent_economics/decision_record.py:488`, `agent_economics/decision_record.py:502`
 
 ### `_inspect_claude_code_jsonl_bytes(..., allow_empty_tasks=)`  (inconsistent-caller)
