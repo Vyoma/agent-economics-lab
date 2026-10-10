@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -21,6 +22,7 @@ from agent_economics.feedback_contract import (
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "templates" / "production-feedback-contract.template.json"
 EXAMPLE = ROOT / "examples" / "production-feedback-contract.json"
+DESIGN_NOTE = ROOT / "docs" / "production-feedback-loops.md"
 
 
 class FeedbackContractTests(unittest.TestCase):
@@ -49,6 +51,21 @@ class FeedbackContractTests(unittest.TestCase):
             exit_code = main([str(EXAMPLE)])
         self.assertEqual(exit_code, 0)
         self.assertRegex(output.getvalue(), r"^VALID digest=[0-9a-f]{64}\n$")
+
+    def test_design_note_is_bound_to_the_checked_in_example(self) -> None:
+        note = DESIGN_NOTE.read_text(encoding="utf-8")
+        normalized_note = " ".join(note.split())
+        match = re.search(r"VALID digest=([0-9a-f]{64})", note)
+        self.assertIsNotNone(match)
+        self.assertEqual(match.group(1), feedback_contract_digest(self.example))
+        for boundary in (
+            "Predictive model",
+            "Generative component",
+            "Tool-using agent",
+            "What the validator does not prove",
+            "not a certificate that the policy is correct",
+        ):
+            self.assertIn(boundary, normalized_note)
 
     def test_digest_ignores_object_key_order_but_binds_policy(self) -> None:
         reordered = dict(reversed(list(self.example.items())))

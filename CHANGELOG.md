@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a digest-bound design note explaining how predictive models, generative
+  components, and tool-using agents share a production feedback loop without
+  collapsing their distinct evidence requirements.
+
 - Add a machine-readable Agent Decision Record contract for one bounded agent
   deployment decision.
 - Ship a JSON Schema, intentionally incomplete template, and filled support-fixture

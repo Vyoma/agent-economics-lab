@@ -856,6 +856,7 @@ does not prove that an outcome label, proxy relationship, or rollout assertion
 is true.
 
 [Inspect the filled cross-modality example](examples/production-feedback-contract.json)
+· [Read the design note: one feedback loop, three kinds of evidence](docs/production-feedback-loops.md)
 
 ## Recipes
 
