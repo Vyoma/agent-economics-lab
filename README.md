@@ -48,7 +48,7 @@ its own stratification.
 | audit any public dataset | `python3 research/corpus/audit_any.py <hf-dataset>`, no code to write |
 | check it without trusting me | [Check this repository](#check-this-repository-without-trusting-it) |
 | when it was wrong | [every correction](docs/corrections.md), including the suspicions killed before publication |
-| what it gets wrong | [the honest limits](docs/limitations.md) and [prior art](docs/landscape.md) |
+| what survives scrutiny | [the narrow novelty claim](docs/novelty.md), [honest limits](docs/limitations.md), and [prior art](docs/landscape.md) |
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
