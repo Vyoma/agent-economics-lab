@@ -32,6 +32,13 @@ from .claude_code_tree import (
     claude_code_tree_bundle_from_session,
     inspect_claude_code_session_tree,
 )
+from .decision_record import (
+    SCHEMA_VERSION as DECISION_RECORD_SCHEMA_VERSION,
+    load_decision_record,
+    render_blank_decision_record,
+    render_decision_record_html,
+    verify_decision_record,
+)
 from .delegation import assess_bundle_closure
 from .frontier import FrontierDecision, run_frontier
 from .frontier_report import (
@@ -151,32 +158,39 @@ def build_parser() -> argparse.ArgumentParser:
     )
     evaluate_parser.add_argument(
         "--bundle", help=(
-            "A normalized evidence bundle, as written by `bundle`. Use this or the five CSV/JSON inputs below, not both."
+            "A normalized evidence bundle, as written by `bundle`. Use this or "
+            "the five CSV/JSON inputs below, not both."
         ),
     )
     evaluate_parser.add_argument(
         "--traces", help=(
-            "CSV of agent events, one row per event. Needs task_id, event_id, timestamp, event_type, name, model, token counts and status."
+            "CSV of agent events, one row per event. Needs task_id, event_id, "
+            "timestamp, event_type, name, model, token counts and status."
         ),
     )
     evaluate_parser.add_argument(
         "--outcomes", help=(
-            "CSV of task outcomes, one row per task: whether it was acceptable and what it was worth."
+            "CSV of task outcomes, one row per task: whether it was acceptable "
+            "and what it was worth."
         ),
     )
     evaluate_parser.add_argument(
         "--rates", help=(
-            "JSON price list keyed by model id, so token counts become money. Omit only if every event carries direct_cost_usd."
+            "JSON price list keyed by model id, so token counts become money. "
+            "Omit only if every event carries direct_cost_usd."
         ),
     )
     evaluate_parser.add_argument(
         "--baseline", help=(
-            "JSON describing the alternative you are comparing against, usually the human-only workflow. Without it the counterfactual gate has nothing to compare and the answer is INCOMPLETE."
+            "JSON describing the alternative you are comparing against, usually "
+            "the human-only workflow. Without it the counterfactual gate has "
+            "nothing to compare and the answer is INCOMPLETE."
         ),
     )
     evaluate_parser.add_argument(
         "--policy", help=(
-            "JSON of the thresholds you are willing to defend: minimum acceptable rate, cost ceilings, call caps."
+            "JSON of the thresholds you are willing to defend: minimum acceptable "
+            "rate, cost ceilings, call caps."
         ),
     )
     evaluate_parser.add_argument(
@@ -405,6 +419,53 @@ def build_parser() -> argparse.ArgumentParser:
     analyse_parser.add_argument("--format", choices=("markdown", "json"), default="markdown")
     analyse_parser.add_argument("--out", help="Output path (default: stdout)")
 
+    decision_record_parser = subparsers.add_parser(
+        "decision-record",
+        help="Create or validate a machine-readable agent deployment decision.",
+    )
+    decision_record_actions = decision_record_parser.add_subparsers(
+        dest="decision_record_action",
+        required=True,
+    )
+    decision_record_init = decision_record_actions.add_parser(
+        "init",
+        help="Write an intentionally incomplete decision-record template.",
+    )
+    decision_record_init.add_argument("--output", required=True)
+    decision_record_validate = decision_record_actions.add_parser(
+        "validate",
+        help=(
+            "Recompute the decision, audit, claim statuses, and artifact hashes."
+        ),
+    )
+    decision_record_validate.add_argument("record")
+    decision_record_validate.add_argument("--bundle", required=True)
+    decision_record_validate.add_argument(
+        "--attestations",
+        help="Instrument attestations used by the recorded audit.",
+    )
+    decision_record_validate.add_argument(
+        "--artifact-root",
+        default=".",
+        help="Root used to resolve every artifact URI (default: current directory).",
+    )
+    decision_record_render = decision_record_actions.add_parser(
+        "render",
+        help="Verify the record, then write a self-contained HTML review card.",
+    )
+    decision_record_render.add_argument("record")
+    decision_record_render.add_argument("--bundle", required=True)
+    decision_record_render.add_argument(
+        "--attestations",
+        help="Instrument attestations used by the recorded audit.",
+    )
+    decision_record_render.add_argument(
+        "--artifact-root",
+        default=".",
+        help="Root used to resolve every artifact URI (default: current directory).",
+    )
+    decision_record_render.add_argument("--output", required=True)
+
     return parser
 
 
@@ -417,7 +478,22 @@ def _load_attestations(path: str | None) -> dict[str, Attestation] | None:
     """
     if path is None:
         return None
-    raw = json.loads(Path(path).read_text())
+    def reject_duplicates(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        document: dict[str, object] = {}
+        for key, value in pairs:
+            if key in document:
+                raise ValueError(f"Duplicate JSON key: {key!r}")
+            document[key] = value
+        return document
+
+    def reject_constant(value: str) -> None:
+        raise ValueError(f"Non-finite JSON number is not allowed: {value}")
+
+    raw = json.loads(
+        Path(path).read_text(),
+        object_pairs_hook=reject_duplicates,
+        parse_constant=reject_constant,
+    )
     return {
         name: Attestation(instrument=name, **fields) for name, fields in raw.items()
     }
@@ -551,6 +627,79 @@ def _cmd_closure_or_mutate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_decision_record(args: argparse.Namespace) -> int:
+    """`agent-economics decision-record`."""
+    if args.decision_record_action == "init":
+        target = Path(args.output)
+        if target.exists():
+            print(
+                f"INCOMPLETE: decision-record output already exists: {target}",
+                file=sys.stderr,
+            )
+            return 2
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(render_blank_decision_record(), encoding="utf-8")
+        except OSError as error:
+            print(
+                f"INCOMPLETE: could not write decision record: {error}",
+                file=sys.stderr,
+            )
+            return 2
+        print(f"Wrote incomplete {DECISION_RECORD_SCHEMA_VERSION} template to {target}")
+        return 0
+
+    try:
+        record = load_decision_record(args.record)
+        bundle = load_normalized_json_bundle(args.bundle)
+        attestations = _load_attestations(args.attestations)
+        artifact_root = Path(args.artifact_root).resolve()
+        bundle_ref = Path(args.bundle).resolve().relative_to(artifact_root).as_posix()
+        attestation_ref = (
+            Path(args.attestations).resolve().relative_to(artifact_root).as_posix()
+            if args.attestations
+            else None
+        )
+    except (KeyError, OSError, TypeError, ValueError) as error:
+        print(f"INCOMPLETE: invalid decision record: {error}", file=sys.stderr)
+        return 2
+    errors = verify_decision_record(
+        record,
+        bundle=bundle,
+        artifact_root=artifact_root,
+        bundle_ref=bundle_ref,
+        attestations=attestations,
+        attestation_ref=attestation_ref,
+    )
+    if errors:
+        for error in errors:
+            print(f"INCOMPLETE: {error}", file=sys.stderr)
+        return 2
+    if args.decision_record_action == "render":
+        target = Path(args.output)
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(render_decision_record_html(record), encoding="utf-8")
+        except (OSError, ValueError) as error:
+            print(
+                f"INCOMPLETE: could not render decision record: {error}",
+                file=sys.stderr,
+            )
+            return 2
+        print(
+            f"Wrote VERIFIED {DECISION_RECORD_SCHEMA_VERSION} "
+            f"record_id={record['record_id']} decision={record['decision']['issued']} "
+            f"to {target}"
+        )
+        return 0
+    print(
+        f"VERIFIED {DECISION_RECORD_SCHEMA_VERSION} "
+        f"record_id={record['record_id']} "
+        f"decision={record['decision']['issued']}"
+    )
+    return 0
+
+
 def _cmd_capabilities(args: argparse.Namespace) -> int:
     """`agent-economics capabilities`."""
     print("SOURCE ADAPTERS")
@@ -579,6 +728,9 @@ def _cmd_capabilities(args: argparse.Namespace) -> int:
     print("renderer.frontier-markdown@1")
     print("renderer.frontier-json@1")
     print("renderer.frontier-svg@1")
+    print("\nDECISION RECORDS")
+    print(f"contract.{DECISION_RECORD_SCHEMA_VERSION}")
+    print("verifier.agent-decision-record@1")
     print("\nEXPERIMENTS")
     print("experiment.paired-budget-frontier@1")
     print("\nINFERENCE")
@@ -898,6 +1050,7 @@ DISPATCH: dict[str, Callable[[argparse.Namespace], int]] = {
     "closure": _cmd_closure_or_mutate,
     "mutate": _cmd_closure_or_mutate,
     "capabilities": _cmd_capabilities,
+    "decision-record": _cmd_decision_record,
     "convert": _cmd_convert,
     "frontier": _cmd_frontier,
     "demo": _cmd_demo,

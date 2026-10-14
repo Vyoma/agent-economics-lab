@@ -1,0 +1,594 @@
+{
+  "baseline": {
+    "acceptable_rate": 0.7,
+    "cost_per_attempt_usd": 5.0,
+    "name": "human-only support queue",
+    "value_per_acceptable_outcome_usd": 8.0
+  },
+  "events": [
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-001",
+      "event_type": "model",
+      "input_tokens": 1000,
+      "model": "edge-small",
+      "name": "route",
+      "output_tokens": 200,
+      "status": "ok",
+      "task_id": "t-001",
+      "timestamp": "2026-07-01T10:00:00Z"
+    },
+    {
+      "arguments": {
+        "customer_id": "C-101"
+      },
+      "direct_cost_usd": 0.002,
+      "event_id": "e-002",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "crm_lookup",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-001",
+      "timestamp": "2026-07-01T10:00:01Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-003",
+      "event_type": "model",
+      "input_tokens": 8000,
+      "model": "frontier-large",
+      "name": "answer",
+      "output_tokens": 1200,
+      "status": "ok",
+      "task_id": "t-001",
+      "timestamp": "2026-07-01T10:00:02Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-004",
+      "event_type": "model",
+      "input_tokens": 900,
+      "model": "edge-small",
+      "name": "route",
+      "output_tokens": 180,
+      "status": "ok",
+      "task_id": "t-002",
+      "timestamp": "2026-07-01T10:01:00Z"
+    },
+    {
+      "arguments": {
+        "query": "refund policy"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-005",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-002",
+      "timestamp": "2026-07-01T10:01:01Z"
+    },
+    {
+      "arguments": {
+        "customer_id": "C-102"
+      },
+      "direct_cost_usd": 0.002,
+      "event_id": "e-006",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "crm_lookup",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-002",
+      "timestamp": "2026-07-01T10:01:02Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-007",
+      "event_type": "model",
+      "input_tokens": 9000,
+      "model": "frontier-large",
+      "name": "answer",
+      "output_tokens": 1300,
+      "status": "ok",
+      "task_id": "t-002",
+      "timestamp": "2026-07-01T10:01:03Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-008",
+      "event_type": "model",
+      "input_tokens": 1200,
+      "model": "edge-small",
+      "name": "route",
+      "output_tokens": 220,
+      "status": "ok",
+      "task_id": "t-003",
+      "timestamp": "2026-07-01T10:02:00Z"
+    },
+    {
+      "arguments": {
+        "query": "warranty exception"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-009",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-003",
+      "timestamp": "2026-07-01T10:02:01Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-010",
+      "event_type": "model",
+      "input_tokens": 10000,
+      "model": "frontier-large",
+      "name": "answer",
+      "output_tokens": 1500,
+      "status": "ok",
+      "task_id": "t-003",
+      "timestamp": "2026-07-01T10:02:02Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-011",
+      "event_type": "model",
+      "input_tokens": 5000,
+      "model": "frontier-large",
+      "name": "retry",
+      "output_tokens": 800,
+      "status": "error",
+      "task_id": "t-003",
+      "timestamp": "2026-07-01T10:02:03Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-012",
+      "event_type": "model",
+      "input_tokens": 800,
+      "model": "edge-small",
+      "name": "route",
+      "output_tokens": 160,
+      "status": "ok",
+      "task_id": "t-004",
+      "timestamp": "2026-07-01T10:03:00Z"
+    },
+    {
+      "arguments": {
+        "customer_id": "C-104"
+      },
+      "direct_cost_usd": 0.002,
+      "event_id": "e-013",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "crm_lookup",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-004",
+      "timestamp": "2026-07-01T10:03:01Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-014",
+      "event_type": "model",
+      "input_tokens": 7000,
+      "model": "frontier-large",
+      "name": "answer",
+      "output_tokens": 1000,
+      "status": "ok",
+      "task_id": "t-004",
+      "timestamp": "2026-07-01T10:03:02Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-015",
+      "event_type": "model",
+      "input_tokens": 1500,
+      "model": "edge-small",
+      "name": "plan",
+      "output_tokens": 300,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:00Z"
+    },
+    {
+      "arguments": {
+        "query": "missing order"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-016",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:01Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-017",
+      "event_type": "model",
+      "input_tokens": 12000,
+      "model": "frontier-large",
+      "name": "reflect",
+      "output_tokens": 1000,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:02Z"
+    },
+    {
+      "arguments": {
+        "query": "order not found"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-018",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:03Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-019",
+      "event_type": "model",
+      "input_tokens": 12000,
+      "model": "frontier-large",
+      "name": "reflect",
+      "output_tokens": 1000,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:04Z"
+    },
+    {
+      "arguments": {
+        "query": "missing transaction"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-020",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:05Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-021",
+      "event_type": "model",
+      "input_tokens": 12000,
+      "model": "frontier-large",
+      "name": "reflect",
+      "output_tokens": 1000,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:06Z"
+    },
+    {
+      "arguments": {
+        "query": "unmatched receipt"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-022",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:07Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-023",
+      "event_type": "model",
+      "input_tokens": 12000,
+      "model": "frontier-large",
+      "name": "reflect",
+      "output_tokens": 1000,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:08Z"
+    },
+    {
+      "arguments": {
+        "query": "customer order absent"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-024",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:09Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-025",
+      "event_type": "model",
+      "input_tokens": 12000,
+      "model": "frontier-large",
+      "name": "reflect",
+      "output_tokens": 1000,
+      "status": "ok",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:10Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-026",
+      "event_type": "model",
+      "input_tokens": 6000,
+      "model": "frontier-large",
+      "name": "final",
+      "output_tokens": 500,
+      "status": "error",
+      "task_id": "t-005",
+      "timestamp": "2026-07-01T10:04:11Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-027",
+      "event_type": "model",
+      "input_tokens": 1000,
+      "model": "edge-small",
+      "name": "route",
+      "output_tokens": 200,
+      "status": "ok",
+      "task_id": "t-006",
+      "timestamp": "2026-07-01T10:05:00Z"
+    },
+    {
+      "arguments": {
+        "query": "shipping window"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-028",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-006",
+      "timestamp": "2026-07-01T10:05:01Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-029",
+      "event_type": "model",
+      "input_tokens": 7500,
+      "model": "frontier-large",
+      "name": "answer",
+      "output_tokens": 1100,
+      "status": "ok",
+      "task_id": "t-006",
+      "timestamp": "2026-07-01T10:05:02Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-030",
+      "event_type": "model",
+      "input_tokens": 1100,
+      "model": "edge-small",
+      "name": "route",
+      "output_tokens": 220,
+      "status": "ok",
+      "task_id": "t-007",
+      "timestamp": "2026-07-01T10:06:00Z"
+    },
+    {
+      "arguments": {
+        "query": "exchange policy"
+      },
+      "direct_cost_usd": 0.005,
+      "event_id": "e-031",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "search",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-007",
+      "timestamp": "2026-07-01T10:06:01Z"
+    },
+    {
+      "arguments": {
+        "customer_id": "C-107"
+      },
+      "direct_cost_usd": 0.002,
+      "event_id": "e-032",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "crm_lookup",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-007",
+      "timestamp": "2026-07-01T10:06:02Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-033",
+      "event_type": "model",
+      "input_tokens": 8500,
+      "model": "frontier-large",
+      "name": "answer",
+      "output_tokens": 1250,
+      "status": "ok",
+      "task_id": "t-007",
+      "timestamp": "2026-07-01T10:06:03Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-034",
+      "event_type": "model",
+      "input_tokens": 700,
+      "model": "edge-small",
+      "name": "route",
+      "output_tokens": 140,
+      "status": "ok",
+      "task_id": "t-008",
+      "timestamp": "2026-07-01T10:07:00Z"
+    },
+    {
+      "arguments": {
+        "customer_id": "C-108"
+      },
+      "direct_cost_usd": 0.002,
+      "event_id": "e-035",
+      "event_type": "tool",
+      "input_tokens": 0,
+      "model": "0",
+      "name": "crm_lookup",
+      "output_tokens": 0,
+      "status": "ok",
+      "task_id": "t-008",
+      "timestamp": "2026-07-01T10:07:01Z"
+    },
+    {
+      "arguments": {},
+      "direct_cost_usd": null,
+      "event_id": "e-036",
+      "event_type": "model",
+      "input_tokens": 6000,
+      "model": "frontier-large",
+      "name": "answer",
+      "output_tokens": 900,
+      "status": "ok",
+      "task_id": "t-008",
+      "timestamp": "2026-07-01T10:07:02Z"
+    }
+  ],
+  "label_source": "fixture.manual-review",
+  "outcomes": [
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "t-001"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "t-002"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 0.0,
+      "human_minutes": 6.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.5,
+      "task_id": "t-003"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "t-004"
+    },
+    {
+      "acceptable": false,
+      "business_value_usd": 0.0,
+      "human_minutes": 10.0,
+      "incident_loss_usd": 3.0,
+      "remediation_cost_usd": 1.0,
+      "task_id": "t-005"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "t-006"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "t-007"
+    },
+    {
+      "acceptable": true,
+      "business_value_usd": 8.0,
+      "human_minutes": 0.0,
+      "incident_loss_usd": 0.0,
+      "remediation_cost_usd": 0.0,
+      "task_id": "t-008"
+    }
+  ],
+  "policy": {
+    "human_hourly_cost_usd": 60.0,
+    "max_calls_per_task": 8,
+    "max_cost_per_acceptable_outcome_usd": 2.0,
+    "max_p95_task_cost_usd": 8.0,
+    "max_trace_cost_per_task_usd": 0.15,
+    "min_acceptable_rate": 0.8,
+    "min_expected_net_value_per_attempt_usd": 0.0,
+    "min_incremental_net_value_vs_baseline_usd": 0.0,
+    "repetition_warning_threshold": 3
+  },
+  "rates": {
+    "edge-small": {
+      "input_per_million_usd": 0.15,
+      "output_per_million_usd": 0.6
+    },
+    "frontier-large": {
+      "input_per_million_usd": 2.5,
+      "output_per_million_usd": 10.0
+    }
+  }
+}

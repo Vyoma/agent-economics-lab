@@ -2,9 +2,9 @@
 
 Measures this repository's package alongside six standard-library packages,
 using the running interpreter's own stdlib. The numbers therefore move with the
-Python version, which is why this is not part of `make reproduce`: the CI
-matrix spans four versions and a byte-comparison would fail on three of them
-for a reason that is not a defect.
+Python version. The reproduction target compares bytes only when the committed
+artifact names the running interpreter; the wider CI matrix skips that
+version-specific comparison rather than reporting a false drift.
 """
 
 from __future__ import annotations

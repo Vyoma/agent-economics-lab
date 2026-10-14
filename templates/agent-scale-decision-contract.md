@@ -3,6 +3,12 @@
 Use this one-page contract for one named agent workload. Complete it before
 reviewing candidate results. A blank field is not approval.
 
+For a machine-checkable review artifact, initialize an
+[Agent Decision Record](agent-decision-record.template.json) and validate it with
+`agent-economics decision-record validate RECORD --bundle BUNDLE
+--attestations ATTESTATIONS --artifact-root ROOT`. The verifier re-runs the
+fail-closed gate and audit; it does not merely check JSON shape.
+
 ## Decision header
 
 | Field | Value |

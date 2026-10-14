@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:,">
+  <title>Synthetic support-agent fixture | Agent Decision Record</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f5f3;
+      --paper: #ffffff;
+      --ink: #141714;
+      --muted: #5d665f;
+      --rule: #d8ddd9;
+      --pass: #17633d;
+      --fail: #9d302b;
+      --incomplete: #8a5a08;
+      --assist: #8a5a08;
+      --soft: #fbf6e8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #101310;
+        --paper: #171b17;
+        --ink: #eef1ee;
+        --muted: #a4ada6;
+        --rule: #303730;
+        --pass: #70d49e;
+        --fail: #ff9890;
+        --incomplete: #f4c069;
+        --assist: #f4c069;
+        --soft: #211d13;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      line-height: 1.5;
+    }
+    main { width: min(62rem, calc(100% - 2rem)); margin: 3rem auto; }
+    h1, h2, h3, p, ul, dl { margin-top: 0; }
+    h1 { max-width: 18ch; margin-bottom: 0; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; }
+    h2 { font-size: 1rem; }
+    h3 { margin-bottom: 0; font-size: 0.95rem; }
+    .eyebrow, dt, .status, .digest {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .eyebrow { color: var(--muted); }
+    .summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2rem;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--assist);
+      background: var(--soft);
+    }
+    .verdict {
+      color: var(--assist);
+      font: 600 clamp(2rem, 5vw, 3.5rem)/1 ui-monospace, monospace;
+    }
+    .requested { margin-bottom: 0.3rem; color: var(--muted); font-size: 0.85rem; }
+    .rationale { max-width: 58ch; margin: 1rem 0 0; }
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin: 0;
+      border: 1px solid var(--rule);
+      border-top: 0;
+    }
+    .facts div { padding: 1rem; border-right: 1px solid var(--rule); }
+    .facts div:last-child { border-right: 0; }
+    dt { color: var(--muted); }
+    dd { margin: 0.3rem 0 0; overflow-wrap: anywhere; }
+    .claims { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+    .claim { padding: 1.1rem; border: 1px solid var(--rule); background: var(--paper); }
+    .claim-pass { border-top: 3px solid var(--pass); }
+    .claim-fail { border-top: 3px solid var(--fail); }
+    .claim-incomplete { border-top: 3px solid var(--incomplete); }
+    .claim-head { display: grid; grid-template-columns: 1fr auto; gap: 1rem; }
+    .claim p { margin: 0.8rem 0; color: var(--muted); font-size: 0.88rem; }
+    .claim dl div {
+      display: grid;
+      grid-template-columns: 4rem 1fr;
+      gap: 0.5rem;
+      padding-top: 0.45rem;
+      border-top: 1px solid var(--rule);
+    }
+    .claim dd { font-size: 0.78rem; }
+    .claim-pass .status { color: var(--pass); }
+    .claim-fail .status { color: var(--fail); }
+    .claim-incomplete .status { color: var(--incomplete); }
+    .notes { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+    .note { padding: 1.1rem; border: 1px solid var(--rule); }
+    .note ul { margin-bottom: 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.88rem; }
+    .verification-boundary {
+      max-width: 68ch;
+      margin-top: 2rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .digest {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      text-transform: none;
+      overflow-wrap: anywhere;
+    }
+    @media (max-width: 44rem) {
+      main { margin: 1.5rem auto; }
+      .summary, .claims, .notes { grid-template-columns: 1fr; }
+      .facts { grid-template-columns: 1fr 1fr; }
+      .facts div:nth-child(2) { border-right: 0; }
+      .facts div:nth-child(-n + 2) { border-bottom: 1px solid var(--rule); }
+    }
+    @media print {
+      :root { color-scheme: light; }
+      body { background: white; }
+      main { width: 100%; margin: 0; }
+      .claim, .note, .summary { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Verified against supplied artifacts · support-assurance-demo-v1</p>
+    <h1>Synthetic support-agent fixture</h1>
+    <section class="summary assist" aria-labelledby="decision-heading">
+      <div>
+        <p class="requested">Requested SCALE</p>
+        <h2 id="decision-heading" class="verdict">ASSIST</h2>
+        <p class="rationale">The fixture is profitable versus its named baseline, but required quality, unit-cost, tail-cost, and runtime-cap claims fail policy.</p>
+      </div>
+      <dl>
+        <div><dt>Required claims</dt><dd>6</dd></div>
+        <div>
+          <dt>Pass / fail / incomplete</dt>
+          <dd>2 / 4 / 0</dd>
+        </div>
+      </dl>
+    </section>
+    <dl class="facts">
+      <div><dt>Population</dt><dd>Eight synthetic support tasks checked into examples/</dd></div>
+      <div>
+        <dt>Window</dt>
+        <dd>2026-07-01 to 2026-07-01</dd>
+      </div>
+      <div><dt>Counterfactual</dt><dd>Human-only support queue</dd></div>
+      <div><dt>Review</dt><dd>2026-10-08 · Vyoma Gajjar</dd></div>
+    </dl>
+    <section aria-labelledby="claims-heading">
+      <p class="eyebrow" id="claims-heading">Required claims</p>
+      <div class="claims">
+        <article class="claim claim-fail">
+          <div class="claim-head">
+            <h3>At least 80% of attempted tasks produce acceptable outcomes.</h3>
+            <span class="status">FAIL</span>
+          </div>
+          <p>6/8 acceptable outcomes; acceptable_rate = 75.0%</p>
+          <dl>
+            <div><dt>Policy</dt><dd>acceptable_rate &gt;= 80.0%</dd></div>
+            <div><dt>Check</dt><dd><code>gate.acceptable-rate@1</code></dd></div>
+          </dl>
+        </article>
+        <article class="claim claim-fail">
+          <div class="claim-head">
+            <h3>Cost per acceptable outcome does not exceed policy.</h3>
+            <span class="status">FAIL</span>
+          </div>
+          <p>cost_per_acceptable_outcome_usd = 3.50</p>
+          <dl>
+            <div><dt>Policy</dt><dd>cost_per_acceptable_outcome_usd &lt;= 2.00</dd></div>
+            <div><dt>Check</dt><dd><code>gate.unit-economics@1</code></dd></div>
+          </dl>
+        </article>
+        <article class="claim claim-fail">
+          <div class="claim-head">
+            <h3>The p95 effective task cost does not exceed policy.</h3>
+            <span class="status">FAIL</span>
+          </div>
+          <p>p95_task_cost_usd = 14.25</p>
+          <dl>
+            <div><dt>Policy</dt><dd>p95_task_cost_usd &lt;= 8.00</dd></div>
+            <div><dt>Check</dt><dd><code>gate.tail-cost@1</code></dd></div>
+          </dl>
+        </article>
+        <article class="claim claim-pass">
+          <div class="claim-head">
+            <h3>Expected net value per attempt is non-negative.</h3>
+            <span class="status">PASS</span>
+          </div>
+          <p>expected_net_value_per_attempt_usd = 3.37</p>
+          <dl>
+            <div><dt>Policy</dt><dd>expected_net_value_per_attempt_usd &gt;= 0.00</dd></div>
+            <div><dt>Check</dt><dd><code>gate.net-value@1</code></dd></div>
+          </dl>
+        </article>
+        <article class="claim claim-pass">
+          <div class="claim-head">
+            <h3>Expected value exceeds the named human-only baseline.</h3>
+            <span class="status">PASS</span>
+          </div>
+          <p>incremental_net_value_vs_baseline_usd = 2.77</p>
+          <dl>
+            <div><dt>Policy</dt><dd>incremental_net_value_vs_baseline_usd &gt;= 0.00</dd></div>
+            <div><dt>Check</dt><dd><code>gate.counterfactual@1</code></dd></div>
+          </dl>
+        </article>
+        <article class="claim claim-fail">
+          <div class="claim-head">
+            <h3>Every task remains inside call-count and trace-cost caps.</h3>
+            <span class="status">FAIL</span>
+          </div>
+          <p>t-005 used 12 calls and 0.2454 USD of trace cost</p>
+          <dl>
+            <div><dt>Policy</dt><dd>calls_per_task &lt;= 8 and trace_cost_per_task_usd &lt;= 0.15</dd></div>
+            <div><dt>Check</dt><dd><code>gate.runtime-caps@1</code></dd></div>
+          </dl>
+        </article>
+      </div>
+    </section>
+    <div class="notes">
+      <section class="note" aria-labelledby="next-heading">
+        <h2 id="next-heading">Required before the next mode</h2>
+        <ul>
+          <li>Meet the acceptable-rate, unit-cost, and tail-cost policy gates.</li>
+          <li>Enforce per-task call and trace-cost caps before reconsidering SCALE.</li>
+        </ul>
+      </section>
+      <section class="note" aria-labelledby="limits-heading">
+        <h2 id="limits-heading">Known limits and non-claims</h2>
+        <ul>
+          <li>No production sampling, temporal drift estimate, or subgroup analysis</li>
+          <li>This record is not a production deployment authorization.</li>
+          <li>The eight-task fixture is not an estimate of production prevalence or ROI.</li>
+        </ul>
+      </section>
+    </div>
+    <p class="verification-boundary">
+      Verification replays this record against the supplied artifacts. It does not
+      establish the real-world truth or representativeness of the inputs.
+    </p>
+    <p class="digest">Evidence digest: 6441a11a69a0958151103fb24d43d8f86507a22fe64bd0d407a8a4bc0c310614<br>
+      Decision contract: e7faae0cb2b0fb62c5341412c16c8e7930142eaf86cd8e8568b0dfad72c3baab<br>
+      Reproduce: <code>agent-economics decision-record validate examples/agent-decision-record.json --bundle examples/agent-decision-record.bundle.json --attestations examples/attestations.json --artifact-root .</code>
+    </p>
+  </main>
+</body>
+</html>
