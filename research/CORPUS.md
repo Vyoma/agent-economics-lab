@@ -198,8 +198,10 @@ Standard deviation is published because the tie-break owns
 0.002 of its answer. Under `top-margin` it owns 0.657,
 which is wider than the entire distance from chance to the best
 grader in this corpus, so a figure computed that way reports the
-tie-break. The other three are recomputed beside it all the same,
-and under all four every grader still falls short.
+tie-break. The other three point estimates are recomputed beside it
+as sensitivity checks for tie dependence. They do not carry their
+own intervals, so they are not evidence that a grader clears or
+fails chance under those rules.
 
 **Prior work.** That model judges are imperfect is established: MT-Bench measured judge agreement with human preference,
 RewardBench scores reward models against it, and position,

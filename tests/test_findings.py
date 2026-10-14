@@ -440,6 +440,28 @@ class EveryPublishedFigureRecomputes(unittest.TestCase):
             by_name["gpt5.2-high"]["levels"][0.25]["by_rule"]["spread"], 0.70
         )
 
+    def test_016_does_not_turn_sensitivity_points_into_interval_claims(self) -> None:
+        """Alternative rules have point estimates, not bootstrap intervals.
+
+        The first draft already leaked the answer through a tie-break.  A
+        second, quieter version of the same mistake would describe the three
+        sensitivity-only point estimates as clearing or failing chance even
+        though no intervals were computed for them.
+        """
+        finding = next(
+            f for f in findings_module.load()["findings"]
+            if f["id"] == "AEL-2026-016"
+        )
+        scope = finding["scope"]
+        self.assertIn("point-estimate sensitivity checks", scope)
+        self.assertIn("do not carry their own intervals", scope)
+        self.assertNotIn("no grader clears chance under any", scope)
+
+        corpus = (ROOT / "research" / "CORPUS.md").read_text(encoding="utf-8")
+        self.assertIn("sensitivity checks for tie dependence", corpus)
+        self.assertIn("not evidence that a grader clears or", corpus)
+        self.assertNotIn("under all four every grader still falls short", corpus)
+
     def test_the_confidence_rules_cannot_see_the_outcome(self) -> None:
         """Non-vacuous against the leak that produced the first draft of
         AEL-2026-016: invert every correctness label and the confidence

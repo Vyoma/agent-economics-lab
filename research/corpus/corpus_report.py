@@ -522,8 +522,9 @@ def hle_verifier_summary() -> dict:
 # leaking sort and 0.566 under the same rule tie-broken by question id.
 # Standard deviation is published because it is the only continuous rule
 # here, with 2 questions tied at the cutoff rather than hundreds. The other
-# three are recomputed beside it so a reader can see the choice did not
-# create the answer: under all four, abstention leaves every grader short.
+# three are recomputed beside it as point-estimate sensitivity checks. They
+# do not carry bootstrap intervals, so they cannot support claims about which
+# graders clear chance.
 CONFIDENCE_RULES = ("stdev", "spread", "top-margin", "few-at-top")
 COVERAGE_LEVELS = (0.50, 0.25)
 
@@ -1542,8 +1543,10 @@ def _entry_hle(hle: dict, coverage: dict) -> list[str]:
         f" {coverage['tie_band']['top-margin']:.3f},",
         "which is wider than the entire distance from chance to the best",
         "grader in this corpus, so a figure computed that way reports the",
-        "tie-break. The other three are recomputed beside it all the same,",
-        "and under all four every grader still falls short.",
+        "tie-break. The other three point estimates are recomputed beside it",
+        "as sensitivity checks for tie dependence. They do not carry their",
+        "own intervals, so they are not evidence that a grader clears or",
+        "fails chance under those rules.",
         "",
         "**Prior work.** That model judges are imperfect is established:"
         " MT-Bench measured judge agreement with human preference,",
