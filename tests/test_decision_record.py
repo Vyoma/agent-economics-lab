@@ -29,6 +29,7 @@ ATTESTATIONS = ROOT / "examples" / "attestations.json"
 TEMPLATE = ROOT / "templates" / "agent-decision-record.template.json"
 SCHEMA = ROOT / "templates" / "agent-decision-record.schema.json"
 HTML_EXAMPLE = ROOT / "examples" / "agent-decision-record.html"
+PUBLISHED_HTML_EXAMPLE = ROOT / "docs" / "decision-record.html"
 
 
 def _attestations() -> dict[str, Attestation]:
@@ -102,17 +103,16 @@ class DecisionRecordTests(unittest.TestCase):
         self.assertIn("decision=ASSIST", output.getvalue())
 
     def test_checked_in_html_matches_the_record_renderer(self) -> None:
-        self.assertEqual(
-            HTML_EXAMPLE.read_text(encoding="utf-8"),
-            render_decision_record_html(self.example),
-        )
+        rendered = render_decision_record_html(self.example)
+        self.assertEqual(HTML_EXAMPLE.read_text(encoding="utf-8"), rendered)
+        self.assertEqual(PUBLISHED_HTML_EXAMPLE.read_text(encoding="utf-8"), rendered)
         self.assertIn(
             "Verified against supplied artifacts",
-            render_decision_record_html(self.example),
+            rendered,
         )
         self.assertIn(
             "real-world truth or representativeness",
-            render_decision_record_html(self.example),
+            rendered,
         )
 
     def test_renderer_escapes_record_text(self) -> None:

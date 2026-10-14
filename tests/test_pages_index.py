@@ -287,6 +287,11 @@ class PublishedNumbersRecompute(unittest.TestCase):
             with self.subTest(figure=shown):
                 self.assertIn(shown, self.page)
 
+    def test_page_exposes_the_verified_decision_and_feedback_artifacts(self) -> None:
+        self.assertIn("(decision-record.html)", self.page)
+        self.assertIn("(production-feedback-loops.md)", self.page)
+        self.assertIn("](assets/decision.gif)", self.page)
+
     def test_no_unregistered_numbers(self) -> None:
         """Any numeral on the page must be bound to a source or declared an input."""
         known = set(COMPUTED) | set(STATED_INPUTS)
