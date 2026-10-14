@@ -252,6 +252,16 @@ def render() -> str:
             " shape a case can take |"
         ),
         (
+            "| Can a decision record pass by editing its own answer? |"
+            " `verifier.agent-decision-record@1` against the filled fixture,"
+            " with one binding altered at a time | honest record reproduces;"
+            " altered decision, claim status, audit status, evidence digest,"
+            " artifact digest, required-claim set, missing attestation, and"
+            " path escape are each refused | a repository-authored fixture"
+            " checked by the same implementation; this establishes"
+            " self-consistency, not that the evidence or prose is true |"
+        ),
+        (
             "| Does a comparison report keep every arm and refusal? |"
             " completeness of `renderer.frontier-markdown@1`,"
             " `renderer.frontier-json@1` and"

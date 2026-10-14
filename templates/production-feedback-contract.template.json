@@ -1,0 +1,47 @@
+{
+  "schema_version": "production-feedback-contract/v1",
+  "contract_id": "",
+  "system": {
+    "name": "",
+    "unit_of_decision": "",
+    "owner": "",
+    "modalities": [],
+    "model_versions": [],
+    "policy_version": "",
+    "observation_window": {
+      "start": "",
+      "end": ""
+    }
+  },
+  "outcome": {
+    "name": "",
+    "definition_version": "",
+    "source": "",
+    "acceptable_when": "",
+    "available_after": "",
+    "missing_route": ""
+  },
+  "proxies": [],
+  "joins": {
+    "decision_id": "",
+    "outcome_id": "",
+    "deduplication": "",
+    "late_data": "",
+    "unmatched_route": ""
+  },
+  "modality_evidence": {},
+  "interventions": [],
+  "rollout": {
+    "counterfactual": "",
+    "canary": "",
+    "advance_when": "",
+    "rollback_when": "",
+    "reviewer": ""
+  },
+  "non_claims": [],
+  "reproduction": {
+    "revision": "",
+    "command": "",
+    "environment": ""
+  }
+}
