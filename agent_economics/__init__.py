@@ -57,6 +57,7 @@ from .decision_record import (
     blank_decision_record,
     load_decision_record,
     render_blank_decision_record,
+    render_decision_record_html,
     validate_decision_record,
     verify_decision_record,
 )
@@ -220,6 +221,7 @@ __all__ = [
     "otel_genai_conversion_receipt",
     "parse_attestations",
     "render_blank_decision_record",
+    "render_decision_record_html",
     "render_frontier_json",
     "render_frontier_markdown",
     "render_frontier_svg",

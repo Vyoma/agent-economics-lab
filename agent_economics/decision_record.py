@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import html
 import json
 import re
 from collections import defaultdict
@@ -111,6 +112,261 @@ def render_blank_decision_record() -> str:
     """Render the intentionally incomplete template as stable JSON."""
 
     return json.dumps(blank_decision_record(), indent=2, ensure_ascii=False) + "\n"
+
+
+def render_decision_record_html(document: Any) -> str:
+    """Render a structurally valid decision record as a self-contained review card.
+
+    This function is presentation-only. The CLI calls :func:`verify_decision_record`
+    before it writes HTML, so a rendered artifact is never the act that verifies a
+    decision. Library callers should do the same when the output will carry a
+    verification claim.
+    """
+
+    errors = validate_decision_record(document)
+    if errors:
+        raise ValueError("cannot render invalid decision record: " + "; ".join(errors))
+
+    record: dict[str, Any] = document
+    decision = record["decision"]
+    workload = record["workload"]
+    claims = record["claims"]
+    evidence = record["evidence"]
+    uncertainty = record["uncertainty"]
+    controls = record["controls"]
+    review = record["review"]
+    statuses = {status: 0 for status in ("PASS", "FAIL", "INCOMPLETE")}
+    for claim in claims:
+        statuses[claim["status"]] += 1
+
+    claims_html = "\n".join(
+        f"""        <article class="claim claim-{_html_text(claim['status'].lower())}">
+          <div class="claim-head">
+            <h3>{_html_text(claim['statement'])}</h3>
+            <span class="status">{_html_text(claim['status'])}</span>
+          </div>
+          <p>{_html_text(claim.get('observed') or claim.get('missing_reason', ''))}</p>
+          <dl>
+            <div><dt>Policy</dt><dd>{_html_text(claim['threshold'])}</dd></div>
+            <div><dt>Check</dt><dd><code>{_html_text(claim['check_id'])}</code></dd></div>
+          </dl>
+        </article>"""
+        for claim in claims
+    )
+    missing_html = "\n".join(
+        f"          <li>{_html_text(item)}</li>"
+        for item in uncertainty["known_missing_evidence"]
+    )
+    non_claims_html = "\n".join(
+        f"          <li>{_html_text(item)}</li>" for item in uncertainty["non_claims"]
+    )
+    controls_html = "\n".join(
+        f"          <li>{_html_text(item)}</li>"
+        for item in controls["required_before_next_mode"]
+    )
+    reviewers = ", ".join(_html_text(name) for name in review["reviewers"])
+    title = f"{_html_text(workload['name'])} | Agent Decision Record"
+    issued = _html_text(decision["issued"])
+    issued_class = _html_text(decision["issued"].lower())
+    window = workload["observation_window"]
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:,">
+  <title>{title}</title>
+  <style>
+    :root {{
+      color-scheme: light dark;
+      --bg: #f4f5f3;
+      --paper: #ffffff;
+      --ink: #141714;
+      --muted: #5d665f;
+      --rule: #d8ddd9;
+      --pass: #17633d;
+      --fail: #9d302b;
+      --incomplete: #8a5a08;
+      --assist: #8a5a08;
+      --soft: #fbf6e8;
+    }}
+    @media (prefers-color-scheme: dark) {{
+      :root {{
+        --bg: #101310;
+        --paper: #171b17;
+        --ink: #eef1ee;
+        --muted: #a4ada6;
+        --rule: #303730;
+        --pass: #70d49e;
+        --fail: #ff9890;
+        --incomplete: #f4c069;
+        --assist: #f4c069;
+        --soft: #211d13;
+      }}
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      line-height: 1.5;
+    }}
+    main {{ width: min(62rem, calc(100% - 2rem)); margin: 3rem auto; }}
+    h1, h2, h3, p, ul, dl {{ margin-top: 0; }}
+    h1 {{ max-width: 18ch; margin-bottom: 0; font-size: clamp(2rem, 5vw, 4rem); line-height: 1; }}
+    h2 {{ font-size: 1rem; }}
+    h3 {{ margin-bottom: 0; font-size: 0.95rem; }}
+    .eyebrow, dt, .status, .digest {{
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }}
+    .eyebrow {{ color: var(--muted); }}
+    .summary {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 2rem;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--assist);
+      background: var(--soft);
+    }}
+    .verdict {{
+      color: var(--assist);
+      font: 600 clamp(2rem, 5vw, 3.5rem)/1 ui-monospace, monospace;
+    }}
+    .requested {{ margin-bottom: 0.3rem; color: var(--muted); font-size: 0.85rem; }}
+    .rationale {{ max-width: 58ch; margin: 1rem 0 0; }}
+    .facts {{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin: 0;
+      border: 1px solid var(--rule);
+      border-top: 0;
+    }}
+    .facts div {{ padding: 1rem; border-right: 1px solid var(--rule); }}
+    .facts div:last-child {{ border-right: 0; }}
+    dt {{ color: var(--muted); }}
+    dd {{ margin: 0.3rem 0 0; overflow-wrap: anywhere; }}
+    .claims {{ display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }}
+    .claim {{ padding: 1.1rem; border: 1px solid var(--rule); background: var(--paper); }}
+    .claim-pass {{ border-top: 3px solid var(--pass); }}
+    .claim-fail {{ border-top: 3px solid var(--fail); }}
+    .claim-incomplete {{ border-top: 3px solid var(--incomplete); }}
+    .claim-head {{ display: grid; grid-template-columns: 1fr auto; gap: 1rem; }}
+    .claim p {{ margin: 0.8rem 0; color: var(--muted); font-size: 0.88rem; }}
+    .claim dl div {{
+      display: grid;
+      grid-template-columns: 4rem 1fr;
+      gap: 0.5rem;
+      padding-top: 0.45rem;
+      border-top: 1px solid var(--rule);
+    }}
+    .claim dd {{ font-size: 0.78rem; }}
+    .claim-pass .status {{ color: var(--pass); }}
+    .claim-fail .status {{ color: var(--fail); }}
+    .claim-incomplete .status {{ color: var(--incomplete); }}
+    .notes {{ display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }}
+    .note {{ padding: 1.1rem; border: 1px solid var(--rule); }}
+    .note ul {{ margin-bottom: 0; padding-left: 1.15rem; color: var(--muted); font-size: 0.88rem; }}
+    .verification-boundary {{
+      max-width: 68ch;
+      margin-top: 2rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }}
+    .digest {{
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      text-transform: none;
+      overflow-wrap: anywhere;
+    }}
+    @media (max-width: 44rem) {{
+      main {{ margin: 1.5rem auto; }}
+      .summary, .claims, .notes {{ grid-template-columns: 1fr; }}
+      .facts {{ grid-template-columns: 1fr 1fr; }}
+      .facts div:nth-child(2) {{ border-right: 0; }}
+      .facts div:nth-child(-n + 2) {{ border-bottom: 1px solid var(--rule); }}
+    }}
+    @media print {{
+      :root {{ color-scheme: light; }}
+      body {{ background: white; }}
+      main {{ width: 100%; margin: 0; }}
+      .claim, .note, .summary {{ break-inside: avoid; }}
+    }}
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Verified against supplied artifacts · {_html_text(record['record_id'])}</p>
+    <h1>{_html_text(workload['name'])}</h1>
+    <section class="summary {issued_class}" aria-labelledby="decision-heading">
+      <div>
+        <p class="requested">Requested {_html_text(decision['requested'])}</p>
+        <h2 id="decision-heading" class="verdict">{issued}</h2>
+        <p class="rationale">{_html_text(decision['rationale'])}</p>
+      </div>
+      <dl>
+        <div><dt>Required claims</dt><dd>{len(claims)}</dd></div>
+        <div>
+          <dt>Pass / fail / incomplete</dt>
+          <dd>{statuses['PASS']} / {statuses['FAIL']} / {statuses['INCOMPLETE']}</dd>
+        </div>
+      </dl>
+    </section>
+    <dl class="facts">
+      <div><dt>Population</dt><dd>{_html_text(workload['population'])}</dd></div>
+      <div>
+        <dt>Window</dt>
+        <dd>{_html_text(window['start'])} to {_html_text(window['end'])}</dd>
+      </div>
+      <div><dt>Counterfactual</dt><dd>{_html_text(record['counterfactual']['name'])}</dd></div>
+      <div><dt>Review</dt><dd>{_html_text(review['review_date'])} · {reviewers}</dd></div>
+    </dl>
+    <section aria-labelledby="claims-heading">
+      <p class="eyebrow" id="claims-heading">Required claims</p>
+      <div class="claims">
+{claims_html}
+      </div>
+    </section>
+    <div class="notes">
+      <section class="note" aria-labelledby="next-heading">
+        <h2 id="next-heading">Required before the next mode</h2>
+        <ul>
+{controls_html}
+        </ul>
+      </section>
+      <section class="note" aria-labelledby="limits-heading">
+        <h2 id="limits-heading">Known limits and non-claims</h2>
+        <ul>
+{missing_html}
+{non_claims_html}
+        </ul>
+      </section>
+    </div>
+    <p class="verification-boundary">
+      Verification replays this record against the supplied artifacts. It does not
+      establish the real-world truth or representativeness of the inputs.
+    </p>
+    <p class="digest">Evidence digest: {_html_text(evidence['evidence_digest'])}<br>
+      Decision contract: {_html_text(evidence['decision_contract_digest'])}<br>
+      Reproduce: <code>{_html_text(record['reproduction']['command'])}</code>
+    </p>
+  </main>
+</body>
+</html>
+"""
+
+
+def _html_text(value: Any) -> str:
+    return html.escape(str(value), quote=True)
 
 
 def load_decision_record(path: str | Path) -> dict[str, Any]:
@@ -935,6 +1191,7 @@ __all__ = [
     "blank_decision_record",
     "load_decision_record",
     "render_blank_decision_record",
+    "render_decision_record_html",
     "validate_decision_record",
     "verify_decision_record",
 ]

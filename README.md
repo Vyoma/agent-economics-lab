@@ -808,6 +808,12 @@ agent-economics decision-record validate decision-record.json \
   --bundle evidence.bundle.json \
   --attestations attestations.json \
   --artifact-root .
+
+agent-economics decision-record render decision-record.json \
+  --bundle evidence.bundle.json \
+  --attestations attestations.json \
+  --artifact-root . \
+  --output decision-record.html
 ```
 
 The verifier returns exit code `2` until the record is structurally complete and
@@ -820,12 +826,19 @@ claim does not pass or known evidence is missing. The prose rationale and
 real-world truth of the inputs remain issuer claims; this verifies the decision
 against the supplied evidence, not reality.
 
+`render` runs that same verification first and writes no HTML when any binding
+fails. Its self-contained review card presents the issued mode, required claim
+statuses, thresholds, observed values, controls, missing evidence, non-claims,
+and the evidence and decision-contract digests. It uses no remote scripts,
+fonts, or runtime dependencies.
+
 Version 1 deliberately replays the shipped default check contract. A custom
 composed check set is refused until the record format can carry and rebuild its
 configuration. `signed_off` and the reviewer names are assertions, not digital
 signatures; protect real approvals with repository review controls.
 
 [Inspect the filled example](examples/agent-decision-record.json) ·
+[Open the generated review card](examples/agent-decision-record.html) ·
 [Read the JSON Schema](templates/agent-decision-record.schema.json) ·
 [Use the one-page review contract](templates/agent-scale-decision-contract.md)
 

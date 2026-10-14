@@ -16,6 +16,7 @@ from agent_economics.decision_record import (
     blank_decision_record,
     load_decision_record,
     render_blank_decision_record,
+    render_decision_record_html,
     validate_decision_record,
     verify_decision_record,
 )
@@ -27,6 +28,7 @@ BUNDLE = ROOT / "examples" / "agent-decision-record.bundle.json"
 ATTESTATIONS = ROOT / "examples" / "attestations.json"
 TEMPLATE = ROOT / "templates" / "agent-decision-record.template.json"
 SCHEMA = ROOT / "templates" / "agent-decision-record.schema.json"
+HTML_EXAMPLE = ROOT / "examples" / "agent-decision-record.html"
 
 
 def _attestations() -> dict[str, Attestation]:
@@ -98,6 +100,80 @@ class DecisionRecordTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn("VERIFIED", output.getvalue())
         self.assertIn("decision=ASSIST", output.getvalue())
+
+    def test_checked_in_html_matches_the_record_renderer(self) -> None:
+        self.assertEqual(
+            HTML_EXAMPLE.read_text(encoding="utf-8"),
+            render_decision_record_html(self.example),
+        )
+        self.assertIn(
+            "Verified against supplied artifacts",
+            render_decision_record_html(self.example),
+        )
+        self.assertIn(
+            "real-world truth or representativeness",
+            render_decision_record_html(self.example),
+        )
+
+    def test_renderer_escapes_record_text(self) -> None:
+        record = deepcopy(self.example)
+        record["workload"]["name"] = '<script>alert("not markup")</script>'
+        rendered = render_decision_record_html(record)
+        self.assertNotIn("<script>", rendered)
+        self.assertIn("&lt;script&gt;", rendered)
+
+    def test_cli_renders_only_after_verification(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "decision-record.html"
+            output = io.StringIO()
+            with redirect_stdout(output):
+                exit_code = main(
+                    [
+                        "decision-record",
+                        "render",
+                        str(EXAMPLE),
+                        "--bundle",
+                        str(BUNDLE),
+                        "--attestations",
+                        str(ATTESTATIONS),
+                        "--artifact-root",
+                        str(ROOT),
+                        "--output",
+                        str(target),
+                    ]
+                )
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                target.read_text(encoding="utf-8"),
+                render_decision_record_html(self.example),
+            )
+            self.assertIn("Wrote VERIFIED", output.getvalue())
+
+            tampered = deepcopy(self.example)
+            tampered["decision"]["issued"] = "STOP"
+            tampered_path = Path(directory) / "tampered.json"
+            tampered_path.write_text(json.dumps(tampered), encoding="utf-8")
+            refused_target = Path(directory) / "tampered.html"
+            error = io.StringIO()
+            with redirect_stderr(error):
+                refused_exit = main(
+                    [
+                        "decision-record",
+                        "render",
+                        str(tampered_path),
+                        "--bundle",
+                        str(BUNDLE),
+                        "--attestations",
+                        str(ATTESTATIONS),
+                        "--artifact-root",
+                        str(ROOT),
+                        "--output",
+                        str(refused_target),
+                    ]
+                )
+            self.assertEqual(refused_exit, 2)
+            self.assertFalse(refused_target.exists())
+            self.assertIn("decision.issued does not reproduce", error.getvalue())
 
     def test_verifier_rejects_a_tampered_evidence_digest(self) -> None:
         record = deepcopy(self.example)

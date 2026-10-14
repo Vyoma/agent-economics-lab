@@ -36,6 +36,7 @@ from .decision_record import (
     SCHEMA_VERSION as DECISION_RECORD_SCHEMA_VERSION,
     load_decision_record,
     render_blank_decision_record,
+    render_decision_record_html,
     verify_decision_record,
 )
 from .delegation import assess_bundle_closure
@@ -448,6 +449,22 @@ def build_parser() -> argparse.ArgumentParser:
         default=".",
         help="Root used to resolve every artifact URI (default: current directory).",
     )
+    decision_record_render = decision_record_actions.add_parser(
+        "render",
+        help="Verify the record, then write a self-contained HTML review card.",
+    )
+    decision_record_render.add_argument("record")
+    decision_record_render.add_argument("--bundle", required=True)
+    decision_record_render.add_argument(
+        "--attestations",
+        help="Instrument attestations used by the recorded audit.",
+    )
+    decision_record_render.add_argument(
+        "--artifact-root",
+        default=".",
+        help="Root used to resolve every artifact URI (default: current directory).",
+    )
+    decision_record_render.add_argument("--output", required=True)
 
     return parser
 
@@ -658,6 +675,23 @@ def _cmd_decision_record(args: argparse.Namespace) -> int:
         for error in errors:
             print(f"INCOMPLETE: {error}", file=sys.stderr)
         return 2
+    if args.decision_record_action == "render":
+        target = Path(args.output)
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(render_decision_record_html(record), encoding="utf-8")
+        except (OSError, ValueError) as error:
+            print(
+                f"INCOMPLETE: could not render decision record: {error}",
+                file=sys.stderr,
+            )
+            return 2
+        print(
+            f"Wrote VERIFIED {DECISION_RECORD_SCHEMA_VERSION} "
+            f"record_id={record['record_id']} decision={record['decision']['issued']} "
+            f"to {target}"
+        )
+        return 0
     print(
         f"VERIFIED {DECISION_RECORD_SCHEMA_VERSION} "
         f"record_id={record['record_id']} "
