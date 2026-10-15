@@ -140,6 +140,16 @@ frontier code and was not applying it here. Corrected at alpha / 2k, which
 widens every interval; the same four still contain 0.5, so the finding
 survives the stricter test rather than depending on the looser one.
 
+**A front page that counted its own findings by hand.** The index reached
+sixteen standing findings while README.md still said the project "has filed
+fourteen results" and that "two of the fourteen" were clean bills. A test
+already compared prose dataset counts against the index, and it passed
+throughout, because it matched on the word `datasets` and the drift had
+moved to a different noun. The same failure, one noun over, is not caught by
+a guard written against the first noun
+([tests/test_findings.py](../tests/test_findings.py) now checks both, and
+was proven to fail on the stale wording before the wording was fixed).
+
 ## Tools that reported confidently and falsely
 
 **A verifier that cried wolf twice before working.** The upstream
@@ -231,6 +241,21 @@ published entry leads with the correction rather than the headline
 **"Satisfaction untethered from work done."** Very short human-agent
 sessions rated highly would have suggested ratings disconnected from
 effort. There are four such sessions. Four sessions establish nothing.
+
+**"Abstention rescues the weak graders."** Asked whether selective
+prediction repairs the graders of AEL-2026-013, a first pass said yes and
+loudly: `gpt5.2-high` rose from AUC 0.547 to 0.833 on the most confident
+quarter of its questions. It was an artifact of the tie-break. Three of the
+four confidence rules are integer-valued, so the coverage cutoff lands
+inside a block of hundreds of questions the rule scores identically, and
+that pass chose among them by sorting on the AUC it was measuring. Ranking
+those same ties by question id instead gives 0.566. The published entry
+measures the width the tie-break alone can move each rule's figure and
+reports it beside the result: 0.657 under `top-margin`, 0.577 under
+`spread`, 0.002 under the standard deviation rule it publishes
+([AEL-2026-016](../research/FINDINGS.md)). The number was never published
+wrong, but it was believed and written down for long enough to be quoted,
+and it would have been the most flattering result in the corpus.
 
 ## What this page does not do
 

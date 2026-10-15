@@ -90,7 +90,8 @@ check, never a silent skip.
 A frozen document with no verifier fails `make verify-corpus`. This is the
 newest rule in this contract and it exists because the project broke it:
 verification covered only the datasets frozen through one transport and
-skipped the rest, so six of fourteen published findings could not be checked
+skipped the rest, so six of the fourteen findings published at the time
+could not be checked
 against source by anyone, while the run printed the count of what it had
 checked as though it were the count of what exists.
 
