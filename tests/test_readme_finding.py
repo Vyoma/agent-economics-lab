@@ -1,17 +1,17 @@
 """Every numeral in the README's finding section, bound to frozen evidence.
 
 An adversarial audit corrupted the README's most-quoted figures: the 44
-disagreements, the 91.2%, the spread, the nine idle runs, the GIF alt text's
+disagreements, the 91.2%, the spread, the nine idle runs, the decision still's
 23-across-588, and the entire suite stayed green, under a front page claiming
 every published number is verified in CI. The quotable sentences were exactly
 the unguarded ones: the same figures inside generated documents were
 byte-compared, and their hand-typed README copies were not.
 
 This applies docs/index.md's registry pattern to the README's front matter:
-the GIF alt text and the whole "Found in the wild" section. Each numeral is
-either COMPUTED (bound to code that rederives it from committed evidence) or a
-STATED_INPUT with a reason. A numeral that is neither fails the walk, so a new
-hand-typed figure cannot be published unguarded.
+the decision still's alt text and the whole "Found in the wild" section. Each
+numeral is either COMPUTED (bound to code that rederives it from committed
+evidence) or a STATED_INPUT with a reason. A numeral that is neither fails the
+walk, so a new hand-typed figure cannot be published unguarded.
 """
 
 from __future__ import annotations
@@ -131,7 +131,7 @@ _DISAGREE, _TWIN_N = _twin_disagreements()
 #: Every derived figure in the guarded region, bound to the code that
 #: rederives it from committed evidence.
 COMPUTED: dict[str, str] = {
-    # GIF alt text
+    # Decision-still alt text
     "23": str(_drift()["dynamic_false_scale_transitions"]),
     "588": str(_drift()["comparisons"]),
     # the headline paragraph and Found in the wild

@@ -42,6 +42,7 @@ ASSETS = ROOT / "docs" / "assets"
 GIF = ASSETS / "decision.gif"
 PNG = ASSETS / "decision.png"
 FACTS = ASSETS / "decision.json"
+README = ROOT / "README.md"
 
 
 def reference_decode(data: bytes, min_code_size: int) -> bytes:
@@ -182,6 +183,20 @@ class VideoIsCurrent(unittest.TestCase):
             self.assertTrue(path.exists(), f"{path.name} is missing; run: make video")
         self.assertGreater(GIF.stat().st_size, 20_000)
         self.assertGreater(PNG.stat().st_size, 2_000)
+
+    def test_readme_uses_the_static_poster_not_the_autoplaying_gif(self) -> None:
+        """The front page should be immediate, light, and motion-free by default."""
+        readme = README.read_text(encoding="utf-8")
+        self.assertIn(
+            "](docs/assets/decision.png)",
+            readme,
+            "README should show the generated key frame",
+        )
+        self.assertNotIn(
+            "](docs/assets/decision.gif)",
+            readme,
+            "README should not autoplay the animated explainer",
+        )
 
     def test_committed_video_matches_live_decisions(self) -> None:
         import render_video
