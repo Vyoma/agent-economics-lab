@@ -477,8 +477,17 @@ class DocumentationLinksResolve(unittest.TestCase):
             text = path.read_text(encoding="utf-8")
             for match in re.finditer(r"\]\((?!https?:|#|mailto:)([^)#]+)", text):
                 target = (path.parent / match.group(1)).resolve()
+                # GitHub Pages renders a source page such as `note.md` at
+                # `note.html`. Public links should name the served route even
+                # though only the Markdown source exists in the checkout.
+                source_target = target
+                if not source_target.exists() and target.suffix == ".html":
+                    source_target = target.with_suffix(".md")
                 with self.subTest(doc=path.name, link=match.group(1)):
-                    self.assertTrue(target.exists(), f"{path.name} -> {match.group(1)}")
+                    self.assertTrue(
+                        source_target.exists(),
+                        f"{path.name} -> {match.group(1)}",
+                    )
 
     def test_every_in_page_anchor_names_a_heading(self) -> None:
         import re
