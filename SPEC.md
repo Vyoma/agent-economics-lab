@@ -7,6 +7,12 @@ and identical decisions; where behavior is deliberately surprising, the
 reason is stated inline. Clause numbers are stable; the conformance tests in
 [tests/](tests/) cite them. MUST/MUST NOT are used in the RFC sense.
 
+Schema identifiers, not the pre-1.0 Python package version, are the compatibility
+boundary. A change to the meaning of a decision, exit code, digest, routing rule,
+attestation verdict, or claim verdict MUST introduce a new schema identifier.
+Within `assurance.decision-contract@2` and `assurance.claim@1`, those meanings
+remain stable. Python call signatures and non-normative report prose are not frozen.
+
 ## 1. Decisions and exit codes
 
 **1.1** A decision is exactly one of `INCOMPLETE`, `SCALE`, `ASSIST`,

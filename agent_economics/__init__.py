@@ -15,7 +15,7 @@ exported now, tests/test_entry_points.py pins the difference on every
 shipped bundle, and the rule is: gating anything, call `decide`.
 """
 
-__version__ = "0.9.0"
+__version__ = "0.10.0"
 
 from .adapters import (
     load_normalized_json_bundle,

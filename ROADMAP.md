@@ -5,27 +5,31 @@ honest answer for each. A stage claim below is backed by a named surface you
 can run; where the next stage's gate is not yet met, the gap is stated
 rather than rounded up.
 
-## Layer maturity today (0.9.0)
+## Layer maturity today (0.10.0)
 
 | layer | stage | evidence | gap to next stage |
 |---|---|---|---|
-| Decision engine + contract | **Production-candidate** | over 830 tests, mutation self-test on every run, measured linear to 10⁶ events, byte-stable digests across 3.10–3.13 in CI | no external production deployment has run it in anger; no semver stability promise yet |
-| Claim / verify / ledger | **Production-candidate** | totality contract (SUPPORTED/REFUTED/UNVERIFIED, never a crash), ledger gates CI, refuted claims fail the build | claim schema not yet frozen as `1.0`; needs a written compatibility promise |
+| Decision engine + contract | **Production-candidate** | over 830 tests, mutation self-test on every run, measured linear to 10⁶ events, byte-stable digests across 3.10–3.13 in CI | no external production deployment has run it in anger; the package remains pre-1.0 |
+| Claim / verify / ledger | **Production-candidate** | totality contract (SUPPORTED/REFUTED/UNVERIFIED, never a crash), ledger gates CI, refuted claims fail the build | claim schema remains `assurance.claim@1`; a semantic change requires a new schema id |
 | Adapters (CSV, Claude Code, session-tree, OTel GenAI) | **Beta** | pinned conversion contracts, byte-compared example cases | field coverage tracks specific emitter versions; drift is caught, not absorbed |
 | Corpus + audit discipline | **Operational** | 10 audited datasets across two domains, findings reproducible from upstream, contribution contract written | zero third-party entries so far; the contract is untested by a stranger |
-| Distribution | **PoC** | public repo, one-command reproduce | not published to PyPI; no versioned releases or tags |
+| Distribution | **Beta** | self-contained wheel tested outside the checkout; tag/version/changelog binding; tagged-source reproduction; source-archive rebuild; checksummed GitHub release artifacts | not published to PyPI; no external consumer has exercised the release path |
 
 ## Stage gates to production
 
 Each is a checkbox with a concrete artifact, not a vibe:
 
-1. **Freeze the public contract.** Publish `SPEC.md` as normative, tag its
-   version, and promise: within a major version, decisions, exit codes,
-   digests, and claim verdicts do not change meaning. Gate: a conformance
-   test file that walks the spec clause by clause.
-2. **Release discipline.** Tagged releases matching `CHANGELOG.md`; a
-   release is `make reproduce` green from the tag's tarball on a clean
-   machine. Gate: a release checklist in CI.
+1. **Public contract: met for schema versions 1 and 2.** `SPEC.md` is
+   normative, `tests/test_conformance.py` walks its clauses, and a semantic
+   change requires a new schema id. The package is still pre-1.0; this is a
+   schema compatibility promise, not a promise that every Python API is frozen.
+2. **Release discipline: automated.** A tag must match both the package
+   version and one dated changelog entry. Release CI runs `make reproduce`
+   from the full tagged checkout, then rebuilds and exercises both the wheel
+   and source archive outside that checkout before publishing checksums. The
+   full-history step cannot honestly run from an archive because historical
+   defect replay is part of the evidence; the workflow states and tests that
+   boundary instead of quietly skipping it.
 3. **PyPI publication.** Blocked on the owner's explicit decision (claims a
    name permanently). Everything else in packaging is ready: wheel builds,
    no runtime dependencies, 3.10–3.13.

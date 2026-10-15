@@ -2,10 +2,32 @@
 
 ## Unreleased
 
+## 0.10.0 - 2026-10-14
+
+The project moved from a decision engine with research around it to a
+reviewable evidence system: public findings, an executable decision record,
+and one feedback contract across predictive, generative, and agent systems.
+
+### Public research record
+
+- Expand the corpus to ten public datasets across two domains and publish a
+  generated findings index with stable identifiers, frozen evidence, upstream
+  verification, scope boundaries, and corrective actions.
+- Publish negative results alongside findings that survived: six narrowed or
+  refuted novelty claims; a generated-test proxy at kappa 0.062 against
+  adjudication; and two selective-prediction studies where abstention did not
+  rescue the weak grader. The latter recomputes the majority baseline on every
+  retained subset and measures cutoff-tie sensitivity rather than treating a
+  higher conditional accuracy as an improvement.
+- Add a standalone reproduction of the headline grader result, a generated
+  instrument scorecard, a correction log, and executable replays of historical
+  defects at their pre-fix revisions.
+
+### Reviewable decisions and feedback loops
+
 - Add a digest-bound design note explaining how predictive models, generative
   components, and tool-using agents share a production feedback loop without
   collapsing their distinct evidence requirements.
-
 - Add a machine-readable Agent Decision Record contract for one bounded agent
   deployment decision.
 - Ship a JSON Schema, intentionally incomplete template, and filled support-fixture
@@ -22,8 +44,34 @@
   agent systems, with distinct modality evidence, outcome-proxy boundaries,
   versioned interventions, rollback semantics, a canonical digest, and a filled
   synthetic example.
+- Render the verified decision record as a static review surface on GitHub Pages;
+  tests follow the same routes a reader receives rather than only checking source
+  files that Pages never publishes.
+
+### Distribution integrity
+
+- Ship the bundled demo evidence in the wheel and exercise it from a directory
+  with no checkout in reach on Python 3.10 through 3.13.
+- Move package licensing to the SPDX/PEP 639 metadata shape and include both
+  `LICENSE` and `NOTICE` explicitly, eliminating the build metadata scheduled
+  for removal by setuptools.
+- Carry the changelog, normative specification, citation metadata, security
+  policy, third-party notices, and release checker in the source archive; CI
+  asserts their presence before rebuilding it.
+- Bind a release tag to the package version and dated changelog entry. Release CI
+  reproduces the full tagged checkout, builds both source and wheel artifacts,
+  rebuilds from the source archive, exercises the installed wheel, publishes
+  SHA-256 checksums, and only then attaches artifacts to a GitHub release.
+- Make documentation regeneration a pre-push gate, preserve full history where
+  defect replays need it, and record the historical release gap below instead of
+  silently backfilling a tag.
 
 ## 0.9.0 - 2026-09-02
+
+`0.8.0` and `0.9.0` were recorded in package metadata and this changelog but
+were not tagged or published as GitHub releases. Their changes are included in
+`0.10.0`; this note preserves the discrepancy rather than manufacturing
+retroactive releases.
 
 The SCALE semantics changed, the instrument was pointed at the wild, and the
 engine got a measured envelope.

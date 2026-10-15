@@ -1,0 +1,10 @@
+include CHANGELOG.md
+include CITATION.cff
+include LICENSE
+include NOTICE
+include README.md
+include SECURITY.md
+include SPEC.md
+include THIRD_PARTY_NOTICES.md
+include scripts/check_release.py
+recursive-include agent_economics/_examples *

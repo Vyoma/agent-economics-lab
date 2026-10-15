@@ -51,6 +51,7 @@ its own stratification.
 | what survives scrutiny | [the narrow novelty claim](docs/novelty.md), [honest limits](docs/limitations.md), and [prior art](docs/landscape.md) |
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/Vyoma/agent-economics-lab)](https://github.com/Vyoma/agent-economics-lab/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 ![Disabling one required gate leaves the evidence unchanged. An engine that infers its requirements answers SCALE anyway, 23 times across 588 comparisons. A fixed contract returns INCOMPLETE in all 588.](docs/assets/decision.gif)
