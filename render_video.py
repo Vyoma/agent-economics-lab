@@ -9,7 +9,7 @@ video changes with it, and `tests/test_videokit.py` fails if the committed asset
 no longer matches what the code decides today.
 
 Output, into --out-dir (default docs/assets):
-    decision.gif     animated, loops, for sharing
+    decision.gif     animated, loops, for the project page and sharing
     decision.png     the key still, for the README
     decision.json    the on-screen facts, so a test can detect a stale asset
 """

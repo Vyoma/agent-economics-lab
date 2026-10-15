@@ -47,8 +47,11 @@ agent-economics demo --extract .
 [![Release](https://img.shields.io/github/v/release/Vyoma/agent-economics-lab)](https://github.com/Vyoma/agent-economics-lab/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-![The evidence stays fixed while one required gate is disabled. An inferred contract answers SCALE; the fixed contract refuses with INCOMPLETE.](docs/assets/decision.gif)
-<sub>Generated from live decisions and recomputed in tests. Synthetic intervention, not a production failure-rate estimate.</sub>
+![The evidence stays fixed while one required gate is disabled. An inferred contract answers SCALE in 23 of 588 comparisons; the fixed contract refuses with INCOMPLETE in all 588.](docs/assets/decision.png)
+
+_Static key frame generated from live decisions and recomputed in tests.
+[Open the evidence-bound decision record](https://vyoma.github.io/agent-economics-lab/decision-record.html).
+Synthetic intervention; not a production failure-rate estimate._
 
 ## Found in the wild
 
