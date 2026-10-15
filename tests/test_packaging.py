@@ -22,6 +22,25 @@ SOURCE = ROOT / "examples"
 
 
 class ThePackagedExamplesMatchTheRepository(unittest.TestCase):
+    def test_source_archive_declares_the_public_contract_documents(self) -> None:
+        manifest = (ROOT / "MANIFEST.in").read_text(encoding="utf-8")
+        for path in (
+            "CHANGELOG.md",
+            "CITATION.cff",
+            "SECURITY.md",
+            "SPEC.md",
+            "THIRD_PARTY_NOTICES.md",
+            "scripts/check_release.py",
+        ):
+            with self.subTest(path=path):
+                self.assertIn(f"include {path}", manifest)
+
+    def test_license_metadata_uses_the_current_pep_639_shape(self) -> None:
+        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+        self.assertIn('license = "Apache-2.0"', pyproject)
+        self.assertIn('license-files = ["LICENSE", "NOTICE"]', pyproject)
+        self.assertNotIn("License :: OSI Approved", pyproject)
+
     def test_every_demo_input_is_byte_identical_to_its_source(self) -> None:
         from agent_economics.cli import DEMO_INPUTS
 

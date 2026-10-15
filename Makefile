@@ -54,7 +54,11 @@ help:
 check-python:
 	@$(PYTHON) -c 'import sys; sys.version_info >= (3, 10) or sys.exit("agent-economics-lab requires Python 3.10 or newer; %d.%d found. Retry with: make PYTHON=python3.12 <target>" % sys.version_info[:2])'
 
-.PHONY: check-python lint coverage label-error demo decision-record falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
+.PHONY: check-python release-check lint coverage label-error demo decision-record falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
+
+release-check: check-python
+	@test -n "$(TAG)" || { echo "need TAG, for example: make release-check TAG=v0.10.0"; exit 2; }
+	@$(PYTHON) scripts/check_release.py --tag "$(TAG)"
 
 demo: check-python
 	@$(PYTHON) -m agent_economics evaluate \

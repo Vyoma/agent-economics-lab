@@ -1,0 +1,83 @@
+name: release-integrity
+
+on:
+  push:
+    tags: ["v*"]
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-integrity-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  verify-build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      # Reproduction includes historical defect replays. A shallow checkout
+      # can make that evidence disappear while the release still goes green.
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Bind tag, package, and changelog
+        run: python scripts/check_release.py --tag "$GITHUB_REF_NAME"
+
+      - name: Reproduce the tagged source
+        run: make reproduce
+
+      - name: Build source and wheel artifacts
+        run: |
+          python -m pip install build==1.2.2.post1
+          python -m build --sdist --wheel --outdir dist
+
+      - name: Prove the wheel works without the checkout
+        run: |
+          wheel_env="$(mktemp -d)/venv"
+          python -m venv "$wheel_env"
+          "$wheel_env/bin/pip" install dist/*.whl
+          cd "$(mktemp -d)"
+          "$wheel_env/bin/agent-economics" capabilities
+          "$wheel_env/bin/agent-economics" demo | tee demo.txt
+          grep -F "Decision: ASSIST" demo.txt
+
+      - name: Prove the source archive rebuilds the same public version
+        run: |
+          source_dir="$(mktemp -d)"
+          rebuilt_dir="$(mktemp -d)"
+          tar -xzf dist/*.tar.gz -C "$source_dir"
+          test -f "$source_dir"/*/CHANGELOG.md
+          test -f "$source_dir"/*/SPEC.md
+          test -f "$source_dir"/*/THIRD_PARTY_NOTICES.md
+          test -f "$source_dir"/*/scripts/check_release.py
+          python "$source_dir"/*/scripts/check_release.py --tag "$GITHUB_REF_NAME"
+          python -m pip wheel "$source_dir"/* --no-deps --wheel-dir "$rebuilt_dir"
+          rebuilt_env="$(mktemp -d)/venv"
+          python -m venv "$rebuilt_env"
+          "$rebuilt_env/bin/pip" install "$rebuilt_dir"/*.whl
+          test "$("$rebuilt_env/bin/agent-economics" --version)" = \
+            "agent-economics ${GITHUB_REF_NAME#v}"
+
+      - name: Bind downloads to their bytes
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: agent-economics-${{ github.ref_name }}
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Attach verified artifacts to the GitHub release
+        if: ${{ github.event_name == 'release' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" dist/* --clobber
