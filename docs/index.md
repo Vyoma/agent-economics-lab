@@ -1,18 +1,35 @@
 ---
-title: "How much can your LLM judge be wrong before your unit economics lie to you?"
-description: "Cost per successful task puts the judge's label in the denominator, so labelling error divides the metric instead of nudging it. What actually has to stay small is net bias, not disagreement."
+title: "Agent Economics Lab | Evidence for AI deployment decisions"
+description: "Replay model and agent traces, verify outcomes, price the full work, and issue a reproducible decision to scale, supervise, stop, or withhold."
 ---
 
-# How much can your LLM judge be wrong before your unit economics lie to you?
+# Your agent says it worked. Prove it.
 
-*Every number here is reproducible with one command; the source is
+Agent Economics Lab turns model and agent traces, independently checked
+outcomes, full cost, a named counterfactual, and policy into a decision someone
+else can reproduce. It carries evaluation into the production feedback loop
+for predictive models, generative components, and tool-using agents.
+
+```bash
+uvx --from git+https://github.com/Vyoma/agent-economics-lab agent-economics demo
+```
+
+[Run it on your evidence](https://github.com/Vyoma/agent-economics-lab/blob/main/examples/README.md) ·
+[open the evidence-bound decision record](decision-record.html) ·
+[inspect the public-data findings](https://github.com/Vyoma/agent-economics-lab/blob/main/research/FINDINGS.md) ·
+[follow the production feedback contract](production-feedback-loops.html)
+
+![Removing one required gate leaves the evidence unchanged. An inferred contract answers SCALE anyway; the fixed contract returns INCOMPLETE.](assets/decision.gif)
+
+*Generated from live decisions and recomputed in the test suite. This is a
+synthetic intervention, not an estimate of production failure rates.*
+
+## One result worth inspecting
+
+### How much can your LLM judge be wrong before your unit economics lie to you?
+
+*Every number below is reproducible with one command; the source is
 [on GitHub](https://github.com/Vyoma/agent-economics-lab).*
-
-**The working artifact:** a fail-closed decision over traces, outcomes, full
-cost, a named counterfactual, and policy. [Open the verified decision
-record](decision-record.html) · [follow the production feedback
-contract](production-feedback-loops.html) across predictive models, generative
-components, and tool-using agents.
 
 You have an agent doing real work, and someone has to decide whether to give it more of
 the queue, keep a person alongside it, or turn it off. That decision needs a number, and
@@ -239,11 +256,10 @@ shrinks its own contract and answers anyway: 23 false `SCALE`s across 588 compar
 against 588 `INCOMPLETE`s from a fixed contract. That is a deterministic fixture, and the
 23 counts only cases where the disabled gate was the sole failing one.
 
-![Removing one required gate leaves the evidence unchanged. An inferred contract answers SCALE anyway; the fixed contract returns INCOMPLETE.](assets/decision.gif)
-
-The visual is generated from live decisions by `make video`, and the displayed
-counts are recomputed in the test suite. It is a synthetic intervention, not an
-estimate of how often production systems fail this way.
+The visual at the top of this page is generated from live decisions by
+`make video`, and the displayed counts are recomputed in the test suite. It is
+a synthetic intervention, not an estimate of how often production systems fail
+this way.
 
 ```bash
 make demo

@@ -1,65 +1,71 @@
 # Agent Economics Lab
 
-**Decide whether an AI agent is worth expanding, worth supervising, or worth
-switching off. Backed by what it actually cost, not by how often it looked right.**
+**Your agent says it worked. Prove it.**
 
-For the person who has traces, some outcome labels, a rate card, and pressure
-to answer "should we scale this?". Python 3.10+, no dependencies outside the
-standard library, no API key, no account.
+Turn model and agent traces, independently checked outcomes, full cost, and a
+named alternative into a decision someone else can reproduce. Missing evidence
+is a result, never an implied pass.
+
+```text
+traces + outcomes + prices + baseline + policy
+                        |
+                        v
+         replay + audit + cost-quality frontier
+                        |
+                        v
+        SCALE | ASSIST | STOP | INCOMPLETE
+```
+
+[Run the bundled case](#run-it) ·
+[open the evidence-bound decision record](https://vyoma.github.io/agent-economics-lab/decision-record.html) ·
+[inspect the public SWE-bench case](examples/public-swebench/) ·
+[follow the production feedback contract](docs/production-feedback-loops.md)
+
+### Run it
 
 ```bash
 uvx --from git+https://github.com/Vyoma/agent-economics-lab agent-economics demo
 ```
 
-About a second, and it prints a real decision on data shipped inside the
-package. No clone, no config, no network beyond the install. When you want to
-run it on your own numbers, the same command hands you the input files to edit:
+Python 3.10+, standard library only, no API key or account. The command replays
+data shipped inside the package and prints why the decision was issued. Extract
+the same contract to replace the fixture with your runs:
 
 ```bash
 agent-economics demo --extract .
 ```
 
-From a clone instead, `make PYTHON=python3.12 demo` does the same thing and is
-byte-identical; use plain `make demo` if your `python3` is already 3.10 or
-newer. `python3 -m agent_economics` works from a bare clone with no install at
-all. The five input files are explained in [examples/README.md](examples/README.md).
-
-The answer is one of four. `SCALE`, `ASSIST` and `STOP` are decisions.
-`INCOMPLETE` means a required gate had no evidence, and it is the common first
-result: the tool refuses to score you rather than scoring you on whatever
-happened to be present. Only `SCALE` exits 0.
-
-**Pointed at ten public datasets it did not produce, it has filed sixteen
-results.** The sharpest is about the graders. Across 31,389 runs where an
-adjudicated outcome sat beside whether the model's own generated tests passed,
-the two agree at Cohen's kappa 0.062, and the proxy predicts the outcome 2.9 points worse than always guessing the commoner label, an interval excluding zero. One published model arm reports a
-100% resolution rate from a field its own cross-check never confirmed once. Two
-arms turn out to be the same 500 runs, and the outcome label disagrees with
-itself on 44 of them.
-
-Two of the sixteen are clean bills, recorded with the same care as the
-defects, and one is a caution against a finding of ours that did not survive
-its own stratification.
-
 | | |
 |---|---|
-| the findings | [Found in the wild](#found-in-the-wild), then [the index](research/FINDINGS.md) with stable ids and what to do about each |
-| use it on your data | [examples/README.md](examples/README.md), the five files and three commands |
-| audit any public dataset | `python3 research/corpus/audit_any.py <hf-dataset>`, no code to write |
-| check it without trusting me | [Check this repository](#check-this-repository-without-trusting-it) |
-| when it was wrong | [every correction](docs/corrections.md), including the suspicions killed before publication |
-| what survives scrutiny | [the narrow novelty claim](docs/novelty.md), [honest limits](docs/limitations.md), and [prior art](docs/landscape.md) |
+| **Use it** | [Your traces to a decision](examples/README.md): the input contract and commands |
+| **See it survive real data** | [Paired public trajectories](examples/public-swebench/) with an undecided result left undecided |
+| **Audit the measuring instrument** | [Public corpus](research/CORPUS.md): defects, clean bills, corrections, and negative results |
+| **Carry the result into production** | [Feedback-loop contract](docs/production-feedback-loops.md) for predictive, generative, and agent systems |
+| **Check every boundary** | [Reproduce the repository](#check-this-repository-without-trusting-it), then read the [limitations](docs/limitations.md) and [prior art](docs/landscape.md) |
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)
 [![Release](https://img.shields.io/github/v/release/Vyoma/agent-economics-lab)](https://github.com/Vyoma/agent-economics-lab/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-![Disabling one required gate leaves the evidence unchanged. An engine that infers its requirements answers SCALE anyway, 23 times across 588 comparisons. A fixed contract returns INCOMPLETE in all 588.](docs/assets/decision.gif)
-<sub>Generated by `make video` from live decisions and recomputed in tests. Synthetic demonstration, not a production failure-rate estimate.</sub>
+![The evidence stays fixed while one required gate is disabled. An inferred contract answers SCALE; the fixed contract refuses with INCOMPLETE.](docs/assets/decision.gif)
+<sub>Generated from live decisions and recomputed in tests. Synthetic intervention, not a production failure-rate estimate.</sub>
 
 ## Found in the wild
 
-Pointed at a public dataset, this produced two things it was built to catch, in
+Pointed at ten public datasets it did not produce, this has filed sixteen
+results. Two of the sixteen are clean bills, recorded with the same care as the
+defects. One is a caution against a finding here that did not survive its own
+stratification.
+
+The sharpest result is about the graders. Across 31,389 runs where an
+adjudicated outcome sat beside whether the model's own generated tests passed,
+the two agree at Cohen's kappa 0.062, and the proxy predicts the outcome 2.9
+points worse than always guessing the commoner label, an interval excluding
+zero. One published model arm reports a 100% resolution rate from a field its
+own cross-check never confirmed once. Two arms turn out to be the same 500 runs,
+and the outcome label disagrees with itself on 44 of them.
+
+The first public dataset produced two things the system was built to catch in
 data it did not produce.
 
 All ten model arms of
