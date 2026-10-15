@@ -11,7 +11,7 @@ description: "Cost per successful task puts the judge's label in the denominator
 **The working artifact:** a fail-closed decision over traces, outcomes, full
 cost, a named counterfactual, and policy. [Open the verified decision
 record](decision-record.html) · [follow the production feedback
-contract](production-feedback-loops.md) across predictive models, generative
+contract](production-feedback-loops.html) across predictive models, generative
 components, and tool-using agents.
 
 You have an agent doing real work, and someone has to decide whether to give it more of
@@ -131,7 +131,9 @@ This is the part that makes the rest usable, so here it is concretely.
 
 Take a random sample of `m` tasks, get human labels, and count false accepts and false
 rejects in the sample. Your estimate is `b̂ = (fp − fn)/m`. Because those are disjoint
-outcomes, ```
+outcomes,
+
+```
 SE(b̂) = sqrt( (d − b²) / m )
 ```
 
@@ -311,10 +313,10 @@ Everything else the project knows it gets wrong is in
 
 | | |
 |---|---|
-| [Specification](../SPEC.md) | the exact contract, conformance-tested clause by clause |
+| [Specification](https://github.com/Vyoma/agent-economics-lab/blob/main/SPEC.md) | the exact contract, conformance-tested clause by clause |
 | [Product requirements](prd.md) | who it is for, and the refusals that define it |
-| [Roadmap](../ROADMAP.md) | maturity per layer, stage gates to production |
-| [The instrument's scorecard](../research/EVALS.md) | how good the auditor is, blind spots included |
+| [Roadmap](https://github.com/Vyoma/agent-economics-lab/blob/main/ROADMAP.md) | maturity per layer, stage gates to production |
+| [The instrument's scorecard](https://github.com/Vyoma/agent-economics-lab/blob/main/research/EVALS.md) | how good the auditor is, blind spots included |
 | [Derivation](label-error.md) | the four propositions and their verification |
 | [Limitations](limitations.md) | every known non-claim |
 | [Corrections](corrections.md) | every time this project was wrong, and how it found out |

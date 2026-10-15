@@ -289,8 +289,18 @@ class PublishedNumbersRecompute(unittest.TestCase):
 
     def test_page_exposes_the_verified_decision_and_feedback_artifacts(self) -> None:
         self.assertIn("(decision-record.html)", self.page)
-        self.assertIn("(production-feedback-loops.md)", self.page)
+        self.assertIn("(production-feedback-loops.html)", self.page)
         self.assertIn("](assets/decision.gif)", self.page)
+
+    def test_page_links_do_not_escape_the_published_docs_root(self) -> None:
+        """Files above docs/ are not published by GitHub Pages."""
+        targets = re.findall(r"\[[^\]]+\]\(([^)]+)\)", self.page)
+        escaped = sorted(target for target in targets if target.startswith("../"))
+        self.assertEqual(
+            escaped,
+            [],
+            "Pages links outside docs/ must use a GitHub URL instead",
+        )
 
     def test_no_unregistered_numbers(self) -> None:
         """Any numeral on the page must be bound to a source or declared an input."""
@@ -313,6 +323,24 @@ class ErrorsThatAlreadyHappened(unittest.TestCase):
 
     def setUp(self) -> None:
         self.page = _page()
+
+    def test_fenced_code_markers_are_standalone_and_balanced(self) -> None:
+        """A fence appended to prose swallowed most of the rendered Pages article."""
+        fences = []
+        for line_number, line in enumerate(self.page.splitlines(), start=1):
+            if "```" not in line:
+                continue
+            fences.append(line_number)
+            self.assertRegex(
+                line.strip(),
+                r"^```(?:[A-Za-z0-9_-]+)?$",
+                f"fenced-code marker must occupy its own line (line {line_number})",
+            )
+        self.assertEqual(
+            len(fences) % 2,
+            0,
+            f"unbalanced fenced-code markers at lines {fences}",
+        )
 
     def test_the_amplification_law_is_stated_exactly(self) -> None:
         """`e/r` is the first-order form and understates the error by 2x at r=0.10."""

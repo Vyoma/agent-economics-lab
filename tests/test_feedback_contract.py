@@ -66,6 +66,11 @@ class FeedbackContractTests(unittest.TestCase):
             "not a certificate that the policy is correct",
         ):
             self.assertIn(boundary, normalized_note)
+        self.assertNotRegex(
+            note,
+            r"\]\(\.\./",
+            "files above docs/ need GitHub URLs on the published Pages site",
+        )
 
     def test_digest_ignores_object_key_order_but_binds_policy(self) -> None:
         reordered = dict(reversed(list(self.example.items())))
