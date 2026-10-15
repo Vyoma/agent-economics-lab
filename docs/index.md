@@ -8,6 +8,12 @@ description: "Cost per successful task puts the judge's label in the denominator
 *Every number here is reproducible with one command; the source is
 [on GitHub](https://github.com/Vyoma/agent-economics-lab).*
 
+**The working artifact:** a fail-closed decision over traces, outcomes, full
+cost, a named counterfactual, and policy. [Open the verified decision
+record](decision-record.html) · [follow the production feedback
+contract](production-feedback-loops.md) across predictive models, generative
+components, and tool-using agents.
+
 You have an agent doing real work, and someone has to decide whether to give it more of
 the queue, keep a person alongside it, or turn it off. That decision needs a number, and
 the usual one is **cost per successful task**: everything you spent, divided by how many
@@ -231,12 +237,25 @@ shrinks its own contract and answers anyway: 23 false `SCALE`s across 588 compar
 against 588 `INCOMPLETE`s from a fixed contract. That is a deterministic fixture, and the
 23 counts only cases where the disabled gate was the sole failing one.
 
+![Removing one required gate leaves the evidence unchanged. An inferred contract answers SCALE anyway; the fixed contract returns INCOMPLETE.](assets/decision.gif)
+
+The visual is generated from live decisions by `make video`, and the displayed
+counts are recomputed in the test suite. It is a synthetic intervention, not an
+estimate of how often production systems fail this way.
+
 ```bash
 make demo
 ```
 
 Zero dependencies beyond the standard library. Apache-2.0. Over 850 tests on Python 3.10
 through 3.13.
+
+The terminal result can also be issued as an
+[Agent Decision Record](decision-record.html). Before producing the review card,
+the renderer replays the decision, checks the evidence and policy digests, verifies
+the cited artifact bytes, and refuses to write HTML when any binding fails. The
+record establishes internal consistency against supplied evidence; it does not
+turn the supplied labels, economics, or reviewer assertions into ground truth.
 
 ## Measurements that cannot fail
 
