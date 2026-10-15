@@ -54,7 +54,7 @@ help:
 check-python:
 	@$(PYTHON) -c 'import sys; sys.version_info >= (3, 10) or sys.exit("agent-economics-lab requires Python 3.10 or newer; %d.%d found. Retry with: make PYTHON=python3.12 <target>" % sys.version_info[:2])'
 
-.PHONY: check-python release-check lint coverage label-error demo decision-record falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video
+.PHONY: check-python release-check lint coverage label-error demo decision-record falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video social-preview
 
 release-check: check-python
 	@test -n "$(TAG)" || { echo "need TAG, for example: make release-check TAG=v0.10.0"; exit 2; }
@@ -399,6 +399,9 @@ lessons: check-python
 
 video: check-python
 	@$(PYTHON) render_video.py
+
+social-preview: check-python
+	@$(PYTHON) render_social_preview.py
 
 # ruff is a dev dependency, not a runtime one, so a fresh clone does not
 # have it and the bare ImportError names neither that fact nor the fix.
