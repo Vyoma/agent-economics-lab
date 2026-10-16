@@ -48,12 +48,12 @@ agent_economics/delegation.py:367  depth=depth.get(event.event_id, 0),
 agent_economics/delegation.py:472  f"${report.unaccounted_cost_usd or 0.0:.4f} of "
 agent_economics/delegation.py:473  f"${report.delegated_cost_usd or 0.0:.4f} delegated spend was "
 agent_economics/delegation.py:483  f"${report.delegated_cost_usd or 0.0:.4f} delegated"
-agent_economics/io.py:58  input_tokens=int(row.get("input_tokens") or 0),
-agent_economics/io.py:59  output_tokens=int(row.get("output_tokens") or 0),
-agent_economics/io.py:119  business_value_usd=float(row.get("business_value_usd") or 0),
-agent_economics/io.py:120  human_minutes=float(row.get("human_minutes") or 0),
-agent_economics/io.py:121  remediation_cost_usd=float(row.get("remediation_cost_usd") or 0),
-agent_economics/io.py:122  incident_loss_usd=float(row.get("incident_loss_usd") or 0),
+agent_economics/io.py:85  input_tokens=int(row.get("input_tokens") or 0),
+agent_economics/io.py:86  output_tokens=int(row.get("output_tokens") or 0),
+agent_economics/io.py:146  business_value_usd=float(row.get("business_value_usd") or 0),
+agent_economics/io.py:147  human_minutes=float(row.get("human_minutes") or 0),
+agent_economics/io.py:148  remediation_cost_usd=float(row.get("remediation_cost_usd") or 0),
+agent_economics/io.py:149  incident_loss_usd=float(row.get("incident_loss_usd") or 0),
 agent_economics/kimi_analyst.py:371  n = metrics.get("attempts", 0)
 agent_economics/kimi_analyst.py:372  ar = metrics.get("acceptable_rate", 0.0)
 agent_economics/kimi_analyst.py:392  f"  total_effective_cost:             ${metrics.get('total_effective_cost_usd', 0):.4f}"
@@ -373,7 +373,7 @@ agent_economics/evidence.py:304  _numeric_issue(...) omits integer, maximum  [is
 agent_economics/evidence.py:318  _numeric_issue(...) omits maximum  [issue = _numeric_issue(]
 agent_economics/feedback_contract.py:125  _expect_exact(...) omits prefix  [_expect_exact(document, "schema_version"]
 agent_economics/feedback_contract.py:170  _expect_list(...) omits non_empty  [proxies = _expect_list(document, "proxie]
-agent_economics/io.py:176  make_evidence_bundle(...) omits declared_delegations, task_manifest  [return make_evidence_bundle(]
+agent_economics/io.py:203  make_evidence_bundle(...) omits declared_delegations, task_manifest  [return make_evidence_bundle(]
 agent_economics/kimi_analyst.py:507  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
 agent_economics/kimi_analyst.py:529  _call_kimi_analyst(...) omits reasoning_effort  [kimi_resp = _call_kimi_analyst(context, ]
 agent_economics/kimi_client.py:398  assert_mfjs_compatible(...) omits path  [assert_mfjs_compatible(response_format)]
@@ -459,27 +459,27 @@ All five known defects share a sharper form than any shape above: the same quant
 ### `make_evidence_bundle(..., declared_delegations=)`  (inconsistent-caller)
 
 - passes / resolves (3): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/unsupplied.py:75`
-- omits / reads raw (3): `agent_economics/assurance.py:592`, `agent_economics/io.py:176`, `agent_economics/otel_genai.py:812`
+- omits / reads raw (3): `agent_economics/assurance.py:592`, `agent_economics/io.py:203`, `agent_economics/otel_genai.py:812`
 
 ### `make_evidence_bundle(..., dependency_edges=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/io.py:176`, `agent_economics/otel_genai.py:812`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/io.py:203`, `agent_economics/otel_genai.py:812`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:592`
 
 ### `make_evidence_bundle(..., label_source=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/io.py:176`, `agent_economics/otel_genai.py:812`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/io.py:203`, `agent_economics/otel_genai.py:812`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:592`
 
 ### `make_evidence_bundle(..., source_version=)`  (inconsistent-caller)
 
-- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/io.py:176`, `agent_economics/otel_genai.py:812`, `agent_economics/unsupplied.py:75`
+- passes / resolves (5): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/io.py:203`, `agent_economics/otel_genai.py:812`, `agent_economics/unsupplied.py:75`
 - omits / reads raw (1): `agent_economics/assurance.py:592`
 
 ### `make_evidence_bundle(..., task_manifest=)`  (inconsistent-caller)
 
 - passes / resolves (4): `agent_economics/adapters.py:76`, `agent_economics/claude_code.py:1423`, `agent_economics/otel_genai.py:812`, `agent_economics/unsupplied.py:75`
-- omits / reads raw (2): `agent_economics/assurance.py:592`, `agent_economics/io.py:176`
+- omits / reads raw (2): `agent_economics/assurance.py:592`, `agent_economics/io.py:203`
 
 ### `mutate(..., _evidence_digest=)`  (inconsistent-caller)
 
