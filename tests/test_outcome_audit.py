@@ -171,19 +171,19 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class TheReadmeCopyMatchesTheComputation(unittest.TestCase):
+class ThePublishedAuditMatchesTheComputation(unittest.TestCase):
     """A hand-typed copy of a computed value is an unguarded claim.
 
-    The README carries this finding as its own table. That table was published
-    unguarded first: changing 100.0% to 99.0% failed nothing, which is the
-    defect this project exists to refuse, committed in the commit that
-    publishes the finding.
+    The full arm table moved out of the front-door README and into the outcome
+    audit. Its publication boundary changed; its evidence binding did not.
     """
 
     def setUp(self) -> None:
         document = json.loads(AUDIT.read_text(encoding="utf-8"))
         self.arms = {arm: _summarise(rows) for arm, rows in document["arms"].items()}
-        self.readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.report = (ROOT / "research" / "OUTCOME_AUDIT.md").read_text(
+            encoding="utf-8"
+        )
 
     def test_every_audited_arm_appears_with_its_recomputed_figures(self) -> None:
         """Cells compared by position, not by substring.
@@ -196,12 +196,13 @@ class TheReadmeCopyMatchesTheComputation(unittest.TestCase):
         for arm, summary in self.arms.items():
             rows = [
                 [cell.strip() for cell in line.strip().strip("|").split("|")]
-                for line in self.readme.splitlines()
+                for line in self.report.splitlines()
                 if line.startswith(f"| `{arm}` |")
             ]
             expected = [
                 f"`{arm}`",
                 str(summary["n"]),
+                str(summary["naive_resolved"]),
                 f"{summary['naive_rate']:.1%}",
                 str(summary["unknown"]),
                 (
@@ -211,14 +212,14 @@ class TheReadmeCopyMatchesTheComputation(unittest.TestCase):
                 ),
             ]
             with self.subTest(arm=arm):
-                self.assertTrue(rows, f"README has no audit row for {arm}")
+                self.assertTrue(rows, f"outcome audit has no row for {arm}")
                 self.assertIn(
                     expected, rows,
-                    f"no README row for {arm} matches {expected} cell for cell; "
+                    f"no outcome-audit row for {arm} matches {expected} cell for cell; "
                     f"found {rows}",
                 )
 
     def test_the_headline_spend_and_call_count_match(self) -> None:
         summary = self.arms["gemini-3-pro"]
-        self.assertIn(f"${summary['spend_usd']:,.2f}", self.readme)
-        self.assertIn(f"{summary['api_calls']:,} API calls", self.readme)
+        self.assertIn(f"${summary['spend_usd']:,.2f}", self.report)
+        self.assertIn(f"{summary['api_calls']:,} API calls", self.report)
