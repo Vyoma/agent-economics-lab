@@ -11,18 +11,21 @@ else can reproduce. It carries evaluation into the production feedback loop
 for predictive models, generative components, and tool-using agents.
 
 ```bash
-uvx --from git+https://github.com/Vyoma/agent-economics-lab agent-economics demo
+uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 agent-economics demo
 ```
 
-[Run it on your evidence](https://github.com/Vyoma/agent-economics-lab/blob/main/examples/README.md) ·
+[Release notes](https://github.com/Vyoma/agent-economics-lab/releases/tag/v0.10.1) ·
+[checksums](https://github.com/Vyoma/agent-economics-lab/releases/download/v0.10.1/SHA256SUMS) ·
+[run it on your evidence](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/examples/README.md) ·
 [open the evidence-bound decision record](decision-record.html) ·
-[inspect the public-data findings](https://github.com/Vyoma/agent-economics-lab/blob/main/research/FINDINGS.md) ·
+[inspect the public-data findings](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/research/FINDINGS.md) ·
 [follow the production feedback contract](production-feedback-loops.html)
 
-![Removing one required gate leaves the evidence unchanged. An inferred contract answers SCALE anyway; the fixed contract returns INCOMPLETE.](assets/decision.gif)
+![The evidence stays fixed while one required gate is disabled. An inferred contract answers SCALE in 23 of 588 comparisons; the fixed contract refuses with INCOMPLETE in all 588.](assets/decision.png)
 
-*Generated from live decisions and recomputed in the test suite. This is a
-synthetic intervention, not an estimate of production failure rates.*
+*Static key frame generated from live decisions and recomputed in the test
+suite. [Open the evidence-bound decision record](decision-record.html).
+Synthetic intervention; not a production failure-rate estimate.*
 
 ## One result worth inspecting
 
@@ -256,9 +259,9 @@ shrinks its own contract and answers anyway: 23 false `SCALE`s across 588 compar
 against 588 `INCOMPLETE`s from a fixed contract. That is a deterministic fixture, and the
 23 counts only cases where the disabled gate was the sole failing one.
 
-The visual at the top of this page is generated from live decisions by
-`make video`, and the displayed counts are recomputed in the test suite. It is
-a synthetic intervention, not an estimate of how often production systems fail
+The key frame at the top of this page is generated from live decisions by
+`make video`, and its displayed counts are recomputed in the test suite. It is a
+synthetic intervention, not an estimate of how often production systems fail
 this way.
 
 ```bash
@@ -329,10 +332,10 @@ Everything else the project knows it gets wrong is in
 
 | | |
 |---|---|
-| [Specification](https://github.com/Vyoma/agent-economics-lab/blob/main/SPEC.md) | the exact contract, conformance-tested clause by clause |
+| [Specification](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/SPEC.md) | the exact contract, conformance-tested clause by clause |
 | [Product requirements](prd.md) | who it is for, and the refusals that define it |
-| [Roadmap](https://github.com/Vyoma/agent-economics-lab/blob/main/ROADMAP.md) | maturity per layer, stage gates to production |
-| [The instrument's scorecard](https://github.com/Vyoma/agent-economics-lab/blob/main/research/EVALS.md) | how good the auditor is, blind spots included |
+| [Roadmap](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/ROADMAP.md) | maturity per layer, stage gates to production |
+| [The instrument's scorecard](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/research/EVALS.md) | how good the auditor is, blind spots included |
 | [Derivation](label-error.md) | the four propositions and their verification |
 | [Limitations](limitations.md) | every known non-claim |
 | [Corrections](corrections.md) | every time this project was wrong, and how it found out |
@@ -349,7 +352,7 @@ Adapters: [Claude Code](claude-code-adapter.md) ·
 Apache-2.0. Derivation, checks, and the retractions:
 
 ```bash
-git clone https://github.com/Vyoma/agent-economics-lab
+git clone --branch v0.10.1 --depth 1 https://github.com/Vyoma/agent-economics-lab
 cd agent-economics-lab
 
 python3 -m agent_economics.label_error -r 0.62 -s 0.08

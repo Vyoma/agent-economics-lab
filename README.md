@@ -28,7 +28,7 @@ uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 agent-econom
 ```
 
 Python 3.10+, standard library only, no API key or account. The command installs
-the immutable `v0.10.1` release, replays data shipped inside it, and explains why
+the versioned `v0.10.1` release, replays data shipped inside it, and explains why
 it issued `ASSIST`. Extract the same contract to replace the fixture with your
 own runs:
 
