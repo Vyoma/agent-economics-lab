@@ -11,13 +11,12 @@
     "dynamic_false_scale_transitions": 23,
     "fixed_contract_incomplete": 588
   },
-  "frames": 41,
-  "height": 900,
+  "height": 675,
   "missing_coverage": [
     "outcome_quality"
   ],
   "n_checks": 8,
   "reduced_verdict": "INCOMPLETE",
   "verdict": "ASSIST",
-  "width": 900
+  "width": 1200
 }

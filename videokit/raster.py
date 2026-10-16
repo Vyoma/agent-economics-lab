@@ -1,13 +1,11 @@
-"""Indexed-colour raster canvas, PNG writer and animated GIF writer.
+"""Indexed-colour raster canvas and deterministic PNG writer.
 
 Standard library only. This exists because the repository declares zero runtime
-dependencies and `make video` must not be the thing that breaks that.
+dependencies and generated public figures must not be the thing that breaks that.
 
 Colour is handled with *ramps* rather than quantisation. Each text colour gets a
 fixed 16-step ramp blended from the background, so antialiased glyph coverage maps
-straight onto a palette index and no quantiser is ever needed. A handful of ramps
-keeps the palette near 100 entries, which also makes the GIF's LZW stream compress
-well.
+straight onto a palette index and no quantiser is ever needed.
 """
 
 from __future__ import annotations
@@ -92,7 +90,7 @@ def build_palette() -> tuple[bytes, dict[str, int]]:
     table = bytearray()
     for r, g, b in entries:
         table += bytes((r, g, b))
-    # Pad to the next power of two, as the GIF spec requires.
+    # Keep a stable power-of-two indexed palette across generated PNGs.
     size = 1
     while size < len(entries):
         size <<= 1
@@ -101,7 +99,6 @@ def build_palette() -> tuple[bytes, dict[str, int]]:
 
 
 PALETTE, RAMP_BASE = build_palette()
-PALETTE_BITS = max(2, (len(PALETTE) // 3 - 1).bit_length())
 
 
 class Canvas:
@@ -112,11 +109,6 @@ class Canvas:
         self.height = height
         self.font = font
         self.px = bytearray(width * height)
-
-    def clone(self) -> Canvas:
-        other = Canvas(self.width, self.height, self.font)
-        other.px[:] = self.px
-        return other
 
     def fill_rect(self, x: int, y: int, w: int, h: int, color: str, level: int = RAMP_STEPS - 1) -> None:
         idx = 0 if color == "bg" else RAMP_BASE[color] + level
@@ -189,121 +181,3 @@ def write_png(path: pathlib.Path, canvas: Canvas) -> None:
         + chunk(b"IDAT", zlib.compress(bytes(raw), 9))
         + chunk(b"IEND", b"")
     )
-
-
-# --------------------------------------------------------------------------- GIF
-
-
-class _BitWriter:
-    """LSB-first bit packing, as GIF requires."""
-
-    def __init__(self) -> None:
-        self.out = bytearray()
-        self._acc = 0
-        self._nbits = 0
-
-    def write(self, code: int, width: int) -> None:
-        self._acc |= code << self._nbits
-        self._nbits += width
-        while self._nbits >= 8:
-            self.out.append(self._acc & 0xFF)
-            self._acc >>= 8
-            self._nbits -= 8
-
-    def flush(self) -> None:
-        if self._nbits:
-            self.out.append(self._acc & 0xFF)
-            self._acc = 0
-            self._nbits = 0
-
-
-def _lzw(indices: bytes, min_code_size: int) -> bytes:
-    """GIF-variant LZW. The dictionary is keyed on (prefix_code, byte).
-
-    Single bytes are their own codes, so the dictionary only ever holds the
-    concatenations. The table is reset with a clear code at 4096 entries.
-
-    The code-width rule is the one detail worth stating, because getting it wrong
-    produces a stream that a self-written decoder still round-trips while every
-    real decoder renders as garbage. A GIF decoder installs its dictionary entry
-    one code later than the encoder does, so it always trails by one. The encoder
-    must therefore widen at `next_code == (1 << width) + 1`, not at
-    `(1 << width)`. Verified against the system GIF decoder in
-    `tests/test_videokit.py`, which is the only check that can catch this.
-    """
-    clear = 1 << min_code_size
-    eoi = clear + 1
-    writer = _BitWriter()
-
-    table: dict[tuple[int, int], int] = {}
-    width = min_code_size + 1
-    next_code = eoi + 1
-
-    writer.write(clear, width)
-    if not indices:
-        writer.write(eoi, width)
-        writer.flush()
-        return bytes(writer.out)
-
-    prefix = indices[0]
-    for value in indices[1:]:
-        key = (prefix, value)
-        found = table.get(key)
-        if found is not None:
-            prefix = found
-            continue
-        writer.write(prefix, width)
-        table[key] = next_code
-        next_code += 1
-        if next_code == 4096:
-            writer.write(clear, width)
-            table.clear()
-            width = min_code_size + 1
-            next_code = eoi + 1
-        elif next_code == (1 << width) + 1 and width < 12:
-            width += 1
-        prefix = value
-    writer.write(prefix, width)
-    writer.write(eoi, width)
-    writer.flush()
-    return bytes(writer.out)
-
-
-def _sub_blocks(data: bytes) -> bytes:
-    out = bytearray()
-    for i in range(0, len(data), 255):
-        piece = data[i : i + 255]
-        out.append(len(piece))
-        out += piece
-    out.append(0)
-    return bytes(out)
-
-
-def write_gif(
-    path: pathlib.Path,
-    frames: list[Canvas],
-    delays_cs: list[int],
-    loop: int = 0,
-) -> None:
-    if len(frames) != len(delays_cs):
-        raise ValueError("frames and delays must be the same length")
-    if not frames:
-        raise ValueError("no frames")
-    w, h = frames[0].width, frames[0].height
-    min_code_size = PALETTE_BITS
-
-    out = bytearray(b"GIF89a")
-    out += struct.pack("<HH", w, h)
-    out += bytes((0x80 | (PALETTE_BITS - 1), 0, 0))
-    out += PALETTE
-    out += b"\x21\xff\x0bNETSCAPE2.0\x03\x01" + struct.pack("<H", loop) + b"\x00"
-
-    for canvas, delay in zip(frames, delays_cs, strict=False):
-        if canvas.width != w or canvas.height != h:
-            raise ValueError("all frames must share dimensions")
-        out += b"\x21\xf9\x04\x04" + struct.pack("<H", delay) + b"\x00\x00"
-        out += b"\x2c" + struct.pack("<HHHH", 0, 0, w, h) + b"\x00"
-        out += bytes((min_code_size,))
-        out += _sub_blocks(_lzw(bytes(canvas.px), min_code_size))
-    out += b"\x3b"
-    path.write_bytes(bytes(out))

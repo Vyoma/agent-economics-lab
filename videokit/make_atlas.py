@@ -1,6 +1,6 @@
 """Regenerate the checked-in bitmap font atlas. macOS only, run rarely.
 
-The atlas exists so that `render_video.py` needs nothing but the Python standard
+The atlas exists so that the figure renderers need nothing but the Python standard
 library. Drawing text normally means Pillow or a font shaper; this repository
 declares zero runtime dependencies and that property is worth more than the
 convenience. So the glyphs are rasterised once, here, from a real monospace font

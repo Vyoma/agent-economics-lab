@@ -259,10 +259,10 @@ shrinks its own contract and answers anyway: 23 false `SCALE`s across 588 compar
 against 588 `INCOMPLETE`s from a fixed contract. That is a deterministic fixture, and the
 23 counts only cases where the disabled gate was the sole failing one.
 
-The key frame at the top of this page is generated from live decisions by
-`make video`, and its displayed counts are recomputed in the test suite. It is a
-synthetic intervention, not an estimate of how often production systems fail
-this way.
+The static figure at the top of this page is generated from live decisions by
+`make figure`, and its displayed counts are recomputed in the test suite. It is
+a synthetic intervention, not an estimate of how often production systems fail
+this way. Motion is intentionally not part of the default reading path.
 
 ```bash
 make demo

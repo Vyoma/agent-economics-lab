@@ -41,9 +41,9 @@ uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 \
 [![Release](https://img.shields.io/github/v/release/Vyoma/agent-economics-lab)](https://github.com/Vyoma/agent-economics-lab/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-![The evidence stays fixed while one required gate is disabled. An inferred contract answers SCALE in 23 of 588 comparisons; the fixed contract refuses with INCOMPLETE in all 588.](docs/assets/decision.png)
+![With identical evidence and one required gate removed, an inferred contract produces 23 false SCALE decisions in 588 comparisons; the fixed contract returns INCOMPLETE in all 588.](docs/assets/decision.png)
 
-_Static key frame generated from live decisions and recomputed in tests.
+_Static evidence figure generated from live decisions and recomputed in tests.
 [Open the evidence-bound decision record](https://vyoma.github.io/agent-economics-lab/decision-record.html).
 Synthetic intervention; not a production failure-rate estimate._
 
