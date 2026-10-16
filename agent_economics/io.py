@@ -20,7 +20,7 @@ from .models import (
 
 def _load_json(path: str | Path) -> dict[str, Any]:
     with Path(path).open(encoding="utf-8") as handle:
-        return json.load(handle)
+        return json.load(handle, object_pairs_hook=_unique_json_object)
 
 
 def _csv_rows(handle: TextIO) -> Iterator[dict[str, str]]:
@@ -211,3 +211,13 @@ def load_csv_bundle(
         source_version="1",
         label_source=label_source,
     )
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Refuse duplicate prices or policy fields rather than taking the last one."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"Duplicate JSON key: {key!r}")
+        result[key] = value
+    return result

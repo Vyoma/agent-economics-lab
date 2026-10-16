@@ -30,6 +30,10 @@ cost cells retain the existing zero convention; a missing field is not an
 explicit empty cell. Write `0` when zero is known, rather than using blanks for
 unknown costs. Quoted commas and multiline fields are supported.
 
+JSON rate cards, baselines, and policies must not repeat an object key, including
+inside a model's rate entry. Duplicate keys are rejected rather than silently
+using the last price or threshold.
+
 ## Setting the numbers you do not have yet
 
 Most teams stall on `baseline.json` and `policy.json`, because both ask for
