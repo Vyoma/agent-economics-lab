@@ -29,7 +29,7 @@ dev = ["ruff==0.16.4", "coverage==7.6.10"]
 [project.urls]
 Homepage = "https://github.com/Vyoma/agent-economics-lab"
 Repository = "https://github.com/Vyoma/agent-economics-lab"
-Documentation = "https://github.com/Vyoma/agent-economics-lab/blob/main/docs/frontier.md"
+Documentation = "https://vyoma.github.io/agent-economics-lab/"
 Issues = "https://github.com/Vyoma/agent-economics-lab/issues"
 
 [project.scripts]

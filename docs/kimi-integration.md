@@ -14,7 +14,7 @@ offline suite stays hermetic.
 ## One egress, enforced
 
 Every model call in the package goes through
-[`agent_economics/kimi_client.py`](https://github.com/Vyoma/agent-economics-lab/blob/main/agent_economics/kimi_client.py). Provider,
+[`agent_economics/kimi_client.py`](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/agent_economics/kimi_client.py). Provider,
 model, request contract, and retry policy are declared there once. Both
 integrations delegate to it, and `agent-economics capabilities` prints what is in
 force:
@@ -26,7 +26,7 @@ model     kimi-k3  reasoning_effort=max
 egress    agent_economics.kimi_client  (single call path)
 ```
 
-[`tests/test_inference_routing.py`](https://github.com/Vyoma/agent-economics-lab/blob/main/tests/test_inference_routing.py) enforces
+[`tests/test_inference_routing.py`](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/tests/test_inference_routing.py) enforces
 this rather than trusting it. It fails if any module opens its own connection,
 declares a second endpoint, imports another provider's SDK, references another
 provider's host, or reaches the client from an undeclared module. Each of those
@@ -324,7 +324,7 @@ case, not seconds. `--reasoning-effort high` or `low` is much faster if your
 account supports those levels. Progress prints per case with elapsed time, so a
 slow run is distinguishable from a stuck one.
 
-[`research/eval/judge-eval-set.json`](https://github.com/Vyoma/agent-economics-lab/blob/main/research/eval/judge-eval-set.json) holds 25
+[`research/eval/judge-eval-set.json`](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/research/eval/judge-eval-set.json) holds 25
 constructed cases, 8 expected-acceptable and 17 expected-unacceptable, across eight
 categories: contradicts-context, correct, correct-but-curt,
 destructive-without-caveats, factually-wrong, hallucinated-feature, non-answer,

@@ -209,6 +209,7 @@ STATED_INPUTS: dict[str, str] = {
     "0.01369": "closed-form standard error, checked below",
     "1970": "attribution decade for prevalence correction ('1970s')",
     "2306.05685": "arXiv id of Zheng et al., the source of the agreement figure",
+    "256": "SHA-256 algorithm named by the release checksum artifact",
     "2023": "publication year of Zheng et al.",
     "80": "the >80% agreement Zheng et al. report",
     "3.10": "lowest supported Python",
@@ -290,7 +291,32 @@ class PublishedNumbersRecompute(unittest.TestCase):
     def test_page_exposes_the_verified_decision_and_feedback_artifacts(self) -> None:
         self.assertIn("(decision-record.html)", self.page)
         self.assertIn("(production-feedback-loops.html)", self.page)
-        self.assertIn("](assets/decision.gif)", self.page)
+        self.assertIn("](assets/decision.png)", self.page)
+        self.assertNotIn("](assets/decision.gif)", self.page)
+
+    def test_page_front_door_is_release_pinned(self) -> None:
+        command = (
+            "uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 "
+            "agent-economics demo"
+        )
+        self.assertIn(command, self.page)
+        self.assertIn(
+            "https://github.com/Vyoma/agent-economics-lab/releases/tag/v0.10.1",
+            self.page,
+        )
+        self.assertIn(
+            "https://github.com/Vyoma/agent-economics-lab/releases/download/"
+            "v0.10.1/SHA256SUMS",
+            self.page,
+        )
+        self.assertNotIn(
+            "git+https://github.com/Vyoma/agent-economics-lab agent-economics",
+            self.page,
+        )
+        self.assertNotIn(
+            "github.com/Vyoma/agent-economics-lab/blob/main/",
+            self.page,
+        )
 
     def test_page_links_do_not_escape_the_published_docs_root(self) -> None:
         """Files above docs/ are not published by GitHub Pages."""
@@ -300,6 +326,18 @@ class PublishedNumbersRecompute(unittest.TestCase):
             escaped,
             [],
             "Pages links outside docs/ must use a GitHub URL instead",
+        )
+
+    def test_published_docs_do_not_link_the_flagship_through_moving_main(self) -> None:
+        moving = "github.com/Vyoma/agent-economics-lab/blob/main/"
+        offenders = []
+        for path in sorted((ROOT / "docs").glob("*.md")):
+            if moving in path.read_text(encoding="utf-8"):
+                offenders.append(path.name)
+        self.assertEqual(
+            offenders,
+            [],
+            "published docs must bind flagship source links to a released version",
         )
 
     def test_no_unregistered_numbers(self) -> None:
