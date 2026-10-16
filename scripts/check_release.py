@@ -55,23 +55,63 @@ def changelog_date(changelog: Path, version: str) -> dt.date:
     return release_date
 
 
-def validate_release(*, tag: str, package_init: Path, changelog: Path) -> tuple[str, dt.date]:
+def citation_identity(citation: Path) -> tuple[str, dt.date]:
+    text = citation.read_text(encoding="utf-8")
+
+    def scalar(key: str) -> str:
+        matches = re.findall(rf"^{re.escape(key)}:\s*(.+?)\s*$", text, re.MULTILINE)
+        if len(matches) != 1:
+            raise ValueError(f"CITATION.cff must contain exactly one top-level {key!r}")
+        return matches[0].strip().strip("\"'")
+
+    version = scalar("version")
+    if not SEMVER.fullmatch(version):
+        raise ValueError(f"CITATION.cff version is not strict SemVer: {version!r}")
+    released = scalar("date-released")
+    try:
+        release_date = dt.date.fromisoformat(released)
+    except ValueError as exc:
+        raise ValueError(f"invalid CITATION.cff date-released: {released!r}") from exc
+    return version, release_date
+
+
+def validate_release(
+    *,
+    tag: str,
+    package_init: Path,
+    changelog: Path,
+    citation: Path | None = None,
+) -> tuple[str, dt.date]:
     version = package_version(package_init)
     expected = f"v{version}"
     if tag != expected:
         raise ValueError(f"release tag {tag!r} does not match package version {expected!r}")
-    return version, changelog_date(changelog, version)
+    release_date = changelog_date(changelog, version)
+    if citation is not None:
+        cited_version, cited_date = citation_identity(citation)
+        if cited_version != version:
+            raise ValueError(
+                f"CITATION.cff version {cited_version!r} does not match package version {version!r}"
+            )
+        if cited_date != release_date:
+            raise ValueError(
+                "CITATION.cff date-released "
+                f"{cited_date.isoformat()!r} does not match changelog date "
+                f"{release_date.isoformat()!r}"
+            )
+    return version, release_date
 
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(description=__doc__)
-    result.add_argument("--tag", required=True, help="Git tag, for example v0.10.0")
+    result.add_argument("--tag", required=True, help="Git tag, for example v0.10.1")
     result.add_argument(
         "--package-init",
         type=Path,
         default=ROOT / "agent_economics" / "__init__.py",
     )
     result.add_argument("--changelog", type=Path, default=ROOT / "CHANGELOG.md")
+    result.add_argument("--citation", type=Path, default=ROOT / "CITATION.cff")
     return result
 
 
@@ -82,6 +122,7 @@ def main(argv: list[str] | None = None) -> int:
             tag=args.tag,
             package_init=args.package_init,
             changelog=args.changelog,
+            citation=args.citation,
         )
     except (OSError, SyntaxError, ValueError) as exc:
         print(f"release metadata invalid: {exc}", file=sys.stderr)

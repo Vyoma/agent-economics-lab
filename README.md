@@ -24,15 +24,17 @@ traces + outcomes + prices + baseline + policy
 ### Run it
 
 ```bash
-uvx --from git+https://github.com/Vyoma/agent-economics-lab agent-economics demo
+uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 agent-economics demo
 ```
 
-Python 3.10+, standard library only, no API key or account. The command replays
-data shipped inside the package and explains why it issued `ASSIST`. Extract the
-same contract to replace the fixture with your own runs:
+Python 3.10+, standard library only, no API key or account. The command installs
+the immutable `v0.10.1` release, replays data shipped inside it, and explains why
+it issued `ASSIST`. Extract the same contract to replace the fixture with your
+own runs:
 
 ```bash
-agent-economics demo --extract .
+uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 \
+  agent-economics demo --extract .
 ```
 
 [![Tests](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml/badge.svg)](https://github.com/Vyoma/agent-economics-lab/actions/workflows/test.yml)

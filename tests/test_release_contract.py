@@ -20,17 +20,18 @@ SPEC.loader.exec_module(check_release)
 class ReleaseMetadataTests(unittest.TestCase):
     def test_current_tree_has_one_matching_release_identity(self) -> None:
         version, release_date = check_release.validate_release(
-            tag="v0.10.0",
+            tag="v0.10.1",
             package_init=ROOT / "agent_economics" / "__init__.py",
             changelog=ROOT / "CHANGELOG.md",
+            citation=ROOT / "CITATION.cff",
         )
-        self.assertEqual(version, "0.10.0")
-        self.assertEqual(release_date.isoformat(), "2026-10-14")
+        self.assertEqual(version, "0.10.1")
+        self.assertEqual(release_date.isoformat(), "2026-10-16")
 
     def test_wrong_tag_is_refused(self) -> None:
         with self.assertRaisesRegex(ValueError, "does not match package version"):
             check_release.validate_release(
-                tag="v0.9.0",
+                tag="v0.10.0",
                 package_init=ROOT / "agent_economics" / "__init__.py",
                 changelog=ROOT / "CHANGELOG.md",
             )
@@ -40,12 +41,12 @@ class ReleaseMetadataTests(unittest.TestCase):
             changelog = Path(directory) / "CHANGELOG.md"
             changelog.write_text(
                 "# Changelog\n\n## Unreleased\n\n"
-                "## 0.10.0 - 2026-10-14\n\n"
-                "## 0.10.0 - 2026-10-14\n",
+                "## 0.10.1 - 2026-10-16\n\n"
+                "## 0.10.1 - 2026-10-16\n",
                 encoding="utf-8",
             )
             with self.assertRaisesRegex(ValueError, "exactly one dated heading"):
-                check_release.changelog_date(changelog, "0.10.0")
+                check_release.changelog_date(changelog, "0.10.1")
 
     def test_version_is_parsed_without_importing_the_package(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -55,6 +56,43 @@ class ReleaseMetadataTests(unittest.TestCase):
                 encoding="utf-8",
             )
             self.assertEqual(check_release.package_version(package_init), "1.2.3")
+
+    def test_stale_citation_version_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            citation = Path(directory) / "CITATION.cff"
+            citation.write_text(
+                "cff-version: 1.2.0\nversion: 0.10.0\ndate-released: 2026-10-16\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "does not match package version"):
+                check_release.validate_release(
+                    tag="v0.10.1",
+                    package_init=ROOT / "agent_economics" / "__init__.py",
+                    changelog=ROOT / "CHANGELOG.md",
+                    citation=citation,
+                )
+
+    def test_stale_citation_date_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            citation = Path(directory) / "CITATION.cff"
+            citation.write_text(
+                "cff-version: 1.2.0\nversion: 0.10.1\ndate-released: 2026-10-14\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "does not match changelog date"):
+                check_release.validate_release(
+                    tag="v0.10.1",
+                    package_init=ROOT / "agent_economics" / "__init__.py",
+                    changelog=ROOT / "CHANGELOG.md",
+                    citation=citation,
+                )
+
+    def test_front_door_pins_the_demo_to_the_current_release(self) -> None:
+        version = check_release.package_version(ROOT / "agent_economics" / "__init__.py")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        pinned_source = "git+https://github.com/Vyoma/agent-economics-lab@v" + version
+        self.assertEqual(readme.count(pinned_source), 2)
+        self.assertNotIn("\nagent-economics demo --extract", readme)
 
 
 class ReleaseWorkflowTests(unittest.TestCase):
