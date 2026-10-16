@@ -884,11 +884,17 @@ def _cmd_demo(args: argparse.Namespace) -> int:
         target.mkdir(parents=True, exist_ok=True)
         for name, source in packaged.items():
             shutil.copyfile(source, target / name)
+        release_source = (
+            "git+https://github.com/Vyoma/agent-economics-lab"
+            f"@v{__version__}"
+        )
         print(
             f"Wrote {len(packaged)} example inputs to {target.resolve()}\n"
             "Replace "
             "their contents with your own runs, then:\n\n"
-            "  agent-economics evaluate \\\n"
+            "  uvx --from \\\n"
+            f"    {release_source} \\\n"
+            "    agent-economics evaluate \\\n"
             "    --traces support_trace.csv --outcomes outcomes.csv \\\n"
             "    --rates rates.json --baseline baseline.json \\\n"
             "    --policy policy.json"

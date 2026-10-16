@@ -5,7 +5,7 @@ honest answer for each. A stage claim below is backed by a named surface you
 can run; where the next stage's gate is not yet met, the gap is stated
 rather than rounded up.
 
-## Layer maturity today (0.10.0)
+## Layer maturity today (0.10.1)
 
 | layer | stage | evidence | gap to next stage |
 |---|---|---|---|

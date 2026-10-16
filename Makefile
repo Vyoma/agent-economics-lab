@@ -57,7 +57,7 @@ check-python:
 .PHONY: check-python release-check lint coverage label-error demo decision-record falsegreen coverage-drift evidence-ablation frontier modularity claude-code claude-code-tree otel-genai public-case benchmark mutation-score sensitivity completion-vs-verdict kimi-judge kimi-doctor kimi-eval reproduce lessons test video social-preview
 
 release-check: check-python
-	@test -n "$(TAG)" || { echo "need TAG, for example: make release-check TAG=v0.10.0"; exit 2; }
+	@test -n "$(TAG)" || { echo "need TAG, for example: make release-check TAG=v0.10.1"; exit 2; }
 	@$(PYTHON) scripts/check_release.py --tag "$(TAG)"
 
 demo: check-python

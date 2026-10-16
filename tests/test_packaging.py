@@ -14,6 +14,7 @@ from __future__ import annotations
 import pathlib
 import subprocess
 import sys
+import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -88,6 +89,32 @@ class TheDemoRunsFromThePackagedData(unittest.TestCase):
         self.assertEqual(packaged.returncode, by_hand.returncode)
         self.assertEqual(packaged.stdout, by_hand.stdout)
         self.assertIn("Decision:", packaged.stdout)
+
+    def test_extract_prints_a_followup_that_survives_uvx_exit(self) -> None:
+        from agent_economics import __version__
+
+        with tempfile.TemporaryDirectory() as directory:
+            extracted = pathlib.Path(directory) / "inputs"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "agent_economics.cli",
+                    "demo",
+                    "--extract",
+                    str(extracted),
+                ],
+                capture_output=True,
+                text=True,
+                cwd=ROOT,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("uvx --from", result.stdout)
+        self.assertIn(
+            "git+https://github.com/Vyoma/agent-economics-lab@v" + __version__,
+            result.stdout,
+        )
+        self.assertNotIn("\n  agent-economics evaluate", result.stdout)
 
 
 if __name__ == "__main__":

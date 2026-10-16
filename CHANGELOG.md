@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.10.1 - 2026-10-16
+
+The first-run contract is now as reproducible as the decisions it demonstrates.
+
+- Pin both README `uvx` commands to the immutable release rather than moving
+  `main`, and exercise the exact commands from outside a checkout.
+- Make `demo --extract` print a complete `uvx` follow-up instead of referring to
+  an executable that an ephemeral `uvx` environment does not leave on `PATH`.
+- Bring `CITATION.cff` forward from the unpublished 0.9.0 identity and bind its
+  version and date to the package, release tag, and changelog in the release
+  checker.
+
 ## 0.10.0 - 2026-10-14
 
 The project moved from a decision engine with research around it to a
