@@ -1,4 +1,4 @@
-"""Every numeral in the README's finding section, bound to frozen evidence.
+"""Every numeral in the README's front-door finding, bound to frozen evidence.
 
 An adversarial audit corrupted the README's most-quoted figures: the 44
 disagreements, the 91.2%, the spread, the nine idle runs, the decision still's
@@ -7,11 +7,12 @@ every published number is verified in CI. The quotable sentences were exactly
 the unguarded ones: the same figures inside generated documents were
 byte-compared, and their hand-typed README copies were not.
 
-This applies docs/index.md's registry pattern to the README's front matter:
-the decision still's alt text and the whole "Found in the wild" section. Each
-numeral is either COMPUTED (bound to code that rederives it from committed
-evidence) or a STATED_INPUT with a reason. A numeral that is neither fails the
-walk, so a new hand-typed figure cannot be published unguarded.
+The detailed arm table now lives in research/OUTCOME_AUDIT.md; the README keeps
+only the findings a first-time reader needs. This applies docs/index.md's
+registry pattern to that front matter: the decision still's alt text and the
+whole "Found in the wild" section. Each numeral is either COMPUTED (bound to
+code that rederives it from committed evidence) or a STATED_INPUT with a reason.
+A numeral that is neither fails the walk, so concise cannot become unguarded.
 """
 
 from __future__ import annotations
@@ -30,18 +31,11 @@ from agent_economics.frontier import clopper_pearson_upper  # noqa: E402
 AUDIT = ROOT / "examples" / "public-swebench" / "outcome_audit.json"
 DRIFT = ROOT / "research" / "results" / "decision-coverage-drift" / "summary.json"
 
-_WORDS = {3: "three", 4: "four", 5: "five", 6: "six", 9: "nine", 10: "ten"}
+_WORDS = {9: "nine", 10: "ten"}
 
 
 def _audit() -> dict:
     return json.loads(AUDIT.read_text(encoding="utf-8"))
-
-
-def _confirmed_rate(rows: list[dict]) -> float | None:
-    scored = [r for r in rows if not isinstance(r["scores_resolved"], str)]
-    if not scored:
-        return None
-    return sum(1 for r in scored if r["resolved"] is True) / len(scored)
 
 
 def _twin_disagreements() -> tuple[int, int]:
@@ -52,15 +46,6 @@ def _twin_disagreements() -> tuple[int, int]:
     n = len(b)
     disagree = sum(1 for r in b if by_task[r["task_id"]] != r["resolved"])
     return disagree, n
-
-
-def _spread_points() -> float:
-    rates = [
-        rate
-        for rows in _audit()["arms"].values()
-        if (rate := _confirmed_rate(rows)) is not None
-    ]
-    return (max(rates) - min(rates)) * 100
 
 
 def _gemini() -> list[dict]:
@@ -76,46 +61,8 @@ def _idle_resolved() -> int:
     )
 
 
-def _demo_case():
-    from agent_economics.assurance import evaluate_bundle
-    from agent_economics.io import load_csv_bundle
-
-    bundle = load_csv_bundle(
-        traces=ROOT / "examples" / "support_trace.csv",
-        outcomes=ROOT / "examples" / "outcomes.csv",
-        rates=ROOT / "examples" / "rates.json",
-        baseline=ROOT / "examples" / "baseline.json",
-        policy=ROOT / "examples" / "policy.json",
-    )
-    return evaluate_bundle(bundle)
-
-
 def _drift() -> dict:
     return json.loads(DRIFT.read_text(encoding="utf-8"))
-
-
-def _twin_split():
-    """(disagreements favouring the first arm, either arm's rate, SD in
-    points of the rate gap a coin-split of those disagreements produces)."""
-    import json
-    import math
-
-    arms = json.loads(
-        (ROOT / "examples" / "public-swebench" / "outcome_audit.json")
-        .read_text(encoding="utf-8")
-    )["arms"]
-    first = {row["task_id"]: row["resolved"] for row in arms["gpt-5.2-codex"]}
-    second = arms["gpt-5.2-high"]
-    total = len(second)
-    disagreements = [
-        row for row in second if first[row["task_id"]] != row["resolved"]
-    ]
-    favouring_first = sum(
-        1 for row in disagreements if first[row["task_id"]] is True
-    )
-    rate = sum(1 for row in second if row["resolved"] is True) / total
-    sd = math.sqrt(len(disagreements) * 0.25) / total * 100
-    return favouring_first, rate, sd
 
 
 def _openhands() -> dict:
@@ -125,7 +72,6 @@ def _openhands() -> dict:
     return nebius_openhands_summary()
 
 
-_CASE = _demo_case()
 _DISAGREE, _TWIN_N = _twin_disagreements()
 
 #: Every derived figure in the guarded region, bound to the code that
@@ -135,44 +81,14 @@ COMPUTED: dict[str, str] = {
     "23": str(_drift()["dynamic_false_scale_transitions"]),
     "588": str(_drift()["comparisons"]),
     # the headline paragraph and Found in the wild
-    "5,000": f"{sum(len(v) for v in _audit()['arms'].values()):,}",
     "500": str(_TWIN_N),
     "ten": _WORDS[len(_audit()["arms"])],
     "44": str(_DISAGREE),
     "91.2%": f"{1 - _DISAGREE / _TWIN_N:.1%}",
-    "20.6": f"{_spread_points():.1f}",
-    "8.8": f"{_DISAGREE / _TWIN_N * 100:.1f}",
-    "8.8%": f"{_DISAGREE / _TWIN_N:.1%}",
-    "0.912": f"{1 - _DISAGREE / _TWIN_N:.3f}",
-    "n=500": f"n={_TWIN_N}",
-    "nine": _WORDS[_idle_resolved()],
+    "Nine": _WORDS[_idle_resolved()].capitalize(),
     "$480.01": f"${sum(r['instance_cost_usd'] or 0.0 for r in _gemini()):,.2f}",
     "25,641": f"{sum(r['api_calls'] or 0 for r in _gemini()):,}",
     "100.0%": f"{sum(1 for r in _gemini() if r['resolved'] is True) / len(_gemini()):.1%}",
-    "100%": f"{sum(1 for r in _gemini() if r['resolved'] is True) // len(_gemini()):.0%}",
-    # the cross-check-unknown column: every distinct count, bound to evidence
-    **{
-        str(sum(1 for r in rows if isinstance(r["scores_resolved"], str))):
-        str(sum(1 for r in rows if isinstance(r["scores_resolved"], str)))
-        for rows in _audit()["arms"].values()
-    },
-    # the per-arm table cells are byte-guarded against research/OUTCOME_AUDIT.md
-    # elsewhere; naive rates registered here so the walk accounts for them
-    **{
-        f"{sum(1 for r in rows if r['resolved'] is True) / len(rows):.1%}":
-        f"{sum(1 for r in rows if r['resolved'] is True) / len(rows):.1%}"
-        for rows in _audit()["arms"].values()
-    },
-    # the worked example
-    "five": _WORDS[len(_CASE.breaches)],
-    "four": _WORDS[
-        len({r.check_id for r in _CASE.check_results if r.status.name == "FAIL"})
-    ],
-    "six": _WORDS[
-        sum(1 for check_id in _CASE.enabled_checks if check_id.startswith("gate."))
-    ],
-    "75.0%": f"{_CASE.acceptable_rate:.1%}",
-    "$3.50": f"${_CASE.cost_per_acceptable_outcome_usd:.2f}",
     # the harmful-regression bound quoted beside the finding
     "24.9%": f"{clopper_pearson_upper(1, 20, 0.025):.1%}",
     # the prospective search, as accounted in research/PROBE_RESULTS.md
@@ -183,16 +99,6 @@ COMPUTED: dict[str, str] = {
     # The number that makes the kappa actionable: the proxy scores this many
     # points below always answering with the commoner label.
     "2.9": f"{abs(_openhands()['agreement_minus_majority']) * 100:.1f}",
-    # Published with its interval: the claim is that the shortfall is
-    # reliably negative, not merely negative on this sample.
-    "5.0": f"{abs(_openhands()['gap_low']):.1f}",
-    "0.9": f"{abs(_openhands()['gap_high']):.1f}",
-    # The twin arms' 44 disagreements split evenly, so both report the same
-    # rate; and the gap that split can move is what bounds a real difference.
-    "22": f"{_twin_split()[0]}",
-    "72.8": f"{_twin_split()[1] * 100:.1f}",
-    "0.7": f"{_twin_split()[2]:.1f}",
-    "2.6": f"{2 * 1.96 * _twin_split()[2]:.1f}",
     "31,389": f"{_openhands()['cross_present']:,}",
 }
 
@@ -244,10 +150,9 @@ class EveryFigureRecomputes(unittest.TestCase):
         guard rather than read it.
         """
         region = " ".join(_guarded_region(_readme()).split())
-        self.assertIn(f"disagrees with itself on {_DISAGREE} of them", region)
+        self.assertIn(f"disagrees on {_DISAGREE} tasks", region)
         self.assertIn(
-            f"{_WORDS[_idle_resolved()]} of those {_TWIN_N} runs record "
-            "a single API call",
+            f"{_WORDS[_idle_resolved()].capitalize()} rows record one call",
             region,
         )
 
@@ -281,7 +186,9 @@ class TheRegistrySentenceIsBound(unittest.TestCase):
     def test_the_entry_count_matches_the_registry(self) -> None:
         corpus = (ROOT / "research" / "CORPUS.md").read_text(encoding="utf-8")
         rows = re.findall(r"^\| \[[^]]+\]\(https://huggingface", corpus, re.M)
-        expected = f"{self._WORDS[len(rows)]} entries so far"
+        expected = (
+            f"audited {self._WORDS[len(rows)].lower()} public trajectory datasets"
+        )
         self.assertIn(
             expected, _readme(),
             f"CORPUS.md lists {len(rows)} datasets; the README's registry "
@@ -316,7 +223,8 @@ class TheProbeAccountingAgrees(unittest.TestCase):
 
     def test_the_readme_quotes_the_same_ratio(self) -> None:
         findings = len(re.findall(r"^### F\d", self.text, re.M))
-        self.assertIn(f"or {findings}/12 counted as\ndistinct sites", _readme())
+        readme = " ".join(_readme().split())
+        self.assertIn(f"or {findings}/12 counted as distinct sites", readme)
 
 
 if __name__ == "__main__":

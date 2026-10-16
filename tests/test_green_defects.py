@@ -83,37 +83,20 @@ class ThePublishedNumbersMatchTheReport(unittest.TestCase):
             with self.subTest(live=live[:40]):
                 self.assertNotEqual(live, fixed)
 
-    def test_the_readme_table_matches_the_generated_report(self) -> None:
-        """A hand-typed copy of a computed value is an unguarded claim.
-
-        The README quotes each defect's commit and the suite size there. Those
-        come from `make green-defects`; this asserts the copy did not drift.
-        """
+    def test_the_readme_summary_matches_the_generated_report(self) -> None:
+        """The front page keeps the conclusion; the report keeps the table."""
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        rows = re.findall(
-            r"^\| (?:the |a |rate-priced |tool )[^|]+\| `([0-9a-f]{7})` \| (\d+) \|",
-            readme, re.MULTILINE,
+        rows = re.findall(r"\| `([0-9a-f]{7})` \| (\d+) \|", self.text)
+        commits = {commit for commit, _count in rows}
+        words = {3: "three", 5: "Five"}
+        expected = (
+            f"{words[len(DEFECTS)]} defects were live across "
+            f"{words[len(commits)]} green commits. The distinct suite total "
+            f"was {_distinct_total(self.text)} tests"
         )
-        self.assertEqual(
-            len(rows), len(DEFECTS), "README table lost or gained a row"
-        )
-        for commit, tests in rows:
-            with self.subTest(commit=commit):
-                self.assertIn(
-                    f"`{commit}` | {tests} |", self.text,
-                    f"README claims {tests} tests at {commit}; the generated "
-                    "report disagrees",
-                )
-        # The distinct suite total, not the column sum. The five defects sit at
-        # three commits, so summing the column double-counted two of them and
-        # published 2275 where the distinct figure is 1365.
-        self.assertIn("1365 tests", readme)
-        # 2275 may appear only where the README says it was wrong, never as the
-        # figure itself. A correction that erases the corrected number hides
-        # that anything was corrected.
-        for line in readme.splitlines():
-            if "2275" in line:
-                self.assertIn("not the 2275", line)
+        self.assertIn(expected, " ".join(readme.split()))
+        self.assertIn("not the previously reported 2275", readme)
+        self.assertIn("case series, not a rate", readme)
 
     def test_the_population_limit_is_stated(self) -> None:
         """A case series presented as a rate would be the thing this repo is against."""
