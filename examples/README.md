@@ -23,6 +23,13 @@ your runs, and the three commands at the bottom produce a decision.
 `rates.json`; supply it and the supplied figure wins. Leaving both empty is
 not free, it is unpriced, and the gate refuses rather than scoring it zero.
 
+CSV headers must be unique and non-empty, and every record must have exactly
+as many fields as the header. Truncated rows, extra fields, duplicate columns,
+and malformed quoting are rejected before evaluation. Explicit empty outcome
+cost cells retain the existing zero convention; a missing field is not an
+explicit empty cell. Write `0` when zero is known, rather than using blanks for
+unknown costs. Quoted commas and multiline fields are supported.
+
 ## Setting the numbers you do not have yet
 
 Most teams stall on `baseline.json` and `policy.json`, because both ask for

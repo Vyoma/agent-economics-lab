@@ -3,8 +3,9 @@ from __future__ import annotations
 import csv
 import json
 from collections import Counter
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, TextIO
 
 from .evidence import make_evidence_bundle
 from .models import (
@@ -20,6 +21,32 @@ from .models import (
 def _load_json(path: str | Path) -> dict[str, Any]:
     with Path(path).open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def _csv_rows(handle: TextIO) -> Iterator[dict[str, str]]:
+    """Reject ambiguous headers and incomplete records before interpreting values.
+
+    DictReader otherwise overwrites duplicate columns and fills truncated rows
+    with None. Neither is evidence that an economic quantity was stated as zero.
+    Explicit empty cells retain the existing loader semantics.
+    """
+    reader = csv.DictReader(handle, strict=True)
+    try:
+        fields = reader.fieldnames
+        if not fields or any(not name.strip() for name in fields):
+            raise ValueError("CSV requires non-empty column names")
+        duplicates = sorted(name for name, count in Counter(fields).items() if count > 1)
+        if duplicates:
+            raise ValueError(f"CSV contains duplicate columns: {duplicates}")
+        for row in reader:
+            if None in row or any(value is None for value in row.values()):
+                raise ValueError(
+                    f"CSV row ending at line {reader.line_num} has a different "
+                    "number of fields than the header"
+                )
+            yield row
+    except csv.Error as error:
+        raise ValueError(f"Invalid CSV near line {reader.line_num}: {error}") from error
 
 
 def load_rates(path: str | Path) -> dict[str, ModelRate]:
@@ -38,7 +65,7 @@ def load_traces(path: str | Path) -> list[TraceEvent]:
     """Read trace events. `parent_event_id`, where present, builds the graph."""
     events: list[TraceEvent] = []
     with Path(path).open(newline="", encoding="utf-8") as handle:
-        for row in csv.DictReader(handle):
+        for row in _csv_rows(handle):
             direct = row.get("direct_cost_usd", "").strip()
             raw_arguments = row.get("arguments", "").strip()
             try:
@@ -86,7 +113,7 @@ def load_outcomes(path: str | Path) -> dict[str, Outcome]:
     """Load per-task outcomes from CSV, keyed by task id."""
     outcomes: dict[str, Outcome] = {}
     with Path(path).open(newline="", encoding="utf-8") as handle:
-        for row in csv.DictReader(handle):
+        for row in _csv_rows(handle):
             task_id = row["task_id"]
             if task_id in outcomes:
                 raise ValueError(f"Duplicate outcome task ID: {task_id!r}")
@@ -154,7 +181,7 @@ def load_dependency_edges(path: str | Path) -> tuple[tuple[str, str], ...]:
     """
     edges: list[tuple[str, str]] = []
     with Path(path).open(newline="", encoding="utf-8") as handle:
-        for row in csv.DictReader(handle):
+        for row in _csv_rows(handle):
             parent = (row.get("parent_event_id") or "").strip()
             if parent:
                 edges.append((parent, row["event_id"]))
