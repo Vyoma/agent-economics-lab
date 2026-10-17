@@ -7,6 +7,11 @@ repository and each number below is produced by a `make` target, not typed.
 Start with [the README](../README.md) for what this is and why. Come here when
 you want to run something.
 
+For commands using `agent-economics`, first follow the
+[installation setup](../README.md#use-it-on-your-evidence). Recipes using
+`make` or repository-relative files require a full clone; follow the
+[reproduction setup](../README.md#reproduce-it-without-trusting-it).
+
 ## Recipe 0: start from your own runs
 
 Every recipe below this one runs on data already committed here, which proves
