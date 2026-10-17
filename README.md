@@ -24,16 +24,16 @@ traces + outcomes + prices + baseline + policy
 ### Run it
 
 ```bash
-uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 agent-economics demo
+uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.2 agent-economics demo
 ```
 
 Python 3.10+, standard library only, no API key or account. The command installs
-the versioned `v0.10.1` release, replays data shipped inside it, and explains why
+the versioned `v0.10.2` release, replays data shipped inside it, and explains why
 it issued `ASSIST`. Extract the same contract to replace the fixture with your
 own runs:
 
 ```bash
-uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 \
+uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.2 \
   agent-economics demo --extract .
 ```
 
@@ -161,13 +161,13 @@ an isolated environment first (Python 3.10+):
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install "git+https://github.com/Vyoma/agent-economics-lab@v0.10.1"
+python -m pip install "git+https://github.com/Vyoma/agent-economics-lab@v0.10.2"
 agent-economics --help
 ```
 
 On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1` instead.
 This Git-based installation also requires Git. Alternatively, prefix each
-command with `uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1`
+command with `uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.2`
 and omit the environment setup. Repository-relative examples later in this
 README require the full clone shown under [Reproduce it without trusting it](#reproduce-it-without-trusting-it).
 

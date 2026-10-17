@@ -296,17 +296,17 @@ class PublishedNumbersRecompute(unittest.TestCase):
 
     def test_page_front_door_is_release_pinned(self) -> None:
         command = (
-            "uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1 "
+            "uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.2 "
             "agent-economics demo"
         )
         self.assertIn(command, self.page)
         self.assertIn(
-            "https://github.com/Vyoma/agent-economics-lab/releases/tag/v0.10.1",
+            "https://github.com/Vyoma/agent-economics-lab/releases/tag/v0.10.2",
             self.page,
         )
         self.assertIn(
             "https://github.com/Vyoma/agent-economics-lab/releases/download/"
-            "v0.10.1/SHA256SUMS",
+            "v0.10.2/SHA256SUMS",
             self.page,
         )
         self.assertNotIn(

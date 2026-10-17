@@ -168,6 +168,6 @@ The practical goal is not one universal evaluation score. It is a traceable
 answer to a narrower question: which versioned decision changed which outcome,
 under which policy, and what should the system do when the evidence is missing?
 
-[Blank template](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/templates/production-feedback-contract.template.json) ·
-[filled synthetic example](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/examples/production-feedback-contract.json) ·
-[validator](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/agent_economics/feedback_contract.py)
+[Blank template](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.2/templates/production-feedback-contract.template.json) ·
+[filled synthetic example](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.2/examples/production-feedback-contract.json) ·
+[validator](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.2/agent_economics/feedback_contract.py)
