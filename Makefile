@@ -157,12 +157,10 @@ frontier: check-python
 		--output-dir /tmp/agent-economics-frontier \
 		--verify-dir research/results/frontier
 
-# The detector on code it did not come from. Deliberately NOT in `reproduce`:
-# it measures the running interpreter's own standard library, so its numbers
-# move with the Python version and the CI matrix spans four. Byte-comparing it
-# there would fail on three of them for a reason that is not a defect. The
-# artifact records the version it was generated on; this regenerates and diffs
-# without asserting, so drift is visible without being fatal.
+# Included in `reproduce`: always enforce this repository's measurements.
+# The standard-library results depend on Python's exact version, so the full
+# artifact is byte-compared only on its recorded interpreter. Other versions
+# still reject drift in the repository's table row and reported findings.
 held-out: check-python
 	@$(PYTHON) research/held_out.py --check research/HELD_OUT.md
 
