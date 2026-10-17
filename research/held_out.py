@@ -3,14 +3,15 @@
 Measures this repository's package alongside six standard-library packages,
 using the running interpreter's own stdlib. The numbers therefore move with the
 Python version. The reproduction target compares bytes only when the committed
-artifact names the running interpreter; the wider CI matrix skips that
-version-specific comparison rather than reporting a false drift.
+artifact names the running interpreter; the wider CI matrix still checks the
+repository's own measurements and skips only the standard-library comparison.
 """
 
 from __future__ import annotations
 
 import json as _json
 import pathlib
+import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
@@ -92,15 +93,23 @@ distance between a tool and a moat.
 """
 
 
-def check(existing: pathlib.Path) -> int:
-    """Compare against the committed artifact, but only on its own interpreter.
+def _repository_evidence(text: str) -> tuple[str, str]:
+    """Extract both the repository measurement and its reported findings."""
+    rows = [line for line in text.splitlines() if line.startswith("| `agent_economics` |")]
+    sections = re.findall(
+        r"^## agent_economics: most lopsided divergences\n(.*?)(?=^## |\Z)",
+        text, re.MULTILINE | re.DOTALL,
+    )
+    if len(rows) != 1 or len(sections) != 1 or not sections[0].strip():
+        raise ValueError("missing or ambiguous repository measurements")
+    return rows[0], sections[0].strip()
 
-    The table measures the running interpreter's own standard library, so it
-    moves with the Python version and the CI matrix spans four. Asserting
-    across versions would fail for a reason that is not a defect. Asserting on
-    the *same* version is exactly right, and the previous recipe did neither:
-    `|| echo` swallowed every difference, so the gate could not fail at all.
-    """
+
+def check(existing: pathlib.Path) -> int:
+    """Always check repository evidence; compare stdlib on its own interpreter."""
+    import io
+    from contextlib import redirect_stdout
+
     version = ".".join(str(part) for part in sys.version_info[:3])
     text = existing.read_text(encoding="utf-8")
     recorded = ""
@@ -108,17 +117,28 @@ def check(existing: pathlib.Path) -> int:
         if line.startswith("Generated on CPython "):
             recorded = line.removeprefix("Generated on CPython ").rstrip(".")
             break
+    if not re.fullmatch(r"\d+\.\d+\.\d+", recorded):
+        print("held-out artifact has no valid interpreter provenance", file=sys.stderr)
+        return 1
     if recorded != version:
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            divergence_main(["agent_economics", "--show", "5"])
+        try:
+            matches = _repository_evidence(buffer.getvalue()) == _repository_evidence(text)
+        except ValueError as error:
+            print(f"held-out artifact: {error}", file=sys.stderr)
+            return 1
+        if not matches:
+            print("held-out repository measurements drifted; regenerate the artifact "
+                  f"with CPython {recorded}", file=sys.stderr)
+            return 1
         print(
-            f"held-out artifact was generated on CPython {recorded or '?'}; "
-            f"running {version}. Skipping the comparison, which would differ "
-            "for a reason that is not a defect.",
+            f"held-out repository evidence matches. Artifact uses CPython {recorded}; "
+            f"running {version}. Skipping only the version-specific stdlib comparison.",
             file=sys.stderr,
         )
         return 0
-    import io
-    from contextlib import redirect_stdout
-
     buffer = io.StringIO()
     with redirect_stdout(buffer):
         _emit()
