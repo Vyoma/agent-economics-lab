@@ -91,7 +91,8 @@ class ReleaseMetadataTests(unittest.TestCase):
         version = check_release.package_version(ROOT / "agent_economics" / "__init__.py")
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         pinned_source = "git+https://github.com/Vyoma/agent-economics-lab@v" + version
-        self.assertEqual(readme.count(pinned_source), 2)
+        self.assertEqual(readme.count(pinned_source), 4)
+        self.assertIn(f'python -m pip install "{pinned_source}"', readme)
         self.assertNotIn("\nagent-economics demo --extract", readme)
 
 

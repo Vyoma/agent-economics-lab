@@ -154,6 +154,23 @@ The package keeps three concerns separate:
 
 ## Use it on your evidence
 
+The `uvx` demo above runs the tool without installing a persistent command.
+For the bare `agent-economics` commands below, install the pinned release into
+an isolated environment first (Python 3.10+):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install "git+https://github.com/Vyoma/agent-economics-lab@v0.10.1"
+agent-economics --help
+```
+
+On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1` instead.
+This Git-based installation also requires Git. Alternatively, prefix each
+command with `uvx --from git+https://github.com/Vyoma/agent-economics-lab@v0.10.1`
+and omit the environment setup. Repository-relative examples later in this
+README require the full clone shown under [Reproduce it without trusting it](#reproduce-it-without-trusting-it).
+
 Build a normalized bundle from ordinary exports:
 
 ```bash
