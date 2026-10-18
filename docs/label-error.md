@@ -94,7 +94,7 @@ gate's 6.36%, but $6.90 gives 1.0% and $6.95 gives 0.5%, which are 6x and 13x
 *tighter*. The remedy is real but it is not free and not universal: it helps when net
 value sits comfortably above zero, and it requires a defensible dollar value per
 acceptable outcome, which is often the hardest input to obtain. This project's own
-[public benchmark example](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.1/examples/public-swebench/README.md)
+[public benchmark example](https://github.com/Vyoma/agent-economics-lab/blob/v0.10.2/examples/public-swebench/README.md)
 could not obtain one.
 
 Subject to that, the label accuracy you need is a property of **the metric you gate

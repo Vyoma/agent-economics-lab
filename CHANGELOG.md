@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+## 0.10.2 - 2026-10-17
+
+Input integrity and reproducibility fixes, with no new empirical claims.
+
+- Reject duplicate or blank CSV headers, truncated or surplus fields, and
+  malformed quoting before interpreting economic evidence. Explicit empty cells
+  retain their documented semantics; missing fields are not treated as zero.
+- Reject duplicate JSON keys recursively in rate cards, baselines, and policies
+  rather than silently overwriting declared prices or thresholds.
+- Keep repository measurements and reported findings checked when Python
+  versions differ. Only version-specific standard-library evidence is skipped;
+  the recorded interpreter still requires a byte-identical held-out report.
+- Replace the retired animation pipeline with a generated static evidence
+  figure and bind the GitHub Pages entry point to the versioned release.
+- Document persistent CLI installation before standalone commands, distinguish
+  installed-package examples from full-clone workflows, and test the added pins.
+
 ## 0.10.1 - 2026-10-16
 
 The first-run contract is now as reproducible as the decisions it demonstrates.
